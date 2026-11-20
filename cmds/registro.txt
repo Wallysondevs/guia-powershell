@@ -3,7 +3,7 @@
 # Linhas com "#ERRO" são erros de propósito. Anonimizar antes de usar.
 # REGRAS: só escreve em HKCU:\Software\GuiaPowerShell (caminho fixo, nunca variável vinda de fora);
 # HKLM só leitura e só das 3 propriedades abaixo (nada de RegisteredOwner, ProductId, listas de programas).
-# COLETOR: rodar o arquivo inteiro num try { ... } finally { <bloco "limpar"> }.
+# COLETOR: o bloco "preparar (guardas)" roda ANTES e FORA do try (se a guarda disparar, o finally NÃO pode rodar, senão apaga algo que já existia). Depois: try { blocos do meio } finally { <bloco "limpar"> }.
 # shell: pwsh
 ## preparar (guarda)
 if (Test-Path 'HKCU:\Software\GuiaPowerShell') { throw 'chave GuiaPowerShell já existe: abortar a coleta' }   # [guarda]

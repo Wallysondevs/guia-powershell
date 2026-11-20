@@ -3,7 +3,7 @@
 # Linhas com "#ERRO" são erros de propósito. Anonimizar antes de usar (nome do PC, SID).
 # REGRAS: só o usuário descartável guia-teste; só o grupo 'Usuários' (nunca Administradores);
 # nada de Get-LocalUser / Get-LocalGroupMember sem -Name/-Member (não listar contas reais).
-# COLETOR: rodar o arquivo inteiro num try { ... } finally { <bloco "limpar"> }: a limpeza roda mesmo se algo falhar.
+# COLETOR: o bloco "preparar (guardas)" roda ANTES e FORA do try (se a guarda disparar, o finally NÃO pode rodar, senão apaga algo que já existia). Depois: try { blocos do meio } finally { <bloco "limpar"> }.
 # Se o módulo LocalAccounts falhar no pwsh, colher o arquivo inteiro com "# shell: powershell".
 # shell: pwsh
 ## preparar (guardas)
