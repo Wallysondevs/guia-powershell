@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Conversão de Tipos — [int], [string], -as e -is | Guia PowerShell</title>
+<meta name="description" content="Conversão de tipos no PowerShell: [int], [string], [double], [datetime], -as e -is, as pegadinhas da vírgula e do [bool] e os erros reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">Conversão de Tipos</span> ([int], [string])</h1>
+
+<p class="intro">A Ana leu as quantidades do estoque de um arquivo, mas a soma deu "105" em vez de 15. O motivo: tudo que vem de arquivo e do teclado chega como texto. Nesta aula, você aprende a transformar um tipo em outro.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A converter um valor de um tipo para outro com <code>[int]</code>, <code>[string]</code>, <code>[double]</code>, <code>[datetime]</code>.</li>
+  <li>A pegadinha da vírgula em <code>[double]"3,14"</code>.</li>
+  <li>O operador <code>-as</code>, que não dá erro, e o <code>-is</code>, que pergunta o tipo.</li>
+  <li>A pegadinha do <code>[bool]"false"</code>, e os erros reais de conversão.</li>
+</ul>
+</div>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português.</p>
+<hr>
+<h2>A ideia: trocar de embalagem</h2>
+<p>O número 42 pode vir escrito num papel (texto <code>"42"</code>) ou estar na calculadora (número <code>42</code>). Para fazer conta, você precisa passar do papel para a calculadora. <strong>Converter</strong> é trocar o valor de embalagem: de texto para número, de texto para data, de número para texto. Isso acontece muito com dados lidos de arquivos e do teclado, que sempre chegam como texto.</p>
+<hr>
+<h2>1. Conversão com colchetes</h2>
+<p>Escreva o tipo entre colchetes antes do valor:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; [int]"42"
+42
+PS C:\Users\ana&gt; [string]42
+42
+PS C:\Users\ana&gt; [datetime]"2026-11-20"
+
+sexta-feira, 20 de novembro de 2026 00:00:00
+</pre>
+<p>Na tela, <code>42</code> e <code>"42"</code> parecem iguais, mas o primeiro é número (soma) e o segundo é texto (junta). A data aceitou o formato <code>ano-mês-dia</code> e foi mostrada em português.</p>
+<h2>2. A pegadinha da vírgula</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; [double]"3,14"
+314
+PS C:\Users\ana&gt; [double]"3.14"
+3,14
+PS C:\Users\ana&gt; [int]3.9
+4
+</pre>
+<p>Atenção: <code>[double]"3,14"</code> deu <strong>314</strong>. A conversão com colchetes sempre usa o padrão americano, em que o decimal é o ponto e a vírgula é só separador de milhar. Com <code>"3.14"</code> deu certo. E <code>[int]3.9</code> arredondou para 4 (não cortou as casas).</p>
+<div class="warning"><strong>Cuidado com planilhas brasileiras:</strong> um preço escrito <code>"3,14"</code> num arquivo vira 314. Troque a vírgula por ponto antes: <code>[double]("3,14" -replace ",", ".")</code>.</div>
+<div class="tryps" data-goal="out:Total: 15;;semerro">
+<p class="try-task"><strong>Experimente:</strong> os dois valores chegaram como texto, então o <code>+</code> juntou em vez de somar. Converta com <code>[int]</code>.</p>
+<pre class="script" data-file="main.ps1">$a = "10"
+$b = "5"
+"Total: $($a + $b)"
+</pre>
+<pre class="solucao" data-file="main.ps1">$a = "10"
+$b = "5"
+"Total: $([int]$a + [int]$b)"
+</pre>
+</div>
+<h2>3. O operador -as: tenta, sem erro</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; "42" -as [int]
+42
+PS C:\Users\ana&gt; "abc" -as [int]
+PS C:\Users\ana&gt; $null -eq ("abc" -as [int])
+True
+</pre>
+<p>Quando a conversão não é possível, o <code>-as</code> ("como") devolve <code>$null</code> em vez de dar erro. Ótimo para conferir se um texto é um número.</p>
+<h2>4. O operador -is: pergunta o tipo</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 42 -is [int]
+True
+PS C:\Users\ana&gt; "42" -is [int]
+False
+PS C:\Users\ana&gt; "42" -is [string]
+True
+PS C:\Users\ana&gt; (1, 2) -is [array]
+True
+</pre>
+<h2>5. A pegadinha do [bool]</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; [bool]0
+False
+PS C:\Users\ana&gt; [bool]1
+True
+PS C:\Users\ana&gt; [bool]""
+False
+PS C:\Users\ana&gt; [bool]"false"
+True
+PS C:\Users\ana&gt; [bool]$null
+False
+</pre>
+<p>O texto <code>"false"</code> virou <strong>True</strong>! Para o <code>[bool]</code>, qualquer texto que não está vazio é verdadeiro, não importa o que está escrito. Veja <a href="booleanos-null.html">$true, $false e $null</a>.</p>
+<h2>Qual usar</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando</th></tr>
+<tr><td><code>[int]$x</code></td><td>Você tem certeza de que dá para converter (erro se não der).</td></tr>
+<tr><td><code>$x -as [int]</code></td><td>Pode não dar; você quer <code>$null</code> em vez de erro.</td></tr>
+<tr><td><code>$x -is [int]</code></td><td>Só quer saber o tipo, sem converter.</td></tr>
+</table>
+</div>
+<hr>
+<h2>Quando dá errado</h2>
+<div class="cenario">
+<strong>Texto que não é número</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; [int]"abc"
+InvalidArgument: Cannot convert value "abc" to type "System.Int32". Error: "The input string 'abc' was not in a correct format."
+</pre>
+<p>"Não consigo converter o valor abc para o tipo Int32. A entrada não está num formato correto." <strong>Como resolver:</strong> confira o valor, ou use <code>-as [int]</code> e teste se veio <code>$null</code>.</p>
+</div>
+<div class="cenario">
+<strong>Texto que não é data</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; [datetime]"não é data"
+InvalidArgument: Cannot convert value "não é data" to type "System.DateTime". Error: "The string 'não é data' was not recognized as a valid DateTime. There is an unknown word starting at index '0'."
+</pre>
+<p>"O texto não foi reconhecido como uma data válida. Há uma palavra desconhecida começando na posição 0." <strong>Como resolver:</strong> use o formato <code>"2026-11-20"</code> (ano-mês-dia), que funciona sempre.</p>
+</div>
+<hr>
+<h2>Exercícios</h2>
+<div class="exercise">
+<h3>1. Para número</h3>
+<p>Complete para converter o texto em inteiro:</p>
+<div class="ex-code"><input data-answer="[int]" aria-label="tipo">"25"</div>
+</div>
+<div class="exercise">
+<h3>2. Sem erro</h3>
+<p>Complete para tentar converter sem dar erro:</p>
+<div class="ex-code">"abc" <input data-answer="-as" aria-label="operador"> [int]</div>
+</div>
+<div class="mc" data-answer="3">
+<p class="mc-q">3. Quanto dá <code>[double]"3,14"</code>?</p>
+<label><input type="radio" name="q3"> 3,14</label>
+<label><input type="radio" name="q3"> 3</label>
+<label><input type="radio" name="q3"> 314</label>
+<label><input type="radio" name="q3"> Erro</label>
+</div>
+<div class="mc" data-answer="2">
+<p class="mc-q">4. O que <code>[bool]"false"</code> mostra?</p>
+<label><input type="radio" name="q4"> False</label>
+<label><input type="radio" name="q4"> True</label>
+<label><input type="radio" name="q4"> Nada</label>
+<label><input type="radio" name="q4"> Erro</label>
+</div>
+<div class="tryps" data-goal="out:Inválido;;src:-as;;semerro">
+<p class="try-task"><strong>Missão final:</strong> use <code>-as [int]</code> para mostrar <code>Inválido</code> quando <code>$entrada</code> não for número.</p>
+<pre class="script" data-file="main.ps1">$entrada = "doze"
+$numero = [int]$entrada
+$numero
+</pre>
+<pre class="solucao" data-file="main.ps1">$entrada = "doze"
+$numero = $entrada -as [int]
+if ($null -eq $numero) { "Inválido" } else { $numero }
+</pre>
+</div>
+<hr>
+<h2>Resumo</h2>
+<ul>
+  <li><code>[tipo]valor</code> converte; dá erro se não der.</li>
+  <li><code>-as [tipo]</code> converte ou devolve <code>$null</code>.</li>
+  <li><code>-is [tipo]</code> responde True ou False.</li>
+  <li>Conversão usa o ponto como decimal: <code>[double]"3,14"</code> vira 314.</li>
+  <li>Qualquer texto não vazio vira <code>True</code> no <code>[bool]</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
