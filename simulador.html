@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PowerShell Simulador — como praticar as missões no seu PowerShell 7 | Guia PowerShell</title>
-<meta name="description" content="O simulador do guia no navegador chega na próxima versão. Por enquanto, rode os exemplos no seu PowerShell 7 (pwsh) e compare com a saída esperada.">
+<title>PowerShell Simulador — um PowerShell 7 simulado no navegador | Guia PowerShell</title>
+<meta name="description" content="Um PowerShell 7 simulado no navegador: digite comandos abaixo e veja a saída, como no pwsh. Nada sai da página e nada é guardado.">
 <link rel="stylesheet" href="assets/style.css">
 <script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 </head>
@@ -18,60 +18,59 @@
 
 <h1><span class="hl">Simulador</span></h1>
 
-<p class="intro">Em várias aulas você vai encontrar caixas de <strong>Experimente</strong> e <strong>Missão</strong>. A ideia é que um dia elas rodem PowerShell aqui mesmo, no navegador. Esse simulador chega na <strong>próxima versão</strong> do guia. Por enquanto, quem roda os comandos é o <strong>seu PowerShell 7</strong>.</p>
+<p class="intro">Em várias aulas você vai encontrar caixas de <strong>Experimente</strong> e <strong>Missão</strong>. Elas rodam um <strong>PowerShell 7 simulado</strong> aqui mesmo, no navegador. Nesta página você tem um terminal livre: <strong>digite comandos abaixo</strong> e aperte <kbd>Enter</kbd>.</p>
 
 <div class="note">
 <strong>Você vai aprender</strong>
 <ul>
-  <li>Por que as missões ainda não rodam no navegador.</li>
-  <li>Como copiar um exemplo, rodar no <code>pwsh</code> e comparar com a saída esperada.</li>
-  <li>Como usar a caixa de missão: colar a saída, clicar em <strong>Conferir</strong> e, se precisar, ver a solução.</li>
+  <li>Como usar o terminal simulado: digitar, repetir comandos com as setas e limpar a tela.</li>
+  <li>Como funcionam as caixas de missão: editar, clicar em <strong>Rodar</strong> e ler as metas ✔/✘.</li>
+  <li>O que o simulador faz e o que ele não faz (e quando usar o seu PowerShell 7 de verdade).</li>
 </ul>
 </div>
 
 <hr>
 
-<h2>1. Por enquanto: o seu PowerShell 7</h2>
-<p>Abra o <strong>PowerShell 7</strong> (no menu Iniciar, procure “PowerShell 7”, ou digite <code>pwsh</code> num terminal). Se ainda não sabe abrir, veja a aula <a href="abrir-terminal.html">Abrindo o PowerShell</a>. Se ainda não instalou, veja <a href="instalar.html">Instalar o PowerShell 7</a>.</p>
-<p>Os blocos com a janela de terminal mostram o comando depois do prompt <code>PS C:\Users\ana&gt;</code> e, embaixo, a <strong>saída esperada</strong>. A pasta e o nome no prompt do seu computador vão ser outros, e isso é normal.</p>
+<h2>1. O terminal simulado</h2>
+<p>Clique na linha do prompt <code>PS C:\Users\ana&gt;</code>, digite um comando e aperte <kbd>Enter</kbd>. Experimente <code>Get-Date</code>, <code>"Olá, mundo"</code>, <code>2 + 3 * 4</code>, <code>Get-ChildItem</code> ou <code>$PSVersionTable</code>. As setas <kbd>↑</kbd> e <kbd>↓</kbd> trazem de volta os comandos anteriores. Se faltar fechar uma chave ou uma aspa, aparece <code>&gt;&gt;</code> e o terminal espera a próxima linha (linha vazia roda o que já foi digitado).</p>
+<div id="pssim-terminal"></div>
+<p>As variáveis e os arquivos que você cria ficam até você clicar em <strong>Recomeçar</strong> ou sair da página. O disco <code>C:\</code> é de mentira e vive só na memória: nada sai da página e nada é guardado.</p>
 
-<h2>2. Passo a passo</h2>
-<ol>
-  <li><strong>Copie</strong> o comando: use o botão <strong>copiar</strong> do bloco (ou <strong>Copiar código</strong>, nas missões).</li>
-  <li><strong>Cole</strong> no PowerShell 7 com <kbd>Ctrl</kbd>+<kbd>V</kbd> (ou clique com o botão direito) e aperte <kbd>Enter</kbd>.</li>
-  <li><strong>Compare</strong> o que apareceu com a saída esperada da aula. Data, hora, pasta e nome de usuário mudam de um computador para outro; o resto deve bater.</li>
-</ol>
-<div class="tip">Num script de várias linhas, cole tudo de uma vez: o PowerShell 7 roda as linhas em sequência. Se ele mostrar <code>&gt;&gt;</code> e ficar esperando, faltou fechar uma aspa, um parêntese ou uma chave. Aperte <kbd>Ctrl</kbd>+<kbd>C</kbd> para cancelar e tente de novo.</div>
+<h2>2. As caixas de missão</h2>
+<p>Nas missões, o guia mostra um editor com o código inicial. Você edita o código e clica em <strong>Rodar</strong> (ou aperta <kbd>Ctrl</kbd>+<kbd>Enter</kbd>). A saída aparece numa janela de terminal e o guia marca cada meta com ✔ ou ✘. Quando todas ficam com ✔, aparece <strong>Missão cumprida!</strong>.</p>
+<p>Cada <strong>Rodar</strong> começa do zero, numa pasta vazia <code>C:\Users\ana\guia-ps-teste</code>. <strong>Resetar</strong> volta ao código inicial. Depois do primeiro <strong>Rodar</strong>, o botão <strong>Ver solução</strong> fica liberado. No editor, <kbd>Tab</kbd> coloca 4 espaços; para sair do editor com o teclado, aperte <kbd>Esc</kbd> e depois <kbd>Tab</kbd>.</p>
 
-<h2>3. As caixas de missão</h2>
-<p>Nas missões, o guia mostra um editor com o código inicial. Você edita o código ali, clica em <strong>Copiar código</strong>, roda no seu PowerShell 7 e <strong>cola a saída</strong> na caixa “Cole aqui a saída do terminal”. Depois clica em <strong>Conferir</strong>: o guia marca cada meta com ✔ ou ✘. Algumas metas, como “o arquivo existe”, você mesmo confere no seu computador.</p>
-<p>Depois do primeiro <strong>Conferir</strong>, o botão <strong>Ver solução</strong> fica liberado. O que você cola fica só nesta página: nada é enviado nem guardado.</p>
+<h2>3. O que o simulador não faz</h2>
+<p>O simulador é um interpretador pequeno, escrito para as aulas do Nível 1: variáveis, operadores, <code>if</code>, <code>switch</code>, laços, pipeline, <code>Write-*</code>, pastas e arquivos. Comandos que mexem no sistema de verdade (usuários locais, registro, serviços, processos, rede, instalação de módulos) <strong>não são simulados</strong>: ele avisa e pede que você veja a saída real na aula. Programas do Windows, como <code>winget</code> ou <code>notepad</code>, também não rodam aqui.</p>
+<p>Para esses casos, e sempre que quiser conferir, use o seu <strong>PowerShell 7</strong> (veja <a href="abrir-terminal.html">Abrindo o PowerShell</a> e <a href="instalar.html">Instalar o PowerShell 7</a>). Data, hora, pasta e nome de usuário mudam de um computador para outro; o resto deve bater.</p>
+<div class="tip">Um laço que nunca termina não trava a página: o simulador para sozinho depois de 100 mil passos ou 2 segundos e mostra um aviso. No PowerShell de verdade, quem interrompe é o <kbd>Ctrl</kbd>+<kbd>C</kbd>.</div>
 
 <hr>
 
 <h2>Exercícios</h2>
 
 <div class="mc" data-answer="2">
-<p class="mc-q">1. Enquanto o simulador do navegador não chega, onde você roda os exemplos das aulas?</p>
-<label><input type="radio" name="q1"> Na própria página, clicando em Rodar</label>
-<label><input type="radio" name="q1"> No seu PowerShell 7 (<code>pwsh</code>), comparando com a saída esperada</label>
-<label><input type="radio" name="q1"> No Bloco de Notas</label>
+<p class="mc-q">1. Você digitou <code>if ($x -gt 1) {</code> no terminal simulado e apareceu <code>&gt;&gt;</code>. O que isso quer dizer?</p>
+<label><input type="radio" name="q1"> Que o comando deu erro</label>
+<label><input type="radio" name="q1"> Que falta fechar a chave: o terminal espera a próxima linha</label>
+<label><input type="radio" name="q1"> Que o simulador travou</label>
 </div>
 
 <div class="mc" data-answer="3">
-<p class="mc-q">2. Você rodou um exemplo e a pasta no prompt é diferente da aula. O que isso quer dizer?</p>
-<label><input type="radio" name="q2"> Que o comando deu erro</label>
-<label><input type="radio" name="q2"> Que você abriu o programa errado</label>
-<label><input type="radio" name="q2"> Nada de errado: pasta e nome de usuário mudam de um computador para outro</label>
+<p class="mc-q">2. Você rodou <code>Get-Service</code> no simulador e ele avisou que o comando não é simulado. O que fazer?</p>
+<label><input type="radio" name="q2"> Rodar de novo até funcionar</label>
+<label><input type="radio" name="q2"> Desistir da aula</label>
+<label><input type="radio" name="q2"> Ver a saída real na aula ou rodar no seu PowerShell 7</label>
 </div>
 
 <hr>
 
 <h2>Resumo</h2>
 <ul>
-  <li>O simulador no navegador chega na próxima versão do guia.</li>
-  <li>Por enquanto: copie o exemplo, cole no PowerShell 7 (<code>pwsh</code>) e compare com a saída esperada.</li>
-  <li>Nas missões, cole a saída na caixa e clique em <strong>Conferir</strong>; a solução fica liberada depois disso.</li>
+  <li>O terminal desta página é um PowerShell 7 simulado: digite comandos abaixo do texto e aperte <kbd>Enter</kbd>.</li>
+  <li>Nas missões, edite o código e clique em <strong>Rodar</strong>; as metas viram ✔ ou ✘ e a solução fica liberada depois do primeiro Rodar.</li>
+  <li>Comandos que mexem no sistema não são simulados; para eles, use o seu PowerShell 7.</li>
+  <li>Nada do que você digita sai da página nem fica guardado.</li>
 </ul>
 
 <div class="pager"></div>
@@ -80,5 +79,6 @@
 </main>
 </div>
 <script src="assets/site.js"></script>
+<script src="assets/pssim.js"></script>
 </body>
 </html>
