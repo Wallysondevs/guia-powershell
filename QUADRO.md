@@ -70,7 +70,7 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 |---|---|---|---|---|---|---|---|
 | `write-host-output.html` Write-Host × Write-Output | Tito | [x] | [x] | [x] | [x] | [x] | c66eb98 |
 | `read-host.html` Read-Host: Lendo o Teclado | Tito | [x] | [x] | [x] | [x] | [x] | b592d9f+8db4a53; prompt interativo descrito em prosa (não coletado) |
-| `write-outros.html` Write-Warning, Write-Verbose e Companhia | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `write-outros.html` Write-Warning, Write-Verbose e Companhia | Zeca | [x] | [x] | [x] | [x] | [x] | 5ba714f |
 
 ## Decisões
 
@@ -78,7 +78,7 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 |---|---|---|---|---|---|---|---|
 | `if.html` if | Tito | [x] | [x] | [x] | [x] | [x] | d21400c; formato ParserError do console descrito (não coletado) |
 | `elseif-else.html` elseif e else | Tito | [x] | [x] | [x] | [x] | [x] | b1d90b9+f8a39c2 (recoleta) |
-| `switch.html` switch | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `switch.html` switch | Zeca | [x] | [x] | [x] | [x] | [x] | 9487d32 |
 
 ## Repetições
 
@@ -86,10 +86,33 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 |---|---|---|---|---|---|---|---|
 | `foreach.html` foreach | Tito | [x] | [x] | [x] | [x] | [x] | 50d5817+39cf79c |
 | `for.html` for | Tito | [x] | [x] | [x] | [x] | [x] | 85ded7d |
-| `while.html` while e do | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `break-continue.html` break e continue | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `while.html` while e do | Zeca | [x] | [x] | [x] | [x] | [x] | 19f9722 |
+| `break-continue.html` break e continue | Zeca | [x] | [x] | [x] | [x] | [x] | 900be27 |
 
 ## Lotes de coleta
 
 - **Lote 1** (Começando + Pastas e Arquivos, 24 aulas): colhido no 7.7, anonimizado. Zeca escrevendo.
 - **Lote 2** (Variáveis e Tipos, Operadores, Saída e Entrada, Decisões, Repetições, 26 aulas): ① Zeca faz os `cmds/` → ② Mira confere as guardas → ③ Luna coleta num lote só (`pwsh -NoProfile -File`, um card do Wallyson) → ④ Mira anonimiza em `_saidas-anon/7/`. Atenção: `read-host` precisa de janela (entra no roteiro com `Start-Transcript` do Zeca ou fica ilustrativo).
+
+
+## Nível 3 · Administração (aulas do Zeca)
+
+| Página | Autor | cmds | ① | ② | ③ | ④ | Obs |
+|---|---|---|---|---|---|---|---|
+| `usuarios-locais.html` Usuários e Grupos Locais | Zeca | [x] | [x] | [x] | [x] | [x] | 8b58f07; o Get-LocalUser final é ilustrativo |
+| `registro.html` O Registro do Windows | Zeca | [x] | [x] | [x] | [x] | [x] | e2fc558 |
+| `servicos.html` Serviços (Get-Service) | Zeca | [x] | [x] | [x] | [x] | [x] | 668a2ff |
+
+## Conferência 18h (Tito)
+
+NIVEIS tem **51** páginas no Nível 1. Existem **50** arquivos `.html`; falta só `simulador.html`.
+
+**O que falta / quebrado**
+
+- `simulador.html` (Zeca) — arquivo ainda não escrito. Obs do quadro: "Adiada: editor wasm ficou na VPS" (não é aula em andamento). O Anterior/Próximo é gerado pelo `site.js` a partir do NIVEIS (os HTML só têm `.pager` vazio; nenhum link fixo). Efeito: `abrir-terminal.html` aponta Próximo para `simulador.html` e `primeiro-comando.html` aponta Anterior para `simulador.html` (404).
+- `index.html` (Zeca) — página-hub da trilha, sem `.mc`/`.exercise` e sem Resumo. Não é aula; não trato como erro. As outras 49 páginas existentes têm `.mc` e `.exercise` antes do Resumo, e todas carregam `assets/site.js` com `.pager`.
+- Nenhum `href` do Nível 1 aponta para página fora do NIVEIS. Há links para aulas futuras (estão no NIVEIS, arquivo ainda não escrito; níveis 2 e 3, projetos e referência — fora do prazo de hoje): da `index.html`, a trilha de N2/N3/projetos/referência (`objetos`, `arrays`, `funcoes`, `scripts`, `erros`, `csv`, `modulos`, `processos`, `dotnet`, `estilo`, `novidades`, os 9 projetos e as 10 refs); das aulas, `caminhos.html` → `variaveis-ambiente.html`; `get-content.html` → `csv.html`; `set-content.html`, `write-host-output.html` e `foreach.html` → `pipeline.html`; `operador-formato.html` → `get-date.html`; `atribuicao.html` e `if.html` → `arrays.html`; `read-host.html` → `credenciais.html`, `parametros-script.html`, `try-catch.html`; `foreach.html` e `break-continue.html` → `foreach-object.html`.
+
+**Lote 1:** limpo (conferido pela Mira).
+
+**Pendência crítica:** `assets/pssim.js` é carregado pelo `site.js` quando a página tem `.tryps`, mas o arquivo não existe — nem nesta cópia, nem no original. Nenhuma missão (tryps) roda e nenhum `data-goal` é avaliado. Não listo isso como link quebrado em cada página do Nível 1: é um item conhecido, único. A Nova decide o aviso das 19:00.
