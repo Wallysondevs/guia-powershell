@@ -3984,9 +3984,220 @@
     core: core
   };
 
-  // Etapa "núcleo": ainda sem interface. Numa página com caixas .tryps o global não é
-  // publicado, para o site.js continuar caindo no rode-local.js (a interface vem na próxima etapa).
-  var temCaixas = G.document && G.document.querySelector && G.document.querySelector(".tryps");
-  if (!temCaixas) G.PSSim = PSSim;
+  /* ------------------------------------------------------------------
+     13. Interface: caixas .tryps (editor + Rodar) e o terminal livre
+     ------------------------------------------------------------------ */
+  var CORES_CSS = { black: "#2e3436", darkblue: "#3465a4", darkgreen: "#4e9a06", darkcyan: "#06989a", darkred: "#cc0000", darkmagenta: "#75507b", darkyellow: "#c4a000", gray: "#d3d7cf",
+    darkgray: "#888a85", blue: "#729fcf", green: "#8ae234", cyan: "#34e2e2", red: "#ef2929", magenta: "#ad7fa8", yellow: "#fce94f", white: "#ffffff" };
+  function mk(doc, tag, attrs, text) {
+    var e = doc.createElement(tag);
+    if (attrs) for (var k in attrs) if (hasOwn(attrs, k)) { if (k === "class") e.className = attrs[k]; else e.setAttribute(k, attrs[k]); }
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+  function promptDe(s) { return "PS " + s.cwdFull() + "> "; }
+  function pintarLinhas(doc, alvo, linhas) { // tudo entra como texto (textContent): nada de HTML vindo do código
+    linhas.forEach(function (l) {
+      var span = mk(doc, "span", null, l.t), k = l.k || "out";
+      if (k === "err") span.className = "sim-err";
+      else if (k === "warn" || k === "verbose") span.style.color = k === "warn" ? "#fce94f" : "#d4d4d8";
+      else if (k === "info") span.className = "sim-info";
+      else if (k === "digitado") span.className = "sim-digitado";
+      else if (/^host c-/.test(k)) span.style.color = CORES_CSS[k.slice(7)] || "";
+      alvo.appendChild(span);
+      alvo.appendChild(doc.createTextNode("\n"));
+    });
+  }
+  var nCaixa = 0;
+  function montarCaixa(doc, box, idx) {
+    var preS = box.querySelector("pre.script"), preSol = box.querySelector("pre.solucao");
+    var limpa = function (p) { return p ? p.textContent.replace(/^\n+/, "").replace(/\s+$/, "") : ""; };
+    var script = limpa(preS), sol = limpa(preSol), goal = box.getAttribute("data-goal") || "";
+    var arq = (preS && preS.getAttribute("data-file")) || "main.ps1";
+    if (preS) preS.style.display = "none";
+    if (preSol) preSol.style.display = "none";
+    var id = "pssim-" + (++nCaixa);
+    box.classList.add("pssim");
+
+    var ts = mk(doc, "div", { "class": "ts" });
+    var bar = mk(doc, "div", { "class": "ts-bar" });
+    bar.appendChild(mk(doc, "span", { "class": "ts-arq" }, arq));
+    bar.appendChild(mk(doc, "span", { "class": "ts-sp" }));
+    var bReset = mk(doc, "button", { type: "button", "class": "sim-btn", "aria-label": "Resetar: voltar ao código inicial" }, "Resetar");
+    var bSol = mk(doc, "button", { type: "button", "class": "sim-btn", disabled: "disabled", title: "Fica disponível depois do primeiro Rodar" }, "Ver solução");
+    bar.appendChild(bReset); bar.appendChild(bSol);
+    var ed = mk(doc, "div", { "class": "ts-editor" });
+    var lab = mk(doc, "label", { "class": "psf-sr", "for": id + "-cod" }, "Código PowerShell (" + arq + ")");
+    var dica = mk(doc, "span", { "class": "psf-sr", id: id + "-dica" }, "Tab insere 4 espaços. Para sair do editor, aperte Esc e depois Tab. Ctrl+Enter roda.");
+    var ta = mk(doc, "textarea", { "class": "ts-code", id: id + "-cod", spellcheck: "false", autocapitalize: "off", autocomplete: "off", "aria-describedby": id + "-dica" });
+    ta.value = script;
+    ed.appendChild(lab); ed.appendChild(dica); ed.appendChild(ta);
+    var run = mk(doc, "div", { "class": "ts-run" });
+    run.appendChild(mk(doc, "span", { "class": "ts-sp" }));
+    var bRun = mk(doc, "button", { type: "button", "class": "ts-rodar" }, "▶ Rodar");
+    run.appendChild(bRun);
+    ts.appendChild(bar); ts.appendChild(ed); ts.appendChild(run);
+
+    var win = mk(doc, "div", { "class": "term-win ts-saida" });
+    var tbar = mk(doc, "div", { "class": "term-bar" });
+    var dots = mk(doc, "span", { "class": "sim-dots", "aria-hidden": "true" }); dots.appendChild(mk(doc, "i")); dots.appendChild(mk(doc, "i")); dots.appendChild(mk(doc, "i"));
+    tbar.appendChild(dots); tbar.appendChild(mk(doc, "span", { "class": "term-title" }, "PowerShell 7 (simulado)"));
+    var pre = mk(doc, "pre", { "class": "term sim-out", role: "log", "aria-live": "polite", "aria-label": "Saída do terminal", tabindex: "0" });
+    win.appendChild(tbar); win.appendChild(pre);
+    win.style.display = "none";
+    var metas = mk(doc, "ul", { "class": "psf-metas", "aria-label": "Metas da missão" });
+    var res = mk(doc, "p", { "class": "ex-result", role: "status", "aria-live": "polite" });
+    var solBox = mk(doc, "div", { "class": "sim-sol" });
+    solBox.appendChild(mk(doc, "p", { "class": "sim-sol-tit" }, "Uma solução possível"));
+    solBox.appendChild(mk(doc, "pre", { "class": "sim-sol-cmd" }, sol));
+    var bUsar = mk(doc, "button", { type: "button", "class": "sim-btn2 secundario" }, "Colocar no editor");
+    solBox.appendChild(bUsar);
+    solBox.style.display = "none";
+
+    var antes = preS || null;
+    var frag = [ts, win, metas, res, solBox];
+    frag.forEach(function (n) { if (antes) box.insertBefore(n, antes); else box.appendChild(n); });
+
+    function ajusta() { ta.rows = Math.max(3, ta.value.split("\n").length + 1); }
+    ajusta();
+    ta.addEventListener("input", ajusta);
+    ta.addEventListener("keydown", function (e) {
+      if (e.key === "Tab" && !e.shiftKey && !ta._sair) {
+        e.preventDefault();
+        var a = ta.selectionStart, b = ta.selectionEnd;
+        ta.value = ta.value.slice(0, a) + "    " + ta.value.slice(b);
+        ta.selectionStart = ta.selectionEnd = a + 4; ajusta();
+      } else if (e.key === "Escape") ta._sair = true;
+      else if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); rodar(); }
+      else if (e.key !== "Tab" && e.key !== "Shift") ta._sair = false;
+    });
+    ta.addEventListener("blur", function () { ta._sair = false; });
+
+    function pintarMetas(ms, todas) {
+      metas.textContent = "";
+      ms.forEach(function (m) {
+        var li = mk(doc, "li", { "class": m.ok === true ? "ok" : m.ok === false ? "bad" : "manual" });
+        li.appendChild(mk(doc, "span", { "class": "psf-sinal", "aria-hidden": "true" }, m.ok === true ? "✔ " : m.ok === false ? "✘ " : "☐ "));
+        li.appendChild(mk(doc, "span", { "class": "psf-sr" }, m.ok === true ? "cumprida: " : m.ok === false ? "não cumprida: " : "confira você: "));
+        li.appendChild(doc.createTextNode(m.desc));
+        if (m.falha) li.appendChild(mk(doc, "span", { "class": "psf-falha" }, " — " + m.falha));
+        metas.appendChild(li);
+      });
+      res.className = "ex-result " + (todas ? "ok" : "bad");
+      res.textContent = todas ? "Missão cumprida!" : ms.some(function (m) { return m.ok === false; }) ? "Ainda não: veja os itens marcados com ✘ e tente de novo." : "Quase: confira os itens marcados com ☐ no seu terminal.";
+    }
+    function rodar() {
+      var codigo = ta.value;
+      var r = executar(codigo, { readHost: function (p) { try { var v = G.prompt ? G.prompt((p ? p + ":" : "Read-Host") + " (simulador)", "") : ""; return v == null ? "" : v; } catch (e) { return ""; } } });
+      var s = r.sessao, ini = fullOf(s.base);
+      pre.textContent = "";
+      var linhas = [{ t: "PS " + ini + "> .\\" + arq, k: "digitado" }].concat(r.linhas);
+      linhas.push({ t: promptDe(s), k: "out" });
+      pintarLinhas(doc, pre, linhas);
+      win.style.display = "";
+      var ms = avaliar(goal, codigo, r), todas = ms.length > 0 && ms.every(function (m) { return m.ok === true; });
+      pintarMetas(ms, todas);
+      bSol.removeAttribute("disabled"); bSol.removeAttribute("title");
+      return { ok: todas, metas: ms, saida: r.saida };
+    }
+    bRun.addEventListener("click", function () { rodar(); });
+    bReset.addEventListener("click", function () {
+      ta.value = script; ajusta(); pre.textContent = ""; win.style.display = "none"; metas.textContent = ""; res.textContent = ""; res.className = "ex-result"; ta.focus();
+    });
+    bSol.addEventListener("click", function () { var aberto = solBox.style.display !== "none"; solBox.style.display = aberto ? "none" : ""; bSol.textContent = aberto ? "Ver solução" : "Esconder solução"; });
+    bUsar.addEventListener("click", function () { ta.value = sol; ajusta(); ta.focus(); });
+
+    return {
+      el: box, indice: idx, goal: goal, script: script, solucao: sol, arquivo: arq,
+      /* testar("inicial"|"solucao") -> {ok, metas:[{tipo, val, ok, desc}], saida} — SÍNCRONO, disco novo, não mexe na tela */
+      testar: function (modo) { var t = testarCodigo(goal, modo === "solucao" ? sol : script); return { ok: t.ok, metas: t.metas, saida: t.saida }; },
+      rodar: rodar
+    };
+  }
+
+  function montarTerminal(doc, host) {
+    var s = new Session({ missao: false, readHost: function (p) { try { var v = G.prompt ? G.prompt((p ? p + ":" : "Read-Host") + " (simulador)", "") : ""; return v == null ? "" : v; } catch (e) { return ""; } } });
+    var win = mk(doc, "div", { "class": "term-win sim pssim-repl" });
+    var bar = mk(doc, "div", { "class": "term-bar" });
+    var dots = mk(doc, "span", { "class": "sim-dots", "aria-hidden": "true" }); dots.appendChild(mk(doc, "i")); dots.appendChild(mk(doc, "i")); dots.appendChild(mk(doc, "i"));
+    var bLimpa = mk(doc, "button", { type: "button", "class": "sim-btn" }, "Limpar");
+    var bNovo = mk(doc, "button", { type: "button", "class": "sim-btn", title: "Apaga variáveis e arquivos criados" }, "Recomeçar");
+    bar.appendChild(dots); bar.appendChild(mk(doc, "span", { "class": "term-title" }, "PowerShell 7 (simulado)")); bar.appendChild(bLimpa); bar.appendChild(bNovo);
+    var scr = mk(doc, "div", { "class": "sim-screen" });
+    var out = mk(doc, "div", { "class": "sim-out", role: "log", "aria-live": "polite", "aria-label": "Saída do terminal" });
+    var line = mk(doc, "div", { "class": "sim-line" });
+    var pr = mk(doc, "span", { "class": "sim-prompt", "aria-hidden": "true" }, promptDe(s));
+    var lab = mk(doc, "label", { "class": "psf-sr", "for": "pssim-repl-in" }, "Comando do PowerShell (Enter roda; setas ↑ e ↓ trazem os anteriores)");
+    var inp = mk(doc, "input", { "class": "sim-input", id: "pssim-repl-in", type: "text", spellcheck: "false", autocomplete: "off", autocapitalize: "off" });
+    line.appendChild(lab); line.appendChild(pr); line.appendChild(inp);
+    scr.appendChild(out); scr.appendChild(line);
+    win.appendChild(bar); win.appendChild(scr);
+    host.appendChild(win);
+    var hist = [], pos = 0, nId = 0, buf = null;
+    function incompleto(src) { // falta fechar chave, parêntese ou aspas: o PowerShell mostra ">>" e espera mais linhas
+      try { parse(src); return false; }
+      catch (e) { return !!(e && e.ps && /Missing closing|missing the terminator|Missing statement block|Missing statement body|here-string|Missing (condition|closing)|Missing '\(' after|Missing '\{'/i.test(e.message)); }
+    }
+    function linha(t, k) { var d = mk(doc, "div"); pintarLinhas(doc, d, [{ t: t, k: k }]); if (d.lastChild) d.removeChild(d.lastChild); out.appendChild(d); }
+    function boasVindas() {
+      linha("PowerShell 7.7.0 (simulado no navegador: nada sai da página e nada é guardado)", "info");
+      linha("Digite um comando e aperte Enter. Ex.: Get-Date, Get-ChildItem, $PSVersionTable", "info");
+      linha("", "out");
+    }
+    boasVindas();
+    scr.addEventListener("click", function (e) { if (e.target === scr || e.target === out) inp.focus(); });
+    inp.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowUp") { if (pos > 0) { pos--; inp.value = hist[pos]; } e.preventDefault(); return; }
+      if (e.key === "ArrowDown") { if (pos < hist.length) { pos++; inp.value = pos < hist.length ? hist[pos] : ""; } e.preventDefault(); return; }
+      if (e.key === "c" && e.ctrlKey && inp.selectionStart === inp.selectionEnd) { // Ctrl+C: cancela a linha (ou o ">>")
+        e.preventDefault(); linha((buf === null ? promptDe(s) : ">> ") + inp.value + "^C", "digitado"); buf = null; inp.value = ""; pr.textContent = promptDe(s); return;
+      }
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      var cmd = inp.value; inp.value = "";
+      linha((buf === null ? promptDe(s) : ">> ") + cmd, "digitado");
+      if (buf !== null) { cmd = buf + "\n" + cmd; buf = null; if (!/\n\s*$/.test(cmd) && incompleto(cmd)) { buf = cmd; pr.textContent = ">> "; return; } }
+      else if (cmd.trim() && incompleto(cmd)) { buf = cmd; pr.textContent = ">> "; scr.scrollTop = scr.scrollHeight; return; }
+      if (cmd.trim()) {
+        if (cmd.indexOf("\n") === -1) hist.push(cmd); pos = hist.length;
+        s.lines = []; s.open = false; s.cleared = false;
+        s.runText(cmd);
+        s.history.push({ id: ++nId, cmd: cmd });
+        if (s.cleared) out.textContent = "";
+        s.lines.forEach(function (l) { linha(l.t, l.k); });
+        s.lines = [];
+      }
+      pr.textContent = promptDe(s);
+      scr.scrollTop = scr.scrollHeight;
+    });
+    bLimpa.addEventListener("click", function () { out.textContent = ""; inp.focus(); });
+    bNovo.addEventListener("click", function () {
+      var ns = new Session({ missao: false, readHost: s.opts.readHost });
+      s = ns; out.textContent = ""; boasVindas(); pr.textContent = promptDe(s); inp.focus();
+    });
+    return { el: win, rodar: function (cmd) { inp.value = cmd; var ev; try { ev = new G.KeyboardEvent("keydown", { key: "Enter" }); } catch (e) { ev = doc.createEvent("Event"); ev.initEvent("keydown", true, true); ev.key = "Enter"; } inp.dispatchEvent(ev); return out.textContent; } };
+  }
+
+  function montar() {
+    var doc = G.document;
+    if (!doc || !doc.querySelectorAll) return;
+    if (doc.head && doc.querySelector && !doc.querySelector('link[href$="rode-local.css"]')) {
+      try { doc.head.appendChild(mk(doc, "link", { rel: "stylesheet", href: "assets/rode-local.css" })); } catch (e) { }
+    }
+    var boxes = doc.querySelectorAll(".tryps");
+    for (var i = 0; i < boxes.length; i++) {
+      if (boxes[i].classList && boxes[i].classList.contains("pssim")) continue;
+      try { PSSim.caixas.push(montarCaixa(doc, boxes[i], PSSim.caixas.length)); }
+      catch (e) { if (G.console) G.console.error("pssim: não montei a caixa " + i, e); }
+    }
+    var t = doc.getElementById && doc.getElementById("pssim-terminal");
+    if (t && !PSSim.terminal) PSSim.terminal = montarTerminal(doc, t);
+  }
+
+  G.PSSim = PSSim;
   if (typeof module !== "undefined" && module && module.exports) module.exports = PSSim;
+  if (G.document && G.document.querySelectorAll) {
+    if (G.document.readyState === "loading" && G.document.addEventListener) G.document.addEventListener("DOMContentLoaded", montar);
+    else montar();
+  }
 })(typeof window !== "undefined" ? window : typeof globalThis !== "undefined" ? globalThis : this);
