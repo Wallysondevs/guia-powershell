@@ -70,7 +70,7 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 |---|---|---|---|---|---|---|---|
 | `write-host-output.html` Write-Host × Write-Output | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 | `read-host.html` Read-Host: Lendo o Teclado | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `write-outros.html` Write-Warning, Write-Verbose e Companhia | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `write-outros.html` Write-Warning, Write-Verbose e Companhia | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 
 ## Decisões
 
@@ -78,7 +78,7 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 |---|---|---|---|---|---|---|---|
 | `if.html` if | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 | `elseif-else.html` elseif e else | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `switch.html` switch | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `switch.html` switch | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 
 ## Repetições
 
@@ -86,8 +86,8 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 |---|---|---|---|---|---|---|---|
 | `foreach.html` foreach | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 | `for.html` for | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `while.html` while e do | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `break-continue.html` break e continue | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `while.html` while e do | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `break-continue.html` break e continue | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 
 ## Lotes de coleta
 
