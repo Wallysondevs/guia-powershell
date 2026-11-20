@@ -140,7 +140,7 @@ PS C:\Users\ana&gt; foreach ($x in $null) { "rodou com [$x]" }
 <hr>
 
 <h2 id="errado">Quando dá errado</h2>
-<p>Para colher estes erros, o código errado foi rodado como texto pelo <code>Invoke-Expression</code>, por isso as mensagens começam com <code>Invoke-Expression:</code>. Digitando direto, a moldura muda um pouco, mas a mensagem é a mesma.</p>
+<p>Para colher estes erros, o código errado foi rodado como texto pelo <code>Invoke-Expression</code>, por isso as mensagens começam com <code>Invoke-Expression:</code>. Digitando direto, a moldura muda um pouco (aparece como <code>ParserError</code>), mas a mensagem é a mesma. Esses erros de leitura do código saem em inglês no PowerShell 7.7, mesmo num Windows em português.</p>
 
 <div class="cenario">
 <strong>Trocar o <code>in</code> por outra palavra</strong>
@@ -148,8 +148,8 @@ PS C:\Users\ana&gt; foreach ($x in $null) { "rodou com [$x]" }
 Invoke-Expression: Missing 'in' after variable in foreach loop. The correct form is: foreach ($a in $b) {...}
 </pre>
 <dl class="anatomy">
-  <dt>Missing 'in' after variable in foreach loop</dt><dd>"Falta o 'in' depois da variável no laço foreach." Quem vem do JavaScript às vezes escreve <code>of</code>.</dd>
-  <dt>The correct form is: foreach ($a in $b) {...}</dt><dd>"A forma correta é...": o próprio PowerShell mostra o modelo certo.</dd>
+  <dt>Missing 'in' after variable in foreach loop</dt><dd>Quer dizer que faltou a palavra <code>in</code> depois da variável do laço. Quem vem do JavaScript às vezes escreve <code>of</code>.</dd>
+  <dt>The correct form is: foreach ($a in $b) {...}</dt><dd>Aqui o próprio PowerShell mostra o modelo certo do <code>foreach</code>.</dd>
 </dl>
 </div>
 
@@ -159,7 +159,7 @@ Invoke-Expression: Missing 'in' after variable in foreach loop. The correct form
 Invoke-Expression: Missing opening '(' after keyword 'foreach'.
 </pre>
 <dl class="anatomy">
-  <dt>Missing opening '(' after keyword 'foreach'</dt><dd>"Falta o '(' de abertura depois da palavra 'foreach'." A parte <code>$fruta in $frutas</code> precisa ficar entre parênteses.</dd>
+  <dt>Missing opening '(' after keyword 'foreach'</dt><dd>Quer dizer que faltou abrir parênteses logo depois da palavra <code>foreach</code>. A parte <code>$fruta in $frutas</code> precisa ficar entre parênteses.</dd>
 </dl>
 </div>
 
