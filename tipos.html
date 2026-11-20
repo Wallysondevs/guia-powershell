@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Tipos de Dados — texto, número, data e lista | Guia PowerShell</title>
+<meta name="description" content="Tipos de dados no PowerShell para iniciantes: String, Int32, Double, Boolean, DateTime, listas e Hashtable, GetType() e o erro real de método inexistente.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">Tipos</span> de Dados</h1>
+
+<p class="intro">Um nome, uma idade, um preço com centavos, uma data de entrega. Para a Ana, são só informações. Para o PowerShell, cada uma é de um <strong>tipo</strong> diferente, e o tipo decide o que dá para fazer com ela.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é o <strong>tipo</strong> de um valor: texto, número inteiro, número decimal, verdadeiro/falso, data, lista.</li>
+  <li>A descobrir o tipo com <code>.GetType()</code>.</li>
+  <li>Por que o tipo importa nas contas e comparações.</li>
+  <li>O erro real de quem escreve o nome do método errado.</li>
+</ul>
+</div>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português.</p>
+<hr>
+<h2>A ideia: cada coisa no seu pote</h2>
+<p>Na cozinha, açúcar vai num pote, feijão em outro, ovos na caixinha. Você não guarda ovo no pote de açúcar, porque cada coisa se usa de um jeito. No PowerShell, todo valor tem um <strong>tipo</strong>: o texto <code>"Ana"</code> é um tipo, o número <code>30</code> é outro. O tipo diz o que dá para fazer com o valor: número soma, texto vira maiúsculo, data tem dia e mês.</p>
+<hr>
+<h2>1. O tipo de cada valor</h2>
+<p>Todo valor sabe o próprio tipo. Pergunte com <code>.GetType().Name</code> ("obter tipo", e o nome dele):</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; "Ana".GetType().Name
+String
+PS C:\Users\ana&gt; (30).GetType().Name
+Int32
+PS C:\Users\ana&gt; (3.14).GetType().Name
+Double
+PS C:\Users\ana&gt; $true.GetType().Name
+Boolean
+PS C:\Users\ana&gt; (Get-Date).GetType().Name
+DateTime
+PS C:\Users\ana&gt; (1, 2, 3).GetType().Name
+Object[]
+PS C:\Users\ana&gt; @{ nome = "Ana"; idade = 30 }.GetType().Name
+Hashtable
+</pre>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Tipo</th><th>O que guarda</th></tr>
+<tr><td><code>String</code></td><td>Texto ("corda" de letras): <code>"Ana"</code>.</td></tr>
+<tr><td><code>Int32</code></td><td>Número inteiro: <code>30</code>.</td></tr>
+<tr><td><code>Double</code></td><td>Número com casas decimais: <code>3.14</code>.</td></tr>
+<tr><td><code>Boolean</code></td><td>Verdadeiro ou falso: <code>$true</code>, <code>$false</code>.</td></tr>
+<tr><td><code>DateTime</code></td><td>Data e hora.</td></tr>
+<tr><td><code>Object[]</code></td><td>Lista (os <code>[]</code> querem dizer "vários").</td></tr>
+<tr><td><code>Hashtable</code></td><td>Ficha com campos: <code>@{ nome = "Ana" }</code>.</td></tr>
+</table>
+</div>
+<p>Repare: no código, o decimal usa <strong>ponto</strong> (<code>3.14</code>), mesmo com o Windows em português. A vírgula separa itens de lista.</p>
+<h2>2. A variável aceita qualquer tipo</h2>
+<p>A caixa (variável) não tem tipo fixo: o tipo é do valor que está dentro. Por isso você pode ter numa mesma lista um texto, um número, um decimal, um booleano, um <code>$null</code> e outra lista:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $valores = "Ana", 30, 3.14, $true, $null, (1, 2)
+PS C:\Users\ana&gt; $valores | ForEach-Object { if ($null -eq $_) { "null" } else { $_.GetType().Name } }
+String
+Int32
+Double
+Boolean
+null
+Object[]
+</pre>
+<p>O <code>$null</code> ("nada") não tem tipo, por isso o comando trata ele à parte. Ele tem uma aula só dele: <a href="booleanos-null.html">$true, $false e $null</a>. Para <strong>forçar</strong> um tipo, veja <a href="conversao.html">Conversão de Tipos</a>.</p>
+<div class="tryps" data-goal="out:Double;;semerro">
+<p class="try-task"><strong>Experimente:</strong> troque o <code>30</code> por <code>30.5</code> e veja o tipo mudar de <code>Int32</code> para <code>Double</code>.</p>
+<pre class="script" data-file="main.ps1">$numero = 30
+$numero.GetType().Name
+</pre>
+<pre class="solucao" data-file="main.ps1">$numero = 30.5
+$numero.GetType().Name
+</pre>
+</div>
+<h2>3. Por que o tipo importa</h2>
+<p>O mesmo sinal faz coisas diferentes conforme o tipo. Com números, <code>+</code> soma; com texto, <code>+</code> junta. Você vai ver isso nas aulas <a href="numeros.html">Números</a> e <a href="strings.html">Textos</a>. O nome completo do tipo aparece com <code>.FullName</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $nome = "Ana"
+PS C:\Users\ana&gt; $nome.GetType().FullName
+System.String
+</pre>
+<p><code>System.String</code> é o nome "de registro" do tipo texto no .NET, a plataforma em que o PowerShell foi construído.</p>
+<hr>
+<h2>Quando dá errado</h2>
+<div class="cenario">
+<strong>Escreveu o nome do método errado</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; (30).GetTyp()
+InvalidOperation: Method invocation failed because [System.Int32] does not contain a method named 'GetTyp'.
+</pre>
+<dl class="anatomy">
+  <dt>Method invocation failed</dt><dd>"A chamada do método falhou." Método é uma ação que o valor sabe fazer, como <code>GetType()</code>.</dd>
+  <dt>[System.Int32] does not contain a method named 'GetTyp'</dt><dd>"O tipo Int32 não tem um método chamado GetTyp." Faltou o <code>e</code>. Repare que o erro já conta o tipo do valor.</dd>
+</dl>
+<p><strong>Como resolver:</strong> <code>(30).GetType()</code>. Os parênteses em volta do 30 também são necessários: sem eles, o ponto seria lido como casa decimal.</p>
+</div>
+<hr>
+<h2>Exercícios</h2>
+<div class="exercise">
+<h3>1. Descubra o tipo</h3>
+<p>Complete para ver o tipo de <code>$preco</code>:</p>
+<div class="ex-code">$preco.<input data-answer="GetType().Name" aria-label="resposta"></div>
+</div>
+<div class="exercise">
+<h3>2. Qual tipo?</h3>
+<p>Que tipo <code>(7).GetType().Name</code> mostra?</p>
+<div class="ex-code"><input data-answer="Int32" aria-label="resposta"></div>
+</div>
+<div class="mc" data-answer="3">
+<p class="mc-q">3. Qual é o tipo de <code>"30"</code> (com aspas)?</p>
+<label><input type="radio" name="q3"> Int32</label>
+<label><input type="radio" name="q3"> Double</label>
+<label><input type="radio" name="q3"> String</label>
+<label><input type="radio" name="q3"> Boolean</label>
+</div>
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Qual destes é um número <strong>decimal</strong> escrito do jeito certo no código?</p>
+<label><input type="radio" name="q4"> <code>3,14</code></label>
+<label><input type="radio" name="q4"> <code>3.14</code></label>
+<label><input type="radio" name="q4"> <code>"3.14"</code></label>
+<label><input type="radio" name="q4"> <code>3 14</code></label>
+</div>
+<div class="tryps" data-goal="out:Boolean;;semerro">
+<p class="try-task"><strong>Missão final:</strong> guarde <code>$true</code> em <code>$ativo</code> e mostre o nome do tipo.</p>
+<pre class="script" data-file="main.ps1">$ativo = "sim"
+$ativo.GetType().Name
+</pre>
+<pre class="solucao" data-file="main.ps1">$ativo = $true
+$ativo.GetType().Name
+</pre>
+</div>
+<hr>
+<h2>Resumo</h2>
+<ul>
+  <li>Todo valor tem um tipo: <code>String</code>, <code>Int32</code>, <code>Double</code>, <code>Boolean</code>, <code>DateTime</code>, <code>Object[]</code>, <code>Hashtable</code>.</li>
+  <li><code>.GetType().Name</code> mostra o tipo.</li>
+  <li>A variável aceita qualquer tipo; o tipo é do valor.</li>
+  <li>No código, decimal usa ponto: <code>3.14</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
