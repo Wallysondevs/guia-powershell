@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell O que é PowerShell — objetos, Get-Date e a diferença para o cmd | Guia PowerShell</title>
+<meta name="description" content="O que é o PowerShell, para quem nunca usou terminal: ele não devolve só um texto, devolve um objeto. Veja a saída real do Get-Date, o ano com (Get-Date).Year e a comparação com o cmd.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>O que é o <span class="hl">PowerShell</span></h1>
+
+<p class="intro">O PowerShell é um <strong>programa para conversar com o computador por escrito</strong>. Você digita um pedido, aperta <kbd>Enter</kbd> e ele responde. A diferença para o <code>cmd</code> antigo (e para muita gente que imagina uma “tela preta só de texto”) é esta: o PowerShell não devolve só uma frase. Ele devolve um <strong>objeto</strong> — uma ficha com várias informações, das quais você pode aproveitar só o pedaço que interessa.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é o PowerShell e para que ele serve no dia a dia.</li>
+  <li>A diferença entre um <strong>texto</strong> (o que o <code>cmd</code> costuma devolver) e um <strong>objeto</strong> (o que o PowerShell devolve).</li>
+  <li>A ver a data com <code>Get-Date</code> e a pedir só o ano com <code>(Get-Date).Year</code>.</li>
+  <li>Que as “partes” de um objeto têm nome (Day, Hour, Year…) e dá para listar algumas delas.</li>
+  <li>Como o mesmo pedido no <code>cmd</code> aparece só como texto.</li>
+</ul>
+</div>
+
+<p>Todas as saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta pessoal da usuária fictícia <code>ana</code>. No Windows PowerShell 5.1 os mesmos comandos funcionam; a ideia de objeto é a mesma.</p>
+
+<hr>
+
+<h2>A ideia: uma ficha de cadastro, não um recado</h2>
+<p>Imagine que você pergunta “que dia é hoje?” para duas pessoas. A primeira responde só com um recado escrito: <code>20/11/2026</code>. Útil, mas é só um texto: para pegar o ano, você teria que ler a frase e recortar os quatro últimos dígitos na mão.</p>
+<p>A segunda pessoa entrega uma <strong>ficha de cadastro</strong> com vários campos: dia da semana, dia, mês, ano, hora. Você olha o campo “ano” e lê <code>2026</code>, sem recortar nada. O PowerShell trabalha no segundo jeito. A ficha é o <strong>objeto</strong>; cada campo é uma <strong>propriedade</strong> (property, em inglês).</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>No dia a dia</th><th>No PowerShell</th></tr>
+<tr><td>O recado no papel</td><td>Um texto, como o que o <code>cmd</code> costuma devolver</td></tr>
+<tr><td>A ficha de cadastro</td><td>O <strong>objeto</strong> que o PowerShell devolve</td></tr>
+<tr><td>O campo “ano” da ficha</td><td>A propriedade <code>Year</code></td></tr>
+<tr><td>“Me mostra só o ano”</td><td><code>(Get-Date).Year</code></td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>1. Pedindo a data: <code>Get-Date</code></h2>
+<p>Digite exatamente isto e aperte <kbd>Enter</kbd>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Date
+
+sexta-feira, 20 de novembro de 2026 17:13:06
+
+</pre>
+<p>A resposta veio em português, com o dia da semana, a data e a hora. As <strong>linhas em branco</strong> antes e depois fazem parte do jeito de mostrar uma data inteira. Não é erro. Na próxima aula, <a href="primeiro-comando.html">Seu Primeiro Comando</a>, a gente desmonta o prompt e este comando com calma. Por enquanto, o importante é o que veio <strong>atrás</strong> desse texto bonito: uma ficha, não só a frase.</p>
+
+<hr>
+
+<h2>2. Pedindo só um campo: <code>(Get-Date).Year</code></h2>
+<p>Se a Ana só precisa do ano — para o nome de uma pasta, por exemplo — ela não recorta o texto. Ela pede o campo <code>Year</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; (Get-Date).Year
+2026
+</pre>
+<dl class="anatomy">
+  <dt>(Get-Date)</dt><dd>Os parênteses mandam o PowerShell <strong>primeiro</strong> obter a data. Sem eles, o ponto não saberia de quem é o <code>Year</code>.</dd>
+  <dt>.</dt><dd>O ponto quer dizer “desta ficha, pegue o campo…”.</dd>
+  <dt>Year</dt><dd>O nome da propriedade: “ano”. A resposta é só o número <code>2026</code>, sem linhas em branco.</dd>
+</dl>
+
+<div class="tryps" data-goal="src:\.Year;;semerro">
+<p class="try-task"><strong>Experimente:</strong> o editor já tem o <code>Get-Date</code>. Acrescente os parênteses e o <code>.Year</code> para mostrar só o ano, e clique em Rodar.</p>
+<pre class="script" data-file="main.ps1">Get-Date
+</pre>
+<pre class="solucao" data-file="main.ps1">(Get-Date).Year
+</pre>
+</div>
+
+<hr>
+
+<h2>3. Quais campos a ficha tem?</h2>
+<p>Você não precisa decorar os nomes. Dá para perguntar ao próprio objeto quais propriedades ele tem. O comando abaixo ainda é um adiantamento (a aula completa de <code>Get-Member</code> vem no Nível 2); aqui ele só serve para <strong>ver os nomes</strong>. Pedimos as 5 primeiras propriedades da data:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Date | Get-Member -MemberType Property | Select-Object -First 5
+
+   TypeName: System.DateTime
+
+Name      MemberType Definition
+----      ---------- ----------
+Date      Property   datetime Date {get;}
+Day       Property   int Day {get;}
+DayOfWeek Property   System.DayOfWeek DayOfWeek {get;}
+DayOfYear Property   int DayOfYear {get;}
+Hour      Property   int Hour {get;}
+</pre>
+<dl class="anatomy">
+  <dt>TypeName: System.DateTime</dt><dd>O “tipo” da ficha: é uma data e hora (DateTime). Por isso ela tem dia, hora, ano…</dd>
+  <dt>Name</dt><dd>O nome de cada campo. <code>Day</code> é o dia do mês, <code>DayOfWeek</code> é o dia da semana, <code>Hour</code> é a hora. <code>Year</code> também existe: ele não apareceu aqui só porque pedimos as 5 primeiras, em ordem alfabética, e Year vem mais abaixo.</dd>
+  <dt>|</dt><dd>A barra vertical é a <strong>esteira</strong> (pipeline): a data segue para o próximo comando. Você vai usá-la o tempo todo a partir do Nível 2.</dd>
+</dl>
+<p>Não se preocupe em entender cada pedaço desta linha agora. Guarde só a ideia: <strong>por trás da frase tem uma ficha, e os campos têm nome</strong>.</p>
+
+<hr>
+
+<h2>4. O mesmo pedido no <code>cmd</code></h2>
+<p>O <code>cmd</code> é o prompt antigo do Windows. Ele também sabe dizer a data, mas a resposta é só um texto:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; cmd /c echo %DATE%
+20/11/2026
+</pre>
+<dl class="anatomy">
+  <dt>cmd /c</dt><dd>Manda o PowerShell chamar o <code>cmd</code> antigo, rodar um comando e voltar.</dd>
+  <dt>echo %DATE%</dt><dd>No <code>cmd</code>, <code>echo</code> escreve na tela e <code>%DATE%</code> é a data do sistema, como um texto.</dd>
+</dl>
+<p>Veio <code>20/11/2026</code>, numa linha só, sem “ano” para você pedir. Se a Ana quisesse só o <code>2026</code>, teria que recortar o texto. No PowerShell, <code>(Get-Date).Year</code> já devolve o número.</p>
+<div class="note">Rodamos o <code>cmd</code> <strong>de dentro</strong> do PowerShell só para comparar. No dia a dia deste guia você fica no PowerShell: o prompt começa com <code>PS</code>. Como abrir essa janela está em <a href="abrir-terminal.html">Abrindo o PowerShell</a>.</div>
+
+<div class="cenario">
+<strong>A Ana quer o ano para o nome de uma pasta</strong>
+<p>Ela precisa criar algo como <code>fotos-2026</code>. Se a data viesse só como o texto <code>20/11/2026</code>, ela teria que copiar os quatro últimos dígitos na mão, e no ano que vem fazer de novo. Com o objeto, o campo já existe:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; (Get-Date).Year
+2026
+</pre>
+<p>É este o motivo de o PowerShell trabalhar com objetos desde o primeiro comando: você pede o campo pelo nome, em vez de recortar frase. O resto do guia parte daqui.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Get-Date</code></td><td>Mostra a data e a hora de agora (por trás, um objeto DateTime).</td></tr>
+<tr><td><code>(Get-Date).Year</code></td><td>Mostra só o ano, pedindo a propriedade <code>Year</code>.</td></tr>
+<tr><td><code>(Get-Date).Day</code></td><td>Mostra só o dia do mês (o nome apareceu na lista de propriedades).</td></tr>
+<tr><td><code>cmd /c echo %DATE%</code></td><td>Pede a data ao <code>cmd</code> antigo: a resposta é só um texto.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete para mostrar só o ano da data de hoje:</p>
+<div class="ex-code">(Get-Date).<input data-answer="Year" aria-label="propriedade"></div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual é a saída?</h3>
+<p>Na saída desta aula, o que aparece com <code>(Get-Date).Year</code>?</p>
+<div class="ex-code">Saída: <input data-answer="2026" aria-label="saída"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Complete a ideia</h3>
+<p>O PowerShell devolve um ________ (uma ficha com campos), não só um texto.</p>
+<div class="ex-code"><input data-answer="objeto" aria-label="palavra"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Qual é a maior diferença entre a resposta do <code>Get-Date</code> e a do <code>cmd /c echo %DATE%</code>?</p>
+<label><input type="radio" name="q4"> O PowerShell só funciona no Linux</label>
+<label><input type="radio" name="q4"> O PowerShell devolve um objeto, com campos como Year; o <code>cmd</code> devolve só um texto</label>
+<label><input type="radio" name="q4"> O <code>cmd</code> é mais novo do que o PowerShell</label>
+<label><input type="radio" name="q4"> Os dois devolvem exatamente a mesma coisa</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Para que servem os parênteses em <code>(Get-Date).Year</code>?</p>
+<label><input type="radio" name="q5"> São enfeite e podem sair</label>
+<label><input type="radio" name="q5"> Apagam a data da tela</label>
+<label><input type="radio" name="q5"> Fazem o <code>Get-Date</code> rodar primeiro, para depois pegar o campo <code>Year</code></label>
+<label><input type="radio" name="q5"> Trocam o PowerShell pelo <code>cmd</code></label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. Na lista de propriedades, <code>Hour</code> é:</p>
+<label><input type="radio" name="q6"> O campo da hora, na ficha da data</label>
+<label><input type="radio" name="q6"> Um erro de digitação</label>
+<label><input type="radio" name="q6"> O nome do computador</label>
+<label><input type="radio" name="q6"> Um programa à parte, no lugar do PowerShell</label>
+</div>
+
+<div class="tryps" data-goal="src:\.Day\b;;semerro">
+<p class="try-task"><strong>Missão final:</strong> mostre só o dia do mês da data de hoje, usando a propriedade <code>Day</code> (o mesmo jeito do <code>.Year</code>).</p>
+<pre class="script" data-file="main.ps1">Get-Date
+</pre>
+<pre class="solucao" data-file="main.ps1">(Get-Date).Day
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>O PowerShell é um programa para pedir coisas ao computador por escrito: você digita, aperta <kbd>Enter</kbd> e lê a resposta.</li>
+  <li>A resposta não é só um texto. É um <strong>objeto</strong>, uma ficha com campos (propriedades) que têm nome.</li>
+  <li><code>Get-Date</code> mostra a data e a hora; por trás, a ficha é do tipo DateTime.</li>
+  <li><code>(Get-Date).Year</code> pede só o campo do ano. Os parênteses fazem o <code>Get-Date</code> rodar primeiro.</li>
+  <li>O <code>cmd</code> antigo, com <code>echo %DATE%</code>, devolve só o texto da data: não tem um campo <code>Year</code> para você pedir.</li>
+  <li>Na próxima aula você instala o PowerShell 7, se ainda não tiver, e depois abre a janela para praticar.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
