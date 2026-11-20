@@ -92,6 +92,17 @@ Sua matrícula está ativa.
 </pre>
 </div>
 <hr>
+<h2>Formas diferentes de fazer várias linhas</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>@" … "@</code></td><td>Bloco grande com variáveis: cartas, e-mails.</td></tr>
+<tr><td><code>@' … '@</code></td><td>Bloco grande sem troca: textos com <code>$</code> literal.</td></tr>
+<tr><td><code>"linha 1`nlinha 2"</code></td><td>Duas ou três linhas curtas; fica difícil de ler se crescer.</td></tr>
+<tr><td>Várias linhas com <code>Write-Output</code></td><td>Uma por comando; bom quando cada linha é calculada à parte.</td></tr>
+</table>
+</div>
+<hr>
 <h2>Quando dá errado</h2>
 <div class="cenario">
 <strong>Espaço antes do fechamento</strong>
@@ -128,19 +139,25 @@ Invoke-Expression: White space is not allowed before the string terminator.
 <p>Como se fecha a here-string com aspas simples?</p>
 <div class="ex-code"><input data-answer="&#x27;@" aria-label="fechamento"></div>
 </div>
+<div class="exercise">
+<h3>3. Texto puro</h3>
+<p>Complete a abertura de uma here-string que <strong>não</strong> troca variáveis:</p>
+<div class="ex-code">$texto = <input data-answer="@&#x27;" aria-label="abertura"></div>
+</div>
+
 <div class="mc" data-answer="2">
-<p class="mc-q">3. Onde o fechamento <code>"@</code> precisa ficar?</p>
-<label><input type="radio" name="q3"> Em qualquer lugar</label>
-<label><input type="radio" name="q3"> No começo da linha, sem espaço antes</label>
-<label><input type="radio" name="q3"> Na mesma linha da abertura</label>
-<label><input type="radio" name="q3"> Depois de um ponto e vírgula</label>
+<p class="mc-q">4. Onde o fechamento <code>"@</code> precisa ficar?</p>
+<label><input type="radio" name="q4"> Em qualquer lugar</label>
+<label><input type="radio" name="q4"> No começo da linha, sem espaço antes</label>
+<label><input type="radio" name="q4"> Na mesma linha da abertura</label>
+<label><input type="radio" name="q4"> Depois de um ponto e vírgula</label>
 </div>
 <div class="mc" data-answer="2">
-<p class="mc-q">4. O que <code>@' Preço: $10 '@</code> (em várias linhas) mostra?</p>
-<label><input type="radio" name="q4"> Preço: 10</label>
-<label><input type="radio" name="q4"> Preço: $10</label>
-<label><input type="radio" name="q4"> Preço:</label>
-<label><input type="radio" name="q4"> Erro</label>
+<p class="mc-q">5. O que <code>@' Preço: $10 '@</code> (em várias linhas) mostra?</p>
+<label><input type="radio" name="q5"> Preço: 10</label>
+<label><input type="radio" name="q5"> Preço: $10</label>
+<label><input type="radio" name="q5"> Preço:</label>
+<label><input type="radio" name="q5"> Erro</label>
 </div>
 <div class="tryps" data-goal="out:Loja da Ana;;outre:Loja da Ana\nAberta;;src:@&quot;;;semerro">
 <p class="try-task"><strong>Missão final:</strong> monte uma here-string com duas linhas: <code>Loja da $dona</code> e <code>Aberta</code>, e mostre.</p>
