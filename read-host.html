@@ -31,7 +31,7 @@
 </ul>
 </div>
 
-<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português. O <code>Read-Host</code> precisa de uma pessoa digitando na janela, e isso o nosso laboratório não fez. Por isso, a parte da pergunta na tela está <strong>descrita em texto</strong>, não copiada do terminal. Para ver de verdade, use os "Experimente": neles o editor responde por você, como se alguém tivesse digitado.</p>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português. O <code>Read-Host</code> precisa de uma pessoa digitando na janela, e isso o nosso laboratório não fez. Por isso, a parte da pergunta na tela está <strong>descrita em texto</strong>, não copiada do terminal. Nas missões, a resposta fica numa variável para você praticar sem interação. Esses exercícios simulam a entrada; não são uma coleta do Read-Host.</p>
 
 <hr>
 
@@ -51,12 +51,14 @@
 </dl>
 <p><strong>O que acontece na tela</strong> (descrito, não colhido no laboratório): o PowerShell mostra a pergunta seguida de dois-pontos, <code>Qual é o seu nome?:</code>, e o cursor fica piscando. O script para e espera. Quando a pessoa digita <code>Ana</code> e aperta <kbd>Enter</kbd>, o texto <code>Ana</code> vai para <code>$nome</code> e a linha seguinte mostra <code>Olá, Ana!</code>. Repare: o <code>Read-Host</code> coloca os dois-pontos sozinho, então não escreva <code>:</code> no fim da pergunta.</p>
 
-<div class="tryps" data-stdin="Ana" data-goal="out:Olá, Ana!;;src:\$nome;;semerro">
-<p class="try-task"><strong>Experimente:</strong> o editor vai responder <code>Ana</code> à pergunta. Troque "visitante" pela variável <code>$nome</code> para o script cumprimentar quem respondeu.</p>
-<pre class="script" data-file="main.ps1">$nome = Read-Host 'Qual é o seu nome?'
+<div class="tryps" data-goal="out:Olá, Ana!;;src:\$nome;;semerro">
+<p class="try-task"><strong>Experimente:</strong> a variável contém a resposta simulada <code>Ana</code>. Troque "visitante" pela variável <code>$nome</code> para o script cumprimentar quem respondeu.</p>
+<pre class="script" data-file="main.ps1"># Resposta simulada, sem pergunta interativa
+$nome = 'Ana'
 "Olá, visitante!"
 </pre>
-<pre class="solucao" data-file="main.ps1">$nome = Read-Host 'Qual é o seu nome?'
+<pre class="solucao" data-file="main.ps1"># Resposta simulada, sem pergunta interativa
+$nome = 'Ana'
 "Olá, $nome!"
 </pre>
 </div>
@@ -201,13 +203,15 @@ InvalidArgument: Cannot convert value "trinta" to type "System.Int32". Error: "T
 <label><input type="radio" name="q6"> Porque transforma a resposta em número</label>
 </div>
 
-<div class="tryps" data-stdin="30" data-goal="out:Ano que vem: 31;;src:\[int\];;semerro">
-<p class="try-task"><strong>Missão final:</strong> o editor vai responder <code>30</code>. O script mostra <code>Ano que vem: 301</code>. Conserte a conta com <code>[int]</code> para aparecer <code>Ano que vem: 31</code>.</p>
-<pre class="script" data-file="main.ps1">$idade = Read-Host 'Idade'
+<div class="tryps" data-goal="out:Ano que vem: 31;;src:\[int\];;semerro">
+<p class="try-task"><strong>Missão final:</strong> a resposta simulada é o texto <code>30</code>. O script mostra <code>Ano que vem: 301</code>. Conserte a conta com <code>[int]</code> para aparecer <code>Ano que vem: 31</code>.</p>
+<pre class="script" data-file="main.ps1"># Resposta simulada, sem pergunta interativa
+$idade = '30'
 $proximo = $idade + 1
 "Ano que vem: $proximo"
 </pre>
-<pre class="solucao" data-file="main.ps1">$idade = Read-Host 'Idade'
+<pre class="solucao" data-file="main.ps1"># Resposta simulada, sem pergunta interativa
+$idade = '30'
 $proximo = [int]$idade + 1
 "Ano que vem: $proximo"
 </pre>
