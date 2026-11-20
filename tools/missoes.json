@@ -1,0 +1,5635 @@
+{
+  "versao": 1,
+  "alvo": "Nível 1",
+  "total": 123,
+  "por_secao": {
+    "Começando": 32,
+    "Pastas e Arquivos": 33,
+    "Variáveis e Tipos": 18,
+    "Operadores": 14,
+    "Saída e Entrada": 8,
+    "Decisões": 8,
+    "Repetições": 10
+  },
+  "comecando_e_pastas": 65,
+  "rode_local": {
+    "commit": "a273e59",
+    "campo_vazio": "não confere nada; aparece “Cole primeiro o que o PowerShell respondeu”; zero ✔, inclusive no semerro",
+    "marcador_sem_saida": "ao escrever “(sem saída)”, o semerro vira ☐ “confirme que o comando executou sem erros no seu terminal”, sem ✔ automático",
+    "quase_la": "quando não há ✘ e só sobram ☐, a mensagem é “Quase lá!” — nunca “Missão cumprida!”. No positivo das missões só com semerro, também é “Quase lá!”.",
+    "missoes_so_semerro": [],
+    "missoes_so_src_ou_semerro": [
+      "abrir-terminal-1",
+      "abrir-terminal-2",
+      "abrir-terminal-3",
+      "cmdlets-1",
+      "get-help-1",
+      "get-help-2",
+      "instalar-1",
+      "instalar-2",
+      "introducao-1",
+      "introducao-2",
+      "get-location-1",
+      "get-location-2",
+      "get-location-3"
+    ]
+  },
+  "etapas": [
+    {
+      "id": "E1",
+      "nome": "Intérprete básico",
+      "resumo": "Linhas, comentários, variáveis, strings, interpolação, $(), aritmética básica, arrays simples, Write-Output (e saída implícita) e Write-Host.",
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "write-host",
+        "aritmetica",
+        "metodos",
+        "arrays"
+      ],
+      "destravadas": 15,
+      "missoes": [
+        "primeiro-comando-2",
+        "teclado-1",
+        "teclado-2",
+        "teclado-3",
+        "interpolacao-1",
+        "interpolacao-2",
+        "numeros-1",
+        "strings-1",
+        "strings-2",
+        "variaveis-1",
+        "variaveis-2",
+        "operadores-aritmeticos-1",
+        "read-host-1",
+        "write-host-output-1",
+        "write-host-output-2"
+      ]
+    },
+    {
+      "id": "E2",
+      "nome": "Data, host e caminhos de texto",
+      "resumo": "Get-Date (-Format, .Year, .Day), variáveis automáticas ($PSVersionTable, $PSEdition, $Host, $PWD, $IsLinux), Get-Location (cwd fixo), Join-Path e Split-Path.",
+      "recursos": [
+        "get-date",
+        "automaticas",
+        "join-path",
+        "split-path",
+        "get-location"
+      ],
+      "destravadas": 21,
+      "missoes": [
+        "abrir-terminal-1",
+        "abrir-terminal-2",
+        "abrir-terminal-3",
+        "instalar-1",
+        "instalar-2",
+        "introducao-1",
+        "introducao-2",
+        "parametros-cmdlet-3",
+        "primeiro-comando-1",
+        "primeiro-comando-3",
+        "versoes-powershell-1",
+        "versoes-powershell-2",
+        "versoes-powershell-3",
+        "versoes-powershell-4",
+        "caminhos-1",
+        "caminhos-2",
+        "caminhos-3",
+        "get-location-1",
+        "get-location-2",
+        "variaveis-automaticas-1",
+        "variaveis-automaticas-2"
+      ]
+    },
+    {
+      "id": "E3",
+      "nome": "Sistema de arquivos falso",
+      "resumo": "Cwd mutável, pipeline, Out-Null, New-Item, Get-ChildItem, Set/Get/Add-Content, Copy/Move/Rename/Remove-Item, Test-Path, Set-Location, Push/Pop-Location, Format-List, if simples e $_ / -replace onde a pasta precisa.",
+      "recursos": [
+        "filesystem",
+        "pipeline",
+        "out-null",
+        "new-item",
+        "get-childitem",
+        "set-content",
+        "get-content",
+        "add-content",
+        "copy-item",
+        "move-item",
+        "rename-item",
+        "remove-item",
+        "test-path",
+        "set-location",
+        "push-pop-location",
+        "format-list",
+        "if",
+        "operadores-texto"
+      ],
+      "destravadas": 29,
+      "missoes": [
+        "parametros-cmdlet-1",
+        "parametros-cmdlet-2",
+        "copy-move-1",
+        "copy-move-2",
+        "copy-move-3",
+        "get-childitem-1",
+        "get-childitem-2",
+        "get-childitem-3",
+        "get-content-1",
+        "get-content-2",
+        "get-content-3",
+        "get-location-3",
+        "new-item-1",
+        "new-item-2",
+        "new-item-3",
+        "remove-item-1",
+        "remove-item-2",
+        "rename-item-1",
+        "rename-item-2",
+        "set-content-1",
+        "set-content-2",
+        "set-location-1",
+        "set-location-2",
+        "set-location-3",
+        "test-path-1",
+        "test-path-2",
+        "test-path-3",
+        "operadores-texto-1",
+        "operadores-texto-2"
+      ]
+    },
+    {
+      "id": "E4",
+      "nome": "Descoberta e apelidos",
+      "resumo": "Get-Command, Get-Verb, Get-Help, Get-Alias, Select-Object e apelidos (echo, ls, pwd, dir, cd).",
+      "recursos": [
+        "get-command",
+        "get-verb",
+        "get-help",
+        "get-alias",
+        "select-object",
+        "aliases"
+      ],
+      "destravadas": 12,
+      "missoes": [
+        "aliases-1",
+        "aliases-2",
+        "aliases-3",
+        "cmdlets-1",
+        "cmdlets-2",
+        "cmdlets-3",
+        "get-command-1",
+        "get-command-2",
+        "get-command-3",
+        "get-help-1",
+        "get-help-2",
+        "get-help-3"
+      ]
+    },
+    {
+      "id": "E5",
+      "nome": "Provedores",
+      "resumo": "Get-PSProvider, Get-PSDrive e drives fake (Env:, Alias:, FileSystem). Só leitura.",
+      "recursos": [
+        "provedores"
+      ],
+      "destravadas": 3,
+      "missoes": [
+        "provedores-1",
+        "provedores-2",
+        "provedores-3"
+      ]
+    },
+    {
+      "id": "E6",
+      "nome": "Tipos, operadores e -f",
+      "resumo": "Tipos e conversão ([int], -as, [math]), $true/$false/$null/??, here-strings, faixa 1..n, operadores de comparação/coleção/lógicos, -f, +=/++/--, Measure-Object.",
+      "recursos": [
+        "tipos",
+        "conversao",
+        "booleanos-null",
+        "here-strings",
+        "range",
+        "operadores-comparacao",
+        "operadores-colecao",
+        "operadores-logicos",
+        "operador-formato",
+        "atribuicao-composta",
+        "measure-object"
+      ],
+      "destravadas": 25,
+      "missoes": [
+        "booleanos-null-1",
+        "booleanos-null-2",
+        "conversao-1",
+        "conversao-2",
+        "here-strings-1",
+        "here-strings-2",
+        "numeros-2",
+        "tipos-1",
+        "tipos-2",
+        "atribuicao-1",
+        "atribuicao-2",
+        "operador-formato-1",
+        "operador-formato-2",
+        "operadores-aritmeticos-2",
+        "operadores-colecao-1",
+        "operadores-colecao-2",
+        "operadores-comparacao-1",
+        "operadores-comparacao-2",
+        "operadores-logicos-1",
+        "operadores-logicos-2",
+        "read-host-2",
+        "write-host-output-3",
+        "elseif-else-1",
+        "if-1",
+        "if-2"
+      ]
+    },
+    {
+      "id": "E7",
+      "nome": "Outros fluxos de saída",
+      "resumo": "Write-Warning, Write-Verbose, Write-Information (e -Verbose / -InformationAction). Read-Host fica ilustrativo ou com resposta já no script.",
+      "recursos": [
+        "write-warning",
+        "write-verbose",
+        "write-information",
+        "read-host"
+      ],
+      "destravadas": 3,
+      "missoes": [
+        "write-outros-1",
+        "write-outros-2",
+        "write-outros-3"
+      ]
+    },
+    {
+      "id": "E8",
+      "nome": "Decisões e repetições",
+      "resumo": "else/elseif completos, switch (e -Wildcard, default), foreach, for, while/do/until, break e continue.",
+      "recursos": [
+        "switch",
+        "foreach",
+        "for",
+        "while",
+        "break",
+        "continue"
+      ],
+      "destravadas": 15,
+      "missoes": [
+        "elseif-else-2",
+        "elseif-else-3",
+        "switch-1",
+        "switch-2",
+        "switch-3",
+        "break-continue-1",
+        "break-continue-2",
+        "break-continue-3",
+        "for-1",
+        "for-2",
+        "foreach-1",
+        "foreach-2",
+        "while-1",
+        "while-2",
+        "while-3"
+      ]
+    }
+  ],
+  "frequencia": {
+    "cmdlets": [
+      {
+        "nome": "Set-Content",
+        "id": "Set-Content",
+        "missoes": 16,
+        "ids": [
+          "copy-move-1",
+          "copy-move-2",
+          "copy-move-3",
+          "get-childitem-1",
+          "get-childitem-2",
+          "get-childitem-3",
+          "get-content-1",
+          "get-content-2",
+          "get-content-3",
+          "remove-item-1",
+          "rename-item-1",
+          "set-content-1",
+          "set-content-2",
+          "test-path-1",
+          "test-path-2",
+          "test-path-3"
+        ]
+      },
+      {
+        "nome": "New-Item",
+        "id": "New-Item",
+        "missoes": 12,
+        "ids": [
+          "parametros-cmdlet-1",
+          "parametros-cmdlet-2",
+          "copy-move-3",
+          "get-childitem-3",
+          "new-item-1",
+          "new-item-2",
+          "new-item-3",
+          "remove-item-2",
+          "rename-item-2",
+          "set-location-1",
+          "set-location-2",
+          "set-location-3"
+        ]
+      },
+      {
+        "nome": "Out-Null",
+        "id": "Out-Null",
+        "missoes": 9,
+        "ids": [
+          "parametros-cmdlet-1",
+          "parametros-cmdlet-2",
+          "copy-move-3",
+          "get-childitem-3",
+          "remove-item-2",
+          "rename-item-2",
+          "set-location-1",
+          "set-location-2",
+          "set-location-3"
+        ]
+      },
+      {
+        "nome": "Get-ChildItem",
+        "id": "Get-ChildItem",
+        "missoes": 7,
+        "ids": [
+          "parametros-cmdlet-1",
+          "parametros-cmdlet-2",
+          "get-childitem-1",
+          "get-childitem-2",
+          "get-childitem-3",
+          "remove-item-2",
+          "rename-item-2"
+        ]
+      },
+      {
+        "nome": "Get-Date",
+        "id": "Get-Date",
+        "missoes": 7,
+        "ids": [
+          "get-help-1",
+          "get-help-2",
+          "introducao-1",
+          "introducao-2",
+          "parametros-cmdlet-3",
+          "primeiro-comando-1",
+          "primeiro-comando-3"
+        ]
+      },
+      {
+        "nome": "Write-Output",
+        "id": "Write-Output",
+        "missoes": 7,
+        "ids": [
+          "primeiro-comando-2",
+          "primeiro-comando-3",
+          "teclado-1",
+          "teclado-2",
+          "teclado-3",
+          "write-host-output-1",
+          "write-host-output-3"
+        ]
+      },
+      {
+        "nome": "Get-Command",
+        "id": "Get-Command",
+        "missoes": 5,
+        "ids": [
+          "cmdlets-2",
+          "cmdlets-3",
+          "get-command-1",
+          "get-command-2",
+          "get-command-3"
+        ]
+      },
+      {
+        "nome": "Get-Content",
+        "id": "Get-Content",
+        "missoes": 5,
+        "ids": [
+          "get-content-1",
+          "get-content-2",
+          "get-content-3",
+          "set-content-1",
+          "set-content-2"
+        ]
+      },
+      {
+        "nome": "Join-Path",
+        "id": "Join-Path",
+        "missoes": 5,
+        "ids": [
+          "versoes-powershell-2",
+          "caminhos-1",
+          "caminhos-2",
+          "caminhos-3",
+          "get-childitem-3"
+        ]
+      },
+      {
+        "nome": "Split-Path",
+        "id": "Split-Path",
+        "missoes": 5,
+        "ids": [
+          "versoes-powershell-3",
+          "versoes-powershell-4",
+          "caminhos-1",
+          "caminhos-2",
+          "caminhos-3"
+        ]
+      },
+      {
+        "nome": "Test-Path",
+        "id": "Test-Path",
+        "missoes": 5,
+        "ids": [
+          "provedores-2",
+          "remove-item-1",
+          "test-path-1",
+          "test-path-2",
+          "test-path-3"
+        ]
+      },
+      {
+        "nome": "Get-Help",
+        "id": "Get-Help",
+        "missoes": 3,
+        "ids": [
+          "get-help-1",
+          "get-help-2",
+          "get-help-3"
+        ]
+      },
+      {
+        "nome": "Get-Location",
+        "id": "Get-Location",
+        "missoes": 3,
+        "ids": [
+          "abrir-terminal-2",
+          "get-location-1",
+          "get-location-3"
+        ]
+      },
+      {
+        "nome": "Add-Content",
+        "id": "Add-Content",
+        "missoes": 2,
+        "ids": [
+          "set-content-1",
+          "set-content-2"
+        ]
+      },
+      {
+        "nome": "Copy-Item",
+        "id": "Copy-Item",
+        "missoes": 2,
+        "ids": [
+          "copy-move-1",
+          "copy-move-3"
+        ]
+      },
+      {
+        "nome": "Get-Alias",
+        "id": "Get-Alias",
+        "missoes": 2,
+        "ids": [
+          "aliases-1",
+          "aliases-3"
+        ]
+      },
+      {
+        "nome": "Get-Verb",
+        "id": "Get-Verb",
+        "missoes": 2,
+        "ids": [
+          "cmdlets-1",
+          "cmdlets-3"
+        ]
+      },
+      {
+        "nome": "Remove-Item",
+        "id": "Remove-Item",
+        "missoes": 2,
+        "ids": [
+          "remove-item-1",
+          "remove-item-2"
+        ]
+      },
+      {
+        "nome": "Rename-Item",
+        "id": "Rename-Item",
+        "missoes": 2,
+        "ids": [
+          "rename-item-1",
+          "rename-item-2"
+        ]
+      },
+      {
+        "nome": "Set-Location",
+        "id": "Set-Location",
+        "missoes": 2,
+        "ids": [
+          "set-location-1",
+          "set-location-3"
+        ]
+      },
+      {
+        "nome": "Write-Warning",
+        "id": "Write-Warning",
+        "missoes": 2,
+        "ids": [
+          "write-outros-1",
+          "write-outros-3"
+        ]
+      },
+      {
+        "nome": "ls (apelido)",
+        "id": "ls (apelido)",
+        "missoes": 2,
+        "ids": [
+          "aliases-1",
+          "get-command-2"
+        ]
+      },
+      {
+        "nome": "Format-List",
+        "id": "Format-List",
+        "missoes": 1,
+        "ids": [
+          "get-location-3"
+        ]
+      },
+      {
+        "nome": "Get-PSDrive",
+        "id": "Get-PSDrive",
+        "missoes": 1,
+        "ids": [
+          "provedores-3"
+        ]
+      },
+      {
+        "nome": "Get-PSProvider",
+        "id": "Get-PSProvider",
+        "missoes": 1,
+        "ids": [
+          "provedores-1"
+        ]
+      },
+      {
+        "nome": "Measure-Object",
+        "id": "Measure-Object",
+        "missoes": 1,
+        "ids": [
+          "write-host-output-3"
+        ]
+      },
+      {
+        "nome": "Move-Item",
+        "id": "Move-Item",
+        "missoes": 1,
+        "ids": [
+          "copy-move-2"
+        ]
+      },
+      {
+        "nome": "Pop-Location",
+        "id": "Pop-Location",
+        "missoes": 1,
+        "ids": [
+          "set-location-2"
+        ]
+      },
+      {
+        "nome": "Push-Location",
+        "id": "Push-Location",
+        "missoes": 1,
+        "ids": [
+          "set-location-2"
+        ]
+      },
+      {
+        "nome": "Write-Host",
+        "id": "Write-Host",
+        "missoes": 1,
+        "ids": [
+          "write-host-output-2"
+        ]
+      },
+      {
+        "nome": "Write-Information",
+        "id": "Write-Information",
+        "missoes": 1,
+        "ids": [
+          "write-outros-3"
+        ]
+      },
+      {
+        "nome": "Write-Verbose",
+        "id": "Write-Verbose",
+        "missoes": 1,
+        "ids": [
+          "write-outros-2"
+        ]
+      },
+      {
+        "nome": "echo (apelido)",
+        "id": "echo (apelido)",
+        "missoes": 1,
+        "ids": [
+          "aliases-2"
+        ]
+      },
+      {
+        "nome": "pwd (apelido)",
+        "id": "pwd (apelido)",
+        "missoes": 1,
+        "ids": [
+          "aliases-3"
+        ]
+      }
+    ],
+    "recursos": [
+      {
+        "nome": "intérprete (linhas, expressões, comentários)",
+        "id": "interprete",
+        "missoes": 123,
+        "ids": [
+          "abrir-terminal-1",
+          "abrir-terminal-2",
+          "abrir-terminal-3",
+          "aliases-1",
+          "aliases-2",
+          "aliases-3",
+          "cmdlets-1",
+          "cmdlets-2",
+          "cmdlets-3",
+          "get-command-1",
+          "get-command-2",
+          "get-command-3",
+          "get-help-1",
+          "get-help-2",
+          "get-help-3",
+          "instalar-1",
+          "instalar-2",
+          "introducao-1",
+          "introducao-2",
+          "parametros-cmdlet-1",
+          "parametros-cmdlet-2",
+          "parametros-cmdlet-3",
+          "primeiro-comando-1",
+          "primeiro-comando-2",
+          "primeiro-comando-3",
+          "teclado-1",
+          "teclado-2",
+          "teclado-3",
+          "versoes-powershell-1",
+          "versoes-powershell-2",
+          "versoes-powershell-3",
+          "versoes-powershell-4",
+          "caminhos-1",
+          "caminhos-2",
+          "caminhos-3",
+          "copy-move-1",
+          "copy-move-2",
+          "copy-move-3",
+          "get-childitem-1",
+          "get-childitem-2",
+          "get-childitem-3",
+          "get-content-1",
+          "get-content-2",
+          "get-content-3",
+          "get-location-1",
+          "get-location-2",
+          "get-location-3",
+          "new-item-1",
+          "new-item-2",
+          "new-item-3",
+          "provedores-1",
+          "provedores-2",
+          "provedores-3",
+          "remove-item-1",
+          "remove-item-2",
+          "rename-item-1",
+          "rename-item-2",
+          "set-content-1",
+          "set-content-2",
+          "set-location-1",
+          "set-location-2",
+          "set-location-3",
+          "test-path-1",
+          "test-path-2",
+          "test-path-3",
+          "booleanos-null-1",
+          "booleanos-null-2",
+          "conversao-1",
+          "conversao-2",
+          "here-strings-1",
+          "here-strings-2",
+          "interpolacao-1",
+          "interpolacao-2",
+          "numeros-1",
+          "numeros-2",
+          "strings-1",
+          "strings-2",
+          "tipos-1",
+          "tipos-2",
+          "variaveis-1",
+          "variaveis-2",
+          "variaveis-automaticas-1",
+          "variaveis-automaticas-2",
+          "atribuicao-1",
+          "atribuicao-2",
+          "operador-formato-1",
+          "operador-formato-2",
+          "operadores-aritmeticos-1",
+          "operadores-aritmeticos-2",
+          "operadores-colecao-1",
+          "operadores-colecao-2",
+          "operadores-comparacao-1",
+          "operadores-comparacao-2",
+          "operadores-logicos-1",
+          "operadores-logicos-2",
+          "operadores-texto-1",
+          "operadores-texto-2",
+          "read-host-1",
+          "read-host-2",
+          "write-host-output-1",
+          "write-host-output-2",
+          "write-host-output-3",
+          "write-outros-1",
+          "write-outros-2",
+          "write-outros-3",
+          "elseif-else-1",
+          "elseif-else-2",
+          "elseif-else-3",
+          "if-1",
+          "if-2",
+          "switch-1",
+          "switch-2",
+          "switch-3",
+          "break-continue-1",
+          "break-continue-2",
+          "break-continue-3",
+          "for-1",
+          "for-2",
+          "foreach-1",
+          "foreach-2",
+          "while-1",
+          "while-2",
+          "while-3"
+        ]
+      },
+      {
+        "nome": "strings (aspas simples e duplas)",
+        "id": "strings",
+        "missoes": 88,
+        "ids": [
+          "aliases-2",
+          "parametros-cmdlet-3",
+          "primeiro-comando-2",
+          "primeiro-comando-3",
+          "teclado-1",
+          "teclado-2",
+          "teclado-3",
+          "versoes-powershell-2",
+          "versoes-powershell-3",
+          "versoes-powershell-4",
+          "caminhos-1",
+          "caminhos-2",
+          "caminhos-3",
+          "copy-move-1",
+          "copy-move-2",
+          "copy-move-3",
+          "get-childitem-1",
+          "get-childitem-2",
+          "get-childitem-3",
+          "get-content-1",
+          "get-content-2",
+          "get-content-3",
+          "new-item-2",
+          "remove-item-1",
+          "remove-item-2",
+          "rename-item-1",
+          "rename-item-2",
+          "set-content-1",
+          "set-content-2",
+          "set-location-3",
+          "test-path-1",
+          "test-path-2",
+          "test-path-3",
+          "booleanos-null-1",
+          "booleanos-null-2",
+          "conversao-1",
+          "conversao-2",
+          "here-strings-1",
+          "here-strings-2",
+          "interpolacao-1",
+          "interpolacao-2",
+          "numeros-1",
+          "strings-1",
+          "strings-2",
+          "variaveis-1",
+          "variaveis-2",
+          "variaveis-automaticas-1",
+          "variaveis-automaticas-2",
+          "atribuicao-1",
+          "atribuicao-2",
+          "operador-formato-1",
+          "operador-formato-2",
+          "operadores-aritmeticos-1",
+          "operadores-aritmeticos-2",
+          "operadores-colecao-1",
+          "operadores-colecao-2",
+          "operadores-comparacao-1",
+          "operadores-comparacao-2",
+          "operadores-logicos-1",
+          "operadores-logicos-2",
+          "operadores-texto-1",
+          "operadores-texto-2",
+          "read-host-1",
+          "read-host-2",
+          "write-host-output-1",
+          "write-host-output-2",
+          "write-host-output-3",
+          "write-outros-1",
+          "write-outros-2",
+          "write-outros-3",
+          "elseif-else-1",
+          "elseif-else-2",
+          "elseif-else-3",
+          "if-1",
+          "if-2",
+          "switch-1",
+          "switch-2",
+          "switch-3",
+          "break-continue-1",
+          "break-continue-2",
+          "break-continue-3",
+          "for-1",
+          "for-2",
+          "foreach-1",
+          "foreach-2",
+          "while-1",
+          "while-2",
+          "while-3"
+        ]
+      },
+      {
+        "nome": "variáveis ($nome, atribuição)",
+        "id": "variaveis",
+        "missoes": 55,
+        "ids": [
+          "abrir-terminal-1",
+          "abrir-terminal-3",
+          "instalar-1",
+          "instalar-2",
+          "versoes-powershell-1",
+          "get-location-2",
+          "rename-item-2",
+          "booleanos-null-1",
+          "booleanos-null-2",
+          "conversao-1",
+          "conversao-2",
+          "here-strings-1",
+          "here-strings-2",
+          "interpolacao-1",
+          "interpolacao-2",
+          "numeros-2",
+          "strings-1",
+          "tipos-1",
+          "tipos-2",
+          "variaveis-1",
+          "variaveis-2",
+          "variaveis-automaticas-1",
+          "variaveis-automaticas-2",
+          "atribuicao-1",
+          "atribuicao-2",
+          "operadores-aritmeticos-2",
+          "operadores-colecao-1",
+          "operadores-colecao-2",
+          "operadores-comparacao-1",
+          "operadores-comparacao-2",
+          "operadores-logicos-1",
+          "operadores-logicos-2",
+          "operadores-texto-1",
+          "operadores-texto-2",
+          "read-host-1",
+          "read-host-2",
+          "write-host-output-1",
+          "write-host-output-3",
+          "elseif-else-1",
+          "elseif-else-2",
+          "elseif-else-3",
+          "if-1",
+          "if-2",
+          "switch-1",
+          "switch-3",
+          "break-continue-1",
+          "break-continue-2",
+          "break-continue-3",
+          "for-1",
+          "for-2",
+          "foreach-1",
+          "foreach-2",
+          "while-1",
+          "while-2",
+          "while-3"
+        ]
+      },
+      {
+        "nome": "Write-Output e saída implícita",
+        "id": "write-output",
+        "missoes": 54,
+        "ids": [
+          "aliases-2",
+          "primeiro-comando-2",
+          "primeiro-comando-3",
+          "teclado-1",
+          "teclado-2",
+          "teclado-3",
+          "get-childitem-1",
+          "get-childitem-2",
+          "get-childitem-3",
+          "get-content-1",
+          "get-content-2",
+          "get-content-3",
+          "remove-item-1",
+          "remove-item-2",
+          "rename-item-1",
+          "set-content-2",
+          "booleanos-null-2",
+          "conversao-1",
+          "here-strings-1",
+          "here-strings-2",
+          "interpolacao-1",
+          "interpolacao-2",
+          "numeros-1",
+          "strings-1",
+          "strings-2",
+          "variaveis-1",
+          "variaveis-2",
+          "variaveis-automaticas-1",
+          "variaveis-automaticas-2",
+          "atribuicao-1",
+          "atribuicao-2",
+          "operador-formato-1",
+          "operador-formato-2",
+          "operadores-aritmeticos-1",
+          "operadores-aritmeticos-2",
+          "operadores-logicos-1",
+          "operadores-logicos-2",
+          "read-host-1",
+          "read-host-2",
+          "write-host-output-1",
+          "write-host-output-3",
+          "elseif-else-1",
+          "elseif-else-3",
+          "if-1",
+          "if-2",
+          "switch-1",
+          "switch-3",
+          "break-continue-1",
+          "break-continue-2",
+          "for-1",
+          "for-2",
+          "foreach-1",
+          "foreach-2",
+          "while-3"
+        ]
+      },
+      {
+        "nome": "interpolação em string e $()",
+        "id": "interpolacao",
+        "missoes": 40,
+        "ids": [
+          "booleanos-null-1",
+          "booleanos-null-2",
+          "conversao-1",
+          "conversao-2",
+          "here-strings-1",
+          "here-strings-2",
+          "interpolacao-1",
+          "interpolacao-2",
+          "numeros-1",
+          "strings-1",
+          "variaveis-1",
+          "variaveis-2",
+          "variaveis-automaticas-1",
+          "variaveis-automaticas-2",
+          "atribuicao-1",
+          "atribuicao-2",
+          "operadores-aritmeticos-1",
+          "operadores-aritmeticos-2",
+          "operadores-colecao-1",
+          "operadores-colecao-2",
+          "operadores-logicos-1",
+          "operadores-texto-1",
+          "operadores-texto-2",
+          "read-host-1",
+          "read-host-2",
+          "write-host-output-1",
+          "write-host-output-3",
+          "elseif-else-2",
+          "switch-1",
+          "switch-3",
+          "break-continue-1",
+          "break-continue-2",
+          "break-continue-3",
+          "for-1",
+          "for-2",
+          "foreach-1",
+          "foreach-2",
+          "while-1",
+          "while-2",
+          "while-3"
+        ]
+      },
+      {
+        "nome": "aritmética básica (+ - * / %)",
+        "id": "aritmetica",
+        "missoes": 27,
+        "ids": [
+          "conversao-2",
+          "numeros-2",
+          "variaveis-2",
+          "atribuicao-1",
+          "atribuicao-2",
+          "operadores-colecao-1",
+          "operadores-colecao-2",
+          "operadores-comparacao-1",
+          "operadores-comparacao-2",
+          "operadores-logicos-1",
+          "operadores-texto-1",
+          "operadores-texto-2",
+          "read-host-2",
+          "elseif-else-1",
+          "elseif-else-2",
+          "elseif-else-3",
+          "if-1",
+          "if-2",
+          "break-continue-1",
+          "break-continue-2",
+          "break-continue-3",
+          "for-1",
+          "for-2",
+          "foreach-2",
+          "while-1",
+          "while-2",
+          "while-3"
+        ]
+      },
+      {
+        "nome": "sistema de arquivos falso",
+        "id": "filesystem",
+        "missoes": 27,
+        "ids": [
+          "parametros-cmdlet-1",
+          "parametros-cmdlet-2",
+          "copy-move-1",
+          "copy-move-2",
+          "copy-move-3",
+          "get-childitem-1",
+          "get-childitem-2",
+          "get-childitem-3",
+          "get-content-1",
+          "get-content-2",
+          "get-content-3",
+          "new-item-1",
+          "new-item-2",
+          "new-item-3",
+          "provedores-2",
+          "remove-item-1",
+          "remove-item-2",
+          "rename-item-1",
+          "rename-item-2",
+          "set-content-1",
+          "set-content-2",
+          "set-location-1",
+          "set-location-2",
+          "set-location-3",
+          "test-path-1",
+          "test-path-2",
+          "test-path-3"
+        ]
+      },
+      {
+        "nome": "if / else / elseif",
+        "id": "if",
+        "missoes": 18,
+        "ids": [
+          "test-path-2",
+          "booleanos-null-1",
+          "conversao-2",
+          "operadores-colecao-1",
+          "operadores-colecao-2",
+          "operadores-comparacao-1",
+          "operadores-comparacao-2",
+          "operadores-logicos-2",
+          "operadores-texto-1",
+          "operadores-texto-2",
+          "elseif-else-1",
+          "elseif-else-2",
+          "elseif-else-3",
+          "if-1",
+          "if-2",
+          "break-continue-1",
+          "break-continue-2",
+          "break-continue-3"
+        ]
+      },
+      {
+        "nome": "pipeline (|)",
+        "id": "pipeline",
+        "missoes": 18,
+        "ids": [
+          "parametros-cmdlet-1",
+          "parametros-cmdlet-2",
+          "copy-move-3",
+          "get-childitem-1",
+          "get-childitem-2",
+          "get-childitem-3",
+          "get-content-1",
+          "get-content-2",
+          "get-content-3",
+          "get-location-3",
+          "remove-item-1",
+          "remove-item-2",
+          "rename-item-1",
+          "rename-item-2",
+          "set-location-1",
+          "set-location-2",
+          "set-location-3",
+          "write-host-output-3"
+        ]
+      },
+      {
+        "nome": "Set-Content",
+        "id": "set-content",
+        "missoes": 16,
+        "ids": [
+          "copy-move-1",
+          "copy-move-2",
+          "copy-move-3",
+          "get-childitem-1",
+          "get-childitem-2",
+          "get-childitem-3",
+          "get-content-1",
+          "get-content-2",
+          "get-content-3",
+          "remove-item-1",
+          "rename-item-1",
+          "set-content-1",
+          "set-content-2",
+          "test-path-1",
+          "test-path-2",
+          "test-path-3"
+        ]
+      },
+      {
+        "nome": "operadores de comparação (-eq, -ne, -gt, -lt, -ge, -le)",
+        "id": "operadores-comparacao",
+        "missoes": 16,
+        "ids": [
+          "conversao-2",
+          "operadores-comparacao-1",
+          "operadores-comparacao-2",
+          "elseif-else-1",
+          "elseif-else-2",
+          "elseif-else-3",
+          "if-1",
+          "if-2",
+          "break-continue-1",
+          "break-continue-2",
+          "break-continue-3",
+          "for-1",
+          "for-2",
+          "while-1",
+          "while-2",
+          "while-3"
+        ]
+      },
+      {
+        "nome": "New-Item",
+        "id": "new-item",
+        "missoes": 12,
+        "ids": [
+          "parametros-cmdlet-1",
+          "parametros-cmdlet-2",
+          "copy-move-3",
+          "get-childitem-3",
+          "new-item-1",
+          "new-item-2",
+          "new-item-3",
+          "remove-item-2",
+          "rename-item-2",
+          "set-location-1",
+          "set-location-2",
+          "set-location-3"
+        ]
+      },
+      {
+        "nome": "arrays e índice",
+        "id": "arrays",
+        "missoes": 12,
+        "ids": [
+          "get-content-1",
+          "get-content-2",
+          "get-content-3",
+          "remove-item-2",
+          "rename-item-2",
+          "operadores-colecao-1",
+          "operadores-colecao-2",
+          "write-host-output-2",
+          "write-host-output-3",
+          "switch-3",
+          "for-2",
+          "foreach-1"
+        ]
+      },
+      {
+        "nome": "métodos e propriedades (.Year, .Path, .Count, .Length, .Name)",
+        "id": "metodos",
+        "missoes": 11,
+        "ids": [
+          "abrir-terminal-1",
+          "introducao-1",
+          "introducao-2",
+          "get-content-2",
+          "get-location-2",
+          "rename-item-2",
+          "set-content-2",
+          "tipos-1",
+          "tipos-2",
+          "write-host-output-3",
+          "for-2"
+        ]
+      },
+      {
+        "nome": "Out-Null",
+        "id": "out-null",
+        "missoes": 9,
+        "ids": [
+          "parametros-cmdlet-1",
+          "parametros-cmdlet-2",
+          "copy-move-3",
+          "get-childitem-3",
+          "remove-item-2",
+          "rename-item-2",
+          "set-location-1",
+          "set-location-2",
+          "set-location-3"
+        ]
+      },
+      {
+        "nome": "variáveis automáticas ($PSVersionTable, $PSEdition, $Host, $PWD, $_, $IsLinux, $HOME, $?)",
+        "id": "automaticas",
+        "missoes": 9,
+        "ids": [
+          "abrir-terminal-1",
+          "abrir-terminal-3",
+          "instalar-1",
+          "instalar-2",
+          "versoes-powershell-1",
+          "get-location-2",
+          "rename-item-2",
+          "variaveis-automaticas-1",
+          "variaveis-automaticas-2"
+        ]
+      },
+      {
+        "nome": "foreach",
+        "id": "foreach",
+        "missoes": 8,
+        "ids": [
+          "elseif-else-2",
+          "elseif-else-3",
+          "switch-3",
+          "break-continue-1",
+          "break-continue-2",
+          "break-continue-3",
+          "foreach-1",
+          "foreach-2"
+        ]
+      },
+      {
+        "nome": "Get-ChildItem",
+        "id": "get-childitem",
+        "missoes": 7,
+        "ids": [
+          "parametros-cmdlet-1",
+          "parametros-cmdlet-2",
+          "get-childitem-1",
+          "get-childitem-2",
+          "get-childitem-3",
+          "remove-item-2",
+          "rename-item-2"
+        ]
+      },
+      {
+        "nome": "Get-Date e -Format",
+        "id": "get-date",
+        "missoes": 7,
+        "ids": [
+          "get-help-1",
+          "get-help-2",
+          "introducao-1",
+          "introducao-2",
+          "parametros-cmdlet-3",
+          "primeiro-comando-1",
+          "primeiro-comando-3"
+        ]
+      },
+      {
+        "nome": "atribuição composta (+=, ++, --)",
+        "id": "atribuicao-composta",
+        "missoes": 7,
+        "ids": [
+          "atribuicao-1",
+          "atribuicao-2",
+          "for-1",
+          "for-2",
+          "foreach-2",
+          "while-1",
+          "while-3"
+        ]
+      },
+      {
+        "nome": "tipos (.GetType, [int], [math])",
+        "id": "tipos",
+        "missoes": 7,
+        "ids": [
+          "conversao-1",
+          "conversao-2",
+          "numeros-2",
+          "tipos-1",
+          "tipos-2",
+          "operadores-aritmeticos-2",
+          "read-host-2"
+        ]
+      },
+      {
+        "nome": "$true, $false, $null, ??",
+        "id": "booleanos-null",
+        "missoes": 6,
+        "ids": [
+          "booleanos-null-1",
+          "booleanos-null-2",
+          "conversao-2",
+          "tipos-2",
+          "operadores-logicos-1",
+          "operadores-logicos-2"
+        ]
+      },
+      {
+        "nome": "Get-Command",
+        "id": "get-command",
+        "missoes": 5,
+        "ids": [
+          "cmdlets-2",
+          "cmdlets-3",
+          "get-command-1",
+          "get-command-2",
+          "get-command-3"
+        ]
+      },
+      {
+        "nome": "Get-Content",
+        "id": "get-content",
+        "missoes": 5,
+        "ids": [
+          "get-content-1",
+          "get-content-2",
+          "get-content-3",
+          "set-content-1",
+          "set-content-2"
+        ]
+      },
+      {
+        "nome": "Join-Path",
+        "id": "join-path",
+        "missoes": 5,
+        "ids": [
+          "versoes-powershell-2",
+          "caminhos-1",
+          "caminhos-2",
+          "caminhos-3",
+          "get-childitem-3"
+        ]
+      },
+      {
+        "nome": "Split-Path",
+        "id": "split-path",
+        "missoes": 5,
+        "ids": [
+          "versoes-powershell-3",
+          "versoes-powershell-4",
+          "caminhos-1",
+          "caminhos-2",
+          "caminhos-3"
+        ]
+      },
+      {
+        "nome": "Test-Path",
+        "id": "test-path",
+        "missoes": 5,
+        "ids": [
+          "provedores-2",
+          "remove-item-1",
+          "test-path-1",
+          "test-path-2",
+          "test-path-3"
+        ]
+      },
+      {
+        "nome": "Get-Location e $PWD (cwd)",
+        "id": "get-location",
+        "missoes": 4,
+        "ids": [
+          "abrir-terminal-2",
+          "get-location-1",
+          "get-location-2",
+          "get-location-3"
+        ]
+      },
+      {
+        "nome": "apelidos (echo, ls, pwd, dir, cd…)",
+        "id": "aliases",
+        "missoes": 4,
+        "ids": [
+          "aliases-1",
+          "aliases-2",
+          "aliases-3",
+          "get-command-2"
+        ]
+      },
+      {
+        "nome": "Get-Help",
+        "id": "get-help",
+        "missoes": 3,
+        "ids": [
+          "get-help-1",
+          "get-help-2",
+          "get-help-3"
+        ]
+      },
+      {
+        "nome": "conversão ([int], -as)",
+        "id": "conversao",
+        "missoes": 3,
+        "ids": [
+          "conversao-1",
+          "conversao-2",
+          "read-host-2"
+        ]
+      },
+      {
+        "nome": "operadores de texto (-like, -match, -replace)",
+        "id": "operadores-texto",
+        "missoes": 3,
+        "ids": [
+          "rename-item-2",
+          "operadores-texto-1",
+          "operadores-texto-2"
+        ]
+      },
+      {
+        "nome": "provedores (Get-PSProvider, Get-PSDrive, Env:, HKCU:)",
+        "id": "provedores",
+        "missoes": 3,
+        "ids": [
+          "provedores-1",
+          "provedores-2",
+          "provedores-3"
+        ]
+      },
+      {
+        "nome": "switch",
+        "id": "switch",
+        "missoes": 3,
+        "ids": [
+          "switch-1",
+          "switch-2",
+          "switch-3"
+        ]
+      },
+      {
+        "nome": "while, do, until",
+        "id": "while",
+        "missoes": 3,
+        "ids": [
+          "while-1",
+          "while-2",
+          "while-3"
+        ]
+      },
+      {
+        "nome": "Add-Content",
+        "id": "add-content",
+        "missoes": 2,
+        "ids": [
+          "set-content-1",
+          "set-content-2"
+        ]
+      },
+      {
+        "nome": "Copy-Item",
+        "id": "copy-item",
+        "missoes": 2,
+        "ids": [
+          "copy-move-1",
+          "copy-move-3"
+        ]
+      },
+      {
+        "nome": "Get-Alias",
+        "id": "get-alias",
+        "missoes": 2,
+        "ids": [
+          "aliases-1",
+          "aliases-3"
+        ]
+      },
+      {
+        "nome": "Get-Verb",
+        "id": "get-verb",
+        "missoes": 2,
+        "ids": [
+          "cmdlets-1",
+          "cmdlets-3"
+        ]
+      },
+      {
+        "nome": "Remove-Item",
+        "id": "remove-item",
+        "missoes": 2,
+        "ids": [
+          "remove-item-1",
+          "remove-item-2"
+        ]
+      },
+      {
+        "nome": "Rename-Item",
+        "id": "rename-item",
+        "missoes": 2,
+        "ids": [
+          "rename-item-1",
+          "rename-item-2"
+        ]
+      },
+      {
+        "nome": "Set-Location",
+        "id": "set-location",
+        "missoes": 2,
+        "ids": [
+          "set-location-1",
+          "set-location-3"
+        ]
+      },
+      {
+        "nome": "Write-Warning",
+        "id": "write-warning",
+        "missoes": 2,
+        "ids": [
+          "write-outros-1",
+          "write-outros-3"
+        ]
+      },
+      {
+        "nome": "break",
+        "id": "break",
+        "missoes": 2,
+        "ids": [
+          "break-continue-1",
+          "break-continue-3"
+        ]
+      },
+      {
+        "nome": "faixa (1..10)",
+        "id": "range",
+        "missoes": 2,
+        "ids": [
+          "break-continue-1",
+          "break-continue-2"
+        ]
+      },
+      {
+        "nome": "for",
+        "id": "for",
+        "missoes": 2,
+        "ids": [
+          "for-1",
+          "for-2"
+        ]
+      },
+      {
+        "nome": "here-strings (@\" \"@)",
+        "id": "here-strings",
+        "missoes": 2,
+        "ids": [
+          "here-strings-1",
+          "here-strings-2"
+        ]
+      },
+      {
+        "nome": "operador -f",
+        "id": "operador-formato",
+        "missoes": 2,
+        "ids": [
+          "operador-formato-1",
+          "operador-formato-2"
+        ]
+      },
+      {
+        "nome": "operadores de coleção (-contains, -in)",
+        "id": "operadores-colecao",
+        "missoes": 2,
+        "ids": [
+          "operadores-colecao-1",
+          "operadores-colecao-2"
+        ]
+      },
+      {
+        "nome": "operadores lógicos (-and, -or, -not)",
+        "id": "operadores-logicos",
+        "missoes": 2,
+        "ids": [
+          "operadores-logicos-1",
+          "operadores-logicos-2"
+        ]
+      },
+      {
+        "nome": "Format-List",
+        "id": "format-list",
+        "missoes": 1,
+        "ids": [
+          "get-location-3"
+        ]
+      },
+      {
+        "nome": "Measure-Object",
+        "id": "measure-object",
+        "missoes": 1,
+        "ids": [
+          "write-host-output-3"
+        ]
+      },
+      {
+        "nome": "Move-Item",
+        "id": "move-item",
+        "missoes": 1,
+        "ids": [
+          "copy-move-2"
+        ]
+      },
+      {
+        "nome": "Push-Location e Pop-Location",
+        "id": "push-pop-location",
+        "missoes": 1,
+        "ids": [
+          "set-location-2"
+        ]
+      },
+      {
+        "nome": "Write-Host",
+        "id": "write-host",
+        "missoes": 1,
+        "ids": [
+          "write-host-output-2"
+        ]
+      },
+      {
+        "nome": "Write-Information",
+        "id": "write-information",
+        "missoes": 1,
+        "ids": [
+          "write-outros-3"
+        ]
+      },
+      {
+        "nome": "Write-Verbose",
+        "id": "write-verbose",
+        "missoes": 1,
+        "ids": [
+          "write-outros-2"
+        ]
+      },
+      {
+        "nome": "continue",
+        "id": "continue",
+        "missoes": 1,
+        "ids": [
+          "break-continue-2"
+        ]
+      }
+    ]
+  },
+  "recursos_legenda": {
+    "interprete": "intérprete (linhas, expressões, comentários)",
+    "variaveis": "variáveis ($nome, atribuição)",
+    "strings": "strings (aspas simples e duplas)",
+    "interpolacao": "interpolação em string e $()",
+    "here-strings": "here-strings (@\" \"@)",
+    "write-output": "Write-Output e saída implícita",
+    "write-host": "Write-Host",
+    "write-warning": "Write-Warning",
+    "write-verbose": "Write-Verbose",
+    "write-information": "Write-Information",
+    "aritmetica": "aritmética básica (+ - * / %)",
+    "get-date": "Get-Date e -Format",
+    "automaticas": "variáveis automáticas ($PSVersionTable, $PSEdition, $Host, $PWD, $_, $IsLinux, $HOME, $?)",
+    "join-path": "Join-Path",
+    "split-path": "Split-Path",
+    "metodos": "métodos e propriedades (.Year, .Path, .Count, .Length, .Name)",
+    "pipeline": "pipeline (|)",
+    "out-null": "Out-Null",
+    "select-object": "Select-Object",
+    "format-list": "Format-List",
+    "measure-object": "Measure-Object",
+    "get-verb": "Get-Verb",
+    "get-command": "Get-Command",
+    "get-help": "Get-Help",
+    "get-alias": "Get-Alias",
+    "aliases": "apelidos (echo, ls, pwd, dir, cd…)",
+    "get-location": "Get-Location e $PWD (cwd)",
+    "set-location": "Set-Location",
+    "push-pop-location": "Push-Location e Pop-Location",
+    "filesystem": "sistema de arquivos falso",
+    "new-item": "New-Item",
+    "get-childitem": "Get-ChildItem",
+    "copy-item": "Copy-Item",
+    "move-item": "Move-Item",
+    "rename-item": "Rename-Item",
+    "remove-item": "Remove-Item",
+    "get-content": "Get-Content",
+    "set-content": "Set-Content",
+    "add-content": "Add-Content",
+    "test-path": "Test-Path",
+    "provedores": "provedores (Get-PSProvider, Get-PSDrive, Env:, HKCU:)",
+    "operadores-comparacao": "operadores de comparação (-eq, -ne, -gt, -lt, -ge, -le)",
+    "operadores-texto": "operadores de texto (-like, -match, -replace)",
+    "operadores-colecao": "operadores de coleção (-contains, -in)",
+    "operadores-logicos": "operadores lógicos (-and, -or, -not)",
+    "operador-formato": "operador -f",
+    "atribuicao-composta": "atribuição composta (+=, ++, --)",
+    "tipos": "tipos (.GetType, [int], [math])",
+    "conversao": "conversão ([int], -as)",
+    "booleanos-null": "$true, $false, $null, ??",
+    "if": "if / else / elseif",
+    "switch": "switch",
+    "foreach": "foreach",
+    "for": "for",
+    "while": "while, do, until",
+    "break": "break",
+    "continue": "continue",
+    "arrays": "arrays e índice",
+    "range": "faixa (1..10)",
+    "read-host": "Read-Host"
+  },
+  "missoes": [
+    {
+      "id": "introducao-1",
+      "pagina": "introducao.html",
+      "titulo": "O que é PowerShell",
+      "secao": "Começando",
+      "n": 1,
+      "goal": "src:\\.Year;;semerro",
+      "metas": [
+        "src:\\.Year",
+        "semerro"
+      ],
+      "task": "Experimente: o editor já tem o Get-Date. Acrescente os parênteses e o .Year para mostrar só o ano, e clique em Rodar.",
+      "script": "Get-Date",
+      "solucao": "(Get-Date).Year",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Date"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "get-date",
+        "metodos"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "introducao-2",
+      "pagina": "introducao.html",
+      "titulo": "O que é PowerShell",
+      "secao": "Começando",
+      "n": 2,
+      "goal": "src:\\.Day\\b;;semerro",
+      "metas": [
+        "src:\\.Day\\b",
+        "semerro"
+      ],
+      "task": "Missão final: mostre só o dia do mês da data de hoje, usando a propriedade Day (o mesmo jeito do .Year).",
+      "script": "Get-Date",
+      "solucao": "(Get-Date).Day",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Date"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "get-date",
+        "metodos"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "versoes-powershell-1",
+      "pagina": "versoes-powershell.html",
+      "titulo": "Windows PowerShell 5.1 × PowerShell 7",
+      "secao": "Começando",
+      "n": 1,
+      "goal": "out:Core;;src:PSEdition;;semerro",
+      "metas": [
+        "out:Core",
+        "src:PSEdition",
+        "semerro"
+      ],
+      "task": "Experimente: no editor (que é PowerShell 7), mostre só a edição, para conferir que é Core.",
+      "script": "Write-Output \"Qual é a edição?\"",
+      "solucao": "$PSVersionTable.PSEdition",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "automaticas"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "versoes-powershell-2",
+      "pagina": "versoes-powershell.html",
+      "titulo": "Windows PowerShell 5.1 × PowerShell 7",
+      "secao": "Começando",
+      "n": 2,
+      "goal": "out:docs;;out:fotos;;out:capa.jpg;;src:Join-Path;;semerro",
+      "metas": [
+        "out:docs",
+        "out:fotos",
+        "out:capa.jpg",
+        "src:Join-Path",
+        "semerro"
+      ],
+      "task": "Experimente: junte três partes de uma vez, docs, fotos e capa.jpg, com um único Join-Path.",
+      "script": "Join-Path \"docs\" \"fotos\"",
+      "solucao": "Join-Path \"docs\" \"fotos\" \"capa.jpg\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Join-Path"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "join-path"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "versoes-powershell-3",
+      "pagina": "versoes-powershell.html",
+      "titulo": "Windows PowerShell 5.1 × PowerShell 7",
+      "secao": "Começando",
+      "n": 3,
+      "goal": "out:.txt;;src:Split-Path;;src:-Extension;;semerro",
+      "metas": [
+        "out:.txt",
+        "src:Split-Path",
+        "src:-Extension",
+        "semerro"
+      ],
+      "task": "Missão: use Split-Path com -Extension para mostrar a extensão de nota.txt.",
+      "script": "Split-Path \"nota.txt\"",
+      "solucao": "Split-Path \"nota.txt\" -Extension",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Split-Path"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "split-path"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "versoes-powershell-4",
+      "pagina": "versoes-powershell.html",
+      "titulo": "Windows PowerShell 5.1 × PowerShell 7",
+      "secao": "Começando",
+      "n": 4,
+      "goal": "out:.jpg;;src:Split-Path;;src:-Extension;;semerro",
+      "metas": [
+        "out:.jpg",
+        "src:Split-Path",
+        "src:-Extension",
+        "semerro"
+      ],
+      "task": "Missão final: mostre só a extensão de capa.jpg, com Split-Path -Extension.",
+      "script": "Split-Path \"capa.jpg\"",
+      "solucao": "Split-Path \"capa.jpg\" -Extension",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Split-Path"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "split-path"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "instalar-1",
+      "pagina": "instalar.html",
+      "titulo": "Instalar o PowerShell 7",
+      "secao": "Começando",
+      "n": 1,
+      "goal": "src:PSVersion;;semerro",
+      "metas": [
+        "src:PSVersion",
+        "semerro"
+      ],
+      "task": "Experimente: mostre a versão do PowerShell que está atendendo, com $PSVersionTable.PSVersion.",
+      "script": "Write-Output \"Qual é a versão?\"",
+      "solucao": "$PSVersionTable.PSVersion",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "automaticas"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "instalar-2",
+      "pagina": "instalar.html",
+      "titulo": "Instalar o PowerShell 7",
+      "secao": "Começando",
+      "n": 2,
+      "goal": "src:PSEdition;;semerro",
+      "metas": [
+        "src:PSEdition",
+        "semerro"
+      ],
+      "task": "Missão final: mostre a edição desta sessão (Core no 7) com $PSVersionTable.PSEdition.",
+      "script": "Write-Output \"Qual é a edição?\"",
+      "solucao": "$PSVersionTable.PSEdition",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "automaticas"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "abrir-terminal-1",
+      "pagina": "abrir-terminal.html",
+      "titulo": "Abrindo o PowerShell (e o Terminal do Windows)",
+      "secao": "Começando",
+      "n": 1,
+      "goal": "src:Host\\.Name;;semerro",
+      "metas": [
+        "src:Host\\.Name",
+        "semerro"
+      ],
+      "task": "Experimente: no editor, pergunte o nome do host com $Host.Name. (Aqui o anfitrião é o do navegador, então o nome pode não ser ConsoleHost — o pedido é o que importa.)",
+      "script": "Write-Output \"Quem está me hospedando?\"",
+      "solucao": "$Host.Name",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "automaticas",
+        "metodos"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "abrir-terminal-2",
+      "pagina": "abrir-terminal.html",
+      "titulo": "Abrindo o PowerShell (e o Terminal do Windows)",
+      "secao": "Começando",
+      "n": 2,
+      "goal": "src:Get-Location;;semerro",
+      "metas": [
+        "src:Get-Location",
+        "semerro"
+      ],
+      "task": "Missão: mostre a pasta atual com Get-Location.",
+      "script": "Write-Output \"Onde estou?\"",
+      "solucao": "Get-Location",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Location"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "get-location"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "abrir-terminal-3",
+      "pagina": "abrir-terminal.html",
+      "titulo": "Abrindo o PowerShell (e o Terminal do Windows)",
+      "secao": "Começando",
+      "n": 3,
+      "goal": "src:Host\\.Version;;semerro",
+      "metas": [
+        "src:Host\\.Version",
+        "semerro"
+      ],
+      "task": "Missão final: mostre a versão do host, com $Host.Version.",
+      "script": "Write-Output \"Qual é a versão do host?\"",
+      "solucao": "$Host.Version",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "automaticas"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "primeiro-comando-1",
+      "pagina": "primeiro-comando.html",
+      "titulo": "Seu Primeiro Comando",
+      "secao": "Começando",
+      "n": 1,
+      "goal": "outre:\\d{4};;semerro",
+      "metas": [
+        "outre:\\d{4}",
+        "semerro"
+      ],
+      "task": "Experimente: clique em Rodar e veja a data de hoje no editor.",
+      "script": "Get-Date",
+      "solucao": "Get-Date",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": true,
+      "cmdlets": [
+        "Get-Date"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "get-date"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "primeiro-comando-2",
+      "pagina": "primeiro-comando.html",
+      "titulo": "Seu Primeiro Comando",
+      "secao": "Começando",
+      "n": 2,
+      "goal": "out:Olá, Ana!",
+      "metas": [
+        "out:Olá, Ana!"
+      ],
+      "task": "Missão: troque \"mundo\" por \"Ana\" e clique em Rodar.",
+      "script": "Write-Output \"Olá, mundo!\"",
+      "solucao": "Write-Output \"Olá, Ana!\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-output"
+      ],
+      "etapa": "E1"
+    },
+    {
+      "id": "primeiro-comando-3",
+      "pagina": "primeiro-comando.html",
+      "titulo": "Seu Primeiro Comando",
+      "secao": "Começando",
+      "n": 3,
+      "goal": "out:Meu nome é Ana;;src:\\bGet-Date\\b;;semerro",
+      "metas": [
+        "out:Meu nome é Ana",
+        "src:\\bGet-Date\\b",
+        "semerro"
+      ],
+      "task": "Missão final: escreva duas linhas: uma que mostre Meu nome é Ana e outra que mostre a data no formato dd/MM/yyyy.",
+      "script": "",
+      "solucao": "Write-Output \"Meu nome é Ana\"\nGet-Date -Format \"dd/MM/yyyy\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Write-Output",
+        "Get-Date"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-output",
+        "get-date"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "cmdlets-1",
+      "pagina": "cmdlets.html",
+      "titulo": "Cmdlets: Verbo-Substantivo",
+      "secao": "Começando",
+      "n": 1,
+      "goal": "src:\\bGet-Verb\\b;;src:-Verb;;semerro",
+      "metas": [
+        "src:\\bGet-Verb\\b",
+        "src:-Verb",
+        "semerro"
+      ],
+      "task": "Experimente: troque o comando para mostrar só o verbo Get, com Get-Verb -Verb Get, e clique em Rodar.",
+      "script": "Get-Verb | Select-Object -First 10",
+      "solucao": "Get-Verb -Verb Get",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Verb"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "get-verb"
+      ],
+      "etapa": "E4"
+    },
+    {
+      "id": "cmdlets-2",
+      "pagina": "cmdlets.html",
+      "titulo": "Cmdlets: Verbo-Substantivo",
+      "secao": "Começando",
+      "n": 2,
+      "goal": "src:\\bGet-Command\\b;;src:-Noun;;out:Get-Item;;semerro",
+      "metas": [
+        "src:\\bGet-Command\\b",
+        "src:-Noun",
+        "out:Get-Item",
+        "semerro"
+      ],
+      "task": "Missão: liste os comandos cujo substantivo é Item.",
+      "script": "Get-Command -Verb Get",
+      "solucao": "Get-Command -Noun Item",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Command"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "get-command"
+      ],
+      "etapa": "E4"
+    },
+    {
+      "id": "cmdlets-3",
+      "pagina": "cmdlets.html",
+      "titulo": "Cmdlets: Verbo-Substantivo",
+      "secao": "Começando",
+      "n": 3,
+      "goal": "src:\\bGet-Command\\b;;src:-Noun;;src:\\bGet-Verb\\b;;out:Get-Item;;semerro",
+      "metas": [
+        "src:\\bGet-Command\\b",
+        "src:-Noun",
+        "src:\\bGet-Verb\\b",
+        "out:Get-Item",
+        "semerro"
+      ],
+      "task": "Missão final: escreva duas linhas: uma que mostre os verbos oficiais e outra que liste os comandos cujo substantivo é Item.",
+      "script": "",
+      "solucao": "Get-Verb\nGet-Command -Noun Item",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Verb",
+        "Get-Command"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "get-verb",
+        "get-command"
+      ],
+      "etapa": "E4"
+    },
+    {
+      "id": "parametros-cmdlet-1",
+      "pagina": "parametros-cmdlet.html",
+      "titulo": "Parâmetros dos Comandos",
+      "secao": "Começando",
+      "n": 1,
+      "goal": "src:\\bGet-ChildItem\\b;;src:-Name;;out:a.txt;;out:b.log;;out:c.txt;;semerro",
+      "metas": [
+        "src:\\bGet-ChildItem\\b",
+        "src:-Name",
+        "out:a.txt",
+        "out:b.log",
+        "out:c.txt",
+        "semerro"
+      ],
+      "task": "Experimente: os três arquivos já estão sendo criados. Complete a segunda linha para listar só os nomes, com o switch -Name.",
+      "script": "New-Item a.txt, b.log, c.txt -ItemType File | Out-Null\nGet-ChildItem",
+      "solucao": "New-Item a.txt, b.log, c.txt -ItemType File | Out-Null\nGet-ChildItem -Name",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "New-Item",
+        "Out-Null",
+        "Get-ChildItem"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "pipeline",
+        "out-null",
+        "filesystem",
+        "new-item",
+        "get-childitem"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "parametros-cmdlet-2",
+      "pagina": "parametros-cmdlet.html",
+      "titulo": "Parâmetros dos Comandos",
+      "secao": "Começando",
+      "n": 2,
+      "goal": "src:\\bGet-ChildItem\\b;;src:-Filter;;out:a.txt;;out:c.txt;;semerro",
+      "metas": [
+        "src:\\bGet-ChildItem\\b",
+        "src:-Filter",
+        "out:a.txt",
+        "out:c.txt",
+        "semerro"
+      ],
+      "task": "Missão: os três arquivos já estão sendo criados. Liste só os .txt, usando o parâmetro -Filter, e mostre apenas os nomes.",
+      "script": "New-Item a.txt, b.log, c.txt -ItemType File | Out-Null\nGet-ChildItem -Name",
+      "solucao": "New-Item a.txt, b.log, c.txt -ItemType File | Out-Null\nGet-ChildItem -Filter *.txt -Name",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "New-Item",
+        "Out-Null",
+        "Get-ChildItem"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "pipeline",
+        "out-null",
+        "filesystem",
+        "new-item",
+        "get-childitem"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "parametros-cmdlet-3",
+      "pagina": "parametros-cmdlet.html",
+      "titulo": "Parâmetros dos Comandos",
+      "secao": "Começando",
+      "n": 3,
+      "goal": "src:\\bGet-Date\\b;;src:-Format;;outre:\\d{2}/\\d{2}/\\d{4};;semerro",
+      "metas": [
+        "src:\\bGet-Date\\b",
+        "src:-Format",
+        "outre:\\d{2}/\\d{2}/\\d{4}",
+        "semerro"
+      ],
+      "task": "Missão final: mostre a data de hoje no formato dd/MM/yyyy, com o parâmetro -Format.",
+      "script": "Get-Date",
+      "solucao": "Get-Date -Format \"dd/MM/yyyy\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Date"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "get-date"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "get-help-1",
+      "pagina": "get-help.html",
+      "titulo": "Get-Help: a Ajuda",
+      "secao": "Começando",
+      "n": 1,
+      "goal": "src:\\bGet-Help\\b;;src:Get-Date;;semerro",
+      "metas": [
+        "src:\\bGet-Help\\b",
+        "src:Get-Date",
+        "semerro"
+      ],
+      "task": "Experimente: peça a ajuda do Get-Date e clique em Rodar. A ajuda do editor pode ser mais completa do que a desta aula; o comando é o mesmo.",
+      "script": "Get-Date",
+      "solucao": "Get-Help Get-Date",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Help",
+        "Get-Date"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "get-date",
+        "get-help"
+      ],
+      "etapa": "E4"
+    },
+    {
+      "id": "get-help-2",
+      "pagina": "get-help.html",
+      "titulo": "Get-Help: a Ajuda",
+      "secao": "Começando",
+      "n": 2,
+      "goal": "src:\\bGet-Help\\b;;src:-Parameter;;src:Format;;semerro",
+      "metas": [
+        "src:\\bGet-Help\\b",
+        "src:-Parameter",
+        "src:Format",
+        "semerro"
+      ],
+      "task": "Missão: peça a ficha do parâmetro Format do Get-Date.",
+      "script": "Get-Help Get-Date",
+      "solucao": "Get-Help Get-Date -Parameter Format",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Help",
+        "Get-Date"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "get-date",
+        "get-help"
+      ],
+      "etapa": "E4"
+    },
+    {
+      "id": "get-help-3",
+      "pagina": "get-help.html",
+      "titulo": "Get-Help: a Ajuda",
+      "secao": "Começando",
+      "n": 3,
+      "goal": "src:\\bGet-Help\\b;;src:\\*location\\*;;out:Get-Location;;semerro",
+      "metas": [
+        "src:\\bGet-Help\\b",
+        "src:\\*location\\*",
+        "out:Get-Location",
+        "semerro"
+      ],
+      "task": "Missão final: busque os tópicos de ajuda cujo nome contém location, com o curinga *.",
+      "script": "Get-Help Get-Date",
+      "solucao": "Get-Help *location*",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Help"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "get-help"
+      ],
+      "etapa": "E4"
+    },
+    {
+      "id": "get-command-1",
+      "pagina": "get-command.html",
+      "titulo": "Get-Command: Achando Comandos",
+      "secao": "Começando",
+      "n": 1,
+      "goal": "out:Get-Date;;src:Get-Command;;semerro",
+      "metas": [
+        "out:Get-Date",
+        "src:Get-Command",
+        "semerro"
+      ],
+      "task": "Experimente: troque o padrão para *-Date e clique em Rodar. Você deve ver o Get-Date na lista.",
+      "script": "Get-Command *-Time",
+      "solucao": "Get-Command *-Date",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Command"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "get-command"
+      ],
+      "etapa": "E4"
+    },
+    {
+      "id": "get-command-2",
+      "pagina": "get-command.html",
+      "titulo": "Get-Command: Achando Comandos",
+      "secao": "Começando",
+      "n": 2,
+      "goal": "out:Get-ChildItem;;src:Get-Command;;semerro",
+      "metas": [
+        "out:Get-ChildItem",
+        "src:Get-Command",
+        "semerro"
+      ],
+      "task": "Missão: descubra qual comando está por trás do apelido ls.",
+      "script": "Get-Command pwd",
+      "solucao": "Get-Command ls",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Command"
+      ],
+      "aliases": [
+        "ls"
+      ],
+      "recursos": [
+        "interprete",
+        "get-command",
+        "aliases"
+      ],
+      "etapa": "E4"
+    },
+    {
+      "id": "get-command-3",
+      "pagina": "get-command.html",
+      "titulo": "Get-Command: Achando Comandos",
+      "secao": "Começando",
+      "n": 3,
+      "goal": "out:Get-Service;;src:-Noun;;semerro",
+      "metas": [
+        "out:Get-Service",
+        "src:-Noun",
+        "semerro"
+      ],
+      "task": "Missão final: use -Noun para listar os comandos do substantivo Service. Na lista deve aparecer o Get-Service.",
+      "script": "Get-Command -Verb Service",
+      "solucao": "Get-Command -Noun Service",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Command"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "get-command"
+      ],
+      "etapa": "E4"
+    },
+    {
+      "id": "aliases-1",
+      "pagina": "aliases.html",
+      "titulo": "Apelidos (ls, dir, cd)",
+      "secao": "Começando",
+      "n": 1,
+      "goal": "out:Get-ChildItem;;src:Get-Alias;;semerro",
+      "metas": [
+        "out:Get-ChildItem",
+        "src:Get-Alias",
+        "semerro"
+      ],
+      "task": "Experimente: troque pwd por ls e veja para qual comando o apelido aponta.",
+      "script": "Get-Alias pwd",
+      "solucao": "Get-Alias ls",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Alias"
+      ],
+      "aliases": [
+        "ls"
+      ],
+      "recursos": [
+        "interprete",
+        "get-alias",
+        "aliases"
+      ],
+      "etapa": "E4"
+    },
+    {
+      "id": "aliases-2",
+      "pagina": "aliases.html",
+      "titulo": "Apelidos (ls, dir, cd)",
+      "secao": "Começando",
+      "n": 2,
+      "goal": "out:Olá, Ana!;;src:\\becho\\b;;semerro",
+      "metas": [
+        "out:Olá, Ana!",
+        "src:\\becho\\b",
+        "semerro"
+      ],
+      "task": "Missão: troque Write-Output pelo apelido echo, sem mudar o texto.",
+      "script": "Write-Output \"Olá, Ana!\"",
+      "solucao": "echo \"Olá, Ana!\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [
+        "echo"
+      ],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-output",
+        "aliases"
+      ],
+      "etapa": "E4"
+    },
+    {
+      "id": "aliases-3",
+      "pagina": "aliases.html",
+      "titulo": "Apelidos (ls, dir, cd)",
+      "secao": "Começando",
+      "n": 3,
+      "goal": "out:Get-Location;;src:Get-Alias;;semerro",
+      "metas": [
+        "out:Get-Location",
+        "src:Get-Alias",
+        "semerro"
+      ],
+      "task": "Missão final: use Get-Alias para descobrir para qual comando aponta o apelido pwd.",
+      "script": "Get-Alias echo",
+      "solucao": "Get-Alias pwd",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Alias"
+      ],
+      "aliases": [
+        "pwd"
+      ],
+      "recursos": [
+        "interprete",
+        "get-alias",
+        "aliases"
+      ],
+      "etapa": "E4"
+    },
+    {
+      "id": "teclado-1",
+      "pagina": "teclado.html",
+      "titulo": "Tab, Histórico e Atalhos",
+      "secao": "Começando",
+      "n": 1,
+      "goal": "out:Tab;;semerro",
+      "metas": [
+        "out:Tab",
+        "semerro"
+      ],
+      "task": "Experimente: troque a palavra Enter pela tecla que completa o nome de um comando.",
+      "script": "Write-Output \"Enter\"",
+      "solucao": "Write-Output \"Tab\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-output"
+      ],
+      "etapa": "E1"
+    },
+    {
+      "id": "teclado-2",
+      "pagina": "teclado.html",
+      "titulo": "Tab, Histórico e Atalhos",
+      "secao": "Começando",
+      "n": 2,
+      "goal": "out:Ctrl+L;;semerro",
+      "metas": [
+        "out:Ctrl+L",
+        "semerro"
+      ],
+      "task": "Missão: faça o script mostrar o atalho que limpa a tela, no formato Ctrl+L.",
+      "script": "Write-Output \"Ctrl+C\"",
+      "solucao": "Write-Output \"Ctrl+L\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-output"
+      ],
+      "etapa": "E1"
+    },
+    {
+      "id": "teclado-3",
+      "pagina": "teclado.html",
+      "titulo": "Tab, Histórico e Atalhos",
+      "secao": "Começando",
+      "n": 3,
+      "goal": "out:Get-History;;src:Write-Output;;semerro",
+      "metas": [
+        "out:Get-History",
+        "src:Write-Output",
+        "semerro"
+      ],
+      "task": "Missão final: escreva na tela o nome do cmdlet que lista o histórico desta sessão.",
+      "script": "Write-Output \"Get-Date\"",
+      "solucao": "Write-Output \"Get-History\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-output"
+      ],
+      "etapa": "E1"
+    },
+    {
+      "id": "get-location-1",
+      "pagina": "get-location.html",
+      "titulo": "Onde Estou (Get-Location)",
+      "secao": "Pastas e Arquivos",
+      "n": 1,
+      "goal": "src:\\bGet-Location\\b;;semerro",
+      "metas": [
+        "src:\\bGet-Location\\b",
+        "semerro"
+      ],
+      "task": "Experimente: use o Get-Location para ver a pasta atual do editor. (O caminho no editor é o do Linux, não o do Windows; o comando é o mesmo.)",
+      "script": "",
+      "solucao": "Get-Location",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Location"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "get-location"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "get-location-2",
+      "pagina": "get-location.html",
+      "titulo": "Onde Estou (Get-Location)",
+      "secao": "Pastas e Arquivos",
+      "n": 2,
+      "goal": "src:\\$PWD\\.Path;;semerro",
+      "metas": [
+        "src:\\$PWD\\.Path",
+        "semerro"
+      ],
+      "task": "Missão: mostre só o texto do caminho atual, com $PWD.Path.",
+      "script": "$PWD",
+      "solucao": "$PWD.Path",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "automaticas",
+        "metodos",
+        "get-location"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "get-location-3",
+      "pagina": "get-location.html",
+      "titulo": "Onde Estou (Get-Location)",
+      "secao": "Pastas e Arquivos",
+      "n": 3,
+      "goal": "src:Format-List;;src:Get-Location;;semerro",
+      "metas": [
+        "src:Format-List",
+        "src:Get-Location",
+        "semerro"
+      ],
+      "task": "Missão final: mostre a ficha completa da pasta atual, com Get-Location | Format-List *.",
+      "script": "Get-Location",
+      "solucao": "Get-Location | Format-List *",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Location",
+        "Format-List"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "pipeline",
+        "format-list",
+        "get-location"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "set-location-1",
+      "pagina": "set-location.html",
+      "titulo": "Mudando de Pasta (Set-Location)",
+      "secao": "Pastas e Arquivos",
+      "n": 1,
+      "goal": "src:\\bSet-Location\\b;;arquivo:fotos;;semerro",
+      "metas": [
+        "src:\\bSet-Location\\b",
+        "arquivo:fotos",
+        "semerro"
+      ],
+      "task": "Experimente: crie uma pasta fotos e entre nela com Set-Location.",
+      "script": "New-Item -ItemType Directory -Name fotos -Force | Out-Null",
+      "solucao": "New-Item -ItemType Directory -Name fotos -Force | Out-Null\nSet-Location fotos",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "New-Item",
+        "Out-Null",
+        "Set-Location"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "pipeline",
+        "out-null",
+        "set-location",
+        "filesystem",
+        "new-item"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "set-location-2",
+      "pagina": "set-location.html",
+      "titulo": "Mudando de Pasta (Set-Location)",
+      "secao": "Pastas e Arquivos",
+      "n": 2,
+      "goal": "src:Push-Location;;src:Pop-Location;;arquivo:fotos;;semerro",
+      "metas": [
+        "src:Push-Location",
+        "src:Pop-Location",
+        "arquivo:fotos",
+        "semerro"
+      ],
+      "task": "Missão: crie a pasta fotos, entre nela com Push-Location e volte com Pop-Location.",
+      "script": "New-Item -ItemType Directory -Name fotos -Force | Out-Null\nSet-Location fotos",
+      "solucao": "New-Item -ItemType Directory -Name fotos -Force | Out-Null\nPush-Location fotos\nPop-Location",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "New-Item",
+        "Out-Null",
+        "Push-Location",
+        "Pop-Location"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "pipeline",
+        "out-null",
+        "push-pop-location",
+        "filesystem",
+        "new-item"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "set-location-3",
+      "pagina": "set-location.html",
+      "titulo": "Mudando de Pasta (Set-Location)",
+      "secao": "Pastas e Arquivos",
+      "n": 3,
+      "goal": "src:Set-Location\\s+'minhas notas';;arquivo:minhas notas;;semerro",
+      "metas": [
+        "src:Set-Location\\s+'minhas notas'",
+        "arquivo:minhas notas",
+        "semerro"
+      ],
+      "task": "Missão final: crie a pasta minhas notas (com espaço) e entre nela com Set-Location, usando aspas.",
+      "script": "New-Item -ItemType Directory -Name 'minhas notas' -Force | Out-Null",
+      "solucao": "New-Item -ItemType Directory -Name 'minhas notas' -Force | Out-Null\nSet-Location 'minhas notas'",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "New-Item",
+        "Out-Null",
+        "Set-Location"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "pipeline",
+        "out-null",
+        "set-location",
+        "filesystem",
+        "new-item"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "get-childitem-1",
+      "pagina": "get-childitem.html",
+      "titulo": "Listando (Get-ChildItem)",
+      "secao": "Pastas e Arquivos",
+      "n": 1,
+      "goal": "out:nota.txt;;src:Get-ChildItem;;semerro",
+      "metas": [
+        "out:nota.txt",
+        "src:Get-ChildItem",
+        "semerro"
+      ],
+      "task": "Experimente: o arquivo nota.txt já é criado. Acrescente um Get-ChildItem -Name para listar o que existe.",
+      "script": "'oi' | Set-Content nota.txt",
+      "solucao": "'oi' | Set-Content nota.txt\nGet-ChildItem -Name",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Set-Content",
+        "Get-ChildItem"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-output",
+        "pipeline",
+        "filesystem",
+        "get-childitem",
+        "set-content"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "get-childitem-2",
+      "pagina": "get-childitem.html",
+      "titulo": "Listando (Get-ChildItem)",
+      "secao": "Pastas e Arquivos",
+      "n": 2,
+      "goal": "out:nota.txt;;src:-Filter;;semerro",
+      "metas": [
+        "out:nota.txt",
+        "src:-Filter",
+        "semerro"
+      ],
+      "task": "Missão: há um .txt e um .csv. Liste só o .txt, com -Filter e -Name.",
+      "script": "'a' | Set-Content nota.txt\n'b' | Set-Content dados.csv\nGet-ChildItem -Name",
+      "solucao": "'a' | Set-Content nota.txt\n'b' | Set-Content dados.csv\nGet-ChildItem -Filter *.txt -Name",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Set-Content",
+        "Get-ChildItem"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-output",
+        "pipeline",
+        "filesystem",
+        "get-childitem",
+        "set-content"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "get-childitem-3",
+      "pagina": "get-childitem.html",
+      "titulo": "Listando (Get-ChildItem)",
+      "secao": "Pastas e Arquivos",
+      "n": 3,
+      "goal": "out:praia.txt;;src:-Recurse;;semerro",
+      "metas": [
+        "out:praia.txt",
+        "src:-Recurse",
+        "semerro"
+      ],
+      "task": "Missão final: crie a pasta fotos com um arquivo praia.txt dentro e liste os nomes em todas as subpastas, com -Recurse.",
+      "script": "New-Item -ItemType Directory -Name fotos -Force | Out-Null\n'x' | Set-Content (Join-Path fotos 'praia.txt')\nGet-ChildItem -Name",
+      "solucao": "New-Item -ItemType Directory -Name fotos -Force | Out-Null\n'x' | Set-Content (Join-Path fotos 'praia.txt')\nGet-ChildItem -Recurse -Name",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "New-Item",
+        "Out-Null",
+        "Set-Content",
+        "Join-Path",
+        "Get-ChildItem"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-output",
+        "join-path",
+        "pipeline",
+        "out-null",
+        "filesystem",
+        "new-item",
+        "get-childitem",
+        "set-content"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "caminhos-1",
+      "pagina": "caminhos.html",
+      "titulo": "Caminhos no Windows e no Linux",
+      "secao": "Pastas e Arquivos",
+      "n": 1,
+      "goal": "out:a.txt;;src:Split-Path;;src:-Leaf;;semerro",
+      "metas": [
+        "out:a.txt",
+        "src:Split-Path",
+        "src:-Leaf",
+        "semerro"
+      ],
+      "task": "Experimente: use o Join-Path e o Split-Path -Leaf para obter só o nome do arquivo a.txt, sem depender da barra do sistema.",
+      "script": "Join-Path 'docs' 'a.txt'",
+      "solucao": "Split-Path (Join-Path 'docs' 'a.txt') -Leaf",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Split-Path",
+        "Join-Path"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "join-path",
+        "split-path"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "caminhos-2",
+      "pagina": "caminhos.html",
+      "titulo": "Caminhos no Windows e no Linux",
+      "secao": "Pastas e Arquivos",
+      "n": 2,
+      "goal": "out:.txt;;src:Split-Path;;src:-Extension;;semerro",
+      "metas": [
+        "out:.txt",
+        "src:Split-Path",
+        "src:-Extension",
+        "semerro"
+      ],
+      "task": "Missão: use Split-Path -Extension para mostrar a extensão do caminho montado com Join-Path.",
+      "script": "Split-Path (Join-Path 'docs' 'a.txt') -Leaf",
+      "solucao": "Split-Path (Join-Path 'docs' 'a.txt') -Extension",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Split-Path",
+        "Join-Path"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "join-path",
+        "split-path"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "caminhos-3",
+      "pagina": "caminhos.html",
+      "titulo": "Caminhos no Windows e no Linux",
+      "secao": "Pastas e Arquivos",
+      "n": 3,
+      "goal": "out:docs;;src:Split-Path;;src:-Parent;;semerro",
+      "metas": [
+        "out:docs",
+        "src:Split-Path",
+        "src:-Parent",
+        "semerro"
+      ],
+      "task": "Missão final: mostre a pasta-mãe do caminho docs/a.txt (use Join-Path e Split-Path -Parent).",
+      "script": "Split-Path (Join-Path 'docs' 'a.txt') -Leaf",
+      "solucao": "Split-Path (Join-Path 'docs' 'a.txt') -Parent",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Split-Path",
+        "Join-Path"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "join-path",
+        "split-path"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "new-item-1",
+      "pagina": "new-item.html",
+      "titulo": "Criando Arquivos e Pastas (New-Item)",
+      "secao": "Pastas e Arquivos",
+      "n": 1,
+      "goal": "arquivo:fotos;;src:\\bNew-Item\\b;;src:Directory;;semerro",
+      "metas": [
+        "arquivo:fotos",
+        "src:\\bNew-Item\\b",
+        "src:Directory",
+        "semerro"
+      ],
+      "task": "Experimente: crie uma pasta chamada fotos com New-Item e -ItemType Directory.",
+      "script": "# crie a pasta fotos",
+      "solucao": "New-Item -ItemType Directory fotos",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "New-Item"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "filesystem",
+        "new-item"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "new-item-2",
+      "pagina": "new-item.html",
+      "titulo": "Criando Arquivos e Pastas (New-Item)",
+      "secao": "Pastas e Arquivos",
+      "n": 2,
+      "goal": "arquivo:relatorio.txt~Primeira linha;;src:\\bNew-Item\\b;;semerro",
+      "metas": [
+        "arquivo:relatorio.txt~Primeira linha",
+        "src:\\bNew-Item\\b",
+        "semerro"
+      ],
+      "task": "Missão: crie o arquivo relatorio.txt já com o texto Primeira linha, usando New-Item e -Value.",
+      "script": "# crie relatorio.txt com texto dentro",
+      "solucao": "New-Item -Path relatorio.txt -Value \"Primeira linha\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "New-Item"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "filesystem",
+        "new-item"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "new-item-3",
+      "pagina": "new-item.html",
+      "titulo": "Criando Arquivos e Pastas (New-Item)",
+      "secao": "Pastas e Arquivos",
+      "n": 3,
+      "goal": "arquivo:um.txt;;arquivo:dois.txt;;src:\\bNew-Item\\b;;semerro",
+      "metas": [
+        "arquivo:um.txt",
+        "arquivo:dois.txt",
+        "src:\\bNew-Item\\b",
+        "semerro"
+      ],
+      "task": "Missão final: crie, de uma vez, os arquivos vazios um.txt e dois.txt com New-Item -ItemType File.",
+      "script": "# crie um.txt e dois.txt",
+      "solucao": "New-Item -ItemType File um.txt, dois.txt",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "New-Item"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "filesystem",
+        "new-item"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "copy-move-1",
+      "pagina": "copy-move.html",
+      "titulo": "Copiando e Movendo (Copy-Item e Move-Item)",
+      "secao": "Pastas e Arquivos",
+      "n": 1,
+      "goal": "arquivo:nota-copia.txt~oi;;src:\\bCopy-Item\\b;;semerro",
+      "metas": [
+        "arquivo:nota-copia.txt~oi",
+        "src:\\bCopy-Item\\b",
+        "semerro"
+      ],
+      "task": "Experimente: o arquivo nota.txt já está criado. Copie-o para nota-copia.txt com Copy-Item.",
+      "script": "Set-Content nota.txt \"oi\"\n# copie nota.txt para nota-copia.txt",
+      "solucao": "Set-Content nota.txt \"oi\"\nCopy-Item nota.txt nota-copia.txt",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Set-Content",
+        "Copy-Item"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "filesystem",
+        "copy-item",
+        "set-content"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "copy-move-2",
+      "pagina": "copy-move.html",
+      "titulo": "Copiando e Movendo (Copy-Item e Move-Item)",
+      "secao": "Pastas e Arquivos",
+      "n": 2,
+      "goal": "arquivo:renomeada.txt~oi;;src:\\bMove-Item\\b;;semerro",
+      "metas": [
+        "arquivo:renomeada.txt~oi",
+        "src:\\bMove-Item\\b",
+        "semerro"
+      ],
+      "task": "Missão: o arquivo nota-copia.txt já existe. Mova-o para renomeada.txt com Move-Item.",
+      "script": "Set-Content nota-copia.txt \"oi\"\n# mova nota-copia.txt para renomeada.txt",
+      "solucao": "Set-Content nota-copia.txt \"oi\"\nMove-Item nota-copia.txt renomeada.txt",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Set-Content",
+        "Move-Item"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "filesystem",
+        "move-item",
+        "set-content"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "copy-move-3",
+      "pagina": "copy-move.html",
+      "titulo": "Copiando e Movendo (Copy-Item e Move-Item)",
+      "secao": "Pastas e Arquivos",
+      "n": 3,
+      "goal": "arquivo:backup/nota.txt~oi;;src:\\bCopy-Item\\b;;src:-Recurse;;arquivo:backup/docs-rec/a.txt;;semerro",
+      "metas": [
+        "arquivo:backup/nota.txt~oi",
+        "src:\\bCopy-Item\\b",
+        "src:-Recurse",
+        "arquivo:backup/docs-rec/a.txt",
+        "semerro"
+      ],
+      "task": "Missão final: crie a pasta backup, copie nota.txt para dentro dela e copie a pasta docs para backup/docs-rec com o conteúdo (use -Recurse).",
+      "script": "New-Item -ItemType Directory backup, docs | Out-Null\nSet-Content nota.txt \"oi\"\nSet-Content docs/a.txt \"x\"\n# copie nota.txt para backup e a pasta docs para backup/docs-rec",
+      "solucao": "New-Item -ItemType Directory backup, docs | Out-Null\nSet-Content nota.txt \"oi\"\nSet-Content docs/a.txt \"x\"\nCopy-Item nota.txt backup/\nCopy-Item docs backup/docs-rec -Recurse",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "New-Item",
+        "Out-Null",
+        "Set-Content",
+        "Copy-Item"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "pipeline",
+        "out-null",
+        "filesystem",
+        "new-item",
+        "copy-item",
+        "set-content"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "rename-item-1",
+      "pagina": "rename-item.html",
+      "titulo": "Renomeando (Rename-Item)",
+      "secao": "Pastas e Arquivos",
+      "n": 1,
+      "goal": "arquivo:compras.txt;;semerro",
+      "metas": [
+        "arquivo:compras.txt",
+        "semerro"
+      ],
+      "task": "Experimente: o script cria lista.txt. Acrescente uma linha que troque o nome dele para compras.txt e clique em Rodar.",
+      "script": "'arroz' | Set-Content lista.txt",
+      "solucao": "'arroz' | Set-Content lista.txt\nRename-Item -Path lista.txt -NewName compras.txt",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Set-Content",
+        "Rename-Item"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-output",
+        "pipeline",
+        "filesystem",
+        "rename-item",
+        "set-content"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "rename-item-2",
+      "pagina": "rename-item.html",
+      "titulo": "Renomeando (Rename-Item)",
+      "secao": "Pastas e Arquivos",
+      "n": 2,
+      "goal": "arquivo:ferias1.jpg;;arquivo:ferias2.jpg;;src:\\bRename-Item\\b;;semerro",
+      "metas": [
+        "arquivo:ferias1.jpg",
+        "arquivo:ferias2.jpg",
+        "src:\\bRename-Item\\b",
+        "semerro"
+      ],
+      "task": "Missão final: o script cria IMG1.jpg e IMG2.jpg. Renomeie os dois de uma vez para ferias1.jpg e ferias2.jpg, trocando IMG por ferias com o pipeline.",
+      "script": "New-Item IMG1.jpg, IMG2.jpg | Out-Null",
+      "solucao": "New-Item IMG1.jpg, IMG2.jpg | Out-Null\nGet-ChildItem IMG*.jpg | Rename-Item -NewName { $_.Name -replace '^IMG', 'ferias' }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "New-Item",
+        "Out-Null",
+        "Get-ChildItem",
+        "Rename-Item"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "automaticas",
+        "metodos",
+        "pipeline",
+        "out-null",
+        "filesystem",
+        "new-item",
+        "get-childitem",
+        "rename-item",
+        "operadores-texto",
+        "arrays"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "remove-item-1",
+      "pagina": "remove-item.html",
+      "titulo": "Apagando (Remove-Item)",
+      "secao": "Pastas e Arquivos",
+      "n": 1,
+      "goal": "out:False;;semerro",
+      "metas": [
+        "out:False",
+        "semerro"
+      ],
+      "task": "Experimente: o script cria velho.txt e no fim pergunta se ele ainda existe. Acrescente, no meio, a linha que apaga o arquivo. A resposta tem de ser False.",
+      "script": "'conteúdo antigo' | Set-Content velho.txt\n\nTest-Path velho.txt",
+      "solucao": "'conteúdo antigo' | Set-Content velho.txt\nRemove-Item velho.txt\nTest-Path velho.txt",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Set-Content",
+        "Remove-Item",
+        "Test-Path"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-output",
+        "pipeline",
+        "filesystem",
+        "remove-item",
+        "set-content",
+        "test-path"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "remove-item-2",
+      "pagina": "remove-item.html",
+      "titulo": "Apagando (Remove-Item)",
+      "secao": "Pastas e Arquivos",
+      "n": 2,
+      "goal": "out:Sobrou: importante.txt;;src:\\bRemove-Item\\b;;semerro",
+      "metas": [
+        "out:Sobrou: importante.txt",
+        "src:\\bRemove-Item\\b",
+        "semerro"
+      ],
+      "task": "Missão final: o script cria três arquivos .tmp e um importante.txt. Apague só os .tmp, com um único Remove-Item e curinga, para que a última linha mostre Sobrou: importante.txt.",
+      "script": "New-Item a.tmp, b.tmp, c.tmp, importante.txt | Out-Null\n\n\"Sobrou: \" + ((Get-ChildItem -Name) -join ', ')",
+      "solucao": "New-Item a.tmp, b.tmp, c.tmp, importante.txt | Out-Null\nRemove-Item *.tmp\n\"Sobrou: \" + ((Get-ChildItem -Name) -join ', ')",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "New-Item",
+        "Out-Null",
+        "Remove-Item",
+        "Get-ChildItem"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-output",
+        "pipeline",
+        "out-null",
+        "filesystem",
+        "new-item",
+        "get-childitem",
+        "remove-item",
+        "arrays"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "get-content-1",
+      "pagina": "get-content.html",
+      "titulo": "Lendo Arquivos (Get-Content)",
+      "secao": "Pastas e Arquivos",
+      "n": 1,
+      "goal": "out:Comprar pão;;out:Pagar a luz;;src:\\bGet-Content\\b;;semerro",
+      "metas": [
+        "out:Comprar pão",
+        "out:Pagar a luz",
+        "src:\\bGet-Content\\b",
+        "semerro"
+      ],
+      "task": "Experimente: o script grava uma lista de tarefas em tarefas.txt. Acrescente a linha que mostra o conteúdo do arquivo.",
+      "script": "'Comprar pão', 'Pagar a luz', 'Ligar para a mãe' | Set-Content tarefas.txt",
+      "solucao": "'Comprar pão', 'Pagar a luz', 'Ligar para a mãe' | Set-Content tarefas.txt\nGet-Content tarefas.txt",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Set-Content",
+        "Get-Content"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-output",
+        "pipeline",
+        "filesystem",
+        "get-content",
+        "set-content",
+        "arrays"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "get-content-2",
+      "pagina": "get-content.html",
+      "titulo": "Lendo Arquivos (Get-Content)",
+      "secao": "Pastas e Arquivos",
+      "n": 2,
+      "goal": "out:3;;src:\\.Count;;semerro",
+      "metas": [
+        "out:3",
+        "src:\\.Count",
+        "semerro"
+      ],
+      "task": "Experimente: mostre quantas linhas tem o tarefas.txt. A resposta deve ser 3.",
+      "script": "'Comprar pão', 'Pagar a luz', 'Ligar para a mãe' | Set-Content tarefas.txt",
+      "solucao": "'Comprar pão', 'Pagar a luz', 'Ligar para a mãe' | Set-Content tarefas.txt\n(Get-Content tarefas.txt).Count",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Set-Content",
+        "Get-Content"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-output",
+        "metodos",
+        "pipeline",
+        "filesystem",
+        "get-content",
+        "set-content",
+        "arrays"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "get-content-3",
+      "pagina": "get-content.html",
+      "titulo": "Lendo Arquivos (Get-Content)",
+      "secao": "Pastas e Arquivos",
+      "n": 3,
+      "goal": "out:Última: Ligar para a mãe;;src:\\bGet-Content\\b;;semerro",
+      "metas": [
+        "out:Última: Ligar para a mãe",
+        "src:\\bGet-Content\\b",
+        "semerro"
+      ],
+      "task": "Missão final: complete a última linha para que ela mostre Última: Ligar para a mãe, pegando a última linha do arquivo com Get-Content.",
+      "script": "'Comprar pão', 'Pagar a luz', 'Ligar para a mãe' | Set-Content tarefas.txt\n\"Última: \" +",
+      "solucao": "'Comprar pão', 'Pagar a luz', 'Ligar para a mãe' | Set-Content tarefas.txt\n\"Última: \" + (Get-Content tarefas.txt)[-1]",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Set-Content",
+        "Get-Content"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-output",
+        "pipeline",
+        "filesystem",
+        "get-content",
+        "set-content",
+        "arrays"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "set-content-1",
+      "pagina": "set-content.html",
+      "titulo": "Escrevendo Arquivos (Set-Content e Add-Content)",
+      "secao": "Pastas e Arquivos",
+      "n": 1,
+      "goal": "out:Arroz;;out:Feijão;;src:\\bAdd-Content\\b;;semerro",
+      "metas": [
+        "out:Arroz",
+        "out:Feijão",
+        "src:\\bAdd-Content\\b",
+        "semerro"
+      ],
+      "task": "Experimente: o script cria a lista de compras com \"Arroz\". Acrescente \"Feijão\" sem apagar o arroz, usando Add-Content.",
+      "script": "Set-Content compras.txt \"Arroz\"\n\nGet-Content compras.txt",
+      "solucao": "Set-Content compras.txt \"Arroz\"\nAdd-Content compras.txt \"Feijão\"\nGet-Content compras.txt",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Set-Content",
+        "Add-Content",
+        "Get-Content"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "filesystem",
+        "get-content",
+        "set-content",
+        "add-content"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "set-content-2",
+      "pagina": "set-content.html",
+      "titulo": "Escrevendo Arquivos (Set-Content e Add-Content)",
+      "secao": "Pastas e Arquivos",
+      "n": 2,
+      "goal": "out:Total: 3 linhas;;src:\\bSet-Content\\b;;src:\\bAdd-Content\\b;;semerro",
+      "metas": [
+        "out:Total: 3 linhas",
+        "src:\\bSet-Content\\b",
+        "src:\\bAdd-Content\\b",
+        "semerro"
+      ],
+      "task": "Missão final: monte um diário com três linhas: grave \"Segunda: academia\" com Set-Content, depois acrescente \"Terça: inglês\" e \"Quarta: folga\" com Add-Content. A última linha do script deve mostrar Total: 3 linhas.",
+      "script": "\"Total: \" + (Get-Content diario.txt).Count + \" linhas\"",
+      "solucao": "Set-Content diario.txt \"Segunda: academia\"\nAdd-Content diario.txt \"Terça: inglês\"\nAdd-Content diario.txt \"Quarta: folga\"\n\"Total: \" + (Get-Content diario.txt).Count + \" linhas\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Set-Content",
+        "Add-Content",
+        "Get-Content"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-output",
+        "metodos",
+        "filesystem",
+        "get-content",
+        "set-content",
+        "add-content"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "test-path-1",
+      "pagina": "test-path.html",
+      "titulo": "Existe? (Test-Path)",
+      "secao": "Pastas e Arquivos",
+      "n": 1,
+      "goal": "out:True;;src:\\bTest-Path\\b;;semerro",
+      "metas": [
+        "out:True",
+        "src:\\bTest-Path\\b",
+        "semerro"
+      ],
+      "task": "Experimente: o arquivo nota.txt já existe. Pergunte se ele existe com Test-Path.",
+      "script": "Set-Content nota.txt \"oi\"\n# teste se nota.txt existe",
+      "solucao": "Set-Content nota.txt \"oi\"\nTest-Path nota.txt",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Set-Content",
+        "Test-Path"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "filesystem",
+        "set-content",
+        "test-path"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "test-path-2",
+      "pagina": "test-path.html",
+      "titulo": "Existe? (Test-Path)",
+      "secao": "Pastas e Arquivos",
+      "n": 2,
+      "goal": "out:Achei!;;src:\\bTest-Path\\b;;src:\\bif\\b;;semerro",
+      "metas": [
+        "out:Achei!",
+        "src:\\bTest-Path\\b",
+        "src:\\bif\\b",
+        "semerro"
+      ],
+      "task": "Missão: se nota.txt existir, mostre Achei!; senão, mostre Não achei. Use if e Test-Path.",
+      "script": "Set-Content nota.txt \"oi\"\n# se o arquivo existir, escreva Achei!",
+      "solucao": "Set-Content nota.txt \"oi\"\nif (Test-Path nota.txt) { \"Achei!\" } else { \"Não achei\" }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Set-Content",
+        "Test-Path"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "filesystem",
+        "set-content",
+        "test-path",
+        "if"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "test-path-3",
+      "pagina": "test-path.html",
+      "titulo": "Existe? (Test-Path)",
+      "secao": "Pastas e Arquivos",
+      "n": 3,
+      "goal": "out:True;;out:False;;src:-PathType;;src:Leaf;;src:\\bTest-Path\\b;;semerro",
+      "metas": [
+        "out:True",
+        "out:False",
+        "src:-PathType",
+        "src:Leaf",
+        "src:\\bTest-Path\\b",
+        "semerro"
+      ],
+      "task": "Missão final: teste se nota.txt é um arquivo com -PathType Leaf (deve ser True) e se ele é uma pasta com -PathType Container (deve ser False).",
+      "script": "Set-Content nota.txt \"oi\"\n# dois Test-Path: Leaf e Container",
+      "solucao": "Set-Content nota.txt \"oi\"\nTest-Path nota.txt -PathType Leaf\nTest-Path nota.txt -PathType Container",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Set-Content",
+        "Test-Path"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "filesystem",
+        "set-content",
+        "test-path"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "provedores-1",
+      "pagina": "provedores.html",
+      "titulo": "Drives e Provedores (Env:, HKCU:)",
+      "secao": "Pastas e Arquivos",
+      "n": 1,
+      "goal": "out:FileSystem;;out:Environment;;src:\\bGet-PSProvider\\b;;semerro",
+      "metas": [
+        "out:FileSystem",
+        "out:Environment",
+        "src:\\bGet-PSProvider\\b",
+        "semerro"
+      ],
+      "task": "Experimente: liste os provedores com Get-PSProvider e confira se FileSystem e Environment aparecem.",
+      "script": "# liste os provedores",
+      "solucao": "Get-PSProvider",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-PSProvider"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "provedores"
+      ],
+      "etapa": "E5"
+    },
+    {
+      "id": "provedores-2",
+      "pagina": "provedores.html",
+      "titulo": "Drives e Provedores (Env:, HKCU:)",
+      "secao": "Pastas e Arquivos",
+      "n": 2,
+      "goal": "out:True;;src:Env:PATH;;src:\\bTest-Path\\b;;semerro",
+      "metas": [
+        "out:True",
+        "src:Env:PATH",
+        "src:\\bTest-Path\\b",
+        "semerro"
+      ],
+      "task": "Missão: confira se a variável de ambiente PATH existe, com Test-Path Env:PATH (deve ser True). Não liste o drive Env: inteiro.",
+      "script": "# teste só Env:PATH",
+      "solucao": "Test-Path Env:PATH",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Test-Path"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "filesystem",
+        "test-path",
+        "provedores"
+      ],
+      "etapa": "E5"
+    },
+    {
+      "id": "provedores-3",
+      "pagina": "provedores.html",
+      "titulo": "Drives e Provedores (Env:, HKCU:)",
+      "secao": "Pastas e Arquivos",
+      "n": 3,
+      "goal": "out:Alias;;src:\\bGet-PSDrive\\b;;semerro",
+      "metas": [
+        "out:Alias",
+        "src:\\bGet-PSDrive\\b",
+        "semerro"
+      ],
+      "task": "Missão final: liste os drives com Get-PSDrive e confira se o drive Alias aparece.",
+      "script": "# liste os drives",
+      "solucao": "Get-PSDrive",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-PSDrive"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "provedores"
+      ],
+      "etapa": "E5"
+    },
+    {
+      "id": "variaveis-1",
+      "pagina": "variaveis.html",
+      "titulo": "Variáveis ($)",
+      "secao": "Variáveis e Tipos",
+      "n": 1,
+      "goal": "out:Olá, Ana!;;semerro",
+      "metas": [
+        "out:Olá, Ana!",
+        "semerro"
+      ],
+      "task": "Experimente: guarde \"Ana\" na variável $nome (troque o texto \"mundo\") e rode.",
+      "script": "$nome = \"mundo\"\n\"Olá, $nome!\"",
+      "solucao": "$nome = \"Ana\"\n\"Olá, $nome!\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output"
+      ],
+      "etapa": "E1"
+    },
+    {
+      "id": "variaveis-2",
+      "pagina": "variaveis.html",
+      "titulo": "Variáveis ($)",
+      "secao": "Variáveis e Tipos",
+      "n": 2,
+      "goal": "out:Total: 30;;src:\\$total;;semerro",
+      "metas": [
+        "out:Total: 30",
+        "src:\\$total",
+        "semerro"
+      ],
+      "task": "Missão final: crie $total com a soma de $a e $b, e mostre Total: 30.",
+      "script": "$a = 10\n$b = 20",
+      "solucao": "$a = 10\n$b = 20\n$total = $a + $b\n\"Total: $total\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "aritmetica"
+      ],
+      "etapa": "E1"
+    },
+    {
+      "id": "tipos-1",
+      "pagina": "tipos.html",
+      "titulo": "Tipos de Dados",
+      "secao": "Variáveis e Tipos",
+      "n": 1,
+      "goal": "out:Double;;semerro",
+      "metas": [
+        "out:Double",
+        "semerro"
+      ],
+      "task": "Experimente: troque o 30 por 30.5 e veja o tipo mudar de Int32 para Double.",
+      "script": "$numero = 30\n$numero.GetType().Name",
+      "solucao": "$numero = 30.5\n$numero.GetType().Name",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "metodos",
+        "tipos"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "tipos-2",
+      "pagina": "tipos.html",
+      "titulo": "Tipos de Dados",
+      "secao": "Variáveis e Tipos",
+      "n": 2,
+      "goal": "out:Boolean;;semerro",
+      "metas": [
+        "out:Boolean",
+        "semerro"
+      ],
+      "task": "Missão final: guarde $true em $ativo e mostre o nome do tipo.",
+      "script": "$ativo = \"sim\"\n$ativo.GetType().Name",
+      "solucao": "$ativo = $true\n$ativo.GetType().Name",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "metodos",
+        "tipos",
+        "booleanos-null"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "strings-1",
+      "pagina": "strings.html",
+      "titulo": "Textos: Aspas Simples × Duplas",
+      "secao": "Variáveis e Tipos",
+      "n": 1,
+      "goal": "out:Olá, Ana;;semerro",
+      "metas": [
+        "out:Olá, Ana",
+        "semerro"
+      ],
+      "task": "Experimente: o texto mostra $nome em vez do nome. Troque as aspas simples por duplas e rode.",
+      "script": "$nome = 'Ana'\n'Olá, $nome'",
+      "solucao": "$nome = 'Ana'\n\"Olá, $nome\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output"
+      ],
+      "etapa": "E1"
+    },
+    {
+      "id": "strings-2",
+      "pagina": "strings.html",
+      "titulo": "Textos: Aspas Simples × Duplas",
+      "secao": "Variáveis e Tipos",
+      "n": 2,
+      "goal": "out:A loja \"Bem-Estar\";;semerro",
+      "metas": [
+        "out:A loja \"Bem-Estar\"",
+        "semerro"
+      ],
+      "task": "Missão final: mostre exatamente A loja \"Bem-Estar\" abriu, com as aspas duplas no texto.",
+      "script": "'A loja Bem-Estar abriu'",
+      "solucao": "'A loja \"Bem-Estar\" abriu'",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-output"
+      ],
+      "etapa": "E1"
+    },
+    {
+      "id": "interpolacao-1",
+      "pagina": "interpolacao.html",
+      "titulo": "Variáveis Dentro do Texto",
+      "secao": "Variáveis e Tipos",
+      "n": 1,
+      "goal": "out:Total: 30;;src:\\$\\(;;semerro",
+      "metas": [
+        "out:Total: 30",
+        "src:\\$\\(",
+        "semerro"
+      ],
+      "task": "Experimente: o texto mostra a conta em vez do resultado. Coloque a conta dentro de $( ).",
+      "script": "$a = 10\n$b = 20\n\"Total: $a + $b\"",
+      "solucao": "$a = 10\n$b = 20\n\"Total: $($a + $b)\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output"
+      ],
+      "etapa": "E1"
+    },
+    {
+      "id": "interpolacao-2",
+      "pagina": "interpolacao.html",
+      "titulo": "Variáveis Dentro do Texto",
+      "secao": "Variáveis e Tipos",
+      "n": 2,
+      "goal": "out:Ana tem 3 letras;;semerro",
+      "metas": [
+        "out:Ana tem 3 letras",
+        "semerro"
+      ],
+      "task": "Missão final: mostre Ana tem 3 letras usando $nome e a propriedade .Length.",
+      "script": "$nome = \"Ana\"\n\"$nome tem $nome.Length letras\"",
+      "solucao": "$nome = \"Ana\"\n\"$nome tem $($nome.Length) letras\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output"
+      ],
+      "etapa": "E1"
+    },
+    {
+      "id": "here-strings-1",
+      "pagina": "here-strings.html",
+      "titulo": "Textos de Várias Linhas (Here-Strings)",
+      "secao": "Variáveis e Tipos",
+      "n": 1,
+      "goal": "out:Bem-vinda, Ana!;;semerro",
+      "metas": [
+        "out:Bem-vinda, Ana!",
+        "semerro"
+      ],
+      "task": "Experimente: a carta mostra $nome em vez do nome. Troque @' e '@ por @\" e \"@.",
+      "script": "$nome = 'Ana'\n@'\nBem-vinda, $nome!\nSua matrícula está ativa.\n'@",
+      "solucao": "$nome = 'Ana'\n@\"\nBem-vinda, $nome!\nSua matrícula está ativa.\n\"@",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "here-strings",
+        "write-output"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "here-strings-2",
+      "pagina": "here-strings.html",
+      "titulo": "Textos de Várias Linhas (Here-Strings)",
+      "secao": "Variáveis e Tipos",
+      "n": 2,
+      "goal": "out:Loja da Ana;;outre:Loja da Ana\\nAberta;;src:@\";;semerro",
+      "metas": [
+        "out:Loja da Ana",
+        "outre:Loja da Ana\\nAberta",
+        "src:@\"",
+        "semerro"
+      ],
+      "task": "Missão final: monte uma here-string com duas linhas: Loja da $dona e Aberta, e mostre.",
+      "script": "$dona = \"Ana\"",
+      "solucao": "$dona = \"Ana\"\n@\"\nLoja da $dona\nAberta\n\"@",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "here-strings",
+        "write-output"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "numeros-1",
+      "pagina": "numeros.html",
+      "titulo": "Números",
+      "secao": "Variáveis e Tipos",
+      "n": 1,
+      "goal": "out:Total: 35;;semerro",
+      "metas": [
+        "out:Total: 35",
+        "semerro"
+      ],
+      "task": "Experimente: 3 cadernos de 10 reais e 1 caneta de 5. A conta está errada; coloque parênteses ou reorganize para dar 35.",
+      "script": "\"Total: $(3 + 1 * 10 + 5)\"",
+      "solucao": "\"Total: $(3 * 10 + 5)\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "interpolacao",
+        "write-output"
+      ],
+      "etapa": "E1"
+    },
+    {
+      "id": "numeros-2",
+      "pagina": "numeros.html",
+      "titulo": "Números",
+      "secao": "Variáveis e Tipos",
+      "n": 2,
+      "goal": "outre:3[,.]33;;src:Round;;semerro",
+      "metas": [
+        "outre:3[,.]33",
+        "src:Round",
+        "semerro"
+      ],
+      "task": "Missão final: mostre a média de $soma por $alunas, arredondada com 2 casas, usando [math]::Round.",
+      "script": "$soma = 10\n$alunas = 3\n$soma / $alunas",
+      "solucao": "$soma = 10\n$alunas = 3\n[math]::Round($soma / $alunas, 2)",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "aritmetica",
+        "tipos"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "conversao-1",
+      "pagina": "conversao.html",
+      "titulo": "Conversão de Tipos ([int], [string])",
+      "secao": "Variáveis e Tipos",
+      "n": 1,
+      "goal": "out:Total: 15;;semerro",
+      "metas": [
+        "out:Total: 15",
+        "semerro"
+      ],
+      "task": "Experimente: os dois valores chegaram como texto, então o + juntou em vez de somar. Converta com [int].",
+      "script": "$a = \"10\"\n$b = \"5\"\n\"Total: $($a + $b)\"",
+      "solucao": "$a = \"10\"\n$b = \"5\"\n\"Total: $([int]$a + [int]$b)\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "tipos",
+        "conversao"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "conversao-2",
+      "pagina": "conversao.html",
+      "titulo": "Conversão de Tipos ([int], [string])",
+      "secao": "Variáveis e Tipos",
+      "n": 2,
+      "goal": "out:Inválido;;src:-as;;semerro",
+      "metas": [
+        "out:Inválido",
+        "src:-as",
+        "semerro"
+      ],
+      "task": "Missão final: use -as [int] para mostrar Inválido quando $entrada não for número.",
+      "script": "$entrada = \"doze\"\n$numero = [int]$entrada\n$numero",
+      "solucao": "$entrada = \"doze\"\n$numero = $entrada -as [int]\nif ($null -eq $numero) { \"Inválido\" } else { $numero }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "aritmetica",
+        "operadores-comparacao",
+        "tipos",
+        "conversao",
+        "booleanos-null",
+        "if"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "booleanos-null-1",
+      "pagina": "booleanos-null.html",
+      "titulo": "$true, $false e $null",
+      "secao": "Variáveis e Tipos",
+      "n": 1,
+      "goal": "out:Sem nome;;semerro",
+      "metas": [
+        "out:Sem nome",
+        "semerro"
+      ],
+      "task": "Experimente: troque \"Ana\" por $null e veja o if ir para o else.",
+      "script": "$nome = \"Ana\"\nif ($nome) { \"Nome: $nome\" } else { \"Sem nome\" }",
+      "solucao": "$nome = $null\nif ($nome) { \"Nome: $nome\" } else { \"Sem nome\" }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "booleanos-null",
+        "if"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "booleanos-null-2",
+      "pagina": "booleanos-null.html",
+      "titulo": "$true, $false e $null",
+      "secao": "Variáveis e Tipos",
+      "n": 2,
+      "goal": "out:Cidade: não informada;;src:\\?\\?;;semerro",
+      "metas": [
+        "out:Cidade: não informada",
+        "src:\\?\\?",
+        "semerro"
+      ],
+      "task": "Missão final: com ??, mostre Cidade: não informada quando $cidade for nulo.",
+      "script": "$cidade = $null\n\"Cidade: $cidade\"",
+      "solucao": "$cidade = $null\n\"Cidade: $($cidade ?? 'não informada')\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "booleanos-null"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "variaveis-automaticas-1",
+      "pagina": "variaveis-automaticas.html",
+      "titulo": "Variáveis Automáticas ($_, $HOME…)",
+      "secao": "Variáveis e Tipos",
+      "n": 1,
+      "goal": "out:Edição: Core;;src:\\$PSEdition;;semerro",
+      "metas": [
+        "out:Edição: Core",
+        "src:\\$PSEdition",
+        "semerro"
+      ],
+      "task": "Experimente: troque o texto fixo pela variável $PSEdition.",
+      "script": "\"Edição: ???\"",
+      "solucao": "\"Edição: $PSEdition\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "automaticas"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "variaveis-automaticas-2",
+      "pagina": "variaveis-automaticas.html",
+      "titulo": "Variáveis Automáticas ($_, $HOME…)",
+      "secao": "Variáveis e Tipos",
+      "n": 2,
+      "goal": "outre:Linux\\? (True|False);;src:\\$IsLinux;;semerro",
+      "metas": [
+        "outre:Linux\\? (True|False)",
+        "src:\\$IsLinux",
+        "semerro"
+      ],
+      "task": "Missão final: mostre Linux? seguido de True ou False, usando a variável automática certa. No Windows a resposta é False; num PowerShell de Linux, True.",
+      "script": "\"Linux? $IsWindows\"",
+      "solucao": "\"Linux? $IsLinux\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "automaticas"
+      ],
+      "etapa": "E2"
+    },
+    {
+      "id": "operadores-aritmeticos-1",
+      "pagina": "operadores-aritmeticos.html",
+      "titulo": "Operadores Aritméticos",
+      "secao": "Operadores",
+      "n": 1,
+      "goal": "out:Média: 8;;semerro",
+      "metas": [
+        "out:Média: 8",
+        "semerro"
+      ],
+      "task": "Experimente: a média das notas 7 e 9 deu errado. Coloque parênteses em volta da soma.",
+      "script": "\"Média: $(7 + 9 / 2)\"",
+      "solucao": "\"Média: $((7 + 9) / 2)\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "interpolacao",
+        "write-output"
+      ],
+      "etapa": "E1"
+    },
+    {
+      "id": "operadores-aritmeticos-2",
+      "pagina": "operadores-aritmeticos.html",
+      "titulo": "Operadores Aritméticos",
+      "secao": "Operadores",
+      "n": 2,
+      "goal": "outre:Mesas: 5\\b;;src:Ceiling;;semerro",
+      "metas": [
+        "outre:Mesas: 5\\b",
+        "src:Ceiling",
+        "semerro"
+      ],
+      "task": "Missão final: 25 convidados, 6 por mesa. Mostre Mesas: 5 usando [math]::Ceiling.",
+      "script": "$convidados = 25\n$porMesa = 6\n\"Mesas: $($convidados / $porMesa)\"",
+      "solucao": "$convidados = 25\n$porMesa = 6\n\"Mesas: $([math]::Ceiling($convidados / $porMesa))\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "tipos"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "operadores-comparacao-1",
+      "pagina": "operadores-comparacao.html",
+      "titulo": "Comparações (-eq, -ne, -gt, -lt)",
+      "secao": "Operadores",
+      "n": 1,
+      "goal": "out:Pode votar;;src:-ge;;semerro",
+      "metas": [
+        "out:Pode votar",
+        "src:-ge",
+        "semerro"
+      ],
+      "task": "Experimente: com 16 anos já pode votar. Troque -gt por -ge (maior ou igual).",
+      "script": "$idade = 16\nif ($idade -gt 16) { \"Pode votar\" } else { \"Ainda não\" }",
+      "solucao": "$idade = 16\nif ($idade -ge 16) { \"Pode votar\" } else { \"Ainda não\" }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "aritmetica",
+        "operadores-comparacao",
+        "if"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "operadores-comparacao-2",
+      "pagina": "operadores-comparacao.html",
+      "titulo": "Comparações (-eq, -ne, -gt, -lt)",
+      "secao": "Operadores",
+      "n": 2,
+      "goal": "out:Estoque baixo;;src:-lt;;semerro",
+      "metas": [
+        "out:Estoque baixo",
+        "src:-lt",
+        "semerro"
+      ],
+      "task": "Missão final: mostre Estoque baixo quando $estoque for menor que 10.",
+      "script": "$estoque = 4",
+      "solucao": "$estoque = 4\nif ($estoque -lt 10) { \"Estoque baixo\" }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "aritmetica",
+        "operadores-comparacao",
+        "if"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "operadores-texto-1",
+      "pagina": "operadores-texto.html",
+      "titulo": "Comparando Textos (-like, -match)",
+      "secao": "Operadores",
+      "n": 1,
+      "goal": "out:É foto;;src:-like;;semerro",
+      "metas": [
+        "out:É foto",
+        "src:-like",
+        "semerro"
+      ],
+      "task": "Experimente: o arquivo é uma foto .jpg. Corrija o padrão do -like.",
+      "script": "$arquivo = \"praia.jpg\"\nif ($arquivo -like \"*.png\") { \"É foto\" }",
+      "solucao": "$arquivo = \"praia.jpg\"\nif ($arquivo -like \"*.jpg\") { \"É foto\" }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "aritmetica",
+        "operadores-texto",
+        "if"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "operadores-texto-2",
+      "pagina": "operadores-texto.html",
+      "titulo": "Comparando Textos (-like, -match)",
+      "secao": "Operadores",
+      "n": 2,
+      "goal": "out:Tem número;;src:-match;;semerro",
+      "metas": [
+        "out:Tem número",
+        "src:-match",
+        "semerro"
+      ],
+      "task": "Missão final: com -match e \\d, mostre Tem número se $senha tiver algum dígito.",
+      "script": "$senha = \"gato2026\"",
+      "solucao": "$senha = \"gato2026\"\nif ($senha -match \"\\d\") { \"Tem número\" }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "aritmetica",
+        "operadores-texto",
+        "if"
+      ],
+      "etapa": "E3"
+    },
+    {
+      "id": "operadores-colecao-1",
+      "pagina": "operadores-colecao.html",
+      "titulo": "-contains e -in",
+      "secao": "Operadores",
+      "n": 1,
+      "goal": "out:Pode entrar;;src:-contains;;semerro",
+      "metas": [
+        "out:Pode entrar",
+        "src:-contains",
+        "semerro"
+      ],
+      "task": "Experimente: a Dora foi convidada, mas não está na lista. Acrescente \"Dora\" à lista e rode.",
+      "script": "$convidados = \"Ana\", \"Beto\", \"Caio\"\nif ($convidados -contains \"Dora\") { \"Pode entrar\" } else { \"Não está na lista\" }",
+      "solucao": "$convidados = \"Ana\", \"Beto\", \"Caio\", \"Dora\"\nif ($convidados -contains \"Dora\") { \"Pode entrar\" } else { \"Não está na lista\" }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "aritmetica",
+        "operadores-colecao",
+        "if",
+        "arrays"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "operadores-colecao-2",
+      "pagina": "operadores-colecao.html",
+      "titulo": "-contains e -in",
+      "secao": "Operadores",
+      "n": 2,
+      "goal": "out:Fim de semana;;src:-in;;semerro",
+      "metas": [
+        "out:Fim de semana",
+        "src:-in",
+        "semerro"
+      ],
+      "task": "Missão final: com -in, mostre Fim de semana quando $dia for \"sab\" ou \"dom\".",
+      "script": "$dia = \"dom\"",
+      "solucao": "$dia = \"dom\"\nif ($dia -in \"sab\", \"dom\") { \"Fim de semana\" }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "aritmetica",
+        "operadores-colecao",
+        "if",
+        "arrays"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "operadores-logicos-1",
+      "pagina": "operadores-logicos.html",
+      "titulo": "-and, -or e -not",
+      "secao": "Operadores",
+      "n": 1,
+      "goal": "out:Desconto: False;;src:-and;;semerro",
+      "metas": [
+        "out:Desconto: False",
+        "src:-and",
+        "semerro"
+      ],
+      "task": "Experimente: O desconto exige compra grande e cadastro. Troque o operador para que, neste caso, apareça Desconto: False.",
+      "script": "$compraGrande = $true\n$temCadastro = $false\n\"Desconto: \" + ($compraGrande -or $temCadastro)",
+      "solucao": "$compraGrande = $true\n$temCadastro = $false\n\"Desconto: \" + ($compraGrande -and $temCadastro)",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "aritmetica",
+        "operadores-logicos",
+        "booleanos-null"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "operadores-logicos-2",
+      "pagina": "operadores-logicos.html",
+      "titulo": "-and, -or e -not",
+      "secao": "Operadores",
+      "n": 2,
+      "goal": "out:Faça seu cadastro;;src:-not;;semerro",
+      "metas": [
+        "out:Faça seu cadastro",
+        "src:-not",
+        "semerro"
+      ],
+      "task": "Experimente: Escreva um aviso para quando não houver cadastro. Use -not na condição para mostrar Faça seu cadastro.",
+      "script": "$temCadastro = $false\nif ($temCadastro) {\n    'Faça seu cadastro'\n}",
+      "solucao": "$temCadastro = $false\nif (-not $temCadastro) {\n    'Faça seu cadastro'\n}",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "write-output",
+        "operadores-logicos",
+        "booleanos-null",
+        "if"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "operador-formato-1",
+      "pagina": "operador-formato.html",
+      "titulo": "Formatando Textos (-f)",
+      "secao": "Operadores",
+      "n": 1,
+      "goal": "out:Ana comprou 3 cadernos;;src:-f;;semerro",
+      "metas": [
+        "out:Ana comprou 3 cadernos",
+        "src:-f",
+        "semerro"
+      ],
+      "task": "Experimente: Complete os valores à direita do -f para aparecer Ana comprou 3 cadernos.",
+      "script": "\"{0} comprou {1} cadernos\" -f",
+      "solucao": "\"{0} comprou {1} cadernos\" -f 'Ana', 3",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-output",
+        "operador-formato"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "operador-formato-2",
+      "pagina": "operador-formato.html",
+      "titulo": "Formatando Textos (-f)",
+      "secao": "Operadores",
+      "n": 2,
+      "goal": "out:Produto 0007;;src:D4;;semerro",
+      "metas": [
+        "out:Produto 0007",
+        "src:D4",
+        "semerro"
+      ],
+      "task": "Experimente: Os códigos da lojinha têm sempre 4 dígitos. Troque o formato para que o 7 apareça como Produto 0007.",
+      "script": "\"Produto {0}\" -f 7",
+      "solucao": "\"Produto {0:D4}\" -f 7",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-output",
+        "operador-formato"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "atribuicao-1",
+      "pagina": "atribuicao.html",
+      "titulo": "Atribuição (+=, ++)",
+      "secao": "Operadores",
+      "n": 1,
+      "goal": "out:Estoque: 15;;src:\\+=;;semerro",
+      "metas": [
+        "out:Estoque: 15",
+        "src:\\+=",
+        "semerro"
+      ],
+      "task": "Experimente: Chegaram 5 cadernos. Use += para atualizar o estoque e mostrar Estoque: 15.",
+      "script": "$estoque = 10\n\n\"Estoque: $estoque\"",
+      "solucao": "$estoque = 10\n$estoque += 5\n\"Estoque: $estoque\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "aritmetica",
+        "atribuicao-composta"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "atribuicao-2",
+      "pagina": "atribuicao.html",
+      "titulo": "Atribuição (+=, ++)",
+      "secao": "Operadores",
+      "n": 2,
+      "goal": "out:Visitas: 2;;src:\\+\\+;;semerro",
+      "metas": [
+        "out:Visitas: 2",
+        "src:\\+\\+",
+        "semerro"
+      ],
+      "task": "Experimente: Conte duas visitas usando ++ duas vezes, para aparecer Visitas: 2.",
+      "script": "$visitas = 0\n\n\"Visitas: $visitas\"",
+      "solucao": "$visitas = 0\n$visitas++\n$visitas++\n\"Visitas: $visitas\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "aritmetica",
+        "atribuicao-composta"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "write-host-output-1",
+      "pagina": "write-host-output.html",
+      "titulo": "Write-Host × Write-Output",
+      "secao": "Saída e Entrada",
+      "n": 1,
+      "goal": "out:Guardado: [Olá, Ana!];;semerro",
+      "metas": [
+        "out:Guardado: [Olá, Ana!]",
+        "semerro"
+      ],
+      "task": "Experimente: a variável $saudacao está saindo vazia. Troque o comando da primeira linha para que o texto fique guardado e apareça Guardado: [Olá, Ana!].",
+      "script": "$saudacao = Write-Host 'Olá, Ana!'\n\"Guardado: [$saudacao]\"",
+      "solucao": "$saudacao = Write-Output 'Olá, Ana!'\n\"Guardado: [$saudacao]\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output"
+      ],
+      "etapa": "E1"
+    },
+    {
+      "id": "write-host-output-2",
+      "pagina": "write-host-output.html",
+      "titulo": "Write-Host × Write-Output",
+      "secao": "Saída e Entrada",
+      "n": 2,
+      "goal": "out:maçã - banana - uva;;src:-Separator;;semerro",
+      "metas": [
+        "out:maçã - banana - uva",
+        "src:-Separator",
+        "semerro"
+      ],
+      "task": "Experimente: faça as frutas aparecerem separadas por - (espaço, traço, espaço), assim: maçã - banana - uva.",
+      "script": "Write-Host 'maçã', 'banana', 'uva'",
+      "solucao": "Write-Host 'maçã', 'banana', 'uva' -Separator ' - '",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Write-Host"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-host",
+        "arrays"
+      ],
+      "etapa": "E1"
+    },
+    {
+      "id": "write-host-output-3",
+      "pagina": "write-host-output.html",
+      "titulo": "Write-Host × Write-Output",
+      "secao": "Saída e Entrada",
+      "n": 3,
+      "goal": "out:Itens: 3;;src:\\bWrite-Output\\b;;semerro",
+      "metas": [
+        "out:Itens: 3",
+        "src:\\bWrite-Output\\b",
+        "semerro"
+      ],
+      "task": "Missão final: o script deveria mostrar Itens: 3, mas mostra Itens: 0. Conserte a primeira linha para as frutas irem pela esteira, usando Write-Output.",
+      "script": "$medida = Write-Host 'maçã', 'banana', 'uva' | Measure-Object\n\"Itens: \" + $medida.Count",
+      "solucao": "$medida = Write-Output 'maçã', 'banana', 'uva' | Measure-Object\n\"Itens: \" + $medida.Count",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Write-Output",
+        "Measure-Object"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "metodos",
+        "pipeline",
+        "measure-object",
+        "arrays"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "read-host-1",
+      "pagina": "read-host.html",
+      "titulo": "Read-Host: Lendo o Teclado",
+      "secao": "Saída e Entrada",
+      "n": 1,
+      "goal": "out:Olá, Ana!;;src:\\$nome;;semerro",
+      "metas": [
+        "out:Olá, Ana!",
+        "src:\\$nome",
+        "semerro"
+      ],
+      "task": "Experimente: a variável contém a resposta simulada Ana. Troque \"visitante\" pela variável $nome para o script cumprimentar quem respondeu.",
+      "script": "# Resposta simulada, sem pergunta interativa\n$nome = 'Ana'\n\"Olá, visitante!\"",
+      "solucao": "# Resposta simulada, sem pergunta interativa\n$nome = 'Ana'\n\"Olá, $nome!\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output"
+      ],
+      "etapa": "E1"
+    },
+    {
+      "id": "read-host-2",
+      "pagina": "read-host.html",
+      "titulo": "Read-Host: Lendo o Teclado",
+      "secao": "Saída e Entrada",
+      "n": 2,
+      "goal": "out:Ano que vem: 31;;src:\\[int\\];;semerro",
+      "metas": [
+        "out:Ano que vem: 31",
+        "src:\\[int\\]",
+        "semerro"
+      ],
+      "task": "Missão final: a resposta simulada é o texto 30. O script mostra Ano que vem: 301. Conserte a conta com [int] para aparecer Ano que vem: 31.",
+      "script": "# Resposta simulada, sem pergunta interativa\n$idade = '30'\n$proximo = $idade + 1\n\"Ano que vem: $proximo\"",
+      "solucao": "# Resposta simulada, sem pergunta interativa\n$idade = '30'\n$proximo = [int]$idade + 1\n\"Ano que vem: $proximo\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "aritmetica",
+        "tipos",
+        "conversao"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "write-outros-1",
+      "pagina": "write-outros.html",
+      "titulo": "Write-Warning, Write-Verbose e Companhia",
+      "secao": "Saída e Entrada",
+      "n": 1,
+      "goal": "out:caderno;;src:\\bWrite-Warning\\b;;semerro",
+      "metas": [
+        "out:caderno",
+        "src:\\bWrite-Warning\\b",
+        "semerro"
+      ],
+      "task": "Experimente: troque “caneta” por “caderno” no aviso e clique em Rodar.",
+      "script": "Write-Warning \"O estoque de caneta está baixo\"",
+      "solucao": "Write-Warning \"O estoque de caderno está baixo\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Write-Warning"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-warning"
+      ],
+      "etapa": "E7"
+    },
+    {
+      "id": "write-outros-2",
+      "pagina": "write-outros.html",
+      "titulo": "Write-Warning, Write-Verbose e Companhia",
+      "secao": "Saída e Entrada",
+      "n": 2,
+      "goal": "out:Detalhe para quem pediu;;src:\\bWrite-Verbose\\b;;src:-Verbose;;semerro",
+      "metas": [
+        "out:Detalhe para quem pediu",
+        "src:\\bWrite-Verbose\\b",
+        "src:-Verbose",
+        "semerro"
+      ],
+      "task": "Missão: a mensagem detalhada não aparece. Acrescente -Verbose para ela ser mostrada.",
+      "script": "Write-Verbose \"Detalhe para quem pediu\"",
+      "solucao": "Write-Verbose \"Detalhe para quem pediu\" -Verbose",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Write-Verbose"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-verbose"
+      ],
+      "etapa": "E7"
+    },
+    {
+      "id": "write-outros-3",
+      "pagina": "write-outros.html",
+      "titulo": "Write-Warning, Write-Verbose e Companhia",
+      "secao": "Saída e Entrada",
+      "n": 3,
+      "goal": "out:estoque baixo;;out:pedido enviado;;src:\\bWrite-Warning\\b;;src:\\bWrite-Information\\b;;src:-InformationAction;;semerro",
+      "metas": [
+        "out:estoque baixo",
+        "out:pedido enviado",
+        "src:\\bWrite-Warning\\b",
+        "src:\\bWrite-Information\\b",
+        "src:-InformationAction",
+        "semerro"
+      ],
+      "task": "Missão final: mostre um aviso contendo estoque baixo com Write-Warning, e uma informação contendo pedido enviado com Write-Information (lembre do -InformationAction Continue, senão a informação não aparece).",
+      "script": "# aviso e informação da lojinha",
+      "solucao": "Write-Warning \"estoque baixo\"\nWrite-Information \"pedido enviado\" -InformationAction Continue",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Write-Warning",
+        "Write-Information"
+      ],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "write-warning",
+        "write-information"
+      ],
+      "etapa": "E7"
+    },
+    {
+      "id": "if-1",
+      "pagina": "if.html",
+      "titulo": "if",
+      "secao": "Decisões",
+      "n": 1,
+      "goal": "out:Estoque baixo;;src:-lt\\s*5;;semerro",
+      "metas": [
+        "out:Estoque baixo",
+        "src:-lt\\s*5",
+        "semerro"
+      ],
+      "task": "Experimente: o aviso deveria aparecer quando o estoque é menor que 5, mas o operador está errado. Troque -gt (\"maior que\") por -lt (\"menor que\") e rode.",
+      "script": "$estoque = 2\nif ($estoque -gt 5) {\n    'Estoque baixo'\n}",
+      "solucao": "$estoque = 2\nif ($estoque -lt 5) {\n    'Estoque baixo'\n}",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "write-output",
+        "aritmetica",
+        "operadores-comparacao",
+        "if"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "if-2",
+      "pagina": "if.html",
+      "titulo": "if",
+      "secao": "Decisões",
+      "n": 2,
+      "goal": "out:Leve água;;src:\\bif\\s*\\(;;semerro",
+      "metas": [
+        "out:Leve água",
+        "src:\\bif\\s*\\(",
+        "semerro"
+      ],
+      "task": "Missão final: escreva um if que mostre Leve água quando $temperatura for maior ou igual a 30.",
+      "script": "$temperatura = 32",
+      "solucao": "$temperatura = 32\nif ($temperatura -ge 30) {\n    'Leve água'\n}",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "write-output",
+        "aritmetica",
+        "operadores-comparacao",
+        "if"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "elseif-else-1",
+      "pagina": "elseif-else.html",
+      "titulo": "elseif e else",
+      "secao": "Decisões",
+      "n": 1,
+      "goal": "out:Pode entrar;;src:\\belse\\b;;semerro",
+      "metas": [
+        "out:Pode entrar",
+        "src:\\belse\\b",
+        "semerro"
+      ],
+      "task": "Experimente: a Ana tem 20 anos. Complete o else para que o script mostre Pode entrar quando a idade for 18 ou mais, e Menor de idade quando não for. (Dica: troque a condição, ou ponha cada texto no bloco certo.)",
+      "script": "$idade = 20\nif ($idade -lt 18) {\n    \"Menor de idade\"\n}",
+      "solucao": "$idade = 20\nif ($idade -lt 18) {\n    \"Menor de idade\"\n} else {\n    \"Pode entrar\"\n}",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "write-output",
+        "aritmetica",
+        "operadores-comparacao",
+        "if"
+      ],
+      "etapa": "E6"
+    },
+    {
+      "id": "elseif-else-2",
+      "pagina": "elseif-else.html",
+      "titulo": "elseif e else",
+      "secao": "Decisões",
+      "n": 2,
+      "goal": "out:9.5: Excelente;;out:7: Aprovada;;out:5: Recuperação;;out:2: Reprovada;;semerro",
+      "metas": [
+        "out:9.5: Excelente",
+        "out:7: Aprovada",
+        "out:5: Recuperação",
+        "out:2: Reprovada",
+        "semerro"
+      ],
+      "task": "Experimente: este é o script das notas, mas com \"$nota: ...\" sem as chaves. Rode e veja o erro. Depois troque cada $nota: por ${nota}: e rode de novo.",
+      "script": "foreach ($nota in 9.5, 7, 5, 2) {\n    if ($nota -ge 9) { \"$nota: Excelente\" }\n    elseif ($nota -ge 7) { \"$nota: Aprovada\" }\n    elseif ($nota -ge 5) { \"$nota: Recuperação\" }\n    else { \"$nota: Reprovada\" }\n}",
+      "solucao": "foreach ($nota in 9.5, 7, 5, 2) {\n    if ($nota -ge 9) { \"${nota}: Excelente\" }\n    elseif ($nota -ge 7) { \"${nota}: Aprovada\" }\n    elseif ($nota -ge 5) { \"${nota}: Recuperação\" }\n    else { \"${nota}: Reprovada\" }\n}",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "aritmetica",
+        "operadores-comparacao",
+        "if",
+        "foreach"
+      ],
+      "etapa": "E8"
+    },
+    {
+      "id": "elseif-else-3",
+      "pagina": "elseif-else.html",
+      "titulo": "elseif e else",
+      "secao": "Decisões",
+      "n": 3,
+      "goal": "out:Frete: grátis;;out:Frete: R$ 10;;out:Frete: R$ 20;;src:\\belseif\\b;;semerro",
+      "metas": [
+        "out:Frete: grátis",
+        "out:Frete: R$ 10",
+        "out:Frete: R$ 20",
+        "src:\\belseif\\b",
+        "semerro"
+      ],
+      "task": "Missão final: a lojinha da Ana cobra frete conforme o valor da compra: a partir de 200, Frete: grátis; a partir de 100, Frete: R$ 10; abaixo disso, Frete: R$ 20. Complete com elseif e else (atenção à ordem!).",
+      "script": "foreach ($compra in 250, 150, 50) {\n    if ($compra -ge 200) {\n        'Frete: grátis'\n    }\n}",
+      "solucao": "foreach ($compra in 250, 150, 50) {\n    if ($compra -ge 200) {\n        'Frete: grátis'\n    } elseif ($compra -ge 100) {\n        'Frete: R$ 10'\n    } else {\n        'Frete: R$ 20'\n    }\n}",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "write-output",
+        "aritmetica",
+        "operadores-comparacao",
+        "if",
+        "foreach"
+      ],
+      "etapa": "E8"
+    },
+    {
+      "id": "switch-1",
+      "pagina": "switch.html",
+      "titulo": "switch",
+      "secao": "Decisões",
+      "n": 1,
+      "goal": "out:Dia útil;;src:\\bswitch\\b;;semerro",
+      "metas": [
+        "out:Dia útil",
+        "src:\\bswitch\\b",
+        "semerro"
+      ],
+      "task": "Experimente: troque o valor de $dia para um dia útil (por exemplo seg) e confira se o default mostra Dia útil.",
+      "script": "$dia = \"sab\"\nswitch ($dia) {\n    \"sab\" { \"Fim de semana\" }\n    \"dom\" { \"Fim de semana\" }\n    default { \"Dia útil\" }\n}",
+      "solucao": "$dia = \"seg\"\nswitch ($dia) {\n    \"sab\" { \"Fim de semana\" }\n    \"dom\" { \"Fim de semana\" }\n    default { \"Dia útil\" }\n}",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "switch"
+      ],
+      "etapa": "E8"
+    },
+    {
+      "id": "switch-2",
+      "pagina": "switch.html",
+      "titulo": "switch",
+      "secao": "Decisões",
+      "n": 2,
+      "goal": "out:imagem;;src:-Wildcard;;semerro",
+      "metas": [
+        "out:imagem",
+        "src:-Wildcard",
+        "semerro"
+      ],
+      "task": "Missão: o switch abaixo compara o nome com o texto literal *.jpg, então não combina. Acrescente -Wildcard para foto.jpg ser classificado como imagem.",
+      "script": "switch (\"foto.jpg\") { \"*.jpg\" { \"imagem\" } \"*.txt\" { \"texto\" } }",
+      "solucao": "switch -Wildcard (\"foto.jpg\") { \"*.jpg\" { \"imagem\" } \"*.txt\" { \"texto\" } }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "strings",
+        "switch"
+      ],
+      "etapa": "E8"
+    },
+    {
+      "id": "switch-3",
+      "pagina": "switch.html",
+      "titulo": "switch",
+      "secao": "Decisões",
+      "n": 3,
+      "goal": "out:Fim de semana;;out:Dia útil;;src:\\bswitch\\b;;src:\\bdefault\\b;;semerro",
+      "metas": [
+        "out:Fim de semana",
+        "out:Dia útil",
+        "src:\\bswitch\\b",
+        "src:\\bdefault\\b",
+        "semerro"
+      ],
+      "task": "Missão final: percorra sab e seg com um switch que mostre Fim de semana para sábado e domingo, e Dia útil no default.",
+      "script": "foreach ($dia in \"sab\", \"seg\") {\n    # complete com switch\n}",
+      "solucao": "foreach ($dia in \"sab\", \"seg\") {\n    switch ($dia) {\n        \"sab\" { \"Fim de semana\" }\n        \"dom\" { \"Fim de semana\" }\n        default { \"Dia útil\" }\n    }\n}",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "switch",
+        "foreach",
+        "arrays"
+      ],
+      "etapa": "E8"
+    },
+    {
+      "id": "foreach-1",
+      "pagina": "foreach.html",
+      "titulo": "foreach",
+      "secao": "Repetições",
+      "n": 1,
+      "goal": "out:Bom dia, Ana!;;out:Bom dia, Beto!;;out:Bom dia, Caio!;;src:\\bforeach\\b;;semerro",
+      "metas": [
+        "out:Bom dia, Ana!",
+        "out:Bom dia, Beto!",
+        "out:Bom dia, Caio!",
+        "src:\\bforeach\\b",
+        "semerro"
+      ],
+      "task": "Experimente: complete o foreach para dar bom dia a cada pessoa da lista: Bom dia, Ana!, Bom dia, Beto! e Bom dia, Caio!.",
+      "script": "$pessoas = \"Ana\", \"Beto\", \"Caio\"",
+      "solucao": "$pessoas = \"Ana\", \"Beto\", \"Caio\"\nforeach ($pessoa in $pessoas) {\n    \"Bom dia, $pessoa!\"\n}",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "foreach",
+        "arrays"
+      ],
+      "etapa": "E8"
+    },
+    {
+      "id": "foreach-2",
+      "pagina": "foreach.html",
+      "titulo": "foreach",
+      "secao": "Repetições",
+      "n": 2,
+      "goal": "out:Total do mês: 120;;src:\\bforeach\\b;;src:\\+=;;semerro",
+      "metas": [
+        "out:Total do mês: 120",
+        "src:\\bforeach\\b",
+        "src:\\+=",
+        "semerro"
+      ],
+      "task": "Missão final: a Ana anotou as contas do mês: 45, 30, 25 e 20. Use um foreach com += para somar tudo e mostrar Total do mês: 120.",
+      "script": "$contas = 45, 30, 25, 20\n$total = 0\n\n\"Total do mês: $total\"",
+      "solucao": "$contas = 45, 30, 25, 20\n$total = 0\nforeach ($conta in $contas) {\n    $total += $conta\n}\n\"Total do mês: $total\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "aritmetica",
+        "atribuicao-composta",
+        "foreach"
+      ],
+      "etapa": "E8"
+    },
+    {
+      "id": "for-1",
+      "pagina": "for.html",
+      "titulo": "for",
+      "secao": "Repetições",
+      "n": 1,
+      "goal": "out:Tabuada: 3 x 10 = 30;;src:\\bfor\\s*\\(;;semerro",
+      "metas": [
+        "out:Tabuada: 3 x 10 = 30",
+        "src:\\bfor\\s*\\(",
+        "semerro"
+      ],
+      "task": "Experimente: o script mostra a tabuada do 3 só até 5. Mude a condição do for para ir até 10.",
+      "script": "for ($i = 1; $i -le 5; $i++) {\n    \"Tabuada: 3 x $i = $(3 * $i)\"\n}",
+      "solucao": "for ($i = 1; $i -le 10; $i++) {\n    \"Tabuada: 3 x $i = $(3 * $i)\"\n}",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "aritmetica",
+        "operadores-comparacao",
+        "atribuicao-composta",
+        "for"
+      ],
+      "etapa": "E8"
+    },
+    {
+      "id": "for-2",
+      "pagina": "for.html",
+      "titulo": "for",
+      "secao": "Repetições",
+      "n": 2,
+      "goal": "out:3º lugar: Caio;;out:1º lugar: Ana;;src:\\bfor\\s*\\(;;semerro",
+      "metas": [
+        "out:3º lugar: Caio",
+        "out:1º lugar: Ana",
+        "src:\\bfor\\s*\\(",
+        "semerro"
+      ],
+      "task": "Missão final: a corrida terminou e a lista $chegada está na ordem de chegada. Complete o for para mostrar cada pessoa com a sua colocação: 1º lugar: Ana, 2º lugar: Beto, 3º lugar: Caio.",
+      "script": "$chegada = 'Ana', 'Beto', 'Caio'\nfor ($i = 0; $i -lt $chegada.Count; $i++) {\n\n}",
+      "solucao": "$chegada = 'Ana', 'Beto', 'Caio'\nfor ($i = 0; $i -lt $chegada.Count; $i++) {\n    \"$($i + 1)º lugar: $($chegada[$i])\"\n}",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "aritmetica",
+        "metodos",
+        "operadores-comparacao",
+        "atribuicao-composta",
+        "for",
+        "arrays"
+      ],
+      "etapa": "E8"
+    },
+    {
+      "id": "while-1",
+      "pagina": "while.html",
+      "titulo": "while e do",
+      "secao": "Repetições",
+      "n": 1,
+      "goal": "out:restam 0;;src:\\bwhile\\b;;semerro",
+      "metas": [
+        "out:restam 0",
+        "src:\\bwhile\\b",
+        "semerro"
+      ],
+      "task": "Experimente: o estoque está zerado, então o while não roda. Mude o valor inicial para um número maior que zero (por exemplo 3) e confira se aparece uma linha com restam 0.",
+      "script": "$estoque = 0\nwhile ($estoque -gt 0) { \"Vendi 1, restam $($estoque - 1)\"; $estoque-- }",
+      "solucao": "$estoque = 3\nwhile ($estoque -gt 0) { \"Vendi 1, restam $($estoque - 1)\"; $estoque-- }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "aritmetica",
+        "operadores-comparacao",
+        "atribuicao-composta",
+        "while"
+      ],
+      "etapa": "E8"
+    },
+    {
+      "id": "while-2",
+      "pagina": "while.html",
+      "titulo": "while e do",
+      "secao": "Repetições",
+      "n": 2,
+      "goal": "out:n = 1;;out:n = 2;;out:n = 4;;out:n = 8;;src:\\buntil\\b;;semerro",
+      "metas": [
+        "out:n = 1",
+        "out:n = 2",
+        "out:n = 4",
+        "out:n = 8",
+        "src:\\buntil\\b",
+        "semerro"
+      ],
+      "task": "Missão: começando com $n = 1, use um do { ... } until que mostre n = 1, n = 2, n = 4 e n = 8, dobrando o valor até ele passar de 10.",
+      "script": "$n = 1\n# complete com do ... until",
+      "solucao": "$n = 1\ndo { \"n = $n\"; $n *= 2 } until ($n -gt 10)",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "aritmetica",
+        "operadores-comparacao",
+        "while"
+      ],
+      "etapa": "E8"
+    },
+    {
+      "id": "while-3",
+      "pagina": "while.html",
+      "titulo": "while e do",
+      "secao": "Repetições",
+      "n": 3,
+      "goal": "out:volta 1;;out:volta 2;;out:volta 3;;src:\\bwhile\\b;;semerro",
+      "metas": [
+        "out:volta 1",
+        "out:volta 2",
+        "out:volta 3",
+        "src:\\bwhile\\b",
+        "semerro"
+      ],
+      "task": "Missão final: com um while, mostre volta 1, volta 2 e volta 3 (e só essas três). Lembre de ir aumentando o contador, senão o laço não termina.",
+      "script": "$i = 1\n# complete com while",
+      "solucao": "$i = 1\nwhile ($i -le 3) {\n    \"volta $i\"\n    $i++\n}",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "aritmetica",
+        "operadores-comparacao",
+        "atribuicao-composta",
+        "while"
+      ],
+      "etapa": "E8"
+    },
+    {
+      "id": "break-continue-1",
+      "pagina": "break-continue.html",
+      "titulo": "break e continue",
+      "secao": "Repetições",
+      "n": 1,
+      "goal": "out:n = 1;;out:n = 3;;out:parei;;src:\\bbreak\\b;;semerro",
+      "metas": [
+        "out:n = 1",
+        "out:n = 3",
+        "out:parei",
+        "src:\\bbreak\\b",
+        "semerro"
+      ],
+      "task": "Experimente: o laço imprime de 1 a 10. Coloque um break para parar ao chegar no 4: mostre n = 1, n = 2, n = 3 e, ao parar, a palavra parei. O 4 e os seguintes não devem ser impressos como n = ….",
+      "script": "foreach ($n in 1..10) {\n    \"n = $n\"\n}",
+      "solucao": "foreach ($n in 1..10) {\n    if ($n -eq 4) { \"parei\"; break }\n    \"n = $n\"\n}",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "aritmetica",
+        "operadores-comparacao",
+        "if",
+        "foreach",
+        "break",
+        "range"
+      ],
+      "etapa": "E8"
+    },
+    {
+      "id": "break-continue-2",
+      "pagina": "break-continue.html",
+      "titulo": "break e continue",
+      "secao": "Repetições",
+      "n": 2,
+      "goal": "out:ímpar: 1;;out:ímpar: 3;;out:ímpar: 5;;src:\\bcontinue\\b;;semerro",
+      "metas": [
+        "out:ímpar: 1",
+        "out:ímpar: 3",
+        "out:ímpar: 5",
+        "src:\\bcontinue\\b",
+        "semerro"
+      ],
+      "task": "Missão: use continue para pular os pares e mostrar só ímpar: 1, ímpar: 3 e ímpar: 5.",
+      "script": "foreach ($n in 1..6) {\n    \"ímpar: $n\"\n}",
+      "solucao": "foreach ($n in 1..6) {\n    if ($n % 2 -eq 0) { continue }\n    \"ímpar: $n\"\n}",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "write-output",
+        "aritmetica",
+        "operadores-comparacao",
+        "if",
+        "foreach",
+        "continue",
+        "range"
+      ],
+      "etapa": "E8"
+    },
+    {
+      "id": "break-continue-3",
+      "pagina": "break-continue.html",
+      "titulo": "break e continue",
+      "secao": "Repetições",
+      "n": 3,
+      "goal": "out:Achei nota baixa: 3;;src:\\bbreak\\b;;semerro",
+      "metas": [
+        "out:Achei nota baixa: 3",
+        "src:\\bbreak\\b",
+        "semerro"
+      ],
+      "task": "Missão final: percorra as notas 6, 8, 3 e 9, mostre Achei nota baixa: 3 ao achar a primeira nota menor que 5, e use break para não continuar depois disso.",
+      "script": "$notas = 6, 8, 3, 9\n# complete com foreach, if e break",
+      "solucao": "$notas = 6, 8, 3, 9\nforeach ($nota in $notas) {\n    if ($nota -lt 5) { \"Achei nota baixa: $nota\"; break }\n}",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [
+        "interprete",
+        "variaveis",
+        "strings",
+        "interpolacao",
+        "aritmetica",
+        "operadores-comparacao",
+        "if",
+        "foreach",
+        "break"
+      ],
+      "etapa": "E8"
+    }
+  ]
+}
