@@ -1,0 +1,18 @@
+# servicos — comandos para colher no Windows (só leitura)
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito. Anonimizar antes de usar.
+# REGRAS: nunca Get-Service sem nome (a lista mostra os programas instalados); só Spooler por nome;
+# nada de Start/Stop/Restart/Set-Service de verdade (só -WhatIf, que não executa).
+# shell: pwsh
+## consultar por nome
+Get-Service -Name Spooler
+Get-Service -Name Spooler | Select-Object Name, DisplayName, Status, StartType
+## dependências
+Get-Service -Name Spooler -RequiredServices
+## métodos e propriedades
+Get-Service -Name Spooler | Get-Member -MemberType Property | Select-Object -First 8
+## erro
+Get-Service -Name 'NaoExisteGuia'   #ERRO
+## WhatIf (não para o serviço)
+Stop-Service -Name Spooler -WhatIf
+Restart-Service -Name Spooler -WhatIf

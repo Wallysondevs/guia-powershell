@@ -1,0 +1,36 @@
+# registro — comandos para colher no Windows (plano da Nova/Mira)
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito. Anonimizar antes de usar.
+# REGRAS: só escreve em HKCU:\Software\GuiaPowerShell (caminho fixo, nunca variável vinda de fora);
+# HKLM só leitura e só das 3 propriedades abaixo (nada de RegisteredOwner, ProductId, listas de programas).
+# COLETOR: rodar o arquivo inteiro num try { ... } finally { <bloco "limpar"> }.
+# shell: pwsh
+## preparar (guarda)
+if (Test-Path 'HKCU:\Software\GuiaPowerShell') { throw 'chave GuiaPowerShell já existe: abortar a coleta' }   # [guarda]
+## unidades do Registro
+Get-PSDrive -PSProvider Registry
+## ler (só leitura)
+Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' | Select-Object ProductName, DisplayVersion, CurrentBuild
+Get-ItemPropertyValue -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name CurrentBuild
+## criar chave e valores
+New-Item -Path 'HKCU:\Software\GuiaPowerShell'
+New-ItemProperty -Path 'HKCU:\Software\GuiaPowerShell' -Name 'Versao' -Value '1.0' -PropertyType String
+New-ItemProperty -Path 'HKCU:\Software\GuiaPowerShell' -Name 'Contador' -Value 1 -PropertyType DWord
+Get-ItemProperty -Path 'HKCU:\Software\GuiaPowerShell'
+## alterar e ler
+Set-ItemProperty -Path 'HKCU:\Software\GuiaPowerShell' -Name 'Contador' -Value 2
+Get-ItemPropertyValue -Path 'HKCU:\Software\GuiaPowerShell' -Name 'Contador'
+## subchave
+New-Item -Path 'HKCU:\Software\GuiaPowerShell\Config'
+Get-ChildItem -Path 'HKCU:\Software\GuiaPowerShell'
+## remover um valor
+Remove-ItemProperty -Path 'HKCU:\Software\GuiaPowerShell' -Name 'Versao'
+Get-ItemProperty -Path 'HKCU:\Software\GuiaPowerShell'
+## erros
+Get-ItemPropertyValue -Path 'HKCU:\Software\GuiaPowerShell' -Name 'NaoExiste'   #ERRO
+Get-Item -Path 'HKCU:\Software\GuiaNaoExiste'   #ERRO
+## WhatIf
+Remove-Item -Path 'HKCU:\Software\GuiaPowerShell' -Recurse -WhatIf
+## limpar (sempre no fim; é o finally)
+Remove-Item -Path 'HKCU:\Software\GuiaPowerShell' -Recurse -ErrorAction SilentlyContinue
+Test-Path 'HKCU:\Software\GuiaPowerShell'

@@ -1,0 +1,33 @@
+# usuarios-locais — comandos para colher no Windows (ADMIN; plano da Mira)
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito. Anonimizar antes de usar (nome do PC, SID).
+# REGRAS: só o usuário descartável guia-teste; só o grupo 'Usuários' (nunca Administradores);
+# nada de Get-LocalUser / Get-LocalGroupMember sem -Name/-Member (não listar contas reais).
+# COLETOR: rodar o arquivo inteiro num try { ... } finally { <bloco "limpar"> }: a limpeza roda mesmo se algo falhar.
+# Se o módulo LocalAccounts falhar no pwsh, colher o arquivo inteiro com "# shell: powershell".
+# shell: pwsh
+## preparar (guardas)
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw 'precisa de administrador: abortar' }   # [guarda]
+if (Get-LocalUser -Name 'guia-teste' -ErrorAction SilentlyContinue) { throw 'guia-teste já existe: abortar a coleta' }   # [guarda]
+## criar
+New-LocalUser -Name 'guia-teste' -NoPassword -Description 'Usuário de teste do guia'
+Disable-LocalUser -Name 'guia-teste'
+## consultar só pelo nome
+Get-LocalUser -Name 'guia-teste'
+Get-LocalUser -Name 'guia-teste' | Select-Object Name, Enabled, Description, PasswordRequired, LastLogon
+## alterar
+Set-LocalUser -Name 'guia-teste' -Description 'Conta de teste do Guia PowerShell'
+Get-LocalUser -Name 'guia-teste' | Select-Object Name, Description
+## grupo Usuários
+Add-LocalGroupMember -Group 'Usuários' -Member 'guia-teste'
+Get-LocalGroupMember -Group 'Usuários' -Member 'guia-teste'
+Remove-LocalGroupMember -Group 'Usuários' -Member 'guia-teste'
+## erros
+New-LocalUser -Name 'guia-teste' -NoPassword   #ERRO
+Get-LocalUser -Name 'naoexiste-guia'   #ERRO
+## WhatIf
+Remove-LocalUser -Name 'guia-teste' -WhatIf
+## limpar (sempre no fim; é o finally)
+Remove-LocalGroupMember -Group 'Usuários' -Member 'guia-teste' -ErrorAction SilentlyContinue
+Remove-LocalUser -Name 'guia-teste' -ErrorAction SilentlyContinue
+[bool](Get-LocalUser -Name 'guia-teste' -ErrorAction SilentlyContinue)
