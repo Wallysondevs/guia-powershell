@@ -88,3 +88,8 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 | `for.html` for | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 | `while.html` while e do | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 | `break-continue.html` break e continue | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+
+## Lotes de coleta
+
+- **Lote 1** (Começando + Pastas e Arquivos, 24 aulas): colhido no 7.7, anonimizado. Zeca escrevendo.
+- **Lote 2** (Variáveis e Tipos, Operadores, Saída e Entrada, Decisões, Repetições, 26 aulas): ① Zeca faz os `cmds/` → ② Mira confere as guardas → ③ Luna coleta num lote só (`pwsh -NoProfile -File`, um card do Wallyson) → ④ Mira anonimiza em `_saidas-anon/7/`. Atenção: `read-host` precisa de janela (entra no roteiro com `Start-Transcript` do Zeca ou fica ilustrativo).
