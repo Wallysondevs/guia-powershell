@@ -88,7 +88,19 @@ if ($idade -lt 18) {
   <dt>else</dt><dd>O que sobrou: menos de 5.</dd>
   <dt>"${nota}: Excelente"</dt><dd>A variável entre <code>${ }</code>. As chaves são obrigatórias aqui por causa dos dois-pontos logo depois do nome (veja <a href="#errado">Quando dá errado</a>).</dd>
 </dl>
-<p>Rode o script no editor abaixo para ver cada nota com a sua faixa.</p>
+<p>Digitado no terminal, o bloco de várias linhas aparece com <code>&gt;&gt;</code> no começo das linhas de continuação (o PowerShell está esperando a <code>}</code> que fecha o bloco):</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; foreach ($nota in 9.5, 7, 5, 2) {
+&gt;&gt;     if ($nota -ge 9) { "${nota}: Excelente" }
+&gt;&gt;     elseif ($nota -ge 7) { "${nota}: Aprovada" }
+&gt;&gt;     elseif ($nota -ge 5) { "${nota}: Recuperação" }
+&gt;&gt;     else { "${nota}: Reprovada" }
+&gt;&gt; }
+9.5: Excelente
+7: Aprovada
+5: Recuperação
+2: Reprovada
+</pre>
+<p>Cada nota entrou em um caminho só. O 7, por exemplo, não é maior ou igual a 9, então foi testado no primeiro <code>elseif</code>, que deu verdadeiro, e o resto foi pulado.</p>
 
 <div class="tryps" data-goal="out:9.5: Excelente;;out:7: Aprovada;;out:5: Recuperação;;out:2: Reprovada;;semerro">
 <p class="try-task"><strong>Experimente:</strong> este é o script das notas, mas com <code>"$nota: ..."</code> sem as chaves. Rode e veja o erro. Depois troque cada <code>$nota:</code> por <code>${nota}:</code> e rode de novo.</p>
@@ -149,25 +161,45 @@ Recuperação
 
 <div class="cenario">
 <strong>Dois-pontos logo depois da variável: <code>"$nota: Excelente"</code></strong>
-<p>Dentro de aspas duplas, o PowerShell lê <code>$nota:</code> como o começo de um nome especial, do tipo <code>$env:PATH</code> (onde o que vem antes dos dois-pontos é um "drive", como <code>env</code>). Como depois dos dois-pontos vem um espaço, o nome fica inválido e o script <strong>nem chega a rodar</strong>: o PowerShell recusa o código inteiro, apontando cada linha onde aparece <code>"$nota:</code>.</p>
-<p>No laboratório, a mensagem dizia: <em>Variable reference is not valid. ':' was not followed by a valid variable name character. Consider using ${} to delimit the name.</em> Ou seja: "A referência à variável não é válida. O ':' não foi seguido de um caractere válido para nome de variável. Considere usar <code>${}</code> para delimitar o nome." A moldura completa do erro não aparece aqui porque foi colhida de um jeito diferente do console, mas você pode vê-la de verdade no segundo "Experimente" acima.</p>
+<p>Dentro de aspas duplas, o PowerShell lê <code>$nota:</code> como o começo de um nome especial, do tipo <code>$env:PATH</code> (onde o que vem antes dos dois-pontos é um "drive", como <code>env</code>). Como depois dos dois-pontos vem um espaço, o nome fica inválido e o script <strong>nem chega a rodar</strong>: o PowerShell recusa o código inteiro, apontando a linha onde aparece <code>"$nota:</code>.</p>
+<p>Rodando um script em que a linha 2 era <code>"$nota: Excelente"</code>, o PowerShell 7 respondeu:</p>
+<pre class="term" data-title="PowerShell 7">ParserError:
+Line |
+   2 |  "$nota: Excelente"
+     |   ~~~~~~
+     | Variable reference is not valid. ':' was not followed by a valid variable name character. Consider using ${} to
+     | delimit the name.
+</pre>
+<dl class="anatomy">
+  <dt>ParserError</dt><dd>Erro de "leitura" do código (o <em>parser</em> é a parte do PowerShell que lê o texto antes de rodar). Por isso nada do script roda, nem as linhas certas.</dd>
+  <dt>Line | 2</dt><dd>A linha do script onde está o problema, repetida logo ao lado.</dd>
+  <dt>~~~~~~</dt><dd>O tracinho sublinha o trecho culpado: <code>$nota:</code>.</dd>
+  <dt>Variable reference is not valid...</dt><dd>Quer dizer que a referência à variável é inválida: depois do <code>:</code> o PowerShell esperava mais letras do nome, e veio um espaço.</dd>
+  <dt>Consider using ${} to delimit the name</dt><dd>A própria dica da solução: use <code>${ }</code> para marcar onde o nome começa e termina.</dd>
+</dl>
+<div class="note">Os erros de leitura do código (<code>ParserError</code>) saem em inglês no PowerShell 7.7, mesmo num Windows em português. Já os erros de comandos, como o "termo não reconhecido" mais abaixo, saem em português.</div>
 <p><strong>Como resolver:</strong> ponha o nome entre chaves, <code>"${nota}: Excelente"</code>. Outra saída é tirar a variável de dentro do texto: <code>"$nota" + ": Excelente"</code>.</p>
 </div>
 
 <div class="cenario">
 <strong>Escrever <code>else if</code> separado</strong>
-<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Invoke-Expression 'if ($nota -ge 7) { "A" } else if ($nota -ge 5) { "B" }'
-Invoke-Expression: Missing statement block after 'else' keyword.
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; if ($nota -ge 7) { "A" } else if ($nota -ge 5) { "B" }
+ParserError:
+Line |
+   1 |  if ($nota -ge 7) { "A" } else if ($nota -ge 5) { "B" }
+     |                               ~
+     | Missing statement block after 'else' keyword.
 </pre>
 <dl class="anatomy">
-  <dt>Invoke-Expression '...'</dt><dd>Para colher o erro, o código errado foi rodado como texto pelo <code>Invoke-Expression</code>. Por isso a linha começa com <code>Invoke-Expression:</code>. Digitando o código direto, a moldura muda um pouco, mas a mensagem é a mesma.</dd>
-  <dt>Missing statement block after 'else' keyword</dt><dd>"Falta o bloco de comandos depois da palavra 'else'." Depois de <code>else</code>, o PowerShell espera uma chave <code>{</code>, e encontrou <code>if</code>.</dd>
+  <dt>~</dt><dd>O tracinho aponta logo depois do <code>else</code>, onde o PowerShell esperava uma chave <code>{</code>.</dd>
+  <dt>Missing statement block after 'else' keyword</dt><dd>Quer dizer que falta o bloco de comandos depois da palavra <code>else</code>: ele esperava <code>{</code> e encontrou <code>if</code>. Nada do comando rodou.</dd>
 </dl>
 <p>Em linguagens como C e JavaScript se escreve <code>else if</code>. No PowerShell é tudo junto: <strong><code>elseif</code></strong>.</p>
 </div>
 
 <div class="cenario">
 <strong>Escrever <code>elsif</code> (como no Ruby ou no Perl)</strong>
+<p>Este erro foi colhido rodando o código errado como texto, com o <code>Invoke-Expression</code>; por isso a mensagem começa com <code>Invoke-Expression:</code>. Digitando direto, a moldura muda, mas a mensagem é a mesma.</p>
 <pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Invoke-Expression 'if ($nota -ge 7) { "A" } elsif ($nota -ge 5) { "B" }'
 A
 Invoke-Expression: O termo "elsif" não é reconhecido como um nome de um cmdlet, função, arquivo de script ou programa executável.
@@ -175,7 +207,7 @@ Verifique a ortografia do nome ou, se um caminho foi incluído, verifique se o c
 </pre>
 <dl class="anatomy">
   <dt>A</dt><dd>Este é mais traiçoeiro: o <code>if</code> rodou normalmente (a <code>$nota</code> ainda era 9.5) e mostrou "A".</dd>
-  <dt>O termo "elsif" não é reconhecido</dt><dd>O PowerShell não conhece <code>elsif</code>, então achou que era o nome de <strong>outro comando</strong>, escrito depois do <code>if</code>, e não encontrou nenhum comando com esse nome.</dd>
+  <dt>O termo "elsif" não é reconhecido...</dt><dd>Este não é erro de leitura: o código foi aceito. O PowerShell não conhece <code>elsif</code>, então achou que era o nome de <strong>outro comando</strong>, escrito depois do <code>if</code>, e não encontrou nenhum comando com esse nome.</dd>
   <dt>Verifique a ortografia do nome</dt><dd>É exatamente isso: a grafia certa é <code>elseif</code>.</dd>
 </dl>
 </div>
@@ -186,7 +218,7 @@ Verifique a ortografia do nome ou, se um caminho foi incluído, verifique se o c
 Invoke-Expression: O termo "else" não é reconhecido como um nome de um cmdlet, função, arquivo de script ou programa executável.
 Verifique a ortografia do nome ou, se um caminho foi incluído, verifique se o caminho está correto e tente novamente.
 </pre>
-<p>O <code>else</code> só existe grudado num <code>if</code>. Sozinho, o PowerShell acha que é o nome de um comando. Isso também acontece no terminal se você aperta Enter depois da <code>}</code> do <code>if</code> e digita o <code>else</code> na linha seguinte, porque o <code>if</code> já terminou. No terminal, escreva o <code>else</code> na mesma linha da <code>}</code>.</p>
+<p>(Colhido também com o <code>Invoke-Expression</code>.) O <code>else</code> só existe grudado num <code>if</code>. Sozinho, o PowerShell acha que é o nome de um comando. Isso também acontece no terminal se você aperta Enter depois da <code>}</code> do <code>if</code> e digita o <code>else</code> na linha seguinte, porque o <code>if</code> já terminou. No terminal, escreva o <code>else</code> na mesma linha da <code>}</code>.</p>
 </div>
 
 <hr>
