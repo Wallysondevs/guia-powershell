@@ -7,36 +7,36 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 
 | Página | Autor | cmds | ① | ② | ③ | ④ | Obs |
 |---|---|---|---|---|---|---|---|
-| `index.html` Início | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] | Escrever por último |
-| `introducao.html` O que é PowerShell | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
-| `versoes-powershell.html` Windows PowerShell 5.1 × PowerShell 7 | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
-| `instalar.html` Instalar o PowerShell 7 | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
-| `abrir-terminal.html` Abrindo o PowerShell (e o Terminal do Windows) | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
+| `index.html` Início | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] | Escrever por último |
+| `introducao.html` O que é PowerShell | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `versoes-powershell.html` Windows PowerShell 5.1 × PowerShell 7 | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `instalar.html` Instalar o PowerShell 7 | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `abrir-terminal.html` Abrindo o PowerShell (e o Terminal do Windows) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
 | `simulador.html` O Editor do Guia | Zeca | [x] | [ ] | [ ] | [ ] | [ ] | Adiada: editor wasm ficou na VPS |
-| `primeiro-comando.html` Seu Primeiro Comando | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
-| `cmdlets.html` Cmdlets: Verbo-Substantivo | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
-| `parametros-cmdlet.html` Parâmetros dos Comandos | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
-| `get-help.html` Get-Help: a Ajuda | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
-| `get-command.html` Get-Command: Achando Comandos | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
-| `aliases.html` Apelidos (ls, dir, cd) | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
-| `teclado.html` Tab, Histórico e Atalhos | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
+| `primeiro-comando.html` Seu Primeiro Comando | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `cmdlets.html` Cmdlets: Verbo-Substantivo | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `parametros-cmdlet.html` Parâmetros dos Comandos | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `get-help.html` Get-Help: a Ajuda | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `get-command.html` Get-Command: Achando Comandos | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `aliases.html` Apelidos (ls, dir, cd) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `teclado.html` Tab, Histórico e Atalhos | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
 
 ## Pastas e Arquivos
 
 | Página | Autor | cmds | ① | ② | ③ | ④ | Obs |
 |---|---|---|---|---|---|---|---|
-| `get-location.html` Onde Estou (Get-Location) | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
-| `set-location.html` Mudando de Pasta (Set-Location) | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
-| `get-childitem.html` Listando (Get-ChildItem) | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
-| `caminhos.html` Caminhos no Windows e no Linux | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
-| `new-item.html` Criando Arquivos e Pastas (New-Item) | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
-| `copy-move.html` Copiando e Movendo (Copy-Item e Move-Item) | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
-| `rename-item.html` Renomeando (Rename-Item) | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
-| `remove-item.html` Apagando (Remove-Item) | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
-| `get-content.html` Lendo Arquivos (Get-Content) | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
-| `set-content.html` Escrevendo Arquivos (Set-Content e Add-Content) | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
-| `test-path.html` Existe? (Test-Path) | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
-| `provedores.html` Drives e Provedores (Env:, HKCU:) | Zeca | [x] | [x] 7.7 (+5.1) | [ ] | [ ] | [ ] |  |
+| `get-location.html` Onde Estou (Get-Location) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `set-location.html` Mudando de Pasta (Set-Location) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `get-childitem.html` Listando (Get-ChildItem) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `caminhos.html` Caminhos no Windows e no Linux | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `new-item.html` Criando Arquivos e Pastas (New-Item) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `copy-move.html` Copiando e Movendo (Copy-Item e Move-Item) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `rename-item.html` Renomeando (Rename-Item) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `remove-item.html` Apagando (Remove-Item) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `get-content.html` Lendo Arquivos (Get-Content) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `set-content.html` Escrevendo Arquivos (Set-Content e Add-Content) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `test-path.html` Existe? (Test-Path) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `provedores.html` Drives e Provedores (Env:, HKCU:) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
 
 ## Variáveis e Tipos
 
