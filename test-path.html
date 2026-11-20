@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Test-Path — o arquivo ou a pasta existe? | Guia PowerShell</title>
+<meta name="description" content="Testar se um caminho existe no PowerShell com Test-Path: True e False, -PathType Container e Leaf, if, caminhos inválidos que respondem False, com saídas do PowerShell 7.7.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Existe? <span class="hl">Test-Path</span></h1>
+
+<p class="intro">Antes de ler, copiar ou apagar, vale a pergunta mais simples do guia: <strong>isso existe</strong>? O <code>Test-Path</code> ("teste o caminho") não mostra o conteúdo e não altera nada. Ele só responde <code>True</code> (verdadeiro, existe) ou <code>False</code> (falso, não existe). É o olho mágico da porta, não a chave.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A perguntar se um arquivo ou uma pasta existe, e a ler o <code>True</code> / <code>False</code>.</li>
+  <li>O parâmetro <code>-PathType</code>, para distinguir pasta (<code>Container</code>) de arquivo (<code>Leaf</code>).</li>
+  <li>A testar um padrão com <code>*</code>, a pasta pessoal <code>$HOME</code>, uma variável de ambiente e uma chave do Registro.</li>
+  <li>A usar o resultado num <code>if</code>, para o script decidir o que fazer.</li>
+  <li>Que um caminho inválido ou vazio, neste comando, também responde <code>False</code> — e não explode.</li>
+</ul>
+</div>
+
+<p>Todas as saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta de teste da usuária fictícia <code>ana</code>. Antes dos testes, a pasta tinha o arquivo <code>nota.txt</code> e a pasta <code>docs</code>.</p>
+
+<div class="warning">
+<strong>Pratique numa pasta de teste.</strong> Todos os exemplos desta aula foram rodados dentro de <code>C:\Users\ana\guia-ps-teste</code>. No seu computador, crie uma pasta só para treinar e trabalhe nela. Um jeito seguro: <code>New-Item -ItemType Directory -Path (Join-Path $HOME 'guia-ps-teste')</code> e depois <code>Set-Location (Join-Path $HOME 'guia-ps-teste')</code>. Assim você não mexe nas suas fotos, documentos ou no Windows. No fim da prática, apague só essa pasta.
+</div>
+
+<hr>
+
+<h2>A ideia: o olho mágico</h2>
+<p>Antes de abrir a porta, você olha pelo olho mágico: tem alguém do lado de fora, ou não? Você não abre, não conversa, não empurra. Só recebe um sim ou um não.</p>
+<p>O <code>Test-Path</code> é esse olhar. Ele não lê o arquivo, não cria e não apaga. A resposta cabe numa palavra: <code>True</code> ou <code>False</code>.</p>
+
+<hr>
+
+<h2>1. Existe ou não existe</h2>
+<p>O <code>nota.txt</code> está na pasta de teste:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Test-Path nota.txt
+True
+</pre>
+<p>Um nome que não está lá responde <code>False</code>, <strong>sem mensagem de erro</strong>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Test-Path naoexiste.txt
+False
+</pre>
+<dl class="anatomy">
+  <dt>Test-Path</dt><dd>Verbo <code>Test</code> ("teste") + <code>Path</code> ("caminho"): "esse caminho existe?".</dd>
+  <dt>nota.txt</dt><dd>O caminho a testar, aqui um arquivo na pasta atual.</dd>
+  <dt>True / False</dt><dd><code>True</code> é "sim, existe". <code>False</code> é "não existe". Não é uma mensagem vermelha.</dd>
+</dl>
+<p>Essa diferença importa: o <code>Get-Content naoexiste.txt</code> reclama em vermelho; o <code>Test-Path naoexiste.txt</code> só diz <code>False</code>. Por isso ele é o guarda da porta nas outras aulas — você pergunta antes de ler ou apagar.</p>
+
+<div class="tryps" data-goal="out:True;;src:\bTest-Path\b;;semerro">
+<p class="try-task"><strong>Experimente:</strong> o arquivo <code>nota.txt</code> já existe. Pergunte se ele existe com <code>Test-Path</code>.</p>
+<pre class="script" data-file="main.ps1">Set-Content nota.txt "oi"
+# teste se nota.txt existe
+</pre>
+<pre class="solucao" data-file="main.ps1">Set-Content nota.txt "oi"
+Test-Path nota.txt
+</pre>
+</div>
+
+<hr>
+
+<h2>2. É pasta ou arquivo? <code>-PathType</code></h2>
+<p>Às vezes existe um item com aquele nome, mas você quer saber <strong>de que tipo</strong>. O parâmetro <code>-PathType</code> filtra: <code>Container</code> é pasta (um "recipiente"); <code>Leaf</code> é arquivo (uma "folha" da árvore).</p>
+<p>A pasta <code>docs</code> é um recipiente:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Test-Path docs -PathType Container
+True
+</pre>
+<p>O <code>nota.txt</code> <strong>não</strong> é pasta:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Test-Path nota.txt -PathType Container
+False
+</pre>
+<p>Mas ele é uma folha:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Test-Path nota.txt -PathType Leaf
+True
+</pre>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Pergunta</th><th>Resposta no laboratório</th></tr>
+<tr><td><code>Test-Path docs -PathType Container</code></td><td><code>True</code> — <code>docs</code> é pasta</td></tr>
+<tr><td><code>Test-Path nota.txt -PathType Container</code></td><td><code>False</code> — arquivo não é pasta</td></tr>
+<tr><td><code>Test-Path nota.txt -PathType Leaf</code></td><td><code>True</code> — <code>nota.txt</code> é arquivo</td></tr>
+</table>
+</div>
+<p>Se o caminho não existe, as duas formas também respondem <code>False</code>.</p>
+
+<hr>
+
+<h2>3. Padrão, pasta pessoal e outros "drives"</h2>
+<p>O asterisco também vale aqui: <code>*.txt</code> pergunta se <strong>algum</strong> arquivo <code>.txt</code> existe na pasta atual.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Test-Path *.txt
+True
+</pre>
+<p>A variável <code>$HOME</code> é a pasta pessoal de quem está logado (no laboratório, <code>C:\Users\ana</code>). Ela existe:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Test-Path $HOME
+True
+</pre>
+<p>O mesmo comando testa coisas que não são arquivo de disco. <code>Env:PATH</code> é a variável de ambiente <code>PATH</code>; <code>HKCU:\Software</code> é uma chave do Registro do usuário atual. Os dois existiam no laboratório. Drives como <code>Env:</code> e <code>HKCU:</code> têm a aula <a href="provedores.html">Drives e Provedores</a>.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Test-Path Env:PATH
+True
+</pre>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Test-Path HKCU:\Software
+True
+</pre>
+<div class="note">O <code>Test-Path Env:PATH</code> não lista o valor da variável — só diz se ela existe. Isso é proposital: uma listagem aberta de <code>Env:</code> pode mostrar dados que não devem ir para um guia. Para ver um valor específico, use o nome completo (<code>Env:PATH</code>, <code>Env:OS</code>), nunca um "me mostra tudo".</div>
+
+<hr>
+
+<h2>4. Decidir com <code>if</code></h2>
+<p>A resposta <code>True</code> ou <code>False</code> serve para o script escolher um caminho. A forma é: se existir, faça uma coisa; senão, faça outra. No laboratório, o <code>nota.txt</code> existia:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; if (Test-Path nota.txt) { "Achei!" } else { "Não achei" }
+Achei!
+</pre>
+<dl class="anatomy">
+  <dt>if (Test-Path nota.txt)</dt><dd>A pergunta entre parênteses. Se a resposta for <code>True</code>, o primeiro bloco roda.</dd>
+  <dt>{ "Achei!" }</dt><dd>O que fazer quando existe. As chaves delimitam o bloco.</dd>
+  <dt>else { "Não achei" }</dt><dd>O plano B, quando a resposta é <code>False</code>. Aqui ele não rodou.</dd>
+</dl>
+<p>As decisões e as chaves têm um grupo de aulas no Nível 1 (<a href="if.html">if</a>). Por enquanto, basta ver que o <code>Test-Path</code> é a pergunta que alimenta o <code>if</code>.</p>
+
+<div class="tryps" data-goal="out:Achei!;;src:\bTest-Path\b;;src:\bif\b;;semerro">
+<p class="try-task"><strong>Missão:</strong> se <code>nota.txt</code> existir, mostre <code>Achei!</code>; senão, mostre <code>Não achei</code>. Use <code>if</code> e <code>Test-Path</code>.</p>
+<pre class="script" data-file="main.ps1">Set-Content nota.txt "oi"
+# se o arquivo existir, escreva Achei!
+</pre>
+<pre class="solucao" data-file="main.ps1">Set-Content nota.txt "oi"
+if (Test-Path nota.txt) { "Achei!" } else { "Não achei" }
+</pre>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando o caminho é estranho</h2>
+
+<div class="cenario">
+<strong>Caminho inválido, caminho vazio</strong>
+<p>O <code>Test-Path</code> é manso: em vez de uma mensagem vermelha, ele costuma só responder <code>False</code>. Um nome com o caractere <code>&lt;</code>, que o Windows não aceita em arquivo, veio <code>False</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Test-Path 'C:\nome&lt;invalido&gt;.txt'
+False
+</pre>
+<p>Uma string vazia (duas aspas sem nada no meio) também respondeu <code>False</code>, sem erro na tela:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Test-Path ''
+False
+</pre>
+<p>Não é um "sim" disfarçado: o caminho vazio não aponta para arquivo nenhum. Se você esperava um <code>True</code> e veio <code>False</code>, confira se a variável que monta o caminho não chegou vazia, e se o nome não tem caractere proibido.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Test-Path nota.txt</code></td><td><code>True</code> se o caminho existe, <code>False</code> se não existe.</td></tr>
+<tr><td><code>Test-Path docs -PathType Container</code></td><td><code>True</code> só se for uma pasta.</td></tr>
+<tr><td><code>Test-Path nota.txt -PathType Leaf</code></td><td><code>True</code> só se for um arquivo.</td></tr>
+<tr><td><code>Test-Path *.txt</code></td><td><code>True</code> se algum <code>.txt</code> existir na pasta atual.</td></tr>
+<tr><td><code>Test-Path $HOME</code></td><td>Confere se a pasta pessoal existe.</td></tr>
+<tr><td><code>Test-Path Env:PATH</code></td><td>Confere se a variável de ambiente <code>PATH</code> existe (sem listar o valor).</td></tr>
+<tr><td><code>if (Test-Path nota.txt) { "Achei!" }</code></td><td>Só roda o bloco quando o arquivo existe.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Qual é a saída?</h3>
+<p>No laboratório, o que <code>Test-Path nota.txt</code> mostrou?</p>
+<div class="ex-code"><input data-answer="True" aria-label="saída"></div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual é a saída?</h3>
+<p>O que <code>Test-Path naoexiste.txt</code> mostrou?</p>
+<div class="ex-code"><input data-answer="False" aria-label="saída"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Complete o tipo</h3>
+<p>Complete para perguntar se <code>docs</code> é uma <strong>pasta</strong>:</p>
+<div class="ex-code">Test-Path docs -PathType <input data-answer="Container" aria-label="tipo"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Qual a maior diferença entre <code>Test-Path naoexiste.txt</code> e <code>Get-Content naoexiste.txt</code>?</p>
+<label><input type="radio" name="q4"> Os dois mostram o mesmo erro vermelho</label>
+<label><input type="radio" name="q4"> O <code>Test-Path</code> responde <code>False</code>, sem erro; o <code>Get-Content</code> reclama que o caminho não existe</label>
+<label><input type="radio" name="q4"> O <code>Test-Path</code> cria o arquivo automaticamente</label>
+<label><input type="radio" name="q4"> O <code>Get-Content</code> responde <code>False</code></label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">5. O <code>Test-Path nota.txt -PathType Container</code> deu <code>False</code>, mas o arquivo existe. Por quê?</p>
+<label><input type="radio" name="q5"> Porque <code>Container</code> pergunta se é pasta, e <code>nota.txt</code> é arquivo</label>
+<label><input type="radio" name="q5"> Porque o <code>Test-Path</code> não vê arquivos <code>.txt</code></label>
+<label><input type="radio" name="q5"> Porque faltou o <code>-Force</code></label>
+<label><input type="radio" name="q5"> Porque o arquivo está vazio</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">6. No laboratório, <code>Test-Path ''</code> (caminho vazio) devolveu o quê?</p>
+<label><input type="radio" name="q6"> Um erro vermelho em inglês</label>
+<label><input type="radio" name="q6"> <code>True</code>, porque a pasta atual existe</label>
+<label><input type="radio" name="q6"> <code>False</code>, sem mensagem de erro</label>
+<label><input type="radio" name="q6"> A pasta pessoal da Ana</label>
+</div>
+
+<div class="tryps" data-goal="out:True;;out:False;;src:-PathType;;src:Leaf;;src:\bTest-Path\b;;semerro">
+<p class="try-task"><strong>Missão final:</strong> teste se <code>nota.txt</code> é um arquivo com <code>-PathType Leaf</code> (deve ser <code>True</code>) e se ele é uma pasta com <code>-PathType Container</code> (deve ser <code>False</code>).</p>
+<pre class="script" data-file="main.ps1">Set-Content nota.txt "oi"
+# dois Test-Path: Leaf e Container
+</pre>
+<pre class="solucao" data-file="main.ps1">Set-Content nota.txt "oi"
+Test-Path nota.txt -PathType Leaf
+Test-Path nota.txt -PathType Container
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Test-Path</code> só responde <code>True</code> ou <code>False</code>: existe ou não existe. Não lê e não altera.</li>
+  <li><code>-PathType Container</code> pergunta se é pasta; <code>Leaf</code>, se é arquivo.</li>
+  <li>Dá para testar padrão (<code>*.txt</code>), <code>$HOME</code>, uma variável <code>Env:NOME</code> e uma chave do Registro.</li>
+  <li>O resultado alimenta um <code>if</code>: "se existir, faça isto".</li>
+  <li>Caminho inválido ou vazio, no PowerShell 7, veio <code>False</code> — não uma mensagem vermelha. Pratique numa pasta de teste.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

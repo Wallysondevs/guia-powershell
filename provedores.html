@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell drives e provedores — Env:, HKCU: e Get-PSDrive | Guia PowerShell</title>
+<meta name="description" content="Provedores e drives no PowerShell: Get-PSProvider, Get-PSDrive, variáveis de ambiente pelo nome (Env:OS, Env:USERNAME, Env:windir), HKCU: só leitura e o erro real de drive inexistente, com saídas do PowerShell 7.7.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Drives e provedores (<span class="hl">Env:</span>, <span class="hl">HKCU:</span>)</h1>
+
+<p class="intro">Até aqui, quase tudo aconteceu no disco: pastas e arquivos em <code>C:</code>. O PowerShell usa a <strong>mesma família de comandos</strong> — <code>Get-ChildItem</code>, <code>Get-Item</code>, <code>Test-Path</code> — para olhar outras "gavetas": variáveis de ambiente, o Registro, apelidos, funções. Quem apresenta essas gavetas são os <strong>provedores</strong>, e cada gaveta aparece como um <strong>drive</strong>, com um nome e dois-pontos: <code>C:</code>, <code>Env:</code>, <code>HKCU:</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é um provedor e o que é um drive, com o <code>Get-PSProvider</code> e o <code>Get-PSDrive</code>.</li>
+  <li>A ler variáveis de ambiente pelo drive <code>Env:</code> (só pelo nome, uma de cada vez) e pelo atalho <code>$env:OS</code>.</li>
+  <li>A olhar o Registro do usuário atual em <code>HKCU:</code>, só leitura, como se fosse uma pasta.</li>
+  <li>Que funções, apelidos e variáveis da sessão também moram em drives.</li>
+  <li>O erro real de pedir um drive que não existe (<code>Z:</code>).</li>
+</ul>
+</div>
+
+<p>Todas as saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta pessoal da usuária fictícia <code>ana</code>. Alguns drives (<code>HKCU:</code>, <code>HKLM:</code>, <code>Cert:</code>, <code>WSMan:</code>) existem só no Windows; no editor do guia, que roda um PowerShell 7 de Linux, eles não aparecem. Os exemplos de arquivo desta aula são só de leitura: nada é criado nem apagado no Registro.</p>
+
+<hr>
+
+<h2>A ideia: o mesmo chaveiro, prédios diferentes</h2>
+<p>Você tem um chaveiro com uma chave só, no mesmo formato, que abre o armário do escritório, a caixa de correio e a gaveta das ferramentas. O movimento da mão é o mesmo; o que tem dentro de cada móvel é que muda.</p>
+<p>No PowerShell, os comandos <code>Get-ChildItem</code>, <code>Get-Item</code> e <code>Test-Path</code> são essa chave. O provedor é o prédio (sistema de arquivos, ambiente, Registro). O drive é a porta com plaquinha: <code>C:</code>, <code>Env:</code>, <code>HKCU:</code>.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>No prédio</th><th>No PowerShell</th></tr>
+<tr><td>O tipo de prédio (arquivo, ambiente, Registro)</td><td>O <strong>provedor</strong> (<code>FileSystem</code>, <code>Environment</code>, <code>Registry</code>)</td></tr>
+<tr><td>A porta com plaquinha</td><td>O <strong>drive</strong> (<code>C:</code>, <code>Env:</code>, <code>HKCU:</code>)</td></tr>
+<tr><td>A mesma chave nas três portas</td><td><code>Get-ChildItem</code>, <code>Get-Item</code>, <code>Test-Path</code></td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>1. Quem são os provedores: <code>Get-PSProvider</code></h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-PSProvider
+
+Name                 Capabilities                                      Drives
+----                 ------------                                      ------
+Registry             ShouldProcess                                     {HKLM, HKCU}
+Alias                ShouldProcess                                     {Alias}
+Environment          ShouldProcess                                     {Env}
+FileSystem           Filter, ShouldProcess, Credentials                {C, Temp}
+Function             ShouldProcess                                     {Function}
+Variable             ShouldProcess                                     {Variable}
+
+</pre>
+<dl class="anatomy">
+  <dt>Name</dt><dd>O nome do provedor. <code>FileSystem</code> é o disco; <code>Environment</code> é o ambiente; <code>Registry</code> é o Registro do Windows.</dd>
+  <dt>Capabilities</dt><dd>O que aquele provedor sabe fazer. <code>ShouldProcess</code> quer dizer que ele respeita <code>-WhatIf</code> e <code>-Confirm</code>. O <code>FileSystem</code> ainda aceita filtro e credenciais.</dd>
+  <dt>Drives</dt><dd>As portas que ele oferece agora. O <code>FileSystem</code> no laboratório tinha <code>C</code> e <code>Temp</code>; o Registro tinha <code>HKLM</code> e <code>HKCU</code>.</dd>
+</dl>
+<p>A lista é a do laboratório no momento da coleta. No seu computador pode aparecer algum provedor a mais, se um módulo tiver sido carregado.</p>
+
+<div class="tryps" data-goal="out:FileSystem;;out:Environment;;src:\bGet-PSProvider\b;;semerro">
+<p class="try-task"><strong>Experimente:</strong> liste os provedores com <code>Get-PSProvider</code> e confira se <code>FileSystem</code> e <code>Environment</code> aparecem.</p>
+<pre class="script" data-file="main.ps1"># liste os provedores
+</pre>
+<pre class="solucao" data-file="main.ps1">Get-PSProvider
+</pre>
+</div>
+
+<hr>
+
+<h2>2. As portas: <code>Get-PSDrive</code></h2>
+<p>O <code>Get-PSDrive</code> lista os drives. Pedimos só três colunas — nome, provedor e raiz — para a tabela caber:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-PSDrive | Format-Table Name, Provider, Root -AutoSize
+
+Name     Provider                                  Root
+----     --------                                  ----
+Alias    Microsoft.PowerShell.Core\Alias           
+C        Microsoft.PowerShell.Core\FileSystem      C:\
+Cert     Microsoft.PowerShell.Security\Certificate \
+Env      Microsoft.PowerShell.Core\Environment     
+Function Microsoft.PowerShell.Core\Function        
+HKCU     Microsoft.PowerShell.Core\Registry        HKEY_CURRENT_USER
+HKLM     Microsoft.PowerShell.Core\Registry        HKEY_LOCAL_MACHINE
+Temp     Microsoft.PowerShell.Core\FileSystem      C:\Users\ana\AppData\Local\Temp\
+Variable Microsoft.PowerShell.Core\Variable        
+WSMan    Microsoft.WSMan.Management\WSMan          
+
+</pre>
+<p>Tem mais portas aqui do que na lista de provedores: <code>Cert</code> (certificados) e <code>WSMan</code> (administração remota) aparecem quando os módulos deles já estão carregados. Os dois, junto com <code>HKCU</code> e <code>HKLM</code>, são <span class="versao">só Windows</span>.</p>
+<dl class="anatomy">
+  <dt>C e Temp</dt><dd>Pastas de verdade. A raiz de <code>C</code> é <code>C:\</code>; a de <code>Temp</code> é a pasta temporária da Ana.</dd>
+  <dt>Env</dt><dd>As variáveis de ambiente. A raiz vem em branco na tabela: o "conteúdo" são os nomes das variáveis, não um caminho de disco.</dd>
+  <dt>HKCU e HKLM</dt><dd>O Registro do usuário atual (<code>HKEY_CURRENT_USER</code>) e o da máquina (<code>HKEY_LOCAL_MACHINE</code>).</dd>
+  <dt>Alias, Function, Variable</dt><dd>Apelidos, funções e variáveis da sessão atual.</dd>
+</dl>
+
+<hr>
+
+<h2>3. Variáveis de ambiente: <code>Env:</code></h2>
+<p>Ambiente, aqui, são as configurações que o Windows (e os programas) expõem com um nome: o tipo de sistema, o usuário logado, a pasta do Windows. Você lê <strong>pelo nome</strong>, como quem puxa uma ficha do fichário — não despeja o fichário inteiro na mesa.</p>
+<div class="warning">
+<strong>Não liste o drive <code>Env:</code> aberto</strong> (nada de <code>Get-ChildItem Env:</code> nem <code>dir Env:</code>). Essa listagem mistura variáveis úteis com dados da sessão que não devem ir para um guia nem para um script compartilhado. Peça só o nome que você precisa.
+</div>
+<p>No laboratório pedimos três nomes, e só esses três:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Item Env:OS, Env:USERNAME, Env:windir
+
+Name                           Value
+----                           -----
+OS                             Windows_NT
+USERNAME                       ana
+windir                         C:\Windows
+
+</pre>
+<dl class="anatomy">
+  <dt>Get-Item Env:OS, Env:USERNAME, Env:windir</dt><dd>Três fichas, pelos nomes completos. A vírgula monta a lista.</dd>
+  <dt>OS</dt><dd>O tipo do sistema. No Windows vem <code>Windows_NT</code>.</dd>
+  <dt>USERNAME</dt><dd>O usuário logado. No guia usamos a usuária fictícia <code>ana</code>; no seu computador aparece o seu nome.</dd>
+  <dt>windir</dt><dd>A pasta do Windows, em geral <code>C:\Windows</code>.</dd>
+</dl>
+<p>Há um atalho ainda menor: <code>$env:NOME</code> devolve só o valor, sem a tabelinha.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $env:OS
+Windows_NT
+</pre>
+
+<div class="tryps" data-goal="out:True;;src:Env:PATH;;src:\bTest-Path\b;;semerro">
+<p class="try-task"><strong>Missão:</strong> confira se a variável de ambiente <code>PATH</code> existe, com <code>Test-Path Env:PATH</code> (deve ser <code>True</code>). Não liste o drive <code>Env:</code> inteiro.</p>
+<pre class="script" data-file="main.ps1"># teste só Env:PATH
+</pre>
+<pre class="solucao" data-file="main.ps1">Test-Path Env:PATH
+</pre>
+</div>
+
+<hr>
+
+<h2>4. O Registro do usuário: <code>HKCU:</code></h2>
+<p><span class="versao">só Windows</span> O Registro é o "armário de configurações" do Windows. O drive <code>HKCU:</code> (Hive Key Current User, a chave do usuário atual) deixa você <strong>navegar como se fosse pasta</strong>, só lendo. Não vamos criar, alterar nem apagar chave nenhuma nesta aula.</p>
+<p>A listagem da raiz mostra as pastas padrão de um usuário do Windows. São nomes de sistema, não arquivos pessoais:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-ChildItem HKCU:\ -Name
+AppEvents
+Console
+Control Panel
+Environment
+EUDC
+Keyboard Layout
+Network
+Printers
+SOFTWARE
+System
+Volatile Environment
+</pre>
+<p>Uma chave útil para este guia está em <code>Control Panel\International</code>: o idioma e o formato curto de data. Pedimos só esses dois nomes com <code>Get-ItemProperty</code> ("obtenha as propriedades do item"):</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-ItemProperty 'HKCU:\Control Panel\International' -Name LocaleName, sShortDate
+
+LocaleName   : pt-BR
+sShortDate   : dd/MM/yyyy
+PSPath       : Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\Control Panel\International
+PSParentPath : Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\Control Panel
+PSChildName  : International
+PSDrive      : HKCU
+PSProvider   : Microsoft.PowerShell.Core\Registry
+
+</pre>
+<p><code>LocaleName</code> veio <code>pt-BR</code> e <code>sShortDate</code> veio <code>dd/MM/yyyy</code> — é por isso que o <code>Get-Date -Format "dd/MM/yyyy"</code> da primeira aula combina com o que o Windows já usa. As linhas <code>PSPath</code>, <code>PSParentPath</code>, <code>PSChildName</code>, <code>PSDrive</code> e <code>PSProvider</code> são a ficha técnica que o PowerShell acrescenta: de onde veio o item, em qual drive e por qual provedor.</p>
+<div class="note">O <code>HKLM:</code> (a máquina inteira) e qualquer alteração no Registro ficam para o Nível 3, e mesmo lá só entram com chave de teste e autorização explícita. Aqui, só leitura em <code>HKCU:</code>.</div>
+
+<hr>
+
+<h2>5. Funções, apelidos, variáveis e certificados</h2>
+<p>Os outros drives do laboratório também se listam com <code>Get-ChildItem</code>. Os cinco primeiros nomes em <code>Function:</code> são atalhos antigos de troca de drive (<code>A:</code>, <code>B:</code>, <code>C:</code>, <code>cd..</code>, <code>cd\</code>):</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-ChildItem Function: | Select-Object -First 5
+
+CommandType     Name                                               Version    Source
+-----------     ----                                               -------    ------
+Function        A:                                                            
+Function        B:                                                            
+Function        C:                                                            
+Function        cd..                                                          
+Function        cd\                                                           
+
+</pre>
+<p>Em <code>Alias:</code> pedimos só a conta, sem despejar a lista: no laboratório havia <code>140</code> apelidos. No seu computador o número pode ser outro.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-ChildItem Alias: | Measure-Object
+
+Count             : 140
+Average           : 
+Sum               : 
+Maximum           : 
+Minimum           : 
+StandardDeviation : 
+Property          : 
+
+</pre>
+<p>Em <code>Variable:</code>, as cinco primeiras variáveis da sessão. A <code>?</code> é o mesmo <code>$?</code> da aula do primeiro comando (se o último comando deu certo). <code>^</code> e <code>$</code> são automáticas; <code>args</code> é a lista de argumentos do script, aqui vazia; <code>ConfirmPreference</code> é o nível padrão de "tem certeza?".</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-ChildItem Variable: | Select-Object -First 5
+
+Name                           Value
+----                           -----
+?                              True
+^                              
+$                              
+args                           {}
+ConfirmPreference              High
+
+</pre>
+<p><span class="versao">só Windows</span> O drive <code>Cert:</code> guarda os armazenamentos de certificado do usuário. A listagem abaixo é só dos <strong>nomes das pastas</strong> padrão, não dos certificados em si:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-ChildItem Cert:\CurrentUser -Name
+My
+REQUEST
+AuthRoot
+Disallowed
+TrustedPublisher
+UserDS
+TrustedPeople
+Trust
+ClientAuthIssuer
+Root
+SmartCardRoot
+CA
+Local NonRemovable Certificates
+</pre>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>O drive não existe</strong>
+<p>Pedimos a listagem de <code>Z:</code>, um drive que não estava no computador do laboratório:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-ChildItem Z:\
+Get-ChildItem: Cannot find drive. A drive with the name 'Z' does not exist.
+</pre>
+<p>A mensagem veio em <strong>inglês</strong>: <code>Cannot find drive. A drive with the name 'Z' does not exist</code> — "não é possível encontrar o drive; um drive com o nome Z não existe". O PowerShell procurou a porta <code>Z:</code> e não havia plaquinha com esse nome.</p>
+<p><strong>Como resolver:</strong> confira os drives com <code>Get-PSDrive</code>. Se <code>Z:</code> é um pendrive ou um disco de rede, ele só aparece quando estiver conectado. Não é um erro de grafia do <code>Get-ChildItem</code>: o comando existe; a porta é que não está lá.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Get-PSProvider</code></td><td>Lista os provedores e os drives de cada um.</td></tr>
+<tr><td><code>Get-PSDrive</code></td><td>Lista os drives visíveis agora.</td></tr>
+<tr><td><code>Get-Item Env:OS, Env:USERNAME, Env:windir</code></td><td>Lê só essas três variáveis de ambiente, pelo nome.</td></tr>
+<tr><td><code>$env:OS</code></td><td>Atalho que devolve só o valor de <code>OS</code>.</td></tr>
+<tr><td><code>Test-Path Env:PATH</code></td><td>Confere se a variável <code>PATH</code> existe, sem listar o valor.</td></tr>
+<tr><td><code>Get-ChildItem HKCU:\ -Name</code></td><td><span class="versao">só Windows</span> Lista as chaves da raiz do Registro do usuário, só os nomes.</td></tr>
+<tr><td><code>Get-ItemProperty 'HKCU:\Control Panel\International' -Name LocaleName, sShortDate</code></td><td><span class="versao">só Windows</span> Lê o idioma e o formato curto de data.</td></tr>
+<tr><td><code>Get-ChildItem Z:\</code></td><td>Falha se o drive <code>Z:</code> não existir.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete para listar os provedores do PowerShell:</p>
+<div class="ex-code"><input data-answer="Get-PSProvider" aria-label="cmdlet"></div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual é a saída?</h3>
+<p>No laboratório, o que <code>$env:OS</code> mostrou?</p>
+<div class="ex-code"><input data-answer="Windows_NT" aria-label="saída"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Complete o drive</h3>
+<p>Complete para ler só a variável de ambiente <code>USERNAME</code> (sem listar o <code>Env:</code> inteiro):</p>
+<div class="ex-code">Get-Item Env:<input data-answer="USERNAME" aria-label="nome"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Qual é a forma segura de olhar uma variável de ambiente nesta aula?</p>
+<label><input type="radio" name="q4"> <code>Get-ChildItem Env:</code>, para ver todas de uma vez</label>
+<label><input type="radio" name="q4"> Pedir pelo nome, como <code>Get-Item Env:OS</code> ou <code>$env:OS</code></label>
+<label><input type="radio" name="q4"> <code>dir Env:</code>, que é mais curto</label>
+<label><input type="radio" name="q4"> Apagar o drive <code>Env:</code> e recriar</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">5. O drive <code>HKCU:</code> é o quê?</p>
+<label><input type="radio" name="q5"> O Registro do usuário atual, acessível como se fosse uma pasta (só Windows)</label>
+<label><input type="radio" name="q5"> A pasta de fotos da Ana</label>
+<label><input type="radio" name="q5"> Um apelido do <code>Get-Content</code></label>
+<label><input type="radio" name="q5"> O disco <code>C:</code> com outro nome</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">6. O <code>Get-ChildItem Z:\</code> respondeu "Cannot find drive… 'Z' does not exist". O que isso quer dizer?</p>
+<label><input type="radio" name="q6"> O <code>Get-ChildItem</code> não existe no PowerShell 7</label>
+<label><input type="radio" name="q6"> A pasta de teste foi apagada</label>
+<label><input type="radio" name="q6"> Não há um drive chamado <code>Z:</code> neste computador, neste momento</label>
+<label><input type="radio" name="q6"> É preciso formatar o disco <code>C:</code></label>
+</div>
+
+<div class="tryps" data-goal="out:Alias;;src:\bGet-PSDrive\b;;semerro">
+<p class="try-task"><strong>Missão final:</strong> liste os drives com <code>Get-PSDrive</code> e confira se o drive <code>Alias</code> aparece.</p>
+<pre class="script" data-file="main.ps1"># liste os drives
+</pre>
+<pre class="solucao" data-file="main.ps1">Get-PSDrive
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Provedores são os "prédios" (<code>FileSystem</code>, <code>Environment</code>, <code>Registry</code>…). Drives são as portas (<code>C:</code>, <code>Env:</code>, <code>HKCU:</code>).</li>
+  <li>Os mesmos comandos de pasta servem nesses drives: <code>Get-ChildItem</code>, <code>Get-Item</code>, <code>Test-Path</code>.</li>
+  <li>Em <code>Env:</code>, peça <strong>pelo nome</strong> (<code>Get-Item Env:OS</code> ou <code>$env:OS</code>). Não liste o drive aberto.</li>
+  <li><code>HKCU:</code>, <code>HKLM:</code>, <code>Cert:</code> e <code>WSMan:</code> são só do Windows. Nesta aula, o Registro é só leitura.</li>
+  <li>Drive inexistente (<code>Z:</code>) gera erro em inglês: <code>Cannot find drive</code>. Confira com <code>Get-PSDrive</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
