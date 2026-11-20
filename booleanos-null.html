@@ -104,6 +104,17 @@ Token '??' inesperado na expressão ou instrução.
 </pre>
 "Token (pedaço) <code>??</code> inesperado." O 5.1 não conhece esse sinal. Lá, use um <code>if</code>: <code>if ($null -eq $a) { "padrão" } else { $a }</code>.</div>
 <hr>
+<h2>Formas diferentes de dar um valor padrão</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>$a ?? "padrão"</code></td><td>Curto e claro. Só no PowerShell 7.</td></tr>
+<tr><td><code>if ($null -eq $a) { "padrão" } else { $a }</code></td><td>Funciona no 7 e no 5.1.</td></tr>
+<tr><td><code>$a ??= "padrão"</code></td><td>Guarda o padrão em <code>$a</code> se ela estiver nula. Só no 7.</td></tr>
+<tr><td><code>if ($a) { … }</code></td><td>Testa "tem alguma coisa?"; cuidado: <code>0</code> e <code>""</code> também contam como falso.</td></tr>
+</table>
+</div>
+<hr>
 <h2>Quando dá errado</h2>
 <div class="cenario">
 <strong>Usou <code>??</code> no Windows PowerShell 5.1</strong>
@@ -112,6 +123,19 @@ Token '??' inesperado na expressão ou instrução.
 <div class="cenario">
 <strong>Escreveu <code>true</code> sem o <code>$</code></strong>
 <p>Sem o cifrão, <code>true</code> é só uma palavra, e o PowerShell procura um comando com esse nome. Escreva sempre <code>$true</code> e <code>$false</code>.</p>
+</div>
+<hr>
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>$true</code>, <code>$false</code></td><td>Verdadeiro e falso (tipo Boolean).</td></tr>
+<tr><td><code>$null</code></td><td>Nada, ausência de valor.</td></tr>
+<tr><td><code>$null -eq $x</code></td><td><code>$x</code> é nulo? (o <code>$null</code> à esquerda).</td></tr>
+<tr><td><code>$null -ne $x</code></td><td><code>$x</code> tem valor?</td></tr>
+<tr><td><code>$a ?? $b</code></td><td><code>$a</code>, ou <code>$b</code> se <code>$a</code> for nulo (só no 7).</td></tr>
+<tr><td><code>0</code>, <code>""</code>, <code>@()</code></td><td>Também contam como falso no <code>if</code>.</td></tr>
+</table>
 </div>
 <hr>
 <h2>Exercícios</h2>
@@ -125,19 +149,25 @@ Token '??' inesperado na expressão ou instrução.
 <p>Complete para usar "visitante" quando <code>$nome</code> for nulo:</p>
 <div class="ex-code">$nome <input data-answer="??" aria-label="operador"> "visitante"</div>
 </div>
+<div class="exercise">
+<h3>3. Verdadeiro</h3>
+<p>Complete com o valor verdadeiro:</p>
+<div class="ex-code">$ativo = <input data-answer="$true" aria-label="resposta"></div>
+</div>
+
 <div class="mc" data-answer="3">
-<p class="mc-q">3. Qual destes conta como <strong>verdadeiro</strong> no <code>if</code>?</p>
-<label><input type="radio" name="q3"> <code>0</code></label>
-<label><input type="radio" name="q3"> <code>""</code></label>
-<label><input type="radio" name="q3"> <code>"Ana"</code></label>
-<label><input type="radio" name="q3"> <code>$null</code></label>
+<p class="mc-q">4. Qual destes conta como <strong>verdadeiro</strong> no <code>if</code>?</p>
+<label><input type="radio" name="q4"> <code>0</code></label>
+<label><input type="radio" name="q4"> <code>""</code></label>
+<label><input type="radio" name="q4"> <code>"Ana"</code></label>
+<label><input type="radio" name="q4"> <code>$null</code></label>
 </div>
 <div class="mc" data-answer="2">
-<p class="mc-q">4. Qual é o jeito recomendado de testar se <code>$x</code> é nulo?</p>
-<label><input type="radio" name="q4"> <code>$x -eq $null</code></label>
-<label><input type="radio" name="q4"> <code>$null -eq $x</code></label>
-<label><input type="radio" name="q4"> <code>$x = $null</code></label>
-<label><input type="radio" name="q4"> <code>null -eq $x</code></label>
+<p class="mc-q">5. Qual é o jeito recomendado de testar se <code>$x</code> é nulo?</p>
+<label><input type="radio" name="q5"> <code>$x -eq $null</code></label>
+<label><input type="radio" name="q5"> <code>$null -eq $x</code></label>
+<label><input type="radio" name="q5"> <code>$x = $null</code></label>
+<label><input type="radio" name="q5"> <code>null -eq $x</code></label>
 </div>
 <div class="tryps" data-goal="out:Cidade: não informada;;src:\?\?;;semerro">
 <p class="try-task"><strong>Missão final:</strong> com <code>??</code>, mostre <code>Cidade: não informada</code> quando <code>$cidade</code> for nulo.</p>
