@@ -73,10 +73,11 @@
         // no PowerShell maiúsculas não importam nos comandos, então o código é comparado sem diferenciar
         rx("mi", cod, "o código usa " + psfCurto(val.replace(/\\b/g, "").replace(/\\(.)/g, "$1")));
       } else if (tipo === "semerro") {
-        // saída vazia conta como "sem erro": Copy-Item, New-Item etc. não mostram nada quando dão certo
+        // sem saída colada não há como saber: vira conferência manual (ver abaixo)
         var linha = psfTemErro(saida);
-        r.ok = !linha;
-        r.desc = linha ? "rodar sem erros (achei: \u201c" + psfCurto(linha.trim()) + "\u201d)" : saida.trim() === "" ? "rodou sem erros (nenhuma saída colada: tudo bem se o comando não mostra nada)" : "rodou sem erros";
+        // saída vazia ("(sem saída)") não comprova execução: vira item para o leitor confirmar
+        r.ok = linha ? false : saida.trim() === "" ? null : true;
+        r.desc = linha ? "rodar sem erros (achei: \u201c" + psfCurto(linha.trim()) + "\u201d)" : saida.trim() === "" ? "confirme que o comando executou sem erros no seu terminal" : "rodou sem erros";
       } else if (tipo === "erro") {
         r.ok = val !== "" && saida.indexOf(psfNormaliza(val)) !== -1;
         r.desc = "aparece o erro \u201c" + psfCurto(val) + "\u201d";
@@ -201,7 +202,8 @@
       html += "</ul>";
       if (!metas.length) html = "";
       var fim = faltam ? '<p class="ex-result bad">Ainda não: falta' + (faltam > 1 ? "m " + faltam + " metas" : " 1 meta") + ' (marcada' + (faltam > 1 ? "s" : "") + " com ✘). Ajuste e rode de novo." + (out.value.trim() ? "" : " Você colou a saída do terminal na caixa acima?") + "</p>"
-        : '<p class="ex-result ok">Missão cumprida!' + (manuais ? " Só falta você conferir o" + (manuais > 1 ? "s itens marcados" : " item marcado") + " com ☐." : "") + "</p>";
+        : manuais ? '<p class="ex-result">Quase lá! O que dá pra conferir aqui está ✔. Confira você mesmo o' + (manuais > 1 ? "s itens marcados" : " item marcado") + " com ☐ e a missão está cumprida.</p>"
+        : '<p class="ex-result ok">Missão cumprida!</p>';
       resDiv.innerHTML = html + fim;
     });
 
