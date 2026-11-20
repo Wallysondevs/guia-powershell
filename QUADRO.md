@@ -62,7 +62,7 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 | `operadores-colecao.html` -contains e -in | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 | `operadores-logicos.html` -and, -or e -not | Tito (de Luna, 17:57) | [x] | [x] | [x] | [x] | [x] | fc81784 |
 | `operador-formato.html` Formatando Textos (-f) | Tito (de Luna, 17:57) | [x] | [x] | [x] | [x] | [x] | 39da399 |
-| `atribuicao.html` Atribuição (+=, ++) | Tito (de Luna, 17:57) | [x] | [x] | [x] | [x] | [x] | 876da13; saída de ++/-- retida (coleta suspeita), pede recoleta |
+| `atribuicao.html` Atribuição (+=, ++) | Tito (de Luna, 17:57) | [x] | [x] | [x] | [x] | [x] | 876da13 + 97c46fc (saída real do ++/-- da recoleta) |
 
 ## Saída e Entrada
 
