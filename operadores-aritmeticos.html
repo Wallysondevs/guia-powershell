@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Operadores Aritméticos — + - * / % | Guia PowerShell</title>
+<meta name="description" content="Operadores aritméticos no PowerShell: soma, subtração, multiplicação, divisão, resto, ordem das operações, [math] e os erros reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">Operadores Aritméticos</span></h1>
+
+<p class="intro">Total de vendas, média da turma, quantas mesas para a festa: o script faz contas o tempo todo. Os operadores aritméticos são os sinais dessas contas.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Os operadores <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code> e <code>%</code>.</li>
+  <li>A ordem das operações e o papel dos parênteses.</li>
+  <li>Contas com cada item de uma lista.</li>
+  <li>Ferramentas do <code>[math]</code>: <code>Abs</code>, <code>Ceiling</code>, <code>Floor</code>, <code>Max</code>.</li>
+  <li>Os erros reais de dividir por zero e de fazer conta com texto.</li>
+</ul>
+</div>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português.</p>
+<hr>
+<h2>A ideia: os botões da calculadora</h2>
+<p>Operador é um sinal que faz uma operação com dois valores, como os botões <code>+</code> e <code>x</code> da calculadora. Os aritméticos são os da matemática da escola. A aula <a href="numeros.html">Números</a> apresentou os números; aqui o foco são os sinais.</p>
+<hr>
+<h2>1. Os operadores</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 5 + 2
+7
+PS C:\Users\ana&gt; 5 - 2
+3
+PS C:\Users\ana&gt; 5 * 2
+10
+PS C:\Users\ana&gt; 5 / 2
+2,5
+PS C:\Users\ana&gt; 5 % 2
+1
+</pre>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Operador</th><th>O que faz</th></tr>
+<tr><td><code>+</code></td><td>Soma (com texto, junta).</td></tr>
+<tr><td><code>-</code></td><td>Subtração.</td></tr>
+<tr><td><code>*</code></td><td>Multiplicação.</td></tr>
+<tr><td><code>/</code></td><td>Divisão (pode dar decimal).</td></tr>
+<tr><td><code>%</code></td><td>Resto da divisão.</td></tr>
+</table>
+</div>
+<h2>2. Parênteses mudam o resultado</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 2 + 3 * 4
+14
+PS C:\Users\ana&gt; (2 + 3) * 4
+20
+</pre>
+<p>Primeiro <code>*</code>, <code>/</code> e <code>%</code>; depois <code>+</code> e <code>-</code>. Na dúvida, use parênteses: além de garantir a ordem, deixam a conta mais fácil de ler.</p>
+<div class="tryps" data-goal="out:Média: 8;;semerro">
+<p class="try-task"><strong>Experimente:</strong> a média das notas 7 e 9 deu errado. Coloque parênteses em volta da soma.</p>
+<pre class="script" data-file="main.ps1">"Média: $(7 + 9 / 2)"
+</pre>
+<pre class="solucao" data-file="main.ps1">"Média: $((7 + 9) / 2)"
+</pre>
+</div>
+<h2>3. Conta com cada item de uma lista</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 1, 2, 3 | ForEach-Object { $_ * 10 }
+10
+20
+30
+PS C:\Users\ana&gt; (1, 2, 3).Count
+3
+</pre>
+<p>O <code>ForEach-Object</code> aplica a conta a cada item (<code>$_</code> é o item da vez). <code>.Count</code> conta quantos itens a lista tem: útil para calcular médias.</p>
+<h2>4. Com [math]</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; [math]::Abs(-8)
+8
+PS C:\Users\ana&gt; [math]::Ceiling(3.1)
+4
+PS C:\Users\ana&gt; [math]::Floor(3.9)
+3
+PS C:\Users\ana&gt; [math]::Max(3, 9)
+9
+</pre>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Ferramenta</th><th>O que faz</th></tr>
+<tr><td><code>Abs</code></td><td>Tira o sinal: -8 vira 8.</td></tr>
+<tr><td><code>Ceiling</code></td><td>Arredonda para cima ("teto").</td></tr>
+<tr><td><code>Floor</code></td><td>Arredonda para baixo ("chão").</td></tr>
+<tr><td><code>Max</code></td><td>O maior dos dois.</td></tr>
+</table>
+</div>
+<p>Exemplo da Ana: 25 convidados, 6 por mesa. <code>[math]::Ceiling(25 / 6)</code> dá as mesas necessárias, porque não dá para ter meia mesa.</p>
+<hr>
+<h2>Quando dá errado</h2>
+<div class="cenario">
+<strong>Dividiu por zero</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 5 / 0
+RuntimeException: Attempted to divide by zero.
+</pre>
+<p>"Tentou dividir por zero." <strong>Como resolver:</strong> confira o divisor antes com um <code>if</code>.</p>
+</div>
+<div class="cenario">
+<strong>Fez conta com texto</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; "Ana" / 2
+InvalidArgument: Cannot convert value "Ana" to type "System.Int32". Error: "The input string 'Ana' was not in a correct format."
+</pre>
+<p>"Não consigo converter Ana para número inteiro." Para dividir, o PowerShell tentou transformar o texto em número e não conseguiu. <strong>Como resolver:</strong> confira se a variável tem mesmo um número; se veio de arquivo, converta (aula <a href="conversao.html">Conversão de Tipos</a>).</p>
+</div>
+<hr>
+<h2>Exercícios</h2>
+<div class="exercise">
+<h3>1. Multiplicar</h3>
+<p>Complete para multiplicar 6 por 7:</p>
+<div class="ex-code">6 <input data-answer="*" aria-label="operador"> 7</div>
+</div>
+<div class="exercise">
+<h3>2. Para cima</h3>
+<p>Complete para arredondar 2.1 para cima:</p>
+<div class="ex-code">[math]::<input data-answer="Ceiling" aria-label="resposta">(2.1)</div>
+</div>
+<div class="mc" data-answer="2">
+<p class="mc-q">3. Quanto dá <code>(2 + 3) * 4</code>?</p>
+<label><input type="radio" name="q3"> 14</label>
+<label><input type="radio" name="q3"> 20</label>
+<label><input type="radio" name="q3"> 24</label>
+<label><input type="radio" name="q3"> 9</label>
+</div>
+<div class="mc" data-answer="3">
+<p class="mc-q">4. Quanto dá <code>5 % 2</code>?</p>
+<label><input type="radio" name="q4"> 2,5</label>
+<label><input type="radio" name="q4"> 2</label>
+<label><input type="radio" name="q4"> 1</label>
+<label><input type="radio" name="q4"> 0</label>
+</div>
+<div class="tryps" data-goal="outre:Mesas: 5\b;;src:Ceiling;;semerro">
+<p class="try-task"><strong>Missão final:</strong> 25 convidados, 6 por mesa. Mostre <code>Mesas: 5</code> usando <code>[math]::Ceiling</code>.</p>
+<pre class="script" data-file="main.ps1">$convidados = 25
+$porMesa = 6
+"Mesas: $($convidados / $porMesa)"
+</pre>
+<pre class="solucao" data-file="main.ps1">$convidados = 25
+$porMesa = 6
+"Mesas: $([math]::Ceiling($convidados / $porMesa))"
+</pre>
+</div>
+<hr>
+<h2>Resumo</h2>
+<ul>
+  <li><code>+ - * / %</code>; <code>*</code>, <code>/</code> e <code>%</code> vêm antes.</li>
+  <li>Parênteses mudam a ordem e facilitam a leitura.</li>
+  <li><code>ForEach-Object { $_ * 10 }</code> faz a conta em cada item.</li>
+  <li><code>[math]</code>: <code>Abs</code>, <code>Ceiling</code>, <code>Floor</code>, <code>Max</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
