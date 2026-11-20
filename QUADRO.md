@@ -68,15 +68,15 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 
 | Página | Autor | cmds | ① | ② | ③ | ④ | Obs |
 |---|---|---|---|---|---|---|---|
-| `write-host-output.html` Write-Host × Write-Output | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `read-host.html` Read-Host: Lendo o Teclado | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `write-host-output.html` Write-Host × Write-Output | Tito | [x] | [x] | [x] | [x] | [x] | c66eb98 |
+| `read-host.html` Read-Host: Lendo o Teclado | Tito | [x] | [x] | [x] | [x] | [x] | b592d9f+8db4a53; prompt interativo descrito em prosa (não coletado) |
 | `write-outros.html` Write-Warning, Write-Verbose e Companhia | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 
 ## Decisões
 
 | Página | Autor | cmds | ① | ② | ③ | ④ | Obs |
 |---|---|---|---|---|---|---|---|
-| `if.html` if | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `if.html` if | Tito | [x] | [x] | [x] | [x] | [x] | d21400c; formato ParserError do console descrito (não coletado) |
 | `elseif-else.html` elseif e else | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 | `switch.html` switch | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 
