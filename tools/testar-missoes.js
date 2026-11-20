@@ -10,11 +10,12 @@
      node tools/testar-missoes.js --secao "Pastas e Arquivos"
      node tools/testar-missoes.js --pssim assets/pssim.js
 
-   O avaliador de data-goal é recortado de assets/rode-local.js
-   (trecho psf-avaliador). Contrato do pssim (Zeca): o arquivo define
-   o global PSSim (ou pssim) com PSSim.run(codigo) e, no navegador,
+   Quando o pssim está carregado, as metas são avaliadas pelo próprio
+   simulador: PSSim.testar(goal, codigo) (ou PSSim.avaliar). O semerro
+   usa os erros reais do pssim e o exitCode — não uma heurística no
+   texto da saída (o aviso "cannot find the Help files" do Get-Help
+   não é erro). Contrato (Zeca): PSSim.run(codigo); no navegador,
    PSSim.caixas[i].testar("inicial"|"solucao") → {ok, metas, saida}.
-   O testador em Node usa PSSim.run; o testar-navegador.js usa .testar.
    ========================================================= */
 "use strict";
 
@@ -24,7 +25,6 @@ const vm = require("vm");
 const ROOT = path.resolve(__dirname, "..");
 const DEFAULT_MISSOES = path.join(__dirname, "missoes.json");
 const DEFAULT_PSSIM = path.join(ROOT, "assets", "pssim.js");
-const RODE_LOCAL = path.join(ROOT, "assets", "rode-local.js");
 
 function uso() {
   return [
@@ -51,25 +51,6 @@ function args() {
   return out;
 }
 
-function carregarAvaliador() {
-  if (!fs.existsSync(RODE_LOCAL)) {
-    throw new Error("não achei assets/rode-local.js (preciso do avaliador de data-goal).");
-  }
-  const src = fs.readFileSync(RODE_LOCAL, "utf8");
-  const m = src.match(/\/\* psf-avaliador:inicio[^*]*\*\/\s*([\s\S]*?)\s*\/\* psf-avaliador:fim \*\//);
-  if (!m) throw new Error("não achei o trecho psf-avaliador em rode-local.js.");
-  const ctx = {};
-  vm.createContext(ctx);
-  vm.runInContext(
-    m[1] + "\nthis.psfAvaliar = psfAvaliar;\nthis.psfNormaliza = psfNormaliza;\n",
-    ctx,
-    { filename: "rode-local.js#avaliador" }
-  );
-  if (typeof ctx.psfAvaliar !== "function") {
-    throw new Error("o trecho recortado de rode-local.js não exportou psfAvaliar.");
-  }
-  return ctx;
-}
 
 function shimDocument() {
   function el() {
@@ -102,111 +83,99 @@ function shimDocument() {
 }
 
 function carregarPssim(pssimPath) {
-  const code = fs.readFileSync(pssimPath, "utf8");
-  const sandbox = {
-    console,
-    setTimeout, clearTimeout,
-    setInterval, clearInterval,
-    Buffer,
-    process: { env: {} }
-  };
-  sandbox.globalThis = sandbox;
-  sandbox.global = sandbox;
-  sandbox.window = sandbox;
-  sandbox.self = sandbox;
-  sandbox.document = shimDocument();
-  vm.createContext(sandbox);
-  vm.runInContext(code, sandbox, { filename: pssimPath, displayErrors: true });
-  const sim = sandbox.PSSim || sandbox.pssim;
-  if (!sim) {
+  const resolved = path.resolve(pssimPath);
+  let sim = null;
+  try {
+    delete require.cache[resolved];
+    sim = require(resolved);
+  } catch (e) {
+    const code = fs.readFileSync(resolved, "utf8");
+    const sandbox = {
+      console,
+      setTimeout, clearTimeout,
+      setInterval, clearInterval,
+      Buffer,
+      process: { env: {} },
+      module: { exports: {} },
+      exports: {}
+    };
+    sandbox.module.exports = sandbox.exports;
+    sandbox.globalThis = sandbox;
+    sandbox.global = sandbox;
+    sandbox.window = sandbox;
+    sandbox.self = sandbox;
+    sandbox.document = shimDocument();
+    vm.createContext(sandbox);
+    vm.runInContext(code, sandbox, { filename: resolved, displayErrors: true });
+    sim = sandbox.PSSim || sandbox.pssim || sandbox.module.exports;
+  }
+  if (!sim || (typeof sim !== "object" && typeof sim !== "function")) {
     throw new Error("pssim.js carregou, mas não definiu o global PSSim nem pssim (o site.js procura um dos dois, de forma síncrona).");
   }
-  const run = typeof sim.run === "function" ? sim.run.bind(sim)
-    : (typeof sim === "function" ? sim : null);
-  if (typeof run !== "function") {
-    throw new Error("O global PSSim/pssim precisa oferecer run(codigo) — ver o contrato no QUADRO.md.");
+  if (typeof sim.testar !== "function" && typeof sim.avaliar !== "function" && typeof sim.run !== "function") {
+    throw new Error("O global PSSim/pssim precisa oferecer testar(goal, codigo) ou avaliar(goal, codigo) — ver o contrato no QUADRO.md.");
   }
-  return function rodar(codigo) {
+  return sim;
+}
+
+function textoSaida(s, n) {
+  s = s == null ? "" : String(s);
+  n = n || 200;
+  s = s.replace(/\s+$/, "");
+  return s.length > n ? s.slice(0, n) + "…" : s;
+}
+
+function avaliarComPssim(sim, goal, codigo) {
+  let t;
+  if (typeof sim.testar === "function") {
+    t = sim.testar(goal, codigo);
+    if (t && typeof t.then === "function") {
+      throw new Error("PSSim.testar deve ser síncrono no testador (sem Promise).");
+    }
+  } else if (typeof sim.avaliar === "function") {
+    const metas = sim.avaliar(goal, codigo);
+    t = {
+      metas: metas || [],
+      ok: !!(metas && metas.length && metas.every(function (m) { return m.ok === true; })),
+      saida: undefined
+    };
+  } else {
+    // último recurso: PSSim.run + erros/exitCode que o pssim reporta (sem olhar /Cannot find/ na saída)
+    const run = typeof sim.run === "function" ? sim.run.bind(sim) : sim;
     const r = run(codigo);
     if (r && typeof r.then === "function") {
       throw new Error("PSSim.run deve ser síncrono no testador (sem Promise).");
     }
-    if (r == null) return { saida: "", exitCode: 0, arquivos: {} };
-    if (typeof r === "string") return { saida: r, exitCode: 0, arquivos: {} };
-    return {
-      saida: r.saida != null ? String(r.saida) : String(r.stdout || ""),
-      exitCode: r.exitCode,
-      arquivos: r.arquivos || r.files || {}
-    };
-  };
-}
-
-function nomeArquivo(mapa, nome) {
-  if (!mapa || nome == null) return undefined;
-  if (Object.prototype.hasOwnProperty.call(mapa, nome)) return mapa[nome];
-  const baixo = String(nome).replace(/\\/g, "/").replace(/^\.\//, "");
-  for (const k of Object.keys(mapa)) {
-    if (String(k).replace(/\\/g, "/").replace(/^\.\//, "") === baixo) return mapa[k];
+    const erros = (r && r.erros) || (r && r.erro != null && r.erro !== "" ? [r.erro] : []);
+    const metas = String(goal || "").split(";;").map(function (meta) {
+      meta = meta.trim();
+      if (!meta) return null;
+      const k = meta.indexOf(":"), tipo = (k === -1 ? meta : meta.slice(0, k)).trim();
+      if (tipo === "semerro") {
+        return { tipo: tipo, ok: erros.length === 0, desc: erros.length ? ("rodar sem erros (apareceu: " + erros[0] + ")") : "rodou sem erros", falha: erros.length ? String(erros[0]).split("\n")[0] : undefined };
+      }
+      if (tipo === "exit") {
+        const val = k === -1 ? "" : meta.slice(k + 1);
+        const ok = r && r.exitCode != null && Number(r.exitCode) === Number(val);
+        return { tipo: tipo, ok: ok, desc: "o código de saída é " + val, falha: ok ? undefined : "exitCode=" + (r && r.exitCode) };
+      }
+      return { tipo: tipo, ok: false, desc: tipo, falha: "sem PSSim.testar/avaliar, não avalio a meta “" + tipo + "”" };
+    }).filter(Boolean);
+    t = { metas: metas, ok: metas.length > 0 && metas.every(function (m) { return m.ok === true; }), saida: r && r.saida };
   }
-  return undefined;
-}
-
-function avaliarCompleto(avaliador, goal, codigo, resultado) {
-  const saida = resultado && resultado.saida != null ? resultado.saida : "";
-  const metas = avaliador.psfAvaliar(goal, codigo, saida).map(function (m) {
-    const r = { tipo: m.tipo, ok: m.ok, desc: m.desc, falha: m.falha };
-    if (m.ok !== null) return r;
-    const val = (function () {
-      const parts = String(goal || "").split(";;");
-      for (let i = 0; i < parts.length; i++) {
-        const p = parts[i].trim();
-        const k = p.indexOf(":");
-        const tipo = (k === -1 ? p : p.slice(0, k)).trim();
-        if (tipo === m.tipo) return k === -1 ? "" : p.slice(k + 1);
-      }
-      return "";
-    })();
-    // No pssim o comando de fato rodou: saída vazia é sucesso do semerro
-    // (New-Item, Copy-Item…). No rode-local a pasta vazia é outro caso
-    // (não confere; "(sem saída)" vira ☐) — ver testar-navegador.js.
-    if (m.tipo === "semerro") {
-      r.ok = true;
-      r.desc = m.desc || "rodou sem erros";
-      return r;
-    }
-    if (m.tipo === "exit") {
-      const esperado = Number(val);
-      r.ok = resultado.exitCode != null && Number(resultado.exitCode) === esperado;
-      if (!r.ok) r.falha = "exitCode=" + (resultado.exitCode == null ? "(ausente)" : resultado.exitCode) + ", esperado " + val;
-    } else if (m.tipo === "arquivo") {
-      const t = val.indexOf("~"), nome = t === -1 ? val : val.slice(0, t), cont = t === -1 ? "" : val.slice(t + 1);
-      const achado = nomeArquivo(resultado.arquivos, nome);
-      if (achado === undefined || achado === null) {
-        r.ok = false;
-        r.falha = "não achei o arquivo “" + nome + "” no estado devolvido por PSSim.run";
-      } else if (cont) {
-        const norm = avaliador.psfNormaliza;
-        r.ok = norm(String(achado)).indexOf(norm(cont)) !== -1;
-        if (!r.ok) r.falha = "o arquivo “" + nome + "” existe, mas não contém “" + cont + "”";
-      } else {
-        r.ok = true;
-      }
-    } else {
-      r.ok = false;
-      r.falha = "meta manual (“" + m.tipo + "”) sem checagem automática";
-    }
-    return r;
-  });
+  const metas = (t && t.metas) || [];
   const falhas = metas.filter(function (m) { return m.ok !== true; });
-  return { metas, ok: falhas.length === 0, falhas };
+  return { metas: metas, ok: !!(t && t.ok) && falhas.length === 0, falhas: falhas, saida: t && t.saida };
 }
 
 function motivoDe(prefixo, ev, erro) {
   if (erro) return prefixo + "erro ao rodar: " + (erro.message || String(erro));
   if (!ev || ev.ok) return "";
-  return ev.falhas.map(function (f) {
+  const metas = ev.falhas.map(function (f) {
     return prefixo + (f.falha || f.desc || f.tipo);
   }).join("; ");
+  const saida = ev.saida != null && String(ev.saida).length ? prefixo + "saída: " + JSON.stringify(textoSaida(ev.saida, 160)) : "";
+  return saida ? metas + (metas ? "; " : "") + saida : metas;
 }
 
 function pad(s, n) {
@@ -245,9 +214,8 @@ function main() {
     }
   }
 
-  const avaliador = carregarAvaliador();
-  let rodar;
-  try { rodar = carregarPssim(opt.pssim); }
+  let sim;
+  try { sim = carregarPssim(opt.pssim); }
   catch (e) {
     console.error("Falha ao carregar o simulador: " + e.message);
     process.exit(2);
@@ -259,9 +227,9 @@ function main() {
   lista.forEach(function (m) {
     const inicialIgual = !!m.inicial_igual_solucao || (m.script || "") === (m.solucao || "");
     let evSol, evIni, errSol, errIni;
-    try { evSol = avaliarCompleto(avaliador, m.goal, m.solucao, rodar(m.solucao || "")); }
+    try { evSol = avaliarComPssim(sim, m.goal, m.solucao || ""); }
     catch (e) { errSol = e; }
-    try { evIni = avaliarCompleto(avaliador, m.goal, m.script, rodar(m.script || "")); }
+    try { evIni = avaliarComPssim(sim, m.goal, m.script || ""); }
     catch (e) { errIni = e; }
 
     const solOk = !errSol && evSol && evSol.ok;

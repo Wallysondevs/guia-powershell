@@ -117,8 +117,7 @@ NIVEIS tem **51** páginas no Nível 1; as 51 existem (`simulador.html` em 4238f
 
 **Lote 1:** limpo (conferido pela Mira).
 
-**Pendências da próxima sessão:**
-1. `pssim.js` (ainda não existe; o fallback é o rode-local).
+**Pendências da próxima sessão:** nenhuma. O `pssim.js` chegou (0df8409, 873e59e, ed004a8; meta de `cmdlets-1` em 3cc2997).
 
 
 ## Fechamento do Nível 1 (20/11/2026, 18:50)
@@ -129,9 +128,11 @@ NIVEIS tem **51** páginas no Nível 1; as 51 existem (`simulador.html` em 4238f
 
 **Varredura final da Mira (18:42):** o checador deu OK nas 131 versões do histórico e nas páginas, sem resto do coletor; as saídas brutas, a lista proibida e os documentos internos ficaram fora do git; o JS passou no `node --check`.
 
-**Pendências da próxima sessão:**
-1. `pssim.js` (não existe; fallback é o rode-local).
-2. Cerca de 10 páginas ainda dizem que o editor do guia é um PowerShell de Linux (ex.: `variaveis-automaticas`, que diz que lá o `$IsLinux` dá True, `get-location`, `abrir-terminal`, `versoes-powershell`). Reescrever junto com o pssim.js; não têm dado do Wallyson. (Os textos das *missões* que falavam em "clique em Rodar" / "no editor" já foram trocados por texto neutro.)
+**Pendências da próxima sessão:** nenhuma das três desta lista.
+
+- 1. `pssim.js` — **resolvida:** 0df8409 (núcleo), 873e59e (caixas), ed004a8 (terminal da página); meta de `cmdlets-1` em 3cc2997.
+- 2. Textos das missões com “clique em Rodar” — **resolvida** em fbc7652.
+- 3. Páginas que diziam que o editor do guia é um PowerShell de Linux — **resolvida** pelo Zeca em **33dbd79** (9 páginas: `abrir-terminal`, `operador-formato`, `provedores`, `registro`, `servicos`, `usuarios-locais`, `variaveis-automaticas`, `versoes-powershell`, `write-outros`).
 
 
 ## Simulador pssim.js — etapas
@@ -177,15 +178,15 @@ Inventário das 123 missões do Nível 1: `tools/missoes.json`. Testadores: `too
 node tools/testar-missoes.js
 node tools/testar-missoes.js --secao "Começando"
 node tools/testar-missoes.js --secao "Pastas e Arquivos"
-# se o pssim.js ainda não existe, o testador avisa e sai com código 2
 
 timeout 600 node tools/testar-navegador.js primeiro-comando.html
 timeout 3600 node tools/testar-navegador.js --todas
 timeout 600 node tools/testar-navegador.js --todas -q
+timeout 600 node tools/testar-navegador.js --todas -q --rode-local
 timeout 600 node tools/testar-navegador.js --fotos /tmp/fotos-guia-ps primeiro-comando.html
 ```
 
-O testador do navegador usa `puppeteer-core` em `tools/node_modules` (ou `PUPPETEER_DIR`) e `CHROMIUM=/usr/bin/google-chrome`. Sem `PSSim`, ele exerce o rode-local. O 404 de `assets/pssim.js` não conta como erro da página.
+O testador do navegador usa `puppeteer-core` em `tools/node_modules` (ou `PUPPETEER_DIR`) e `CHROMIUM=/usr/bin/google-chrome`. Com o `pssim.js`, ele chama `PSSim.caixas[i].testar("inicial"|"solucao")`. `--rode-local` força o plano B (404 no `pssim.js`). Requisições externas e erros de console contam como problema.
 
 ### Etapas (ordenadas; cada uma soma às anteriores)
 
@@ -193,14 +194,14 @@ Critério de pronto: as missões destravadas na etapa (e nas anteriores) passam 
 
 | Etapa | O que entra | Destrava | C+P | Critério de pronto | Dono | Status |
 |---|---|---|---|---|---|---|
-| E1 Intérprete básico | linhas, comentários, variáveis, strings, interpolação, `$()`, aritmética básica, arrays simples, métodos/propriedades simples, Write-Output (e saída implícita), Write-Host | 15 | 4 | 15/15 (4 de Começando+Pastas) | Zeca | pendente |
-| E2 Data, host e caminhos de texto | Get-Date (`-Format`, `.Year`, `.Day`), `$PSVersionTable` / `$PSEdition` / `$Host` / `$PWD` / `$IsLinux`, Get-Location (cwd fixo), Join-Path, Split-Path | 21 | 19 | 36/36 acumuladas (23 de C+P) | Zeca | pendente |
-| E3 Sistema de arquivos falso | cwd mutável, pipeline, Out-Null, New-Item, Get-ChildItem, Set/Get/Add-Content, Copy/Move/Rename/Remove-Item, Test-Path, Set-Location, Push/Pop-Location, Format-List, `if` simples, `$_` / `-replace` | 29 | 27 | 65/65 acumuladas (50 de C+P) | Zeca | pendente |
-| E4 Descoberta e apelidos | Get-Command, Get-Verb, Get-Help, Get-Alias, Select-Object, apelidos (`echo`, `ls`, `pwd`, `dir`, `cd`) | 12 | 12 | 77/77 acumuladas (62 de C+P) | Zeca | pendente |
-| E5 Provedores | Get-PSProvider, Get-PSDrive, drives fake (Env:, Alias:, FileSystem), só leitura | 3 | 3 | 80/80 acumuladas (**65/65 de C+P**) | Zeca | pendente |
-| E6 Tipos, operadores e `-f` | tipos e conversão (`[int]`, `-as`, `[math]`), `$true`/`$false`/`$null`/`??`, here-strings, faixa `1..n`, operadores de comparação/coleção/lógicos, `-f`, `+=`/`++`/`--`, Measure-Object | 25 | 0 | 105/105 acumuladas | Zeca | pendente |
-| E7 Outros fluxos de saída | Write-Warning, Write-Verbose, Write-Information (`-Verbose`, `-InformationAction`). Read-Host fica ilustrativo ou com a resposta já no script | 3 | 0 | 108/108 acumuladas | Zeca | pendente |
-| E8 Decisões e repetições | else/elseif, switch (`-Wildcard`, default), foreach, for, while/do/until, break, continue | 15 | 0 | 123/123 acumuladas | Zeca | pendente |
+| E1 Intérprete básico | linhas, comentários, variáveis, strings, interpolação, `$()`, aritmética básica, arrays simples, métodos/propriedades simples, Write-Output (e saída implícita), Write-Host | 15 | 4 | 15/15 (4 de Começando+Pastas) | Zeca | pronto (123/123, 20/11) |
+| E2 Data, host e caminhos de texto | Get-Date (`-Format`, `.Year`, `.Day`), `$PSVersionTable` / `$PSEdition` / `$Host` / `$PWD` / `$IsLinux`, Get-Location (cwd fixo), Join-Path, Split-Path | 21 | 19 | 36/36 acumuladas (23 de C+P) | Zeca | pronto (123/123, 20/11) |
+| E3 Sistema de arquivos falso | cwd mutável, pipeline, Out-Null, New-Item, Get-ChildItem, Set/Get/Add-Content, Copy/Move/Rename/Remove-Item, Test-Path, Set-Location, Push/Pop-Location, Format-List, `if` simples, `$_` / `-replace` | 29 | 27 | 65/65 acumuladas (50 de C+P) | Zeca | pronto (123/123, 20/11) |
+| E4 Descoberta e apelidos | Get-Command, Get-Verb, Get-Help, Get-Alias, Select-Object, apelidos (`echo`, `ls`, `pwd`, `dir`, `cd`) | 12 | 12 | 77/77 acumuladas (62 de C+P) | Zeca | pronto (123/123, 20/11) |
+| E5 Provedores | Get-PSProvider, Get-PSDrive, drives fake (Env:, Alias:, FileSystem), só leitura | 3 | 3 | 80/80 acumuladas (**65/65 de C+P**) | Zeca | pronto (123/123, 20/11) |
+| E6 Tipos, operadores e `-f` | tipos e conversão (`[int]`, `-as`, `[math]`), `$true`/`$false`/`$null`/`??`, here-strings, faixa `1..n`, operadores de comparação/coleção/lógicos, `-f`, `+=`/`++`/`--`, Measure-Object | 25 | 0 | 105/105 acumuladas | Zeca | pronto (123/123, 20/11) |
+| E7 Outros fluxos de saída | Write-Warning, Write-Verbose, Write-Information (`-Verbose`, `-InformationAction`). Read-Host fica ilustrativo ou com a resposta já no script | 3 | 0 | 108/108 acumuladas | Zeca | pronto (123/123, 20/11) |
+| E8 Decisões e repetições | else/elseif, switch (`-Wildcard`, default), foreach, for, while/do/until, break, continue | 15 | 0 | 123/123 acumuladas | Zeca | pronto (123/123, 20/11) |
 
 **E1** destrava: `primeiro-comando-2`, `teclado-1`, `teclado-2`, `teclado-3`, `interpolacao-1`, `interpolacao-2`, `numeros-1`, `strings-1`, `strings-2`, `variaveis-1`, `variaveis-2`, `operadores-aritmeticos-1`, `read-host-1`, `write-host-output-1`, `write-host-output-2`.
 
@@ -222,13 +223,28 @@ Frequência de cmdlets e recursos (quantas missões cada um destrava, com Começ
 
 ## Teste no navegador
 
-**20/11/2026, 19:26 (America/Sao_Paulo).** `timeout 180 node tools/testar-navegador.js --todas -q`, com `puppeteer-core` temporário em `tools/node_modules` e `CHROMIUM=/usr/bin/google-chrome`. Sem `pssim.js` (caminho rode-local, a273e59). O 404 de `assets/pssim.js` é ignorado. `node_modules` não entra no git.
+**20/11/2026, 20:04 (America/Sao_Paulo).** HEAD `33dbd79`. `puppeteer-core` temporário em `tools/node_modules`, `CHROMIUM=/usr/bin/google-chrome`. `node_modules` não entra no git. O testador em Node avalia as metas com `PSSim.testar` (sem a heurística de `semerro` na saída).
+
+**Node** (`node tools/testar-missoes.js`): **123/123** passaram, 0 falharam (o inicial não cumpre a meta, salvo quando já é a solução; a solução cumpre). Inclui `get-help-1` (o aviso “cannot find the Help files” não é erro) e `cmdlets-1` (meta `src:\s-Verb\b` em 3cc2997).
+
+**Navegador, caminho PSSim** (`timeout 360 node tools/testar-navegador.js --todas -q`):
 
 | | Total |
 |---|---|
 | Páginas | 54, **0 com problema** |
-| Caixas `.tryps` | 129 |
-| Casos negativos (campo vazio; colar o script; colar a solução; só o prompt `PS C:\Users\ana>`; script ou solução com esse prompt) | **768** conferidos, **0** falso(s) positivo(s) (nenhum ✔ nem “Missão cumprida!”) |
-| Positivo com `(sem saída)` nas missões só `src`/`semerro` | **19** “Quase lá!”, **0** falha(s) |
+| Caixas `PSSim.caixas[i].testar` | **129/129** ok, **0** falha(s) (123 do Nível 1 + 6 do Nível 3) |
+| Erros de console | **0** |
+| Requisições externas | **0** |
 
-Os textos das missões não dizem mais “clique em Rodar”, “veja no editor” nem “aperte Rodar”: o pedido é neutro (serve no rode-local e no pssim). A pendência 2 foi encerrada. O aviso do `rode-local.js` ainda menciona a frase antiga; isso fica com o Zeca.
+**Navegador, plano B** (`--todas -q --rode-local`):
+
+| | Total |
+|---|---|
+| Páginas | 54, **0 com problema** (modo forçado: rode-local) |
+| Caixas rode-local | 129 |
+| Casos negativos (campo vazio; colar o script; colar a solução; só o prompt `PS C:\Users\ana>`; script ou solução com esse prompt) | **768** conferidos, **0** falso(s) positivo(s) |
+| Positivo com `(sem saída)` nas missões só `src`/`semerro` | **19** “Quase lá!”, **0** falha(s) |
+| Erros de console | **0** |
+| Requisições externas | **0** |
+
+Pendência 3 (textos “o editor é um PowerShell de Linux”): **resolvida** em 33dbd79.

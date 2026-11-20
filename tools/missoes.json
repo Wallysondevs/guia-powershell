@@ -12,6 +12,15 @@
     "Repetições": 10
   },
   "comecando_e_pastas": 65,
+  "pssim": {
+    "commits": [
+      "0df8409",
+      "873e59e",
+      "ed004a8"
+    ],
+    "cmdlets_1_meta": "3cc2997",
+    "avaliador": "PSSim.testar(goal, codigo) / PSSim.avaliar — semerro usa os erros reais do simulador, não o texto da saída"
+  },
   "rode_local": {
     "commit": "a273e59",
     "campo_vazio": "não confere nada; aparece “Cole primeiro o que o PowerShell respondeu”; zero ✔, inclusive no semerro",
@@ -56,17 +65,17 @@
         "teclado-1",
         "teclado-2",
         "teclado-3",
+        "variaveis-1",
+        "variaveis-2",
+        "strings-1",
+        "strings-2",
         "interpolacao-1",
         "interpolacao-2",
         "numeros-1",
-        "strings-1",
-        "strings-2",
-        "variaveis-1",
-        "variaveis-2",
         "operadores-aritmeticos-1",
-        "read-host-1",
         "write-host-output-1",
-        "write-host-output-2"
+        "write-host-output-2",
+        "read-host-1"
       ]
     },
     {
@@ -82,25 +91,25 @@
       ],
       "destravadas": 21,
       "missoes": [
-        "abrir-terminal-1",
-        "abrir-terminal-2",
-        "abrir-terminal-3",
-        "instalar-1",
-        "instalar-2",
         "introducao-1",
         "introducao-2",
-        "parametros-cmdlet-3",
-        "primeiro-comando-1",
-        "primeiro-comando-3",
         "versoes-powershell-1",
         "versoes-powershell-2",
         "versoes-powershell-3",
         "versoes-powershell-4",
+        "instalar-1",
+        "instalar-2",
+        "abrir-terminal-1",
+        "abrir-terminal-2",
+        "abrir-terminal-3",
+        "primeiro-comando-1",
+        "primeiro-comando-3",
+        "parametros-cmdlet-3",
+        "get-location-1",
+        "get-location-2",
         "caminhos-1",
         "caminhos-2",
         "caminhos-3",
-        "get-location-1",
-        "get-location-2",
         "variaveis-automaticas-1",
         "variaveis-automaticas-2"
       ]
@@ -133,28 +142,28 @@
       "missoes": [
         "parametros-cmdlet-1",
         "parametros-cmdlet-2",
-        "copy-move-1",
-        "copy-move-2",
-        "copy-move-3",
-        "get-childitem-1",
-        "get-childitem-2",
-        "get-childitem-3",
-        "get-content-1",
-        "get-content-2",
-        "get-content-3",
         "get-location-3",
-        "new-item-1",
-        "new-item-2",
-        "new-item-3",
-        "remove-item-1",
-        "remove-item-2",
-        "rename-item-1",
-        "rename-item-2",
-        "set-content-1",
-        "set-content-2",
         "set-location-1",
         "set-location-2",
         "set-location-3",
+        "get-childitem-1",
+        "get-childitem-2",
+        "get-childitem-3",
+        "new-item-1",
+        "new-item-2",
+        "new-item-3",
+        "copy-move-1",
+        "copy-move-2",
+        "copy-move-3",
+        "rename-item-1",
+        "rename-item-2",
+        "remove-item-1",
+        "remove-item-2",
+        "get-content-1",
+        "get-content-2",
+        "get-content-3",
+        "set-content-1",
+        "set-content-2",
         "test-path-1",
         "test-path-2",
         "test-path-3",
@@ -176,18 +185,18 @@
       ],
       "destravadas": 12,
       "missoes": [
-        "aliases-1",
-        "aliases-2",
-        "aliases-3",
         "cmdlets-1",
         "cmdlets-2",
         "cmdlets-3",
+        "get-help-1",
+        "get-help-2",
+        "get-help-3",
         "get-command-1",
         "get-command-2",
         "get-command-3",
-        "get-help-1",
-        "get-help-2",
-        "get-help-3"
+        "aliases-1",
+        "aliases-2",
+        "aliases-3"
       ]
     },
     {
@@ -223,31 +232,31 @@
       ],
       "destravadas": 25,
       "missoes": [
-        "booleanos-null-1",
-        "booleanos-null-2",
-        "conversao-1",
-        "conversao-2",
+        "tipos-1",
+        "tipos-2",
         "here-strings-1",
         "here-strings-2",
         "numeros-2",
-        "tipos-1",
-        "tipos-2",
-        "atribuicao-1",
-        "atribuicao-2",
-        "operador-formato-1",
-        "operador-formato-2",
+        "conversao-1",
+        "conversao-2",
+        "booleanos-null-1",
+        "booleanos-null-2",
         "operadores-aritmeticos-2",
-        "operadores-colecao-1",
-        "operadores-colecao-2",
         "operadores-comparacao-1",
         "operadores-comparacao-2",
+        "operadores-colecao-1",
+        "operadores-colecao-2",
         "operadores-logicos-1",
         "operadores-logicos-2",
-        "read-host-2",
+        "operador-formato-1",
+        "operador-formato-2",
+        "atribuicao-1",
+        "atribuicao-2",
         "write-host-output-3",
-        "elseif-else-1",
+        "read-host-2",
         "if-1",
-        "if-2"
+        "if-2",
+        "elseif-else-1"
       ]
     },
     {
@@ -286,16 +295,16 @@
         "switch-1",
         "switch-2",
         "switch-3",
-        "break-continue-1",
-        "break-continue-2",
-        "break-continue-3",
-        "for-1",
-        "for-2",
         "foreach-1",
         "foreach-2",
+        "for-1",
+        "for-2",
         "while-1",
         "while-2",
-        "while-3"
+        "while-3",
+        "break-continue-1",
+        "break-continue-2",
+        "break-continue-3"
       ]
     }
   ],
@@ -554,15 +563,6 @@
         ]
       },
       {
-        "nome": "ls (apelido)",
-        "id": "ls (apelido)",
-        "missoes": 2,
-        "ids": [
-          "aliases-1",
-          "get-command-2"
-        ]
-      },
-      {
         "nome": "Format-List",
         "id": "Format-List",
         "missoes": 1,
@@ -640,22 +640,6 @@
         "missoes": 1,
         "ids": [
           "write-outros-2"
-        ]
-      },
-      {
-        "nome": "echo (apelido)",
-        "id": "echo (apelido)",
-        "missoes": 1,
-        "ids": [
-          "aliases-2"
-        ]
-      },
-      {
-        "nome": "pwd (apelido)",
-        "id": "pwd (apelido)",
-        "missoes": 1,
-        "ids": [
-          "aliases-3"
         ]
       }
     ],
@@ -744,10 +728,10 @@
           "strings-2",
           "tipos-1",
           "tipos-2",
-          "variaveis-1",
-          "variaveis-2",
           "variaveis-automaticas-1",
           "variaveis-automaticas-2",
+          "variaveis-1",
+          "variaveis-2",
           "atribuicao-1",
           "atribuicao-2",
           "operador-formato-1",
@@ -839,10 +823,10 @@
           "numeros-1",
           "strings-1",
           "strings-2",
-          "variaveis-1",
-          "variaveis-2",
           "variaveis-automaticas-1",
           "variaveis-automaticas-2",
+          "variaveis-1",
+          "variaveis-2",
           "atribuicao-1",
           "atribuicao-2",
           "operador-formato-1",
@@ -909,10 +893,10 @@
           "strings-1",
           "tipos-1",
           "tipos-2",
-          "variaveis-1",
-          "variaveis-2",
           "variaveis-automaticas-1",
           "variaveis-automaticas-2",
+          "variaveis-1",
+          "variaveis-2",
           "atribuicao-1",
           "atribuicao-2",
           "operadores-aritmeticos-2",
@@ -977,10 +961,10 @@
           "numeros-1",
           "strings-1",
           "strings-2",
-          "variaveis-1",
-          "variaveis-2",
           "variaveis-automaticas-1",
           "variaveis-automaticas-2",
+          "variaveis-1",
+          "variaveis-2",
           "atribuicao-1",
           "atribuicao-2",
           "operador-formato-1",
@@ -1023,10 +1007,10 @@
           "interpolacao-2",
           "numeros-1",
           "strings-1",
-          "variaveis-1",
-          "variaveis-2",
           "variaveis-automaticas-1",
           "variaveis-automaticas-2",
+          "variaveis-1",
+          "variaveis-2",
           "atribuicao-1",
           "atribuicao-2",
           "operadores-aritmeticos-1",
@@ -1174,29 +1158,6 @@
         ]
       },
       {
-        "nome": "Set-Content",
-        "id": "set-content",
-        "missoes": 16,
-        "ids": [
-          "copy-move-1",
-          "copy-move-2",
-          "copy-move-3",
-          "get-childitem-1",
-          "get-childitem-2",
-          "get-childitem-3",
-          "get-content-1",
-          "get-content-2",
-          "get-content-3",
-          "remove-item-1",
-          "rename-item-1",
-          "set-content-1",
-          "set-content-2",
-          "test-path-1",
-          "test-path-2",
-          "test-path-3"
-        ]
-      },
-      {
         "nome": "operadores de comparação (-eq, -ne, -gt, -lt, -ge, -le)",
         "id": "operadores-comparacao",
         "missoes": 16,
@@ -1220,22 +1181,26 @@
         ]
       },
       {
-        "nome": "New-Item",
-        "id": "new-item",
-        "missoes": 12,
+        "nome": "Set-Content",
+        "id": "set-content",
+        "missoes": 16,
         "ids": [
-          "parametros-cmdlet-1",
-          "parametros-cmdlet-2",
+          "copy-move-1",
+          "copy-move-2",
           "copy-move-3",
+          "get-childitem-1",
+          "get-childitem-2",
           "get-childitem-3",
-          "new-item-1",
-          "new-item-2",
-          "new-item-3",
-          "remove-item-2",
-          "rename-item-2",
-          "set-location-1",
-          "set-location-2",
-          "set-location-3"
+          "get-content-1",
+          "get-content-2",
+          "get-content-3",
+          "remove-item-1",
+          "rename-item-1",
+          "set-content-1",
+          "set-content-2",
+          "test-path-1",
+          "test-path-2",
+          "test-path-3"
         ]
       },
       {
@@ -1258,6 +1223,25 @@
         ]
       },
       {
+        "nome": "New-Item",
+        "id": "new-item",
+        "missoes": 12,
+        "ids": [
+          "parametros-cmdlet-1",
+          "parametros-cmdlet-2",
+          "copy-move-3",
+          "get-childitem-3",
+          "new-item-1",
+          "new-item-2",
+          "new-item-3",
+          "remove-item-2",
+          "rename-item-2",
+          "set-location-1",
+          "set-location-2",
+          "set-location-3"
+        ]
+      },
+      {
         "nome": "métodos e propriedades (.Year, .Path, .Count, .Length, .Name)",
         "id": "metodos",
         "missoes": 11,
@@ -1273,22 +1257,6 @@
           "tipos-2",
           "write-host-output-3",
           "for-2"
-        ]
-      },
-      {
-        "nome": "Out-Null",
-        "id": "out-null",
-        "missoes": 9,
-        "ids": [
-          "parametros-cmdlet-1",
-          "parametros-cmdlet-2",
-          "copy-move-3",
-          "get-childitem-3",
-          "remove-item-2",
-          "rename-item-2",
-          "set-location-1",
-          "set-location-2",
-          "set-location-3"
         ]
       },
       {
@@ -1308,6 +1276,22 @@
         ]
       },
       {
+        "nome": "Out-Null",
+        "id": "out-null",
+        "missoes": 9,
+        "ids": [
+          "parametros-cmdlet-1",
+          "parametros-cmdlet-2",
+          "copy-move-3",
+          "get-childitem-3",
+          "remove-item-2",
+          "rename-item-2",
+          "set-location-1",
+          "set-location-2",
+          "set-location-3"
+        ]
+      },
+      {
         "nome": "foreach",
         "id": "foreach",
         "missoes": 8,
@@ -1320,6 +1304,20 @@
           "break-continue-3",
           "foreach-1",
           "foreach-2"
+        ]
+      },
+      {
+        "nome": "atribuição composta (+=, ++, --)",
+        "id": "atribuicao-composta",
+        "missoes": 7,
+        "ids": [
+          "atribuicao-1",
+          "atribuicao-2",
+          "for-1",
+          "for-2",
+          "foreach-2",
+          "while-1",
+          "while-3"
         ]
       },
       {
@@ -1348,20 +1346,6 @@
           "parametros-cmdlet-3",
           "primeiro-comando-1",
           "primeiro-comando-3"
-        ]
-      },
-      {
-        "nome": "atribuição composta (+=, ++, --)",
-        "id": "atribuicao-composta",
-        "missoes": 7,
-        "ids": [
-          "atribuicao-1",
-          "atribuicao-2",
-          "for-1",
-          "for-2",
-          "foreach-2",
-          "while-1",
-          "while-3"
         ]
       },
       {
@@ -1452,17 +1436,6 @@
         ]
       },
       {
-        "nome": "Get-Location e $PWD (cwd)",
-        "id": "get-location",
-        "missoes": 4,
-        "ids": [
-          "abrir-terminal-2",
-          "get-location-1",
-          "get-location-2",
-          "get-location-3"
-        ]
-      },
-      {
         "nome": "apelidos (echo, ls, pwd, dir, cd…)",
         "id": "aliases",
         "missoes": 4,
@@ -1474,13 +1447,14 @@
         ]
       },
       {
-        "nome": "Get-Help",
-        "id": "get-help",
-        "missoes": 3,
+        "nome": "Get-Location e $PWD (cwd)",
+        "id": "get-location",
+        "missoes": 4,
         "ids": [
-          "get-help-1",
-          "get-help-2",
-          "get-help-3"
+          "abrir-terminal-2",
+          "get-location-1",
+          "get-location-2",
+          "get-location-3"
         ]
       },
       {
@@ -1491,6 +1465,16 @@
           "conversao-1",
           "conversao-2",
           "read-host-2"
+        ]
+      },
+      {
+        "nome": "Get-Help",
+        "id": "get-help",
+        "missoes": 3,
+        "ids": [
+          "get-help-1",
+          "get-help-2",
+          "get-help-3"
         ]
       },
       {
@@ -1543,12 +1527,30 @@
         ]
       },
       {
+        "nome": "break",
+        "id": "break",
+        "missoes": 2,
+        "ids": [
+          "break-continue-1",
+          "break-continue-3"
+        ]
+      },
+      {
         "nome": "Copy-Item",
         "id": "copy-item",
         "missoes": 2,
         "ids": [
           "copy-move-1",
           "copy-move-3"
+        ]
+      },
+      {
+        "nome": "for",
+        "id": "for",
+        "missoes": 2,
+        "ids": [
+          "for-1",
+          "for-2"
         ]
       },
       {
@@ -1567,6 +1569,51 @@
         "ids": [
           "cmdlets-1",
           "cmdlets-3"
+        ]
+      },
+      {
+        "nome": "here-strings (@\" \"@)",
+        "id": "here-strings",
+        "missoes": 2,
+        "ids": [
+          "here-strings-1",
+          "here-strings-2"
+        ]
+      },
+      {
+        "nome": "operador -f",
+        "id": "operador-formato",
+        "missoes": 2,
+        "ids": [
+          "operador-formato-1",
+          "operador-formato-2"
+        ]
+      },
+      {
+        "nome": "operadores de coleção (-contains, -in)",
+        "id": "operadores-colecao",
+        "missoes": 2,
+        "ids": [
+          "operadores-colecao-1",
+          "operadores-colecao-2"
+        ]
+      },
+      {
+        "nome": "operadores lógicos (-and, -or, -not)",
+        "id": "operadores-logicos",
+        "missoes": 2,
+        "ids": [
+          "operadores-logicos-1",
+          "operadores-logicos-2"
+        ]
+      },
+      {
+        "nome": "faixa (1..10)",
+        "id": "range",
+        "missoes": 2,
+        "ids": [
+          "break-continue-1",
+          "break-continue-2"
         ]
       },
       {
@@ -1606,66 +1653,11 @@
         ]
       },
       {
-        "nome": "break",
-        "id": "break",
-        "missoes": 2,
+        "nome": "continue",
+        "id": "continue",
+        "missoes": 1,
         "ids": [
-          "break-continue-1",
-          "break-continue-3"
-        ]
-      },
-      {
-        "nome": "faixa (1..10)",
-        "id": "range",
-        "missoes": 2,
-        "ids": [
-          "break-continue-1",
           "break-continue-2"
-        ]
-      },
-      {
-        "nome": "for",
-        "id": "for",
-        "missoes": 2,
-        "ids": [
-          "for-1",
-          "for-2"
-        ]
-      },
-      {
-        "nome": "here-strings (@\" \"@)",
-        "id": "here-strings",
-        "missoes": 2,
-        "ids": [
-          "here-strings-1",
-          "here-strings-2"
-        ]
-      },
-      {
-        "nome": "operador -f",
-        "id": "operador-formato",
-        "missoes": 2,
-        "ids": [
-          "operador-formato-1",
-          "operador-formato-2"
-        ]
-      },
-      {
-        "nome": "operadores de coleção (-contains, -in)",
-        "id": "operadores-colecao",
-        "missoes": 2,
-        "ids": [
-          "operadores-colecao-1",
-          "operadores-colecao-2"
-        ]
-      },
-      {
-        "nome": "operadores lógicos (-and, -or, -not)",
-        "id": "operadores-logicos",
-        "missoes": 2,
-        "ids": [
-          "operadores-logicos-1",
-          "operadores-logicos-2"
         ]
       },
       {
@@ -1722,14 +1714,6 @@
         "missoes": 1,
         "ids": [
           "write-outros-2"
-        ]
-      },
-      {
-        "nome": "continue",
-        "id": "continue",
-        "missoes": 1,
-        "ids": [
-          "break-continue-2"
         ]
       }
     ]
@@ -1808,7 +1792,7 @@
         "src:\\.Year",
         "semerro"
       ],
-      "task": "Experimente: o editor já tem o Get-Date. Acrescente os parênteses e o .Year para mostrar só o ano, e clique em Rodar.",
+      "task": "Experimente: o código já tem o Get-Date. Acrescente os parênteses e o .Year para mostrar só o ano, e rode.",
       "script": "Get-Date",
       "solucao": "(Get-Date).Year",
       "script_file": "main.ps1",
@@ -1865,7 +1849,7 @@
         "src:PSEdition",
         "semerro"
       ],
-      "task": "Experimente: no editor (que é PowerShell 7), mostre só a edição, para conferir que é Core.",
+      "task": "Experimente: mostre só a edição. No PowerShell 7, o valor é Core.",
       "script": "Write-Output \"Qual é a edição?\"",
       "solucao": "$PSVersionTable.PSEdition",
       "script_file": "main.ps1",
@@ -2034,7 +2018,7 @@
         "src:Host\\.Name",
         "semerro"
       ],
-      "task": "Experimente: no editor, pergunte o nome do host com $Host.Name. (Aqui o anfitrião é o do navegador, então o nome pode não ser ConsoleHost — o pedido é o que importa.)",
+      "task": "Experimente: pergunte o nome do host com $Host.Name. (O nome pode variar conforme onde você roda; o pedido é o que importa.)",
       "script": "Write-Output \"Quem está me hospedando?\"",
       "solucao": "$Host.Name",
       "script_file": "main.ps1",
@@ -2114,7 +2098,7 @@
         "outre:\\d{4}",
         "semerro"
       ],
-      "task": "Experimente: clique em Rodar e veja a data de hoje no editor.",
+      "task": "Experimente: rode o código e confira a data de hoje.",
       "script": "Get-Date",
       "solucao": "Get-Date",
       "script_file": "main.ps1",
@@ -2140,7 +2124,7 @@
       "metas": [
         "out:Olá, Ana!"
       ],
-      "task": "Missão: troque \"mundo\" por \"Ana\" e clique em Rodar.",
+      "task": "Missão: troque \"mundo\" por \"Ana\" e rode o código.",
       "script": "Write-Output \"Olá, mundo!\"",
       "solucao": "Write-Output \"Olá, Ana!\"",
       "script_file": "main.ps1",
@@ -2194,13 +2178,13 @@
       "titulo": "Cmdlets: Verbo-Substantivo",
       "secao": "Começando",
       "n": 1,
-      "goal": "src:\\bGet-Verb\\b;;src:-Verb;;semerro",
+      "goal": "src:\\bGet-Verb\\b;;src:\\s-Verb\\b;;semerro",
       "metas": [
         "src:\\bGet-Verb\\b",
-        "src:-Verb",
+        "src:\\s-Verb\\b",
         "semerro"
       ],
-      "task": "Experimente: troque o comando para mostrar só o verbo Get, com Get-Verb -Verb Get, e clique em Rodar.",
+      "task": "Experimente: troque o comando para mostrar só o verbo Get, com Get-Verb -Verb Get, e rode.",
       "script": "Get-Verb | Select-Object -First 10",
       "solucao": "Get-Verb -Verb Get",
       "script_file": "main.ps1",
@@ -2392,7 +2376,7 @@
         "src:Get-Date",
         "semerro"
       ],
-      "task": "Experimente: peça a ajuda do Get-Date e clique em Rodar. A ajuda do editor pode ser mais completa do que a desta aula; o comando é o mesmo.",
+      "task": "Experimente: peça a ajuda do Get-Date e rode o comando. A ajuda no seu PowerShell pode ser mais completa do que a desta aula; o comando é o mesmo.",
       "script": "Get-Date",
       "solucao": "Get-Help Get-Date",
       "script_file": "main.ps1",
@@ -2482,7 +2466,7 @@
         "src:Get-Command",
         "semerro"
       ],
-      "task": "Experimente: troque o padrão para *-Date e clique em Rodar. Você deve ver o Get-Date na lista.",
+      "task": "Experimente: troque o padrão para *-Date e rode o comando. Você deve ver o Get-Date na lista.",
       "script": "Get-Command *-Time",
       "solucao": "Get-Command *-Date",
       "script_file": "main.ps1",
@@ -2745,7 +2729,7 @@
         "src:\\bGet-Location\\b",
         "semerro"
       ],
-      "task": "Experimente: use o Get-Location para ver a pasta atual do editor. (O caminho no editor é o do Linux, não o do Windows; o comando é o mesmo.)",
+      "task": "Experimente: use o Get-Location para ver a pasta atual. (O caminho muda conforme onde você roda; o comando é o mesmo.)",
       "script": "",
       "solucao": "Get-Location",
       "script_file": "main.ps1",
@@ -3333,7 +3317,7 @@
         "arquivo:compras.txt",
         "semerro"
       ],
-      "task": "Experimente: o script cria lista.txt. Acrescente uma linha que troque o nome dele para compras.txt e clique em Rodar.",
+      "task": "Experimente: o script cria lista.txt. Acrescente uma linha que troque o nome dele para compras.txt e rode o código.",
       "script": "'arroz' | Set-Content lista.txt",
       "solucao": "'arroz' | Set-Content lista.txt\nRename-Item -Path lista.txt -NewName compras.txt",
       "script_file": "main.ps1",
@@ -4828,7 +4812,7 @@
         "src:-Separator",
         "semerro"
       ],
-      "task": "Experimente: faça as frutas aparecerem separadas por - (espaço, traço, espaço), assim: maçã - banana - uva.",
+      "task": "Experimente: faça as frutas aparecerem separadas por  -  (espaço, traço, espaço), assim: maçã - banana - uva.",
       "script": "Write-Host 'maçã', 'banana', 'uva'",
       "solucao": "Write-Host 'maçã', 'banana', 'uva' -Separator ' - '",
       "script_file": "main.ps1",
@@ -4955,7 +4939,7 @@
         "src:\\bWrite-Warning\\b",
         "semerro"
       ],
-      "task": "Experimente: troque “caneta” por “caderno” no aviso e clique em Rodar.",
+      "task": "Experimente: troque “caneta” por “caderno” no aviso e rode o comando.",
       "script": "Write-Warning \"O estoque de caneta está baixo\"",
       "solucao": "Write-Warning \"O estoque de caderno está baixo\"",
       "script_file": "main.ps1",

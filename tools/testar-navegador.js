@@ -5,10 +5,13 @@
 //   timeout 3600 node tools/testar-navegador.js --todas          (todas as .html da raiz)
 //   --fotos DIR   salva um print de página inteira de cada uma em DIR (claro e escuro)
 //   -q            mostra só as páginas com problema (e o resumo)
+//   --rode-local  força o plano B: o servidor responde 404 em assets/pssim.js
+//                 e as caixas são conferidas no modo rode-local (a273e59)
 //
 // Sobe um servidor HTTP estático em 127.0.0.1 (porta livre). Em cada página:
-// erro de JS/console/HTTP = problema (o 404 de assets/pssim.js é esperado enquanto
-// o simulador não existe); menu montado; um h1.
+// erro de JS/console/HTTP = problema; requisição externa = problema (tem que
+// dar zero). O 404 de assets/pssim.js só é ignorado com --rode-local.
+// Menu montado; um h1.
 //
 // Se window.PSSim existir (contrato do Zeca):
 //   PSSim.caixas[i].testar("inicial"|"solucao") → {ok, metas, saida}
@@ -35,18 +38,19 @@ const PUP = process.env.PUPPETEER_DIR || path.join(__dirname, "node_modules", "p
 const CHROMIUM = process.env.CHROMIUM || "/usr/bin/google-chrome";
 
 const args = process.argv.slice(2);
-let fotos = null, quieto = false;
+let fotos = null, quieto = false, forcarRodeLocal = false;
 const paginas = [];
 for (let i = 0; i < args.length; i++) {
   const a = args[i];
   if (a === "--todas") fs.readdirSync(RAIZ).filter((f) => /\.html$/.test(f)).sort().forEach((f) => paginas.push(f));
   else if (a === "--fotos") fotos = path.resolve(args[++i] || "fotos");
   else if (a === "-q") quieto = true;
+  else if (a === "--rode-local") forcarRodeLocal = true;
   else if (a.startsWith("-")) { console.error("opção desconhecida: " + a); process.exit(2); }
   else paginas.push(fs.existsSync(path.join(RAIZ, a)) ? a : path.basename(a));
 }
 if (!paginas.length) {
-  console.error("uso: timeout 600 node tools/testar-navegador.js [--fotos DIR] [-q] pagina.html…|--todas");
+  console.error("uso: timeout 600 node tools/testar-navegador.js [--fotos DIR] [-q] [--rode-local] pagina.html…|--todas");
   process.exit(2);
 }
 if (fotos) fs.mkdirSync(fotos, { recursive: true });
@@ -63,6 +67,7 @@ function servidor() {
   const srv = http.createServer((req, res) => {
     let p = decodeURIComponent(new URL(req.url, "http://x").pathname);
     if (p.endsWith("/")) p += "index.html";
+    if (forcarRodeLocal && /\/assets\/pssim\.js$/i.test(p)) { res.writeHead(404); res.end("404"); return; }
     const arq = path.join(RAIZ, path.normalize(p).replace(/^(\.\.[/\\])+/, ""));
     if (!arq.startsWith(RAIZ) || !fs.existsSync(arq) || !fs.statSync(arq).isFile()) {
       res.writeHead(404); res.end("404"); return;
@@ -74,7 +79,17 @@ function servidor() {
 }
 
 const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
-function ignoraPssim(url) { return /\/assets\/pssim\.js(\?|$)/.test(url) || /favicon/.test(url); }
+function ehPssimJs(url) { return /\/assets\/pssim\.js(\?|$)/.test(url); }
+function ignoraEsperado(url) { return /favicon/.test(url) || (forcarRodeLocal && ehPssimJs(url)); }
+function ehExterna(url, base) {
+  if (!url || /^(data:|blob:|about:|chrome:|chrome-extension:)/i.test(url)) return false;
+  if (url.startsWith(base)) return false;
+  try {
+    const u = new URL(url);
+    if (u.hostname === "127.0.0.1" || u.hostname === "localhost") return false;
+  } catch (e) { return false; }
+  return true;
+}
 
 /* ------------------ API do pssim: caixas[i].testar("inicial"|"solucao") */
 async function testarCaixa(pg, i, qual, limite = 20000) {
@@ -121,6 +136,8 @@ async function testarComPssim(pg, problemas, notas) {
     const nome = "caixa " + (i + 1);
     if (!c.goal) { notas.push(nome + ": sem data-goal, não testada como missão"); continue; }
     if (!c.temSol) { problemas.push(nome + ": missão sem pre.solucao"); continue; }
+    stats.pssimCaixas++;
+    const antes = problemas.length;
     const ini = await testarCaixa(pg, i, "inicial");
     if (ini.semResposta) { problemas.push(nome + ": o inicial não terminou em 20 s"); continue; }
     if (ini.erro) { problemas.push(nome + ": testar(\"inicial\") falhou: " + ini.erro); continue; }
@@ -133,8 +150,10 @@ async function testarComPssim(pg, problemas, notas) {
     if (!sol.ok) {
       const falhas = Array.isArray(sol.metas) ? sol.metas.filter((m) => m && m.ok !== true).map((m) => m.falha || m.desc || m.tipo).join(" ;; ") : "";
       problemas.push(nome + ": a solução não deu ok" + (falhas ? " (" + falhas + ")" : "") +
-        (sol.saida != null ? " (saída: " + JSON.stringify(String(sol.saida).slice(0, 120)) + ")" : ""));
+        (sol.saida != null ? " (saída: " + JSON.stringify(String(sol.saida).slice(0, 200)) + ")" : ""));
     }
+    if (problemas.length > antes) stats.pssimFalhou++;
+    else stats.pssimOk++;
   }
 }
 
@@ -178,7 +197,12 @@ const stats = {
   negativos: 0,
   falsoPositivo: 0,
   quaseLa: 0,
-  quaseLaFalhou: 0
+  quaseLaFalhou: 0,
+  pssimCaixas: 0,
+  pssimOk: 0,
+  pssimFalhou: 0,
+  console: 0,
+  externas: 0
 };
 
 function casoNegativo(nome, caso, r, problemas) {
@@ -272,15 +296,24 @@ async function testarPagina(nav, base, pagina) {
   const pg = await nav.newPage();
   const erros = [], problemas = [], notas = [];
   await pg.setViewport({ width: 1280, height: 900 });
-  pg.on("pageerror", (e) => erros.push("JS: " + e.message));
+  pg.on("pageerror", (e) => { stats.console++; erros.push("JS: " + e.message); });
   pg.on("console", (m) => {
-    if (m.type() === "error" && !ignoraPssim(m.text()) && !/Failed to load resource/.test(m.text())) erros.push("console: " + m.text());
+    if (m.type() !== "error") return;
+    if (ignoraEsperado(m.text()) || /Failed to load resource/.test(m.text())) return;
+    stats.console++;
+    erros.push("console: " + m.text());
+  });
+  pg.on("request", (r) => {
+    if (ehExterna(r.url(), base)) {
+      stats.externas++;
+      erros.push("requisição externa: " + r.url());
+    }
   });
   pg.on("requestfailed", (r) => {
-    if (!ignoraPssim(r.url())) erros.push("falhou: " + r.url().replace(base, "") + " " + ((r.failure() || {}).errorText || ""));
+    if (!ignoraEsperado(r.url())) erros.push("falhou: " + r.url().replace(base, "") + " " + ((r.failure() || {}).errorText || ""));
   });
   pg.on("response", (r) => {
-    if (r.status() >= 400 && !ignoraPssim(r.url())) erros.push("HTTP " + r.status() + ": " + r.url().replace(base, ""));
+    if (r.status() >= 400 && !ignoraEsperado(r.url())) erros.push("HTTP " + r.status() + ": " + r.url().replace(base, ""));
   });
   pg.on("dialog", (d) => { erros.push("diálogo inesperado: " + d.message()); d.dismiss().catch(() => {}); });
   try {
@@ -353,12 +386,15 @@ async function testarPagina(nav, base, pagina) {
     srv.close();
   }
   const linhas = [
-    paginas.length + " página(s), " + ruins + " com problema" + (fotos ? "; prints em " + fotos : ""),
+    paginas.length + " página(s), " + ruins + " com problema" + (fotos ? "; prints em " + fotos : "") +
+      (forcarRodeLocal ? "; modo forçado: rode-local" : ""),
+    "caixas PSSim.caixas.testar: " + stats.pssimCaixas + " — " + stats.pssimOk + " ok, " + stats.pssimFalhou + " falha(s)",
     "caixas testadas (rode-local): " + stats.caixas,
     "casos negativos (campo vazio, colar script, colar solução, com prompt PS C:\\Users\\ana>): " +
       stats.negativos + " conferidos, " + stats.falsoPositivo + " falso(s) positivo(s)",
     "positivo com “(sem saída)” nas missões só src/semerro: " +
-      stats.quaseLa + " “Quase lá!”, " + stats.quaseLaFalhou + " falha(s)"
+      stats.quaseLa + " “Quase lá!”, " + stats.quaseLaFalhou + " falha(s)",
+    "erros de console: " + stats.console + "; requisições externas: " + stats.externas
   ];
   console.log("\n" + linhas.join("\n"));
   process.exitCode = ruins ? 1 : 0;
