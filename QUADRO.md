@@ -13,10 +13,10 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 | `instalar.html` Instalar o PowerShell 7 | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
 | `abrir-terminal.html` Abrindo o PowerShell (e o Terminal do Windows) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
 | `simulador.html` O Editor do Guia | Zeca | [x] | [ ] | [ ] | [ ] | [ ] | Adiada: editor wasm ficou na VPS |
-| `primeiro-comando.html` Seu Primeiro Comando | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `cmdlets.html` Cmdlets: Verbo-Substantivo | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `parametros-cmdlet.html` Parâmetros dos Comandos | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `get-help.html` Get-Help: a Ajuda | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `primeiro-comando.html` Seu Primeiro Comando | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] |  |
+| `cmdlets.html` Cmdlets: Verbo-Substantivo | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] |  |
+| `parametros-cmdlet.html` Parâmetros dos Comandos | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] |  |
+| `get-help.html` Get-Help: a Ajuda | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] |  |
 | `get-command.html` Get-Command: Achando Comandos | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
 | `aliases.html` Apelidos (ls, dir, cd) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
 | `teclado.html` Tab, Histórico e Atalhos | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
@@ -31,63 +31,63 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 | `caminhos.html` Caminhos no Windows e no Linux | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
 | `new-item.html` Criando Arquivos e Pastas (New-Item) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
 | `copy-move.html` Copiando e Movendo (Copy-Item e Move-Item) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `rename-item.html` Renomeando (Rename-Item) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `remove-item.html` Apagando (Remove-Item) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `get-content.html` Lendo Arquivos (Get-Content) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `set-content.html` Escrevendo Arquivos (Set-Content e Add-Content) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `test-path.html` Existe? (Test-Path) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `provedores.html` Drives e Provedores (Env:, HKCU:) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `rename-item.html` Renomeando (Rename-Item) | Tito | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `remove-item.html` Apagando (Remove-Item) | Tito | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `get-content.html` Lendo Arquivos (Get-Content) | Tito | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `set-content.html` Escrevendo Arquivos (Set-Content e Add-Content) | Tito | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `test-path.html` Existe? (Test-Path) | Tito | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `provedores.html` Drives e Provedores (Env:, HKCU:) | Tito | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
 
 ## Variáveis e Tipos
 
 | Página | Autor | cmds | ① | ② | ③ | ④ | Obs |
 |---|---|---|---|---|---|---|---|
-| `variaveis.html` Variáveis ($) | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `tipos.html` Tipos de Dados | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `strings.html` Textos: Aspas Simples × Duplas | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `interpolacao.html` Variáveis Dentro do Texto | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `here-strings.html` Textos de Várias Linhas (Here-Strings) | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `numeros.html` Números | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `conversao.html` Conversão de Tipos ([int], [string]) | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `booleanos-null.html` $true, $false e $null | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `variaveis-automaticas.html` Variáveis Automáticas ($_, $HOME…) | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `variaveis.html` Variáveis ($) | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `tipos.html` Tipos de Dados | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `strings.html` Textos: Aspas Simples × Duplas | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `interpolacao.html` Variáveis Dentro do Texto | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `here-strings.html` Textos de Várias Linhas (Here-Strings) | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `numeros.html` Números | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `conversao.html` Conversão de Tipos ([int], [string]) | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `booleanos-null.html` $true, $false e $null | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `variaveis-automaticas.html` Variáveis Automáticas ($_, $HOME…) | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 
 ## Operadores
 
 | Página | Autor | cmds | ① | ② | ③ | ④ | Obs |
 |---|---|---|---|---|---|---|---|
-| `operadores-aritmeticos.html` Operadores Aritméticos | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `operadores-comparacao.html` Comparações (-eq, -ne, -gt, -lt) | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `operadores-texto.html` Comparando Textos (-like, -match) | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `operadores-colecao.html` -contains e -in | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `operadores-logicos.html` -and, -or e -not | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `operador-formato.html` Formatando Textos (-f) | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `atribuicao.html` Atribuição (+=, ++) | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `operadores-aritmeticos.html` Operadores Aritméticos | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `operadores-comparacao.html` Comparações (-eq, -ne, -gt, -lt) | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `operadores-texto.html` Comparando Textos (-like, -match) | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `operadores-colecao.html` -contains e -in | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `operadores-logicos.html` -and, -or e -not | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `operador-formato.html` Formatando Textos (-f) | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `atribuicao.html` Atribuição (+=, ++) | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 
 ## Saída e Entrada
 
 | Página | Autor | cmds | ① | ② | ③ | ④ | Obs |
 |---|---|---|---|---|---|---|---|
-| `write-host-output.html` Write-Host × Write-Output | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `read-host.html` Read-Host: Lendo o Teclado | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `write-outros.html` Write-Warning, Write-Verbose e Companhia | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `write-host-output.html` Write-Host × Write-Output | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `read-host.html` Read-Host: Lendo o Teclado | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `write-outros.html` Write-Warning, Write-Verbose e Companhia | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 
 ## Decisões
 
 | Página | Autor | cmds | ① | ② | ③ | ④ | Obs |
 |---|---|---|---|---|---|---|---|
-| `if.html` if | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `elseif-else.html` elseif e else | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `switch.html` switch | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `if.html` if | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `elseif-else.html` elseif e else | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `switch.html` switch | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 
 ## Repetições
 
 | Página | Autor | cmds | ① | ② | ③ | ④ | Obs |
 |---|---|---|---|---|---|---|---|
-| `foreach.html` foreach | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `for.html` for | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `while.html` while e do | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `break-continue.html` break e continue | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `foreach.html` foreach | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `for.html` for | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `while.html` while e do | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `break-continue.html` break e continue | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 
 ## Lotes de coleta
 
