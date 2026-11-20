@@ -67,7 +67,7 @@ PS C:\Users\ana&gt; 2 -in 1, 2, 3
 True
 </pre>
 <p>Igual ao <code>-contains</code>, com o item à esquerda e a lista à direita. Muitas vezes fica mais natural de ler: <code>if ($dia -in "sab", "dom")</code>.</p>
-<h2>Qual usar</h2>
+<h2>Formas diferentes</h2>
 <div class="table-wrap">
 <table class="ref">
 <tr><th>Forma</th><th>Quando</th></tr>
@@ -100,6 +100,17 @@ False
 <p><code>"Beto" -contains "Ana", "Beto"</code> pergunta se o texto "Beto" contém a lista, e dá False. No <code>-contains</code>, a lista vem <strong>antes</strong>; no <code>-in</code>, <strong>depois</strong>.</p>
 </div>
 <hr>
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>lista -contains item</code></td><td>A lista tem o item?</td></tr>
+<tr><td><code>item -in lista</code></td><td>O item está na lista?</td></tr>
+<tr><td><code>-notcontains</code>, <code>-notin</code></td><td>O contrário.</td></tr>
+<tr><td><code>-ccontains</code>, <code>-cin</code></td><td>Diferenciam maiúsculas.</td></tr>
+</table>
+</div>
+<hr>
 <h2>Exercícios</h2>
 <div class="exercise">
 <h3>1. Contém</h3>
@@ -111,19 +122,25 @@ False
 <p>Complete para perguntar se <code>$dia</code> é sábado ou domingo:</p>
 <div class="ex-code">$dia <input data-answer="-in" aria-label="operador"> "sab", "dom"</div>
 </div>
-<div class="mc" data-answer="2">
-<p class="mc-q">3. O que <code>"a" -in "abc"</code> mostra?</p>
-<label><input type="radio" name="q3"> True</label>
-<label><input type="radio" name="q3"> False</label>
-<label><input type="radio" name="q3"> a</label>
-<label><input type="radio" name="q3"> Erro</label>
+<div class="exercise">
+<h3>3. Não está</h3>
+<p>Complete para perguntar se "Dora" <strong>não</strong> está na lista:</p>
+<div class="ex-code">"Dora" <input data-answer="-notin" aria-label="operador"> "Ana", "Beto"</div>
 </div>
-<div class="mc" data-answer="1">
-<p class="mc-q">4. O que <code>"Ana", "Beto" -contains "ana"</code> mostra?</p>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. O que <code>"a" -in "abc"</code> mostra?</p>
 <label><input type="radio" name="q4"> True</label>
 <label><input type="radio" name="q4"> False</label>
-<label><input type="radio" name="q4"> Ana</label>
+<label><input type="radio" name="q4"> a</label>
 <label><input type="radio" name="q4"> Erro</label>
+</div>
+<div class="mc" data-answer="1">
+<p class="mc-q">5. O que <code>"Ana", "Beto" -contains "ana"</code> mostra?</p>
+<label><input type="radio" name="q5"> True</label>
+<label><input type="radio" name="q5"> False</label>
+<label><input type="radio" name="q5"> Ana</label>
+<label><input type="radio" name="q5"> Erro</label>
 </div>
 <div class="tryps" data-goal="out:Fim de semana;;src:-in;;semerro">
 <p class="try-task"><strong>Missão final:</strong> com <code>-in</code>, mostre <code>Fim de semana</code> quando <code>$dia</code> for <code>"sab"</code> ou <code>"dom"</code>.</p>
