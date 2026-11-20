@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Instalar o PowerShell 7 — Microsoft Store e winget | Guia PowerShell</title>
+<meta name="description" content="Como instalar o PowerShell 7 no Windows pela Microsoft Store ou pelo winget, conferir se o winget está disponível e o que o 5.1 diz se o pwsh ainda não existe.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Instalar o <span class="hl">PowerShell 7</span></h1>
+
+<p class="intro">O Windows já traz o <strong>Windows PowerShell 5.1</strong>. O <strong>PowerShell 7</strong>, que este guia ensina, é um programa à parte: você instala uma vez e depois abre pelo atalho ou pelo comando <code>pwsh</code>. Nesta aula você vê dois jeitos oficiais no Windows — a <strong>Microsoft Store</strong> e o <code>winget</code> — e como conferir, depois, se deu certo. Não vamos rodar a instalação daqui: quem instala no seu computador é você.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que o 7 precisa ser instalado (o 5.1 já vem no Windows, o 7 não).</li>
+  <li>A instalar pela <strong>Microsoft Store</strong>, com o aplicativo da Microsoft.</li>
+  <li>A instalar pelo <code>winget</code>, o instalador de programas da linha de comando do Windows.</li>
+  <li>A conferir se o <code>winget</code> existe e se o pacote se chama mesmo <code>Microsoft.PowerShell</code>.</li>
+  <li>O erro real do 5.1 quando o <code>pwsh</code> ainda não está instalado, e o que fazer.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> (e o erro, no 5.1) de um Windows em português. Nenhum comando daqui instala, altera ou lista os programas da sua máquina: a instalação em si você faz na Store ou digitando o <code>winget install</code> na sua janela, quando quiser.</p>
+
+<hr>
+
+<h2>A ideia: um aplicativo a mais, como um navegador</h2>
+<p>O 5.1 é como o bloco de notas que já veio no Windows: está lá, estável, mas não recebe as novidades. O 7 é como instalar um navegador atual: você baixa o aplicativo oficial, e as duas coisas podem conviver. Instalar o 7 <strong>não apaga</strong> o 5.1.</p>
+<p>Depois de instalado, o atalho “PowerShell 7” e o comando <code>pwsh</code> abrem o 7. O atalho “Windows PowerShell” e o comando <code>powershell</code> continuam abrindo o 5.1. A aula <a href="versoes-powershell.html">Windows PowerShell 5.1 × PowerShell 7</a> mostra como ter certeza de qual janela é qual.</p>
+
+<hr>
+
+<h2>1. Pela Microsoft Store (o jeito mais visual)</h2>
+<p>Se você prefere clicar em vez de digitar, use a loja de aplicativos do Windows.</p>
+<ol class="passo">
+  <li>Abra a <strong>Microsoft Store</strong> no menu Iniciar.</li>
+  <li>Na busca, digite <strong>PowerShell</strong>.</li>
+  <li>Abra o aplicativo publicado pela <strong>Microsoft Corporation</strong> (o nome é “PowerShell”, não “Windows PowerShell” e não é um guia de outra empresa).</li>
+  <li>Clique em <strong>Obter</strong> ou <strong>Instalar</strong> e espere terminar.</li>
+  <li>Feche a janela antiga, se houver uma aberta, e abra o atalho <strong>PowerShell 7</strong> no menu Iniciar (é uma janela nova que já enxerga a instalação).</li>
+</ol>
+<div class="note">A Store atualiza o PowerShell junto com os outros aplicativos, o que é cômodo. Se a Store não estiver disponível na sua edição do Windows, use o <code>winget</code> da seção seguinte, ou baixe o instalador oficial em <a href="https://aka.ms/powershell" rel="noopener">aka.ms/powershell</a>.</div>
+
+<hr>
+
+<h2>2. Pelo <code>winget</code> (o jeito pela linha de comando)</h2>
+<p>O <code>winget</code> é o instalador de programas do próprio Windows, no terminal. Primeiro vale conferir se ele responde. No laboratório:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; winget --version
+v1.29.380
+</pre>
+<p>Se aparecer um número de versão (o seu pode ser outro), o <code>winget</code> está pronto. Em seguida, você pode <strong>consultar</strong> o pacote oficial, sem instalar nada: o identificador é <code>Microsoft.PowerShell</code>.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; winget search --id Microsoft.PowerShell --exact --accept-source-agreements
+Nome       ID                   Versão  Origem
+-----------------------------------------------
+PowerShell Microsoft.PowerShell 7.7.0.0 winget
+</pre>
+<dl class="anatomy">
+  <dt>winget search</dt><dd>Procura um pacote no catálogo. Não instala nada.</dd>
+  <dt>--id Microsoft.PowerShell</dt><dd>O identificador oficial, para não confundir com outro programa de nome parecido.</dd>
+  <dt>--exact</dt><dd>Só o que tem exatamente esse identificador.</dd>
+  <dt>Versão 7.7.0.0</dt><dd>A versão que o catálogo oferecia no dia da coleta. A sua busca pode mostrar uma versão mais nova, e tudo bem: instale a que a Microsoft estiver oferecendo.</dd>
+</dl>
+
+<p>Quando você quiser instalar de verdade, na <strong>sua</strong> janela (não no editor deste guia), o pedido é este:</p>
+<pre class="file" data-file="instalar-pwsh.ps1">winget install --id Microsoft.PowerShell --accept-package-agreements --accept-source-agreements
+</pre>
+<p>O <code>winget</code> vai baixar o pacote, pedir confirmação se fizer falta e concluir a instalação. A saída varia com a versão do <code>winget</code> e com o que já existe na máquina: por isso esta aula <strong>não reproduz uma instalação</strong>. Depois que terminar, feche a janela e abra o <strong>PowerShell 7</strong>.</p>
+<div class="warning">Rode o <code>winget install</code> só se você quiser instalar (ou atualizar) o PowerShell 7 neste computador, e só numa janela sua. O editor do guia não instala programa nenhum no seu Windows.</div>
+
+<hr>
+
+<h2>3. Conferindo se deu certo</h2>
+<p>Abra uma janela <strong>nova</strong> do PowerShell 7 e rode <code>$PSVersionTable.PSVersion</code>. A versão deve começar com <code>7</code> (neste guia, a referência é a 7.7). Se ainda aparecer <code>5.1…</code>, você abriu o 5.1: feche e escolha o atalho “PowerShell 7”, ou digite <code>pwsh</code> no menu Iniciar.</p>
+<p>O editor abaixo já é um PowerShell 7 (o do navegador). Use-o para praticar o pedido da versão, sem mexer no que está instalado no seu Windows.</p>
+
+<div class="tryps" data-goal="src:PSVersion;;semerro">
+<p class="try-task"><strong>Experimente:</strong> mostre a versão do PowerShell que está atendendo, com <code>$PSVersionTable.PSVersion</code>.</p>
+<pre class="script" data-file="main.ps1">Write-Output "Qual é a versão?"
+</pre>
+<pre class="solucao" data-file="main.ps1">$PSVersionTable.PSVersion
+</pre>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>O 5.1 ainda não encontra o <code>pwsh</code></strong>
+<p>Se você pede o <code>pwsh</code> numa janela do Windows PowerShell 5.1 e o 7 ainda não está instalado, a resposta real é esta:</p>
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; (Get-Command pwsh).Source
+Get-Command : O termo 'pwsh' não é reconhecido como nome de cmdlet, função, arquivo de script ou programa operável.
+Verifique a grafia do nome ou, se um caminho tiver sido incluído, veja se o caminho está correto e tente novamente.
+No linha:1 caractere:2
++ (Get-Command pwsh).Source
++  ~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (pwsh:String) [Get-Command], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException,Microsoft.PowerShell.Commands.GetCommandCommand
+</pre>
+<p>É o mesmo tipo de “não é reconhecido” da aula <a href="versoes-powershell.html">5.1 × 7</a>: o 5.1 procurou o programa <code>pwsh</code> e não achou.</p>
+<p><strong>Como resolver:</strong> instale o 7 pela Store ou pelo <code>winget install --id Microsoft.PowerShell</code>, feche a janela e abra o atalho <strong>PowerShell 7</strong>. Não adianta só rodar de novo na mesma janela antiga do 5.1 sem instalar nada.</p>
+</div>
+
+<div class="cenario">
+<strong>O <code>winget</code> também não é reconhecido</strong>
+<p>Em algumas instalações do Windows o <code>winget</code> ainda não está disponível, ou a janela antiga não o enxerga. Nesse caso, use a Microsoft Store (seção 1) ou o instalador oficial em <a href="https://aka.ms/powershell" rel="noopener">aka.ms/powershell</a>, e abra uma janela nova depois.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Jeito</th><th>Quando usar</th></tr>
+<tr><td>Microsoft Store, app “PowerShell” da Microsoft</td><td>O mais visual; a Store cuida das atualizações.</td></tr>
+<tr><td><code>winget search --id Microsoft.PowerShell --exact</code></td><td>Só consulta o catálogo, sem instalar.</td></tr>
+<tr><td><code>winget install --id Microsoft.PowerShell</code></td><td>Instala (ou atualiza) o 7, na sua janela, quando você quiser.</td></tr>
+<tr><td>Instalador em aka.ms/powershell</td><td>Se a Store e o <code>winget</code> não estiverem disponíveis.</td></tr>
+<tr><td><code>$PSVersionTable.PSVersion</code></td><td>Confere a versão, numa janela nova: deve começar com 7.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o identificador</h3>
+<p>Qual é o identificador oficial do pacote no <code>winget</code>?</p>
+<div class="ex-code">winget install --id <input data-answer="Microsoft.PowerShell" aria-label="id"></div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual comando consulta, sem instalar?</h3>
+<p>Complete para procurar o pacote no catálogo:</p>
+<div class="ex-code">winget <input data-answer="search" aria-label="subcomando"> --id Microsoft.PowerShell --exact</div>
+</div>
+
+<div class="exercise">
+<h3>3. Como conferir a versão?</h3>
+<p>Complete para ver a versão do PowerShell desta janela:</p>
+<div class="ex-code">$PSVersionTable.<input data-answer="PSVersion" aria-label="campo"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Instalar o PowerShell 7 apaga o Windows PowerShell 5.1?</p>
+<label><input type="radio" name="q4"> Sim, o 5.1 some para sempre</label>
+<label><input type="radio" name="q4"> Não: os dois convivem; <code>pwsh</code> abre o 7 e <code>powershell</code> abre o 5.1</label>
+<label><input type="radio" name="q4"> Só apaga se você usar a Store</label>
+<label><input type="radio" name="q4"> Só apaga se você usar o <code>winget</code></label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Depois de instalar, <code>$PSVersionTable.PSVersion</code> ainda mostra 5.1. O que aconteceu?</p>
+<label><input type="radio" name="q5"> A instalação falhou e não há jeito</label>
+<label><input type="radio" name="q5"> O PowerShell 7 não existe para Windows</label>
+<label><input type="radio" name="q5"> Você ainda está numa janela do 5.1: feche e abra o atalho PowerShell 7</label>
+<label><input type="radio" name="q5"> Precisa reiniciar o computador obrigatoriamente</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. Qual destes comandos <strong>só consulta</strong> e não instala nada?</p>
+<label><input type="radio" name="q6"> <code>winget search --id Microsoft.PowerShell --exact</code></label>
+<label><input type="radio" name="q6"> <code>winget install --id Microsoft.PowerShell</code></label>
+<label><input type="radio" name="q6"> Desinstalar o 5.1 na mão</label>
+<label><input type="radio" name="q6"> Apagar a pasta do Windows</label>
+</div>
+
+<div class="tryps" data-goal="src:PSEdition;;semerro">
+<p class="try-task"><strong>Missão final:</strong> mostre a edição desta sessão (<code>Core</code> no 7) com <code>$PSVersionTable.PSEdition</code>.</p>
+<pre class="script" data-file="main.ps1">Write-Output "Qual é a edição?"
+</pre>
+<pre class="solucao" data-file="main.ps1">$PSVersionTable.PSEdition
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>O 5.1 já vem no Windows; o <strong>PowerShell 7</strong> se instala à parte e não apaga o 5.1.</li>
+  <li>Dois jeitos oficiais no Windows: a <strong>Microsoft Store</strong> (app “PowerShell” da Microsoft) e o <code>winget install --id Microsoft.PowerShell</code>.</li>
+  <li><code>winget --version</code> e <code>winget search</code> só consultam. A instalação você roda na sua janela, quando quiser; esta aula não reproduz essa saída.</li>
+  <li>Depois, abra uma janela <strong>nova</strong> do PowerShell 7 e confira com <code>$PSVersionTable.PSVersion</code> (deve começar com 7).</li>
+  <li>Se o 5.1 diz que <code>pwsh</code> não é reconhecido, o 7 ainda não está instalado (ou você não abriu a janela dele).</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
