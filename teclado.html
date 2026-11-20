@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Tab, Histórico e Atalhos — PSReadLine | Guia PowerShell</title>
+<meta name="description" content="Atalhos do teclado no PowerShell 7: Tab para completar, setas e F8 no histórico, Ctrl+R para buscar, Ctrl+L para limpar, Ctrl+C para cancelar, Ctrl+Espaço para o menu, e o cmdlet Get-History, explicados sem inventar saídas.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+
+<h1><span class="hl">Tab</span>, Histórico e Atalhos</h1>
+
+<p class="intro">Até agora você digitou o comando inteiro e apertou <kbd>Enter</kbd>. O PowerShell também se comporta como um caderno e uma calculadora: ele completa o que você começou a escrever, lembra o que você já rodou e responde a alguns atalhos de teclado. Nesta aula você vai conhecer esses atalhos. Como eles acontecem <strong>enquanto você digita</strong>, e não como um resultado na tela, a gente explica o que cada tecla faz, sem inventar uma saída.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A tecla <kbd>Tab</kbd>, que completa o nome de um comando ou de um caminho.</li>
+  <li>As setas <kbd>↑</kbd> e <kbd>↓</kbd>, que folheiam os comandos que você já rodou nesta janela.</li>
+  <li>O <kbd>F8</kbd>, que procura no histórico a partir do que você já digitou.</li>
+  <li>O <kbd>Ctrl</kbd>+<kbd>R</kbd>, que abre uma busca interativa no histórico.</li>
+  <li>O <kbd>Ctrl</kbd>+<kbd>L</kbd>, que limpa a tela, e o <kbd>Ctrl</kbd>+<kbd>C</kbd>, que cancela a linha (ou copia, se houver texto selecionado).</li>
+  <li>O <kbd>Ctrl</kbd>+<kbd>Espaço</kbd>, que abre um menu de completação.</li>
+  <li>O <code>Get-History</code>, que lista os comandos desta sessão.</li>
+</ul>
+</div>
+
+<p>Esses atalhos vêm de um módulo chamado <strong>PSReadLine</strong> ("linha de leitura do PowerShell"), que já vem no PowerShell 7. As descrições abaixo são as do laboratório, no <strong>PowerShell 7.7</strong> de um Windows em português. No editor do guia, no navegador, o teclado é o do editor, não o desta aula: pratique os atalhos na janela do PowerShell do seu computador.</p>
+
+<hr>
+
+<h2>A ideia: o caderno com marcador</h2>
+<p>Imagine um caderno em que cada comando que você rodou virou uma página, e uma régua que completa a palavra quando você começou a escrever. Você não precisa copiar de novo o que já fez: vira a página para trás, ou deixa a régua terminar o nome.</p>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>No caderno</th><th>No PowerShell</th></tr>
+<tr><td>A régua que completa a palavra</td><td>A tecla <kbd>Tab</kbd></td></tr>
+<tr><td>Virar para a página anterior</td><td>A seta <kbd>↑</kbd></td></tr>
+<tr><td>Procurar uma página pelo começo do título</td><td>O <kbd>F8</kbd> e o <kbd>Ctrl</kbd>+<kbd>R</kbd></td></tr>
+<tr><td>Passar para uma folha em branco</td><td>O <kbd>Ctrl</kbd>+<kbd>L</kbd>, que limpa a tela</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>1. <kbd>Tab</kbd>: deixe o PowerShell terminar o nome</h2>
+<p>Digite só o começo de um comando, por exemplo <code>Get-Da</code>, e aperte <kbd>Tab</kbd>. O PowerShell completa para <code>Get-Date</code> (ou para o próximo nome que encaixa, se houver mais de um). Aperte <kbd>Tab</kbd> de novo para circular entre as opções. Isso vale também para pastas e arquivos: digite <code>C:\Use</code> e <kbd>Tab</kbd> completa o caminho.</p>
+<p>Se nada encaixar, a linha fica como está. O <kbd>Tab</kbd> não inventa um comando que não existe e não roda nada: ele só completa. Para entregar o comando, você ainda aperta <kbd>Enter</kbd>.</p>
+<div class="note">O PowerShell não liga para maiúsculas e minúsculas, então <code>get-da</code> e <kbd>Tab</kbd> também chegam em <code>Get-Date</code>. Nos scripts, continue escrevendo o nome no jeito oficial, com as iniciais maiúsculas.</div>
+
+<hr>
+
+<h2>2. Setas e <kbd>F8</kbd>: o histórico desta janela</h2>
+<p>A seta <kbd>↑</kbd> coloca na linha o comando <strong>anterior</strong> desta sessão. Aperte de novo para ir mais para trás. A seta <kbd>↓</kbd> avança para o mais recente. Quando achar o que quer, você pode editar e apertar <kbd>Enter</kbd>.</p>
+<p>O <kbd>F8</kbd> é mais seletivo: você digita o começo (por exemplo <code>Get-</code>) e aperta <kbd>F8</kbd>. Ele pulou só pelos comandos do histórico que <strong>começam</strong> com aquilo.</p>
+<p>Esses atalhos folheiam a memória <strong>desta janela</strong>. Se você fecha o PowerShell e abre outro, o que a seta mostra pode ser outro (depende da configuração da sua máquina). Nesta aula a gente não lista o histórico da máquina real.</p>
+
+<hr>
+
+<h2>3. <kbd>Ctrl</kbd>+<kbd>R</kbd>: buscar no histórico</h2>
+<p>Aperte <kbd>Ctrl</kbd> e <kbd>R</kbd> juntos. Aparece um campo de busca: vá digitando um pedaço do comando (por exemplo <code>Date</code>) e o PowerShell mostra a ocorrência mais recente que contém aquele texto. <kbd>Enter</kbd> entrega o comando; <kbd>Esc</kbd> cancela a busca e devolve a linha como estava.</p>
+<p>É o atalho certo quando você lembra de uma palavra, mas não de qual comando era, nem de quão longe ele está nas setas.</p>
+
+<hr>
+
+<h2>4. Limpar, cancelar e o menu de completação</h2>
+<ul>
+  <li><kbd>Ctrl</kbd>+<kbd>L</kbd> — limpa a tela e redesenha a linha atual no alto. O mesmo efeito do <code>Clear-Host</code> (apelido <code>cls</code>), sem apagar o histórico.</li>
+  <li><kbd>Ctrl</kbd>+<kbd>C</kbd> — se houver texto selecionado, copia; se não houver, <strong>cancela</strong> a linha que você estava escrevendo (e também interrompe um comando que ainda está rodando).</li>
+  <li><kbd>Ctrl</kbd>+<kbd>Espaço</kbd> — abre um <strong>menu</strong> com as completações possíveis, em vez de ir uma a uma com o <kbd>Tab</kbd>.</li>
+</ul>
+
+<hr>
+
+<h2>5. A lista oficial dos atalhos</h2>
+<p>O comando <code>Get-PSReadLineKeyHandler</code> lista o que cada tecla faz neste computador. Pedimos só as teclas desta aula. As descrições saíram em inglês (é o texto oficial da função); embaixo, a tradução:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-PSReadLineKeyHandler -Bound | Where-Object Key -in 'Tab','UpArrow','Ctrl+r','F8','Ctrl+c','Ctrl+l','Ctrl+Spacebar' | Format-Table Key, Function, Description -AutoSize
+
+Key           Function              Description
+---           --------              -----------
+Ctrl+C        Copy                  Copy selected region to the system clipboard.  If no region is selected, copy the w…
+Ctrl+c        CopyOrCancelLine      Either copy selected text to the clipboard, or if no text is selected, cancel editi…
+F8            HistorySearchBackward Search for the previous item in the history that starts with the current input - li…
+UpArrow       PreviousHistory       Replace the input with the previous item in the history
+Ctrl+r        ReverseSearchHistory  Search history backwards interactively
+Ctrl+Spacebar MenuComplete          Complete the input if there is a single completion, otherwise complete the input by…
+Tab           TabCompleteNext       Complete the input using the next completion
+Ctrl+l        ClearScreen           Clear the screen and redraw the current line at the top of the screen</pre>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Tecla</th><th>Função</th><th>Em português</th></tr>
+<tr><td><kbd>Tab</kbd></td><td><code>TabCompleteNext</code></td><td>Completa com a próxima opção que encaixa.</td></tr>
+<tr><td><kbd>↑</kbd></td><td><code>PreviousHistory</code></td><td>Coloca o comando anterior do histórico.</td></tr>
+<tr><td><kbd>F8</kbd></td><td><code>HistorySearchBackward</code></td><td>Procura, para trás, um item do histórico que comece com o que você já digitou.</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>R</kbd></td><td><code>ReverseSearchHistory</code></td><td>Busca interativa no histórico, para trás.</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd></td><td><code>ClearScreen</code></td><td>Limpa a tela e redesenha a linha no alto.</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>C</kbd></td><td><code>Copy</code> / <code>CopyOrCancelLine</code></td><td>Copia a seleção, ou cancela a linha se não houver seleção.</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Espaço</kbd></td><td><code>MenuComplete</code></td><td>Abre o menu de completação (se só houver uma opção, completa direto).</td></tr>
+</table>
+</div>
+<p>Repare que <kbd>Ctrl</kbd>+<kbd>C</kbd> aparece duas vezes na lista, com C maiúsculo e minúsculo: um é "só copiar", o outro é "copiar ou cancelar". No teclado do Windows as duas são a mesma combinação; o que muda é se há texto selecionado.</p>
+
+<hr>
+
+<h2>6. <code>Get-History</code>: ver os comandos desta sessão</h2>
+<p>O cmdlet <code>Get-History</code> lista o que você já rodou <strong>nesta janela</strong>, com um número de ordem. Ele não mostra a saída de cada comando, só o texto que você digitou.</p>
+<p>Como o histórico é pessoal e muda a cada sessão, esta aula não cola uma lista pronta. Para ver a sua: abra o PowerShell 7, rode uns comandos (por exemplo o <code>Get-Date</code>) e depois digite <code>Get-History</code>.</p>
+<div class="note">O <code>Get-History</code> é um comando como os outros: você digita e aperta <kbd>Enter</kbd>, e a lista aparece na tela. Já as setas, o <kbd>Tab</kbd> e o <kbd>Ctrl</kbd>+<kbd>R</kbd> acontecem <strong>antes</strong> de você apertar <kbd>Enter</kbd>, na própria linha do prompt.</div>
+
+<div class="tryps" data-goal="out:Tab;;semerro">
+<p class="try-task"><strong>Experimente:</strong> troque a palavra <code>Enter</code> pela tecla que completa o nome de um comando.</p>
+<pre class="script" data-file="main.ps1">Write-Output "Enter"
+</pre>
+<pre class="solucao" data-file="main.ps1">Write-Output "Tab"
+</pre>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>O <kbd>Tab</kbd> não completa, ou completa outra coisa</strong>
+<p>Isso quase nunca é um erro vermelho na tela: o <kbd>Tab</kbd> simplesmente não tem um nome que encaixe, e a linha fica parada. Confira se você digitou o começo certo (<code>Get-Da</code> para <code>Get-Date</code>, não <code>Get-Datx</code>). Se houver vários nomes possíveis, aperte <kbd>Tab</kbd> de novo, ou use <kbd>Ctrl</kbd>+<kbd>Espaço</kbd> para ver o menu.</p>
+<p>Outro tropeço comum: completar um caminho e apertar <kbd>Enter</kbd> achando que só "olhou" a pasta. O <kbd>Tab</kbd> só escreve o nome; o <kbd>Enter</kbd> é que entrega o comando. Se o comando for um <code>Set-Location</code> ou um <code>Remove-Item</code>, ele vai rodar de verdade. Confira a linha antes de apertar <kbd>Enter</kbd>.</p>
+</div>
+
+<div class="cenario">
+<strong>A seta <kbd>↑</kbd> não mostra o que você espera</strong>
+<p>A seta só folheia o histórico que esta janela está usando. Uma janela recém-aberta, ou um <code>pwsh -NoProfile</code>, pode começar vazia. Isso não é quebra: rode o comando de novo, ou use o <code>Get-History</code> para ver o que esta sessão realmente guardou.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você aperta</th><th>O que faz</th></tr>
+<tr><td><kbd>Tab</kbd></td><td>Completa o comando ou o caminho.</td></tr>
+<tr><td><kbd>↑</kbd> / <kbd>↓</kbd></td><td>Folheia o histórico desta janela.</td></tr>
+<tr><td><kbd>F8</kbd></td><td>Procura no histórico um item que comece com o que você digitou.</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>R</kbd></td><td>Busca interativa no histórico.</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd></td><td>Limpa a tela.</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>C</kbd></td><td>Copia a seleção, ou cancela a linha / o comando em andamento.</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Espaço</kbd></td><td>Abre o menu de completação.</td></tr>
+<tr><td><code>Get-History</code></td><td>Lista os comandos já rodados nesta sessão.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Qual tecla completa?</h3>
+<p>Qual tecla completa o nome de um comando a partir do que você já digitou?</p>
+<div class="ex-code"><input data-answer="Tab" aria-label="tecla"></div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual comando lista o histórico?</h3>
+<p>Qual cmdlet lista os comandos já rodados nesta sessão?</p>
+<div class="ex-code"><input data-answer="Get-History" aria-label="cmdlet"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Qual atalho limpa a tela?</h3>
+<p>Qual combinação limpa a tela e redesenha a linha no alto?</p>
+<div class="ex-code"><input data-answer="Ctrl+L|Ctrl + L|Ctrl-L" aria-label="atalho"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Você digitou <code>Get-Da</code> e apertou <kbd>Tab</kbd>. O que acontece?</p>
+<label><input type="radio" name="q4"> O PowerShell roda o <code>Get-Date</code> na hora</label>
+<label><input type="radio" name="q4"> O PowerShell completa o nome; o comando só roda quando você aperta <kbd>Enter</kbd></label>
+<label><input type="radio" name="q4"> O PowerShell apaga o que você digitou</label>
+<label><input type="radio" name="q4"> Aparece uma mensagem de erro em vermelho</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Para que serve a seta <kbd>↑</kbd>?</p>
+<label><input type="radio" name="q5"> Para completar o nome de um arquivo</label>
+<label><input type="radio" name="q5"> Para limpar a tela</label>
+<label><input type="radio" name="q5"> Para trazer o comando anterior do histórico desta janela</label>
+<label><input type="radio" name="q5"> Para fechar o PowerShell</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. O <code>Get-History</code> mostra o quê?</p>
+<label><input type="radio" name="q6"> Os comandos que você já rodou nesta sessão</label>
+<label><input type="radio" name="q6"> A senha da sua conta</label>
+<label><input type="radio" name="q6"> Todos os arquivos da pasta pessoal</label>
+<label><input type="radio" name="q6"> A data e a hora de agora</label>
+</div>
+
+<div class="tryps" data-goal="out:Ctrl+L;;semerro">
+<p class="try-task"><strong>Missão:</strong> faça o script mostrar o atalho que limpa a tela, no formato <code>Ctrl+L</code>.</p>
+<pre class="script" data-file="main.ps1">Write-Output "Ctrl+C"
+</pre>
+<pre class="solucao" data-file="main.ps1">Write-Output "Ctrl+L"
+</pre>
+</div>
+
+<div class="tryps" data-goal="out:Get-History;;src:Write-Output;;semerro">
+<p class="try-task"><strong>Missão final:</strong> escreva na tela o nome do cmdlet que lista o histórico desta sessão.</p>
+<pre class="script" data-file="main.ps1">Write-Output "Get-Date"
+</pre>
+<pre class="solucao" data-file="main.ps1">Write-Output "Get-History"
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><kbd>Tab</kbd> completa o comando ou o caminho; o comando só roda com <kbd>Enter</kbd>.</li>
+  <li><kbd>↑</kbd> e <kbd>↓</kbd> folheiam o histórico desta janela; <kbd>F8</kbd> procura pelo começo do que você digitou; <kbd>Ctrl</kbd>+<kbd>R</kbd> abre uma busca.</li>
+  <li><kbd>Ctrl</kbd>+<kbd>L</kbd> limpa a tela; <kbd>Ctrl</kbd>+<kbd>C</kbd> copia ou cancela; <kbd>Ctrl</kbd>+<kbd>Espaço</kbd> abre o menu de completação.</li>
+  <li><code>Get-History</code> lista os comandos já rodados nesta sessão.</li>
+  <li>Esses atalhos valem na janela do PowerShell do Windows. No editor do guia, o teclado é o do editor.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
