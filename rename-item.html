@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Rename-Item — renomear arquivos e pastas | Guia PowerShell</title>
+<meta name="description" content="Rename-Item para quem nunca usou terminal: trocar o nome de um arquivo, o -NewName, o -PassThru, renomear vários de uma vez com o pipeline e o -WhatIf, e os erros reais (arquivo que não existe, nome já usado, caminho no novo nome) explicados em português.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Rename-Item</span>: Renomeando</h1>
+
+<p class="intro">A Ana baixou as fotos do celular e elas vieram com a extensão em maiúsculas: <code>foto1.JPG</code>, <code>foto2.JPG</code>. Também tem uma <code>nota.txt</code> que merecia um nome melhor. Nesta aula você vai trocar o nome de um arquivo, conferir o resultado, e depois renomear <strong>vários de uma vez</strong> sem medo, ensaiando antes com o <code>-WhatIf</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A trocar o nome de um arquivo ou pasta com <code>Rename-Item</code>.</li>
+  <li>O que são o <code>-Path</code> (quem) e o <code>-NewName</code> (o nome novo).</li>
+  <li>O <code>-PassThru</code>, que mostra o arquivo depois de renomeado.</li>
+  <li>A renomear vários arquivos de uma vez, pelo pipeline (<code>|</code>).</li>
+  <li>O <code>-WhatIf</code>, que ensaia sem mudar nada.</li>
+  <li>Os três erros mais comuns, com a mensagem real.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, dentro de uma pasta de treino chamada <code>guia-ps-teste</code>, na pasta pessoal da usuária fictícia <code>ana</code>. Por isso o prompt aparece como <code>PS C:\Users\ana\guia-ps-teste&gt;</code>.</p>
+
+<hr>
+
+<h2>A ideia: a etiqueta da pasta suspensa</h2>
+<p>Pense numa gaveta de arquivo com pastas suspensas. Renomear é trocar a <strong>etiqueta</strong> de uma pasta: o conteúdo continua igual, no mesmo lugar. Só o nome muda.</p>
+<p>É exatamente isso que o <code>Rename-Item</code> faz. Ele não abre o arquivo, não copia, não move de pasta. Para levar o arquivo a outra pasta existe o <code>Move-Item</code> (aula <a href="copy-move.html">Copiando e Movendo</a>).</p>
+
+<hr>
+
+<h2>1. Trocando um nome</h2>
+<p>A pasta de treino tem uma <code>nota.txt</code>. Para chamá-la de <code>anotacao.txt</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Rename-Item nota.txt anotacao.txt
+PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem -Name
+anotacao.txt
+foto1.JPG
+foto2.JPG
+foto3.JPG
+</pre>
+<dl class="anatomy">
+  <dt>Rename-Item</dt><dd>"Renomear item". <em>Rename</em> é "renomear" e <em>Item</em> é qualquer coisa que mora numa pasta: arquivo ou outra pasta.</dd>
+  <dt>nota.txt</dt><dd><strong>Quem</strong> vai ser renomeado. É o parâmetro <code>-Path</code> ("caminho"), que pode ir sem o nome quando vem primeiro.</dd>
+  <dt>anotacao.txt</dt><dd>O <strong>nome novo</strong>. É o parâmetro <code>-NewName</code>, que pode ir sem o nome quando vem em segundo.</dd>
+</dl>
+<p>O <code>Rename-Item</code> não escreveu nada: no PowerShell, <strong>silêncio quer dizer que deu certo</strong>. O <code>Get-ChildItem -Name</code> (aula <a href="get-childitem.html">Listando</a>) confirma que a <code>nota.txt</code> virou <code>anotacao.txt</code>.</p>
+
+<h3>Com os nomes dos parâmetros escritos</h3>
+<p>Nos scripts, escreva os nomes dos parâmetros. Fica mais fácil de ler daqui a um mês:</p>
+<pre class="file" data-file="renomear.ps1">Rename-Item -Path nota.txt -NewName anotacao.txt
+</pre>
+
+<div class="tryps" data-goal="arquivo:compras.txt;;semerro">
+<p class="try-task"><strong>Experimente:</strong> o script cria <code>lista.txt</code>. Acrescente uma linha que troque o nome dele para <code>compras.txt</code> e clique em Rodar.</p>
+<pre class="script" data-file="main.ps1">'arroz' | Set-Content lista.txt
+</pre>
+<pre class="solucao" data-file="main.ps1">'arroz' | Set-Content lista.txt
+Rename-Item -Path lista.txt -NewName compras.txt
+</pre>
+</div>
+
+<hr>
+
+<h2>2. Vendo o resultado: <code>-PassThru</code></h2>
+<p>Se você quer uma confirmação na hora, sem listar a pasta, use <code>-PassThru</code> ("passar adiante"). Ele mostra o arquivo já com o nome novo:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Rename-Item anotacao.txt -NewName lembrete.txt -PassThru
+
+    Diretório: C:\Users\ana\guia-ps-teste
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          20/11/2026    17:13              4 lembrete.txt
+
+</pre>
+<p>É a mesma ficha que o <code>Get-ChildItem</code> mostra: a pasta, a data da última mudança, o tamanho (4 bytes: as letras <code>oi</code> e a quebra de linha) e o <strong>nome novo</strong>. Repare que a data não mudou para "agora": renomear não altera o conteúdo.</p>
+
+<hr>
+
+<h2>3. Vários de uma vez</h2>
+<p>As três fotos têm a extensão <code>.JPG</code> em maiúsculas. Renomear uma por uma seria chato. O jeito é <strong>listar</strong> as fotos e mandar a lista, pelo pipeline (<code>|</code>), para o <code>Rename-Item</code>, dizendo como calcular cada nome novo.</p>
+
+<h3>Primeiro, ensaie com <code>-WhatIf</code></h3>
+<p>Mexer em muitos arquivos de uma vez pede cuidado. O <code>-WhatIf</code> ("e se?") mostra o que <strong>aconteceria</strong>, sem fazer nada:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem *.JPG | Rename-Item -NewName { $_.Name -replace '\.JPG$', '.jpg' } -WhatIf
+What If: Executando a operação "Renomear Arquivo" no destino "Item: C:\Users\ana\guia-ps-teste\foto1.JPG Destino: C:\Users\ana\guia-ps-teste\foto1.jpg".
+What If: Executando a operação "Renomear Arquivo" no destino "Item: C:\Users\ana\guia-ps-teste\foto2.JPG Destino: C:\Users\ana\guia-ps-teste\foto2.jpg".
+What If: Executando a operação "Renomear Arquivo" no destino "Item: C:\Users\ana\guia-ps-teste\foto3.JPG Destino: C:\Users\ana\guia-ps-teste\foto3.jpg".
+</pre>
+<dl class="anatomy">
+  <dt>Get-ChildItem *.JPG</dt><dd>Lista só os arquivos terminados em <code>.JPG</code>. O <code>*</code> quer dizer "qualquer coisa antes".</dd>
+  <dt>|</dt><dd>O <strong>pipeline</strong>: passa cada arquivo da lista para o próximo comando, um de cada vez.</dd>
+  <dt>-NewName { … }</dt><dd>Em vez de um nome fixo, uma <strong>receita</strong> entre chaves, calculada para cada arquivo.</dd>
+  <dt>$_</dt><dd>"O arquivo da vez". <code>$_.Name</code> é o nome dele, como <code>foto1.JPG</code>.</dd>
+  <dt>-replace '\.JPG$', '.jpg'</dt><dd>Troca o <code>.JPG</code> do fim (<code>$</code> = fim do nome) por <code>.jpg</code>. O <code>\.</code> é um ponto de verdade. Você vai ver o <code>-replace</code> com calma em <a href="operadores-texto.html">Comparando Textos</a>.</dd>
+  <dt>-WhatIf</dt><dd>Só ensaia. A linha <code>What If:</code> descreve cada troca: <em>Item</em> é o nome atual e <em>Destino</em> é o nome novo.</dd>
+</dl>
+<p>O ensaio mostrou exatamente o que a Ana queria. Agora é só rodar <strong>sem</strong> o <code>-WhatIf</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem *.JPG | Rename-Item -NewName { $_.Name -replace '\.JPG$', '.jpg' }
+PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem -Name
+foto1.jpg
+foto2.jpg
+foto3.jpg
+lembrete.txt
+</pre>
+<div class="tip">Crie o hábito: antes de renomear, mover ou apagar <strong>muitos</strong> arquivos, rode uma vez com <code>-WhatIf</code>. Se o ensaio estiver certo, apague o <code>-WhatIf</code> e rode de novo.</div>
+
+<hr>
+
+<h2>Formas diferentes de renomear</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>Rename-Item -Path a.txt -NewName b.txt</code></td><td>Nos scripts: tudo escrito, fácil de ler.</td></tr>
+<tr><td><code>Rename-Item a.txt b.txt</code></td><td>No terminal, no dia a dia: os dois parâmetros pela posição.</td></tr>
+<tr><td><code>ren a.txt b.txt</code></td><td>Apelido herdado do <code>cmd</code> (aula <a href="aliases.html">Apelidos</a>). Funciona no terminal, evite em scripts.</td></tr>
+<tr><td><code>Get-ChildItem … | Rename-Item -NewName { … }</code></td><td>Vários arquivos com a mesma regra. Ensaie com <code>-WhatIf</code>.</td></tr>
+<tr><td><code>Move-Item a.txt pasta\b.txt</code></td><td>Quando, além de renomear, o arquivo tem de <strong>mudar de pasta</strong>. O <code>Rename-Item</code> não faz isso.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>O arquivo não existe (ou o nome está errado)</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Rename-Item naoexiste.txt x.txt
+Rename-Item: Não é possível localizar o caminho 'C:\Users\ana\guia-ps-teste\naoexiste.txt' porque ele não existe.
+</pre>
+<dl class="anatomy">
+  <dt>Rename-Item:</dt><dd>Qual comando reclamou.</dd>
+  <dt>Não é possível localizar o caminho '…\naoexiste.txt'</dt><dd>Ele procurou o arquivo <strong>na pasta atual</strong> (repare no caminho completo) e não achou.</dd>
+</dl>
+<p><strong>Como resolver:</strong> liste a pasta com <code>Get-ChildItem</code> e copie o nome exato, com a extensão. Use a tecla <kbd>Tab</kbd> para completar o nome (aula <a href="teclado.html">Tab, Histórico e Atalhos</a>).</p>
+</div>
+
+<div class="cenario">
+<strong>Já existe um arquivo com o nome novo</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Rename-Item lembrete.txt foto1.jpg
+Rename-Item: Não é possível criar um arquivo já existente.
+</pre>
+<p>A pasta já tem uma <code>foto1.jpg</code>. O PowerShell <strong>se recusa</strong> a passar por cima dela, e isso é bom: nenhum arquivo foi perdido. Na mensagem, "criar" quer dizer "criar um item com esse nome".</p>
+<p><strong>Como resolver:</strong> escolha outro nome, ou primeiro renomeie (ou apague) o arquivo que já usa esse nome.</p>
+</div>
+
+<div class="cenario">
+<strong>Pôs uma pasta no nome novo</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Rename-Item lembrete.txt .\pasta\x.txt
+Rename-Item: Não é possível renomear o destino especificado porque ele representa um caminho ou nome de dispositivo.
+</pre>
+<p>O <code>-NewName</code> aceita <strong>só o nome</strong>, nunca um caminho. "Representa um caminho" é o PowerShell dizendo: "isso aí tem pasta no meio".</p>
+<p><strong>Como resolver:</strong> para mudar de pasta, use <code>Move-Item</code>, que pode mudar a pasta e o nome ao mesmo tempo.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Rename-Item a.txt b.txt</code></td><td>Troca o nome de <code>a.txt</code> para <code>b.txt</code>, na mesma pasta.</td></tr>
+<tr><td><code>-Path</code></td><td>Quem vai ser renomeado (primeira posição).</td></tr>
+<tr><td><code>-NewName</code></td><td>O nome novo, sem pasta (segunda posição). Aceita uma receita <code>{ … }</code>.</td></tr>
+<tr><td><code>-PassThru</code></td><td>Mostra o item já renomeado.</td></tr>
+<tr><td><code>-WhatIf</code></td><td>Ensaia: mostra o que faria, sem fazer.</td></tr>
+<tr><td><code>ren</code></td><td>Apelido do <code>Rename-Item</code>.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Troque o nome de <code>rascunho.txt</code> para <code>final.txt</code>:</p>
+<div class="ex-code"><input data-answer="Rename-Item|ren" aria-label="comando"> rascunho.txt final.txt</div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual parâmetro?</h3>
+<p>Complete com o parâmetro que recebe o nome novo:</p>
+<div class="ex-code">Rename-Item -Path rascunho.txt <input data-answer="-NewName" aria-label="parâmetro"> final.txt</div>
+</div>
+
+<div class="exercise">
+<h3>3. Ensaio</h3>
+<p>Complete para só <strong>ver</strong> o que aconteceria, sem renomear nada:</p>
+<div class="ex-code">Get-ChildItem *.JPG | Rename-Item -NewName { $_.Name -replace '\.JPG$', '.jpg' } <input data-answer="-WhatIf" aria-label="parâmetro"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Depois de <code>Rename-Item foto.png ferias.png</code>, o que acontece com o conteúdo da imagem?</p>
+<label><input type="radio" name="q4"> É apagado e criado de novo</label>
+<label><input type="radio" name="q4"> Continua igual: só o nome mudou</label>
+<label><input type="radio" name="q4"> Vai para a pasta Imagens</label>
+<label><input type="radio" name="q4"> Vira um arquivo de texto</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Apareceu "Não é possível criar um arquivo já existente". O que aconteceu?</p>
+<label><input type="radio" name="q5"> O arquivo original foi apagado</label>
+<label><input type="radio" name="q5"> Falta permissão de administrador</label>
+<label><input type="radio" name="q5"> Já existe um arquivo com o nome novo, e nada foi mudado</label>
+<label><input type="radio" name="q5"> O nome tinha acento</label>
+</div>
+
+<div class="mc" data-answer="4">
+<p class="mc-q">6. Você quer levar <code>a.txt</code> para a pasta <code>Docs</code> com o nome <code>b.txt</code>. Qual comando?</p>
+<label><input type="radio" name="q6"> <code>Rename-Item a.txt Docs\b.txt</code></label>
+<label><input type="radio" name="q6"> <code>Rename-Item a.txt b.txt -Path Docs</code></label>
+<label><input type="radio" name="q6"> <code>ren a.txt Docs</code></label>
+<label><input type="radio" name="q6"> <code>Move-Item a.txt Docs\b.txt</code></label>
+</div>
+
+<div class="tryps" data-goal="arquivo:ferias1.jpg;;arquivo:ferias2.jpg;;src:\bRename-Item\b;;semerro">
+<p class="try-task"><strong>Missão final:</strong> o script cria <code>IMG1.jpg</code> e <code>IMG2.jpg</code>. Renomeie os dois de uma vez para <code>ferias1.jpg</code> e <code>ferias2.jpg</code>, trocando <code>IMG</code> por <code>ferias</code> com o pipeline.</p>
+<pre class="script" data-file="main.ps1">New-Item IMG1.jpg, IMG2.jpg | Out-Null
+</pre>
+<pre class="solucao" data-file="main.ps1">New-Item IMG1.jpg, IMG2.jpg | Out-Null
+Get-ChildItem IMG*.jpg | Rename-Item -NewName { $_.Name -replace '^IMG', 'ferias' }
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Rename-Item nome-atual nome-novo</code> troca só a etiqueta: o conteúdo e a pasta continuam os mesmos.</li>
+  <li><code>-Path</code> é quem, <code>-NewName</code> é o nome novo. Nos scripts, escreva os dois.</li>
+  <li>Sem mensagem = deu certo. Para ver o resultado na hora, use <code>-PassThru</code>.</li>
+  <li>Vários arquivos: <code>Get-ChildItem … | Rename-Item -NewName { … }</code>, com <code>$_</code> sendo o arquivo da vez.</li>
+  <li>Ensaie com <code>-WhatIf</code> antes de mexer em muitos arquivos.</li>
+  <li>O <code>-NewName</code> não aceita pasta; para mudar de lugar, use <code>Move-Item</code>. E o PowerShell nunca passa por cima de um arquivo que já existe.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
