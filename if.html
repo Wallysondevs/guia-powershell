@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell if — tomar decisões | Guia PowerShell</title>
+<meta name="description" content="if no PowerShell para quem nunca programou: condição e bloco, True e False, valores que contam como falso, blocos de várias linhas e os erros reais (= no lugar de -eq, chaves e parênteses faltando), explicados em português.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">if</span>: Tomando Decisões</h1>
+
+<p class="intro">A Ana corrige as provas da turma: nota 7 ou mais, aprovada. Na lojinha, se o estoque de um produto cai abaixo de 5, é hora de comprar mais. Até aqui, os scripts faziam tudo, sempre, de cima para baixo. Com o <code>if</code> ("se"), o script passa a <strong>decidir</strong>: faz uma coisa só quando uma condição é verdadeira.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A escrever um <code>if</code> com a condição entre <code>( )</code> e o bloco entre <code>{ }</code>.</li>
+  <li>Que a condição sempre vira <code>True</code> (verdadeiro) ou <code>False</code> (falso).</li>
+  <li>Quais valores o PowerShell considera falsos: <code>0</code>, texto vazio, <code>$null</code> e lista vazia.</li>
+  <li>A colocar várias linhas dentro do bloco.</li>
+  <li>A reconhecer os erros reais mais comuns, inclusive o <code>=</code> no lugar de <code>-eq</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português.</p>
+
+<hr>
+
+<h2>A ideia: o porteiro com a lista</h2>
+<p>Pense num porteiro de festa. Ele olha para quem chega e faz uma pergunta só: "o nome está na lista?". Se a resposta é <strong>sim</strong>, a pessoa entra. Se é <strong>não</strong>, nada acontece, e a fila segue. O <code>if</code> é esse porteiro: a pergunta é a condição, e o que fica dentro das chaves só acontece quando a resposta é sim.</p>
+
+<hr>
+
+<h2>1. O if simples</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $nota = 8
+PS C:\Users\ana&gt; if ($nota -ge 7) { "Aprovada" }
+Aprovada
+</pre>
+<dl class="anatomy">
+  <dt>if</dt><dd>"Se". É uma palavra da linguagem, não um cmdlet: não tem verbo-substantivo.</dd>
+  <dt>($nota -ge 7)</dt><dd>A <strong>condição</strong>, sempre entre parênteses. <code>-ge</code> quer dizer "maior ou igual" (<em>greater or equal</em>). Os outros operadores estão na aula <a href="operadores-comparacao.html">Operadores de Comparação</a>.</dd>
+  <dt>{ "Aprovada" }</dt><dd>O <strong>bloco</strong>, entre chaves: o que roda quando a condição é verdadeira.</dd>
+</dl>
+<p>Agora com nota 5:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $nota = 5
+PS C:\Users\ana&gt; if ($nota -ge 7) { "Aprovada" }
+</pre>
+<p><strong>Nada apareceu.</strong> A condição foi falsa, então o bloco foi pulado, e o PowerShell voltou ao prompt sem mostrar nada. Não é erro: é exatamente o que o <code>if</code> deve fazer. Para mostrar outra coisa quando é falso, existe o <code>else</code> (aula <a href="elseif-else.html">elseif e else</a>).</p>
+
+<div class="tryps" data-goal="out:Estoque baixo;;src:-lt\s*5;;semerro">
+<p class="try-task"><strong>Experimente:</strong> o aviso deveria aparecer quando o estoque é <strong>menor</strong> que 5, mas o operador está errado. Troque <code>-gt</code> ("maior que") por <code>-lt</code> ("menor que") e rode.</p>
+<pre class="script" data-file="main.ps1">$estoque = 2
+if ($estoque -gt 5) {
+    'Estoque baixo'
+}
+</pre>
+<pre class="solucao" data-file="main.ps1">$estoque = 2
+if ($estoque -lt 5) {
+    'Estoque baixo'
+}
+</pre>
+</div>
+
+<hr>
+
+<h2>2. A condição vira verdadeiro ou falso</h2>
+<p>A condição é uma pergunta, e a resposta é sempre <code>True</code> ou <code>False</code>. Você pode ver a resposta digitando só a condição:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $nota -ge 7
+False
+PS C:\Users\ana&gt; 8 -ge 7
+True
+</pre>
+<p>Com <code>$nota</code> valendo 5, "5 é maior ou igual a 7?" dá <code>False</code>. "8 é maior ou igual a 7?" dá <code>True</code>. O <code>if</code> só olha essa resposta. Mais sobre <code>True</code>, <code>False</code> e <code>$null</code> na aula <a href="booleanos-null.html">Booleanos e $null</a>.</p>
+
+<hr>
+
+<h2>3. Valores que contam como falso</h2>
+<p>A condição nem precisa ser uma comparação. Qualquer valor serve, e o PowerShell decide se ele "conta como" verdadeiro ou falso. Aqui o <code>else</code> mostra o que aconteceu quando a condição foi falsa:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; if (0) { "sim" } else { "0 é falso" }
+0 é falso
+PS C:\Users\ana&gt; if ("") { "sim" } else { "texto vazio é falso" }
+texto vazio é falso
+PS C:\Users\ana&gt; if ($null) { "sim" } else { "$null é falso" }
+ é falso
+PS C:\Users\ana&gt; if ("0") { "texto '0' é verdadeiro" }
+texto '0' é verdadeiro
+PS C:\Users\ana&gt; if (@()) { "sim" } else { "lista vazia é falsa" }
+lista vazia é falsa
+</pre>
+<dl class="anatomy">
+  <dt>0</dt><dd>O número zero é falso. Qualquer outro número é verdadeiro.</dd>
+  <dt>""</dt><dd>Um texto vazio é falso.</dd>
+  <dt>$null</dt><dd>"Nada" é falso. Repare na resposta: saiu só <code> é falso</code>. Isso acontece porque, entre aspas duplas, o <code>$null</code> virou o valor dele, que é nada. Veja em "Quando dá errado".</dd>
+  <dt>"0"</dt><dd>Pegadinha: o <strong>texto</strong> "0" não é vazio, então é verdadeiro.</dd>
+  <dt>@()</dt><dd>Uma lista vazia é falsa (aula <a href="arrays.html">Arrays</a>).</dd>
+</dl>
+
+<hr>
+
+<h2>4. Várias linhas no bloco</h2>
+<p>O bloco pode ter quantas linhas você quiser. No terminal, enquanto a chave <code>{</code> está aberta, o prompt muda para <code>&gt;&gt;</code>: o PowerShell está esperando o resto.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $estoque = 3
+PS C:\Users\ana&gt; if ($estoque -lt 5) {
+&gt;&gt;     Write-Output "Estoque baixo: $estoque unidades"
+&gt;&gt;     Write-Output "Hora de comprar mais"
+&gt;&gt; }
+Estoque baixo: 3 unidades
+Hora de comprar mais
+</pre>
+<dl class="anatomy">
+  <dt>{ na mesma linha do if</dt><dd>O costume do guia: a chave que abre fica no fim da linha do <code>if</code>.</dd>
+  <dt>4 espaços</dt><dd>As linhas de dentro ficam recuadas. O PowerShell não exige, mas o recuo mostra, de olho, o que está dentro do <code>if</code>.</dd>
+  <dt>}</dt><dd>Fecha o bloco. Só depois dela o PowerShell roda tudo.</dd>
+</dl>
+
+<hr>
+
+<h2>Formas diferentes de decidir</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>if (cond) { … }</code> numa linha</td><td>No terminal, para algo curto.</td></tr>
+<tr><td><code>if (cond) {</code> + linhas + <code>}</code></td><td>Nos scripts: mais fácil de ler e de crescer.</td></tr>
+<tr><td><code>if … else …</code></td><td>Quando há duas saídas: "aprovada" ou "reprovada" (aula <a href="elseif-else.html">elseif e else</a>).</td></tr>
+<tr><td><code>if … elseif … else</code></td><td>Várias faixas: excelente, boa, regular (mesma aula).</td></tr>
+<tr><td><code>switch</code></td><td>Muitas comparações com o mesmo valor (aula <a href="switch.html">switch</a>).</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Usou <code>=</code> no lugar de <code>-eq</code></strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; if ($nota = 10) { "sempre entra: isso é atribuição" }; "nota agora vale $nota"
+sempre entra: isso é atribuição
+nota agora vale 10
+</pre>
+<p>Não aparece erro, e é por isso que esse engano é perigoso. No PowerShell, <code>=</code> <strong>guarda</strong> um valor (atribuição), não compara. O <code>if</code> guardou 10 em <code>$nota</code>, e o 10, como qualquer número diferente de zero, conta como verdadeiro. Resultado: o bloco sempre roda, e a nota antiga foi perdida.</p>
+<p><strong>Como resolver:</strong> para comparar, use <code>-eq</code> ("igual", <em>equal</em>): <code>if ($nota -eq 10)</code>.</p>
+</div>
+
+<div class="cenario">
+<strong>Esqueceu as chaves</strong>
+<p>Os erros de sintaxe abaixo foram colhidos com <code>Invoke-Expression</code>, que roda um texto como comando. Digitado direto no console, o mesmo engano aparece como <code>ParserError</code>, com outra moldura em volta, mas a explicação é a mesma.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Invoke-Expression 'if ($nota -ge 7) "Aprovada"'
+Invoke-Expression: Missing statement block after if ( condition ).
+</pre>
+<dl class="anatomy">
+  <dt>Missing statement block</dt><dd>"Falta o bloco de comandos."</dd>
+  <dt>after if ( condition )</dt><dd>"Depois do if (condição)." O <code>"Aprovada"</code> precisa estar entre <code>{ }</code>, mesmo sendo uma linha só.</dd>
+</dl>
+<p><strong>Como resolver:</strong> <code>if ($nota -ge 7) { "Aprovada" }</code>.</p>
+</div>
+
+<div class="cenario">
+<strong>Esqueceu os parênteses</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Invoke-Expression 'if $nota -ge 7 { "Aprovada" }'
+Invoke-Expression: Missing '(' after 'if' in if statement.
+</pre>
+<p>"Falta o <code>(</code> depois do <code>if</code>." Em outras linguagens a condição pode ir solta; no PowerShell, os parênteses são obrigatórios.</p>
+<p><strong>Como resolver:</strong> <code>if ($nota -ge 7) { "Aprovada" }</code>.</p>
+</div>
+
+<div class="cenario">
+<strong>O texto saiu sem a palavra <code>$null</code></strong>
+<p>Na seção 3, <code>"$null é falso"</code> mostrou só <code> é falso</code>. Entre <strong>aspas duplas</strong>, tudo que começa com <code>$</code> é trocado pelo valor (aula <a href="interpolacao.html">Interpolação</a>), e o valor de <code>$null</code> é nada.</p>
+<p><strong>Como resolver:</strong> quando o texto não tem variável, use aspas simples: <code>'$null é falso'</code> mostra o texto como está.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>if ($x -ge 7) { … }</code></td><td>Roda o bloco se <code>$x</code> for maior ou igual a 7.</td></tr>
+<tr><td><code>-eq</code>, <code>-ne</code></td><td>Igual, diferente.</td></tr>
+<tr><td><code>-gt</code>, <code>-ge</code></td><td>Maior, maior ou igual.</td></tr>
+<tr><td><code>-lt</code>, <code>-le</code></td><td>Menor, menor ou igual.</td></tr>
+<tr><td><code>0</code>, <code>""</code>, <code>$null</code>, <code>@()</code></td><td>Contam como falso.</td></tr>
+<tr><td><code>"0"</code>, qualquer número diferente de 0</td><td>Contam como verdadeiro.</td></tr>
+<tr><td><code>=</code></td><td>Guarda valor. <strong>Não</strong> use para comparar.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Mostre "Passou" se <code>$nota</code> for maior ou igual a 7:</p>
+<div class="ex-code"><input data-answer="if" aria-label="palavra"> ($nota -ge 7) { "Passou" }</div>
+</div>
+
+<div class="exercise">
+<h3>2. O operador</h3>
+<p>Complete para mostrar "Promoção!" quando <code>$preco</code> for menor que 10:</p>
+<div class="ex-code">if ($preco <input data-answer="-lt" aria-label="operador"> 10) { "Promoção!" }</div>
+</div>
+
+<div class="exercise">
+<h3>3. Igual de verdade</h3>
+<p>Complete para comparar (e não guardar) a nota com 10:</p>
+<div class="ex-code">if ($nota <input data-answer="-eq" aria-label="operador"> 10) { "Nota máxima" }</div>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">4. Com <code>$nota = 5</code>, o que <code>if ($nota -ge 7) { "Aprovada" }</code> mostra?</p>
+<label><input type="radio" name="q4"> Aprovada</label>
+<label><input type="radio" name="q4"> False</label>
+<label><input type="radio" name="q4"> Nada</label>
+<label><input type="radio" name="q4"> Um erro</label>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">5. Qual destes valores conta como <strong>verdadeiro</strong>?</p>
+<label><input type="radio" name="q5"> <code>0</code></label>
+<label><input type="radio" name="q5"> <code>"0"</code></label>
+<label><input type="radio" name="q5"> <code>""</code></label>
+<label><input type="radio" name="q5"> <code>$null</code></label>
+</div>
+
+<div class="mc" data-answer="4">
+<p class="mc-q">6. Por que <code>if ($nota = 10)</code> sempre entra no bloco?</p>
+<label><input type="radio" name="q6"> Porque 10 é a nota máxima</label>
+<label><input type="radio" name="q6"> Porque o PowerShell ignora o <code>=</code></label>
+<label><input type="radio" name="q6"> Porque dá erro e o erro conta como verdadeiro</label>
+<label><input type="radio" name="q6"> Porque <code>=</code> guarda 10 em <code>$nota</code>, e 10 conta como verdadeiro</label>
+</div>
+
+<div class="tryps" data-goal="out:Leve água;;src:\bif\s*\(;;semerro">
+<p class="try-task"><strong>Missão final:</strong> escreva um <code>if</code> que mostre <code>Leve água</code> quando <code>$temperatura</code> for maior ou igual a 30.</p>
+<pre class="script" data-file="main.ps1">$temperatura = 32
+
+</pre>
+<pre class="solucao" data-file="main.ps1">$temperatura = 32
+if ($temperatura -ge 30) {
+    'Leve água'
+}
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>if (condição) { bloco }</code>: o bloco só roda quando a condição é verdadeira.</li>
+  <li>Os parênteses e as chaves são obrigatórios.</li>
+  <li>A condição vira <code>True</code> ou <code>False</code>. <code>0</code>, <code>""</code>, <code>$null</code> e <code>@()</code> contam como falso; o texto <code>"0"</code> conta como verdadeiro.</li>
+  <li>Condição falsa sem <code>else</code>: nada aparece, e não é erro.</li>
+  <li>Para comparar, use <code>-eq</code>, nunca <code>=</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
