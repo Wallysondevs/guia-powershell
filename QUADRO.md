@@ -42,24 +42,24 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 
 | Página | Autor | cmds | ① | ② | ③ | ④ | Obs |
 |---|---|---|---|---|---|---|---|
-| `variaveis.html` Variáveis ($) | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `tipos.html` Tipos de Dados | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `strings.html` Textos: Aspas Simples × Duplas | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `interpolacao.html` Variáveis Dentro do Texto | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `here-strings.html` Textos de Várias Linhas (Here-Strings) | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `numeros.html` Números | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `conversao.html` Conversão de Tipos ([int], [string]) | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `booleanos-null.html` $true, $false e $null | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `variaveis-automaticas.html` Variáveis Automáticas ($_, $HOME…) | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `variaveis.html` Variáveis ($) | Luna | [x] | [x] | [x] | [x] | [x] | 0b7b1a4 |
+| `tipos.html` Tipos de Dados | Luna | [x] | [x] | [x] | [x] | [x] | 9a922b3 |
+| `strings.html` Textos: Aspas Simples × Duplas | Luna | [x] | [x] | [x] | [x] | [x] | deb641f |
+| `interpolacao.html` Variáveis Dentro do Texto | Luna | [x] | [x] | [x] | [x] | [x] | bd722a3 |
+| `here-strings.html` Textos de Várias Linhas (Here-Strings) | Luna | [x] | [x] | [x] | [x] | [x] | 2a871b2 |
+| `numeros.html` Números | Luna | [x] | [x] | [x] | [x] | [x] | d0848c9 (+5.1) |
+| `conversao.html` Conversão de Tipos ([int], [string]) | Luna | [x] | [x] | [x] | [x] | [x] | 423593f |
+| `booleanos-null.html` $true, $false e $null | Luna | [x] | [x] | [x] | [x] | [x] | 23a4b79 (+5.1) |
+| `variaveis-automaticas.html` Variáveis Automáticas ($_, $HOME…) | Luna | [x] | [x] | [x] | [x] | [x] | 03df5d6 (+5.1) |
 
 ## Operadores
 
 | Página | Autor | cmds | ① | ② | ③ | ④ | Obs |
 |---|---|---|---|---|---|---|---|
-| `operadores-aritmeticos.html` Operadores Aritméticos | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `operadores-comparacao.html` Comparações (-eq, -ne, -gt, -lt) | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `operadores-texto.html` Comparando Textos (-like, -match) | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `operadores-colecao.html` -contains e -in | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `operadores-aritmeticos.html` Operadores Aritméticos | Luna | [x] | [x] | [x] | [x] | [x] | ffab8d5 |
+| `operadores-comparacao.html` Comparações (-eq, -ne, -gt, -lt) | Luna | [x] | [x] | [x] | [x] | [x] | 82cf41a |
+| `operadores-texto.html` Comparando Textos (-like, -match) | Luna | [x] | [x] | [x] | [x] | [x] | edcab1e |
+| `operadores-colecao.html` -contains e -in | Luna | [x] | [x] | [x] | [x] | [x] | 080c735 + correção |
 | `operadores-logicos.html` -and, -or e -not | Tito (de Luna, 17:57) | [x] | [x] | [x] | [x] | [x] | fc81784 |
 | `operador-formato.html` Formatando Textos (-f) | Tito (de Luna, 17:57) | [x] | [x] | [x] | [x] | [x] | 39da399 |
 | `atribuicao.html` Atribuição (+=, ++) | Tito (de Luna, 17:57) | [x] | [x] | [x] | [x] | [x] | 876da13 + 97c46fc (saída real do ++/-- da recoleta) |
