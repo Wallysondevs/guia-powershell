@@ -49,7 +49,19 @@ $estoque += 5
 &quot;Estoque: $estoque&quot;
 </pre></div>
 <hr><h2>3. Somando e diminuindo 1: ++ e --</h2>
-<p><code>$i++</code> soma 1 a <code>$i</code>, e <code>$i--</code> diminui 1. É o jeito curto de <code>$i += 1</code> e <code>$i -= 1</code>, muito usado para contar voltas (aula <a href="for.html">for</a>). Também existe a forma com o sinal antes, <code>++$i</code>.</p><div class="warning"><strong>Saída não publicada:</strong> o trecho de <code>++</code> e <code>--</code> colhido no laboratório mostrou <code>$i</code> sempre valendo 1, o que não corresponde ao comportamento desses operadores. Isso parece um efeito do coletor, por isso a saída ficou fora da aula até ser colhida de novo. Rode o “Experimente” abaixo para ver o resultado no PowerShell do editor.</div><div class="tryps" data-goal="out:Visitas: 2;;src:\+\+;;semerro"><p class="try-task"><strong>Experimente:</strong> Conte duas visitas usando <code>++</code> duas vezes, para aparecer <code>Visitas: 2</code>.</p><pre class="script" data-file="main.ps1">$visitas = 0
+<p><code>$i++</code> soma 1 a <code>$i</code>, e <code>$i--</code> diminui 1. É o jeito curto de <code>$i += 1</code> e <code>$i -= 1</code>, muito usado para contar voltas (aula <a href="for.html">for</a>). Também existe a forma com o sinal antes, <code>++$i</code>.</p><pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $i = 1
+PS C:\Users\ana&gt; $i++
+PS C:\Users\ana&gt; $i
+2
+PS C:\Users\ana&gt; ++$i
+PS C:\Users\ana&gt; $i
+3
+PS C:\Users\ana&gt; $i--
+PS C:\Users\ana&gt; $i
+2
+</pre>
+<dl class="anatomy"><dt>$i++</dt><dd>Soma 1 a <code>$i</code>. Sozinho na linha, ele <strong>não mostra nada</strong>: só muda o valor guardado. Para ver o valor, digite <code>$i</code> na linha seguinte: 1 virou 2.</dd><dt>++$i</dt><dd>Também soma 1, com o sinal antes. Sozinho na linha, também não mostra nada: 2 virou 3.</dd><dt>$i--</dt><dd>Diminui 1, e também não mostra nada sozinho: 3 voltou para 2.</dd></dl>
+<div class="tryps" data-goal="out:Visitas: 2;;src:\+\+;;semerro"><p class="try-task"><strong>Experimente:</strong> Conte duas visitas usando <code>++</code> duas vezes, para aparecer <code>Visitas: 2</code>.</p><pre class="script" data-file="main.ps1">$visitas = 0
 
 &quot;Visitas: $visitas&quot;
 </pre><pre class="solucao" data-file="main.ps1">$visitas = 0
