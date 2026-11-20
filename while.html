@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell while e do — repetindo enquanto a condição vale | Guia PowerShell</title>
+<meta name="description" content="Os laços while, do-while e do-until no PowerShell: condição no começo ou no fim, o risco do laço infinito (explicado sem rodar) e o erro real de sintaxe em inglês no 7.7.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">while</span> e <span class="hl">do</span></h1>
+
+<p class="intro">O <a href="foreach.html">foreach</a> e o <a href="for.html">for</a> repetem quando você já tem uma lista, ou um número certo de voltas. Às vezes a Ana não sabe quantas vezes vai repetir: ela vende enquanto houver estoque, ou dobra um número até ele passar de 10. Para isso existe o <code>while</code> (“enquanto”) e o par <code>do … while</code> / <code>do … until</code> (“faça … enquanto” / “faça … até”).</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O <code>while</code>, que testa a condição <strong>antes</strong> de cada volta e pode não rodar nenhuma vez.</li>
+  <li>O <code>do { ... } while</code> e o <code>do { ... } until</code>, que rodam <strong>pelo menos uma vez</strong>.</li>
+  <li>A diferença: <code>while</code> continua enquanto a condição é verdadeira; <code>until</code> continua até ela se tornar verdadeira.</li>
+  <li>Por que a variável da condição precisa mudar, senão o laço não termina.</li>
+  <li>O risco do laço infinito, explicado sem rodar, e um freio de segurança com <code>break</code>.</li>
+  <li>O erro real de esquecer os parênteses depois do <code>while</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta pessoal da usuária fictícia <code>ana</code>.</p>
+
+<hr>
+
+<h2>A ideia: vender enquanto houver estoque</h2>
+<p>Pense no balcão da lojinha. Enquanto houver caneta na prateleira, a Ana vende uma, confere o que restou, e só para quando o estoque chega a zero. Ela <strong>olha primeiro</strong>: se já estiver zerado, não vende nenhuma. Isso é o <code>while</code>.</p>
+<p>Agora imagine ela provando um bolo: ela prova pelo menos um pedaço, e só então decide se precisa de mais açúcar. Isso é o <code>do … while</code> e o <code>do … until</code>: o bloco roda uma vez <strong>antes</strong> da pergunta.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Na lojinha</th><th>No PowerShell</th></tr>
+<tr><td>Olhar o estoque antes de vender</td><td><code>while (condição) { ... }</code></td></tr>
+<tr><td>Vender uma e anotar o que restou</td><td>O bloco, que também muda a variável</td></tr>
+<tr><td>Provar o bolo pelo menos uma vez, depois perguntar</td><td><code>do { ... } while</code> ou <code>do { ... } until</code></td></tr>
+<tr><td>“Até o número passar de 10”</td><td><code>until ($n -gt 10)</code></td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>1. O <code>while</code>: testa antes</h2>
+<p>A Ana tem 3 canetas. Enquanto o estoque for maior que zero, ela vende uma:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $estoque = 3
+PS C:\Users\ana&gt; while ($estoque -gt 0) { "Vendi 1, restam $($estoque - 1)"; $estoque-- }
+Vendi 1, restam 2
+Vendi 1, restam 1
+Vendi 1, restam 0
+</pre>
+<dl class="anatomy">
+  <dt>$estoque = 3</dt><dd>O estoque começa em 3.</dd>
+  <dt>while ($estoque -gt 0)</dt><dd>“Enquanto o estoque for maior que zero”. A condição vai <strong>entre parênteses</strong> e é testada <strong>antes</strong> de cada volta. O <code>-gt</code> é “maior que” (aula <a href="operadores-comparacao.html">Comparações</a>).</dd>
+  <dt>"Vendi 1, restam $($estoque - 1)"</dt><dd>A mensagem da volta. O <code>$($estoque - 1)</code> calcula o que vai restar depois desta venda.</dd>
+  <dt>$estoque--</dt><dd>Tira 1 do estoque (aula <a href="atribuicao.html">Atribuição</a>). Sem essa linha, a condição continuaria verdadeira para sempre.</dd>
+</dl>
+<p>Foram três voltas: 3, depois 2, depois 1. Quando o estoque chegou a 0, a condição ficou falsa e o laço parou. O prompt voltou.</p>
+
+<div class="tryps" data-goal="out:restam 0;;src:\bwhile\b;;semerro">
+<p class="try-task"><strong>Experimente:</strong> o estoque está zerado, então o <code>while</code> não roda. Mude o valor inicial para um número maior que zero (por exemplo 3) e confira se aparece uma linha com <code>restam 0</code>.</p>
+<pre class="script" data-file="main.ps1">$estoque = 0
+while ($estoque -gt 0) { "Vendi 1, restam $($estoque - 1)"; $estoque-- }
+</pre>
+<pre class="solucao" data-file="main.ps1">$estoque = 3
+while ($estoque -gt 0) { "Vendi 1, restam $($estoque - 1)"; $estoque-- }
+</pre>
+</div>
+
+<hr>
+
+<h2>2. Quando o <code>while</code> não roda nenhuma vez</h2>
+<p>Se a condição já é falsa na primeira olhada, o bloco é pulado. A Ana está com estoque 0:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $estoque = 0
+PS C:\Users\ana&gt; while ($estoque -gt 0) { "nunca" }; "while não rodou nenhuma vez"
+while não rodou nenhuma vez
+</pre>
+<p>A palavra <code>nunca</code> não apareceu. Só a mensagem depois do laço. O ponto e vírgula <code>;</code> apenas junta dois comandos na mesma linha: o <code>while</code> e o texto seguinte.</p>
+
+<hr>
+
+<h2>3. <code>do-while</code> e <code>do-until</code>: pelo menos uma vez</h2>
+<p>O <code>do</code> (“faça”) inverte a ordem: primeiro o bloco, depois a pergunta. Mesmo com o estoque em 0, o <code>do-while</code> roda uma vez:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; do { "do-while rodou com $estoque" } while ($estoque -gt 0)
+do-while rodou com 0
+</pre>
+<dl class="anatomy">
+  <dt>do { ... }</dt><dd>O bloco roda primeiro, sem perguntar nada.</dd>
+  <dt>while ($estoque -gt 0)</dt><dd>A pergunta vem no fim. Como o estoque ainda é 0 (ficou da seção anterior), a condição é falsa e não há segunda volta. Mesmo assim a primeira já tinha acontecido.</dd>
+</dl>
+<p>O <code>until</code> (“até”) também roda o bloco primeiro, mas continua <strong>até</strong> a condição ficar verdadeira — o contrário do <code>while</code>. A Ana começa com 1 e vai dobrando até o número passar de 10:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $n = 1
+PS C:\Users\ana&gt; do { "n = $n"; $n *= 2 } until ($n -gt 10)
+n = 1
+n = 2
+n = 4
+n = 8
+</pre>
+<dl class="anatomy">
+  <dt>$n = 1</dt><dd>O número começa em 1.</dd>
+  <dt>"n = $n"; $n *= 2</dt><dd>Mostra o valor atual e depois o dobra. O <code>*= 2</code> é “multiplique por 2 e guarde”.</dd>
+  <dt>until ($n -gt 10)</dt><dd>“Até <code>$n</code> ser maior que 10”. Depois de mostrar 8, <code>$n</code> vira 16, a condição fica verdadeira e o laço para. Por isso o 16 não aparece na tela: a mensagem roda <strong>antes</strong> da dobra, e o <code>until</code> é testado depois.</dd>
+</dl>
+
+<div class="tryps" data-goal="out:n = 1;;out:n = 2;;out:n = 4;;out:n = 8;;src:\buntil\b;;semerro">
+<p class="try-task"><strong>Missão:</strong> começando com <code>$n = 1</code>, use um <code>do { ... } until</code> que mostre <code>n = 1</code>, <code>n = 2</code>, <code>n = 4</code> e <code>n = 8</code>, dobrando o valor até ele passar de 10.</p>
+<pre class="script" data-file="main.ps1">$n = 1
+# complete com do ... until
+</pre>
+<pre class="solucao" data-file="main.ps1">$n = 1
+do { "n = $n"; $n *= 2 } until ($n -gt 10)
+</pre>
+</div>
+
+<hr>
+
+<h2>Formas diferentes de repetir</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>foreach</code> / <code>for</code></td><td>Você já tem uma lista, ou sabe o número de voltas. Aulas <a href="foreach.html">foreach</a> e <a href="for.html">for</a>.</td></tr>
+<tr><td><code>while (condição) { ... }</code></td><td>Não sabe quantas voltas serão. Testa <strong>antes</strong>; pode não rodar nenhuma vez.</td></tr>
+<tr><td><code>do { ... } while (condição)</code></td><td>Precisa rodar pelo menos uma vez, e continuar enquanto a condição for verdadeira.</td></tr>
+<tr><td><code>do { ... } until (condição)</code></td><td>Precisa rodar pelo menos uma vez, e continuar <strong>até</strong> a condição ficar verdadeira.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>O laço que não termina</strong>
+<p>Se a condição nunca fica falsa, o <code>while</code> não devolve o prompt. Um exemplo clássico é usar <code>$true</code> (“verdadeiro”, sempre) e não ter um <code>break</code> lá dentro:</p>
+<pre class="file" data-file="nao-rode.ps1">while ($true) {
+    "isso não para nunca"
+}
+</pre>
+<p>Este bloco <strong>não foi rodado</strong> no laboratório, de propósito. <code>$true</code> é sempre verdadeiro (aula <a href="booleanos-null.html">$true, $false e $null</a>), o texto se repetiria sem fim, e a linha <code>PS C:\Users\ana&gt;</code> não voltaria. No terminal, a interrupção usual é <kbd>Ctrl</kbd>+<kbd>C</kbd> (aula <a href="teclado.html">Tab, Histórico e Atalhos</a>). No editor do guia, evite um <code>while ($true)</code> sem saída: a missão pode ficar presa.</p>
+<p>O jeito seguro de estudar um “enquanto verdadeiro” é colocar um <strong>freio</strong>: um contador e um <code>break</code> (aula <a href="break-continue.html">break e continue</a>). Isso o laboratório rodou:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $i = 0; while ($true) { $i++; if ($i -ge 1000) { "freio de segurança em $i"; break } }
+freio de segurança em 1000
+</pre>
+<dl class="anatomy">
+  <dt>while ($true)</dt><dd>A condição nunca fica falsa por si só.</dd>
+  <dt>$i++</dt><dd>Soma 1 no contador a cada volta.</dd>
+  <dt>if ($i -ge 1000) { ...; break }</dt><dd>Quando o contador chega a 1000 (maior ou igual), mostra a mensagem e o <code>break</code> sai do laço. O prompt volta.</dd>
+</dl>
+<p><strong>Como evitar:</strong> toda condição de <code>while</code> precisa de um caminho para ficar falsa — uma variável que muda, ou um <code>break</code> com limite. Nunca rode um <code>while ($true)</code> “só para ver” sem freio.</p>
+</div>
+
+<div class="cenario">
+<strong>Faltaram os parênteses depois do <code>while</code></strong>
+<p>A condição foi escrita sem <code>( )</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; while $estoque -gt 0 { $estoque-- }
+ParserError:
+Line |
+   1 |  while $estoque -gt 0 { $estoque-- }
+     |       ~
+     | Missing opening '(' after keyword 'while'.
+</pre>
+<p>Este é um <code>ParserError</code>: erro de leitura do código. O PowerShell recusa a linha antes de rodar qualquer coisa, mostra a linha (<code>Line | 1</code>) e aponta o problema com um tracinho <code>~</code>. Esses erros saem em inglês no PowerShell 7.7, mesmo num Windows em português.</p>
+<dl class="anatomy">
+  <dt>ParserError</dt><dd>Erro de leitura: a linha nem chegou a executar.</dd>
+  <dt>Line | 1</dt><dd>A linha com o problema, repetida ao lado.</dd>
+  <dt>~</dt><dd>O tracinho aponta logo depois da palavra <code>while</code>, onde deveria abrir o parêntese.</dd>
+  <dt>Missing opening '(' after keyword 'while'</dt><dd>Quer dizer que faltou abrir parênteses logo depois da palavra <code>while</code>. A condição precisa ficar entre parênteses: <code>while ($estoque -gt 0)</code>.</dd>
+</dl>
+<p><strong>Como resolver:</strong> escreva <code>while ($estoque -gt 0) { ... }</code>, com parênteses em volta da condição.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>while ($estoque -gt 0) { ...; $estoque-- }</code></td><td>Repete enquanto a condição for verdadeira. Testa <strong>antes</strong>; pode não rodar nenhuma vez.</td></tr>
+<tr><td><code>do { ... } while ($estoque -gt 0)</code></td><td>Roda o bloco pelo menos uma vez; depois continua enquanto a condição for verdadeira.</td></tr>
+<tr><td><code>do { ... } until ($n -gt 10)</code></td><td>Roda o bloco pelo menos uma vez; depois continua <strong>até</strong> a condição ficar verdadeira.</td></tr>
+<tr><td><code>$estoque--</code> / <code>$n *= 2</code></td><td>Mudam a variável da condição, para o laço poder terminar.</td></tr>
+<tr><td><code>while ($true) { ...; break }</code></td><td>Só é seguro com um freio (<code>break</code>) que devolve o prompt.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete a palavra que começa o laço “enquanto”:</p>
+<div class="ex-code"><input data-answer="while" aria-label="palavra"> ($estoque -gt 0) { $estoque-- }</div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual é a saída?</h3>
+<p>Com <code>$estoque = 0</code>, o que o laboratório mostrou depois de <code>do { "do-while rodou com $estoque" } while ($estoque -gt 0)</code>?</p>
+<div class="ex-code"><input data-answer="do-while rodou com 0" aria-label="saída"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Complete a palavra</h3>
+<p>Complete para continuar <strong>até</strong> <code>$n</code> ser maior que 10:</p>
+<div class="ex-code">do { "n = $n"; $n *= 2 } <input data-answer="until" aria-label="palavra"> ($n -gt 10)</div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Qual é a diferença principal entre <code>while</code> e <code>do { ... } while</code>?</p>
+<label><input type="radio" name="q4"> O <code>while</code> só roda no PowerShell 7, o <code>do-while</code> só no 5.1</label>
+<label><input type="radio" name="q4"> O <code>while</code> testa a condição antes (pode não rodar nenhuma vez); o <code>do-while</code> roda o bloco pelo menos uma vez e testa depois</label>
+<label><input type="radio" name="q4"> O <code>do-while</code> não precisa de parênteses</label>
+<label><input type="radio" name="q4"> Não há diferença</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Por que um <code>while ($true) { "oi" }</code>, sem <code>break</code>, é perigoso?</p>
+<label><input type="radio" name="q5"> Porque <code>$true</code> não existe no PowerShell</label>
+<label><input type="radio" name="q5"> Porque mostra um <code>ParserError</code></label>
+<label><input type="radio" name="q5"> Porque a condição nunca fica falsa: o laço não termina e o prompt não volta</label>
+<label><input type="radio" name="q5"> Porque apaga os arquivos da pasta</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. A mensagem <code>Missing opening '(' after keyword 'while'</code> quer dizer o quê?</p>
+<label><input type="radio" name="q6"> Faltou abrir parênteses logo depois da palavra <code>while</code>: a condição vai entre <code>( )</code></label>
+<label><input type="radio" name="q6"> Faltou o <code>foreach</code></label>
+<label><input type="radio" name="q6"> O estoque estava negativo</label>
+<label><input type="radio" name="q6"> É preciso usar <code>until</code> no lugar de <code>while</code></label>
+</div>
+
+<div class="tryps" data-goal="out:volta 1;;out:volta 2;;out:volta 3;;src:\bwhile\b;;semerro">
+<p class="try-task"><strong>Missão final:</strong> com um <code>while</code>, mostre <code>volta 1</code>, <code>volta 2</code> e <code>volta 3</code> (e só essas três). Lembre de ir aumentando o contador, senão o laço não termina.</p>
+<pre class="script" data-file="main.ps1">$i = 1
+# complete com while
+</pre>
+<pre class="solucao" data-file="main.ps1">$i = 1
+while ($i -le 3) {
+    "volta $i"
+    $i++
+}
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>while (condição) { ... }</code> testa <strong>antes</strong> de cada volta. Se a condição já for falsa, o bloco não roda nenhuma vez.</li>
+  <li><code>do { ... } while (condição)</code> e <code>do { ... } until (condição)</code> rodam o bloco pelo menos uma vez, e perguntam no fim.</li>
+  <li><code>while</code> continua enquanto a condição é verdadeira; <code>until</code> continua até ela se tornar verdadeira.</li>
+  <li>A variável da condição precisa mudar (por exemplo <code>$estoque--</code>). Sem isso, o laço não termina.</li>
+  <li>Um <code>while ($true)</code> sem <code>break</code> não devolve o prompt. Não rode um desses “só para ver”.</li>
+  <li>Esquecer os parênteses depois do <code>while</code> gera um <code>ParserError</code> em inglês: <code>Missing opening '(' after keyword 'while'</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
