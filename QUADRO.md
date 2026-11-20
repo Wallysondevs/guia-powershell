@@ -50,7 +50,7 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 | `numeros.html` Números | Luna | [x] | [x] | [x] | [x] | [x] | d0848c9 (+5.1) |
 | `conversao.html` Conversão de Tipos ([int], [string]) | Luna | [x] | [x] | [x] | [x] | [x] | 423593f |
 | `booleanos-null.html` $true, $false e $null | Luna | [x] | [x] | [x] | [x] | [x] | 23a4b79 (+5.1) |
-| `variaveis-automaticas.html` Variáveis Automáticas ($_, $HOME…) | Luna | [x] | [x] | [x] | [x] | [x] | 03df5d6 (+5.1) |
+| `variaveis-automaticas.html` Variáveis Automáticas ($_, $HOME…) | Luna | [x] | [x] | [x] | [x] | [x] | 78bec34 + fb5190d |
 
 ## Operadores
 
