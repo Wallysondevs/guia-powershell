@@ -160,6 +160,20 @@ False
 
 <hr>
 
+<h2>Formas diferentes de testar um caminho</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>Test-Path -Path nota.txt</code></td><td>O jeito deste guia nos scripts: o caminho com o nome do parâmetro.</td></tr>
+<tr><td><code>Test-Path nota.txt</code></td><td>A mesma pergunta, com o caminho na posição.</td></tr>
+<tr><td><code>Test-Path nota.txt -PathType Leaf</code></td><td><code>True</code> só se for um arquivo (não uma pasta).</td></tr>
+<tr><td><code>Test-Path docs -PathType Container</code></td><td><code>True</code> só se for uma pasta (não um arquivo).</td></tr>
+<tr><td><code>Test-Path Env:PATH</code></td><td>Confere se a variável de ambiente <code>PATH</code> existe, sem listar o valor.</td></tr>
+</table>
+</div>
+
+<hr>
+
 <h2>Referência rápida</h2>
 <div class="table-wrap">
 <table class="ref">
