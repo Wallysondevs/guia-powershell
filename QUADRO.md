@@ -77,15 +77,15 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 | Página | Autor | cmds | ① | ② | ③ | ④ | Obs |
 |---|---|---|---|---|---|---|---|
 | `if.html` if | Tito | [x] | [x] | [x] | [x] | [x] | d21400c; formato ParserError do console descrito (não coletado) |
-| `elseif-else.html` elseif e else | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `elseif-else.html` elseif e else | Tito | [x] | [x] | [x] | [x] | [x] | b1d90b9+f8a39c2 (recoleta) |
 | `switch.html` switch | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 
 ## Repetições
 
 | Página | Autor | cmds | ① | ② | ③ | ④ | Obs |
 |---|---|---|---|---|---|---|---|
-| `foreach.html` foreach | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `for.html` for | Tito | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `foreach.html` foreach | Tito | [x] | [x] | [x] | [x] | [x] | 50d5817+39cf79c |
+| `for.html` for | Tito | [x] | [x] | [x] | [x] | [x] | 85ded7d |
 | `while.html` while e do | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 | `break-continue.html` break e continue | Zeca | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 
