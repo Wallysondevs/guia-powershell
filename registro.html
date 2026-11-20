@@ -240,6 +240,19 @@ False
 
 <hr>
 
+<h2>Formas diferentes de ler um valor</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>Get-ItemProperty -Path 'HKCU:\Software\GuiaPowerShell' -Name Versao</code></td><td><span class="versao">só Windows</span> Lê a propriedade na chave de teste e devolve um objeto (com <code>Versao</code> e dados do caminho).</td></tr>
+<tr><td><code>Get-ItemPropertyValue -Path 'HKCU:\Software\GuiaPowerShell' -Name Versao</code></td><td><span class="versao">só Windows</span> Devolve só o valor, sem o objeto em volta.</td></tr>
+<tr><td><code>(Get-Item -Path 'HKCU:\Software\GuiaPowerShell').GetValue('Versao')</code></td><td><span class="versao">só Windows</span> O mesmo valor, pelo método da chave. Também é só leitura, e também só nesta chave de teste.</td></tr>
+<tr><td><code>Get-ItemProperty -Path 'HKCU:\Software\GuiaPowerShell' | Select-Object Versao</code></td><td><span class="versao">só Windows</span> Outro jeito de ficar só com aquela propriedade, a partir do objeto.</td></tr>
+</table>
+</div>
+
+<hr>
+
 <h2>Referência rápida</h2>
 <div class="table-wrap">
 <table class="ref">
