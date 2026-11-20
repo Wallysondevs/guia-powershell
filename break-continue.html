@@ -166,6 +166,20 @@ item 2
 
 <hr>
 
+<h2>Formas diferentes de sair de um laço</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>break</code></td><td>Encerra o laço atual. O que vem depois do laço roda normalmente.</td></tr>
+<tr><td><code>continue</code></td><td>Pula o resto desta volta e segue para o próximo item.</td></tr>
+<tr><td><code>:fora foreach (...) { ...; break fora }</code></td><td>O rótulo deixa o <code>break</code> encerrar também o laço de fora.</td></tr>
+<tr><td><code>ForEach-Object { if (...) { return } }</code></td><td>Pula um item da esteira. Evite <code>break</code> aqui: ele pode interromper mais do que o laço.</td></tr>
+<tr><td><code>if ($nota -ge 5) { ... }</code></td><td>Outro jeito de “pular” o que não serve: só entra no bloco quem passa na condição, sem <code>continue</code>.</td></tr>
+</table>
+</div>
+
+<hr>
+
 <h2>Referência rápida</h2>
 <div class="table-wrap">
 <table class="ref">
