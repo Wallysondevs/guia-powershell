@@ -92,6 +92,17 @@ Get-Variable: Cannot find a variable with the name 'idade'.
 </pre>
 <p>"Não encontrei uma variável com o nome 'idade'." Ela foi apagada mesmo.</p>
 <hr>
+<h2>Formas diferentes de criar uma variável</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>$nome = "Ana"</code></td><td>O jeito do dia a dia. Use sempre este.</td></tr>
+<tr><td><code>${nome} = "Ana"</code></td><td>O mesmo, com chaves; útil quando o nome encosta em outro texto.</td></tr>
+<tr><td><code>Set-Variable nome "Ana"</code></td><td>Com cmdlet (nome sem <code>$</code>); aparece em scripts avançados.</td></tr>
+<tr><td><code>$a = $b = 0</code></td><td>Duas variáveis com o mesmo valor numa linha só.</td></tr>
+</table>
+</div>
+<hr>
 <h2>Quando dá errado</h2>
 <div class="cenario">
 <strong>Esqueceu o cifrão</strong>
