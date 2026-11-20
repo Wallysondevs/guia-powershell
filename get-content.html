@@ -128,7 +128,7 @@ Lines Words Characters Property
 <hr>
 
 <h2>5. Procurando uma palavra</h2>
-<p>O <code>cat</code> é um apelido do <code>Get-Content</code>. Com o <code>Select-String</code> (aula <a href="select-string.html">Select-String</a>) você filtra só as linhas que têm uma palavra:</p>
+<p>O <code>cat</code> é um apelido do <code>Get-Content</code>. Com o <code>Select-String</code> você filtra só as linhas que têm uma palavra:</p>
 <pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; cat pessoas.csv
 nome,idade
 Ana,30
@@ -137,7 +137,7 @@ PS C:\Users\ana\guia-ps-teste&gt; Get-Content pessoas.csv | Select-String Ana
 
 Ana,30
 </pre>
-<div class="tip">Para um <code>.csv</code> de verdade, o <code>Import-Csv</code> (aula <a href="import-csv.html">CSV</a>) é melhor: ele entende as colunas. O <code>Get-Content</code> só enxerga linhas de texto.</div>
+<div class="tip">Para um <code>.csv</code> de verdade, o <code>Import-Csv</code> (aula <a href="csv.html">CSV</a>) é melhor: ele entende as colunas. O <code>Get-Content</code> só enxerga linhas de texto.</div>
 
 <hr>
 
