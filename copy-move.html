@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Copy-Item e Move-Item — copiando e movendo arquivos | Guia PowerShell</title>
+<meta name="description" content="Copiar e mover arquivos e pastas no PowerShell com Copy-Item e Move-Item: -Recurse, -PassThru, -WhatIf e os erros reais de caminho inexistente e destino ocupado, com saídas do PowerShell 7.7.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Copiando e movendo (<span class="hl">Copy-Item</span> e <span class="hl">Move-Item</span>)</h1>
+
+<p class="intro">Criar arquivo é o começo. O dia a dia pede duas coisas a mais: <strong>copiar</strong> (ficar com o original e uma cópia) e <strong>mover</strong> (o item muda de lugar, ou de nome, e some da origem). Os comandos são o <code>Copy-Item</code> ("copie o item") e o <code>Move-Item</code> ("mova o item"). Os dois, por padrão, não escrevem nada na tela quando dão certo: o silêncio é o "ok".</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A copiar um arquivo para outra pasta, ou para um nome novo na mesma pasta.</li>
+  <li>A diferença enorme de copiar uma pasta <strong>com</strong> e <strong>sem</strong> o <code>-Recurse</code>.</li>
+  <li>O <code>-PassThru</code>, que pede o comprovante (a tabelinha) depois de copiar.</li>
+  <li>A mover um arquivo de pasta e, se quiser, já trocar o nome no mesmo comando.</li>
+  <li>Os erros reais de caminho que não existe e de destino que já está ocupado.</li>
+  <li>O ensaio <code>-WhatIf</code>, para ver a cópia antes de ela acontecer.</li>
+</ul>
+</div>
+
+<p>Todas as saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta de teste da usuária fictícia <code>ana</code>. Antes dos comandos abaixo, a pasta de teste já tinha <code>nota.txt</code>, a pasta <code>backup</code> e a pasta <code>docs</code> com um <code>a.txt</code> dentro.</p>
+
+<div class="warning">
+<strong>Pratique numa pasta de teste.</strong> Todos os exemplos desta aula foram rodados dentro de <code>C:\Users\ana\guia-ps-teste</code>. No seu computador, crie uma pasta só para treinar e trabalhe nela. Um jeito seguro: <code>New-Item -ItemType Directory -Path (Join-Path $HOME 'guia-ps-teste')</code> e depois <code>Set-Location (Join-Path $HOME 'guia-ps-teste')</code>. Assim você não mexe nas suas fotos, documentos ou no Windows. No fim da prática, apague só essa pasta.
+</div>
+
+<hr>
+
+<h2>A ideia: xerox e mudança de gaveta</h2>
+<p>Copiar é fazer um xerox: o original continua onde estava e nasce uma folha igual em outro lugar (ou com outro nome). Mover é tirar a folha de uma gaveta e colocar em outra: ela não fica nos dois lugares. Se no caminho você ainda trocar o rótulo, é mover e renomear ao mesmo tempo.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>No dia a dia</th><th>No PowerShell</th></tr>
+<tr><td>Xerox da folha, original no lugar</td><td><code>Copy-Item</code></td></tr>
+<tr><td>Tirar a folha de uma gaveta e pôr em outra</td><td><code>Move-Item</code></td></tr>
+<tr><td>Xerox de uma pasta inteira, com o que tem dentro</td><td><code>Copy-Item … -Recurse</code></td></tr>
+<tr><td>"Me mostra o comprovante da cópia"</td><td><code>-PassThru</code></td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>1. Copiar um arquivo</h2>
+<p>O primeiro nome é a origem; o segundo é o destino. Se o destino é uma pasta (e termina com <code>\</code>, para ficar claro), a cópia entra lá com o <strong>mesmo nome</strong>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Copy-Item nota.txt backup\
+</pre>
+<p>Não apareceu nada. No <code>Copy-Item</code>, silêncio quer dizer sucesso. A cópia está em <code>backup\nota.txt</code> e o original <code>nota.txt</code> continua na pasta de teste.</p>
+<p>Se o destino é um nome de arquivo, você aproveita para batizar a cópia:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Copy-Item nota.txt nota-copia.txt
+</pre>
+<p>De novo, silêncio. Agora existem <code>nota.txt</code> e <code>nota-copia.txt</code> lado a lado.</p>
+<dl class="anatomy">
+  <dt>Copy-Item</dt><dd>Verbo <code>Copy</code> ("copiar") + <code>Item</code>: "copie o item".</dd>
+  <dt>nota.txt</dt><dd>A origem: o arquivo que já existe.</dd>
+  <dt>backup\</dt><dd>O destino: a pasta <code>backup</code>. A barra invertida no fim ajuda a ler "é uma pasta".</dd>
+  <dt>nota-copia.txt</dt><dd>Outro tipo de destino: um nome novo, na pasta atual.</dd>
+</dl>
+
+<div class="tryps" data-goal="arquivo:nota-copia.txt~oi;;src:\bCopy-Item\b;;semerro">
+<p class="try-task"><strong>Experimente:</strong> o arquivo <code>nota.txt</code> já está criado. Copie-o para <code>nota-copia.txt</code> com <code>Copy-Item</code>.</p>
+<pre class="script" data-file="main.ps1">Set-Content nota.txt "oi"
+# copie nota.txt para nota-copia.txt
+</pre>
+<pre class="solucao" data-file="main.ps1">Set-Content nota.txt "oi"
+Copy-Item nota.txt nota-copia.txt
+</pre>
+</div>
+
+<hr>
+
+<h2>2. Copiar pasta: o <code>-Recurse</code> faz toda a diferença</h2>
+<p>Sem <code>-Recurse</code> ("recursivo": desça o que tiver dentro), o PowerShell cria no destino uma pasta <strong>vazia</strong> com o nome que você deu. O conteúdo fica para trás. Veja o laboratório: copiamos <code>docs</code> (que tem um <code>a.txt</code>) para <code>backup\docs-copia</code> e depois listamos o que há em <code>backup</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Copy-Item docs backup\docs-copia
+PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem backup -Recurse -Name
+docs-copia
+nota.txt
+</pre>
+<p><code>docs-copia</code> apareceu, <code>nota.txt</code> já estava no backup da seção anterior… e <strong>não há</strong> <code>docs-copia\a.txt</code>. A pasta chegou oca.</p>
+<p>Com <code>-Recurse</code>, ele copia a pasta <strong>e o que está dentro</strong>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Copy-Item docs backup\docs-rec -Recurse
+PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem backup -Recurse -Name
+docs-copia
+docs-rec
+nota.txt
+docs-rec\a.txt
+</pre>
+<dl class="anatomy">
+  <dt>-Recurse</dt><dd>Desça a árvore: copie também os arquivos e as subpastas.</dd>
+  <dt>docs-rec\a.txt</dt><dd>Agora sim: o <code>a.txt</code> veio junto. A lista <code>-Name</code> mostra o caminho relativo de cada item.</dd>
+</dl>
+<div class="warning">
+<strong>Sem <code>-Recurse</code>, a "cópia" de uma pasta não leva o conteúdo.</strong> Se a ideia é um backup de verdade, não esqueça desse parâmetro. E ensaie com <code>-WhatIf</code> antes, principalmente se o destino já tiver coisas.
+</div>
+
+<hr>
+
+<h2>3. Ver o comprovante: <code>-PassThru</code></h2>
+<p>Por padrão o <code>Copy-Item</code> não devolve a tabelinha. O parâmetro <code>-PassThru</code> ("deixe passar") pede esse comprovante, no mesmo formato do <code>New-Item</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Copy-Item nota.txt backup\ -PassThru
+
+    Diretório: C:\Users\ana\guia-ps-teste\backup
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          20/11/2026    17:12              4 nota.txt
+
+</pre>
+<p>O <code>Diretório:</code> é o destino (<code>…\backup</code>). O <code>Length</code> 4 é o tamanho do <code>nota.txt</code> (no laboratório ele tinha o texto <code>oi</code> e a quebra de linha). A hora é a do arquivo de origem.</p>
+
+<hr>
+
+<h2>4. Mover: o original sai do lugar</h2>
+<p>O <code>Move-Item</code> tira o item da origem. Movemos <code>nota-copia.txt</code> para dentro de <code>docs</code> e listamos essa pasta:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Move-Item nota-copia.txt docs\
+PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem docs -Name
+a.txt
+nota-copia.txt
+</pre>
+<p>Lá estão o <code>a.txt</code> que já existia e o <code>nota-copia.txt</code> que acabou de chegar. Na pasta de teste, o <code>nota-copia.txt</code> não está mais na raiz.</p>
+<p>O destino também pode ser um nome novo: aí você move <strong>e</strong> renomeia no mesmo comando. Tiremos o arquivo de <code>docs</code> de volta para a pasta atual, já com o nome <code>renomeada.txt</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Move-Item docs\nota-copia.txt .\renomeada.txt
+PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem -Name
+backup
+docs
+nota.txt
+renomeada.txt
+</pre>
+<dl class="anatomy">
+  <dt>Move-Item</dt><dd>Verbo <code>Move</code> ("mover") + <code>Item</code>.</dd>
+  <dt>docs\nota-copia.txt</dt><dd>A origem, com o caminho da pasta onde o arquivo está agora.</dd>
+  <dt>.\renomeada.txt</dt><dd>O destino: <code>.</code> é a pasta atual, e <code>renomeada.txt</code> é o nome novo.</dd>
+</dl>
+<p>A listagem da pasta de teste mostra <code>backup</code>, <code>docs</code>, o <code>nota.txt</code> original e o <code>renomeada.txt</code>. O <code>nota-copia.txt</code> não aparece mais: ele foi movido, não copiado.</p>
+<div class="note">Só trocar o nome, deixando o arquivo na mesma pasta, é trabalho do <a href="rename-item.html">Rename-Item</a>. O <code>Move-Item</code> também consegue, mas o nome dele pede "mudança de lugar".</div>
+
+<div class="tryps" data-goal="arquivo:renomeada.txt~oi;;src:\bMove-Item\b;;semerro">
+<p class="try-task"><strong>Missão:</strong> o arquivo <code>nota-copia.txt</code> já existe. Mova-o para <code>renomeada.txt</code> com <code>Move-Item</code>.</p>
+<pre class="script" data-file="main.ps1">Set-Content nota-copia.txt "oi"
+# mova nota-copia.txt para renomeada.txt
+</pre>
+<pre class="solucao" data-file="main.ps1">Set-Content nota-copia.txt "oi"
+Move-Item nota-copia.txt renomeada.txt
+</pre>
+</div>
+
+<hr>
+
+<h2>Formas de copiar e mover</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>Copy-Item nota.txt backup\</code></td><td>Cópia com o mesmo nome, dentro da pasta destino. O original fica.</td></tr>
+<tr><td><code>Copy-Item nota.txt nota-copia.txt</code></td><td>Cópia com outro nome, na pasta atual.</td></tr>
+<tr><td><code>Copy-Item docs backup\docs-rec -Recurse</code></td><td>Cópia de pasta <strong>com</strong> o conteúdo.</td></tr>
+<tr><td><code>Copy-Item … -PassThru</code></td><td>Quando você quer ver o comprovante na tela.</td></tr>
+<tr><td><code>Move-Item nota-copia.txt docs\</code></td><td>Mudar o arquivo de pasta. Ele some da origem.</td></tr>
+<tr><td><code>Move-Item docs\nota-copia.txt .\renomeada.txt</code></td><td>Mover e já trocar o nome.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>A origem não existe</strong>
+<p>Tentamos copiar um arquivo que não está na pasta:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Copy-Item naoexiste.txt backup\
+Copy-Item: Não é possível localizar o caminho 'C:\Users\ana\guia-ps-teste\naoexiste.txt' porque ele não existe.
+</pre>
+<p>A mensagem veio em português, em vermelho. Linha por linha:</p>
+<dl class="anatomy">
+  <dt>Copy-Item:</dt><dd>Qual comando reclamou.</dd>
+  <dt>Não é possível localizar o caminho '…\naoexiste.txt'</dt><dd>Ele procurou esse caminho e não achou o arquivo.</dd>
+  <dt>porque ele não existe.</dt><dd>A causa: o nome está errado, ou o arquivo está em outra pasta.</dd>
+</dl>
+<p><strong>Como resolver:</strong> confira o nome com <a href="get-childitem.html">Get-ChildItem</a> ou <a href="test-path.html">Test-Path</a> e rode de novo. Nada foi copiado.</p>
+</div>
+
+<div class="cenario">
+<strong>O destino já está ocupado</strong>
+<p>Tentamos mover <code>renomeada.txt</code> para cima de <code>backup\nota.txt</code>, que já existia:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Move-Item renomeada.txt backup\nota.txt
+Move-Item: Não é possível criar um arquivo já existente.
+</pre>
+<p><code>Não é possível criar um arquivo já existente.</code> O PowerShell se recusou a esmagar o arquivo que já estava no destino. Os dois arquivos continuam onde estavam.</p>
+<p><strong>Como resolver:</strong> escolha outro nome, apague o destino só se for isso mesmo que você quer, ou copie/mova para uma pasta vazia. Não existe, neste comando, um "juntar os dois".</p>
+</div>
+
+<hr>
+
+<h2>Ensaiar: <code>-WhatIf</code></h2>
+<p>Antes de uma cópia que você não quer repetir à toa, ensaie. O <code>-WhatIf</code> conta a operação e os dois caminhos, e não copia nada:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Copy-Item nota.txt backup\ -WhatIf
+What If: Executando a operação "Copiar Arquivo" no destino "Item: C:\Users\ana\guia-ps-teste\nota.txt Destino: C:\Users\ana\guia-ps-teste\backup\nota.txt".
+</pre>
+<p>Ele diria "Copiar Arquivo", da origem <code>nota.txt</code> para <code>backup\nota.txt</code>. Como já tínhamos essa cópia, o ensaio é só uma confirmação visual — e é o hábito que vai te salvar quando o destino for outro.</p>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Copy-Item nota.txt backup\</code></td><td>Copia o arquivo para a pasta, com o mesmo nome.</td></tr>
+<tr><td><code>Copy-Item nota.txt nota-copia.txt</code></td><td>Cria uma cópia com outro nome.</td></tr>
+<tr><td><code>Copy-Item docs destino -Recurse</code></td><td>Copia a pasta e o conteúdo.</td></tr>
+<tr><td><code>Copy-Item … -PassThru</code></td><td>Mostra o comprovante da cópia.</td></tr>
+<tr><td><code>Move-Item arquivo pasta\</code></td><td>Move o arquivo; ele some da origem.</td></tr>
+<tr><td><code>Move-Item arquivo .\nome-novo.txt</code></td><td>Move e renomeia no mesmo comando.</td></tr>
+<tr><td><code>Copy-Item … -WhatIf</code></td><td>Ensaia a cópia, sem copiar.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete para copiar <code>nota.txt</code> para dentro da pasta <code>backup</code>, com o mesmo nome:</p>
+<div class="ex-code">Copy-Item nota.txt <input data-answer="backup\" aria-label="destino"></div>
+</div>
+
+<div class="exercise">
+<h3>2. O que faltou?</h3>
+<p>Qual parâmetro faz o <code>Copy-Item</code> levar também o que está <strong>dentro</strong> da pasta?</p>
+<div class="ex-code">Copy-Item docs backup\docs-rec -<input data-answer="Recurse" aria-label="parâmetro"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Qual é a diferença?</h3>
+<p>Depois de um <code>Move-Item</code> bem-sucedido, o arquivo continua na origem? Responda <code>sim</code> ou <code>nao</code>.</p>
+<div class="ex-code"><input data-answer="nao|não" aria-label="sim ou nao"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Você rodou <code>Copy-Item nota.txt backup\</code> e a tela não mostrou nada. O que isso (quase sempre) quer dizer?</p>
+<label><input type="radio" name="q4"> O comando falhou e precisa ser instalado</label>
+<label><input type="radio" name="q4"> A cópia deu certo: o <code>Copy-Item</code> é silencioso por padrão</label>
+<label><input type="radio" name="q4"> O arquivo original foi apagado</label>
+<label><input type="radio" name="q4"> É preciso reiniciar o PowerShell</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Sem <code>-Recurse</code>, o que o <code>Copy-Item docs backup\docs-copia</code> fez no laboratório?</p>
+<label><input type="radio" name="q5"> Copiou <code>docs</code> com o <code>a.txt</code> dentro</label>
+<label><input type="radio" name="q5"> Apagou a pasta <code>docs</code></label>
+<label><input type="radio" name="q5"> Criou <code>docs-copia</code> vazia, sem o <code>a.txt</code></label>
+<label><input type="radio" name="q5"> Renomeou <code>docs</code> para <code>backup</code></label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. O <code>Move-Item renomeada.txt backup\nota.txt</code> respondeu "Não é possível criar um arquivo já existente." O que fazer?</p>
+<label><input type="radio" name="q6"> Escolher outro nome (ou outro destino): os dois arquivos continuam onde estavam</label>
+<label><input type="radio" name="q6"> Reiniciar o computador para "liberar" o arquivo</label>
+<label><input type="radio" name="q6"> Rodar o mesmo comando várias vezes até colar</label>
+<label><input type="radio" name="q6"> Apagar a pasta de teste inteira sem olhar</label>
+</div>
+
+<div class="tryps" data-goal="arquivo:backup/nota.txt~oi;;src:\bCopy-Item\b;;src:-Recurse;;arquivo:backup/docs-rec/a.txt;;semerro">
+<p class="try-task"><strong>Missão final:</strong> crie a pasta <code>backup</code>, copie <code>nota.txt</code> para dentro dela e copie a pasta <code>docs</code> para <code>backup/docs-rec</code> <strong>com o conteúdo</strong> (use <code>-Recurse</code>).</p>
+<pre class="script" data-file="main.ps1">New-Item -ItemType Directory backup, docs | Out-Null
+Set-Content nota.txt "oi"
+Set-Content docs/a.txt "x"
+# copie nota.txt para backup e a pasta docs para backup/docs-rec
+</pre>
+<pre class="solucao" data-file="main.ps1">New-Item -ItemType Directory backup, docs | Out-Null
+Set-Content nota.txt "oi"
+Set-Content docs/a.txt "x"
+Copy-Item nota.txt backup/
+Copy-Item docs backup/docs-rec -Recurse
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Copy-Item</code> faz uma cópia e deixa o original. <code>Move-Item</code> tira o item do lugar.</li>
+  <li>Os dois são silenciosos quando dão certo; <code>-PassThru</code> pede o comprovante.</li>
+  <li>Copiar pasta <strong>sem</strong> <code>-Recurse</code> cria uma pasta vazia. Com <code>-Recurse</code>, o conteúdo vai junto.</li>
+  <li>O destino pode ser uma pasta (mesmo nome) ou um nome novo (copiar/mover e já batizar).</li>
+  <li>Origem inexistente e destino ocupado geram erro em português; nada é destruído por causa disso.</li>
+  <li><code>-WhatIf</code> ensaia a cópia. Pratique sempre numa pasta de teste.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
