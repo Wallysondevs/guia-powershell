@@ -5,12 +5,15 @@
 # shell: powershell
 ## preparar pasta de teste
 $T = Join-Path $HOME 'guia-ps-teste'
-New-Item -ItemType Directory -Path $T -Force | Out-Null
+if (Test-Path $T) { throw 'guia-ps-teste já existe: abortar a coleta' }   # [guarda]
+New-Item -ItemType Directory -Path $T -ErrorAction Stop | Out-Null
 Set-Location $T
 # shell: powershell
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 1..12 | ForEach-Object { "Linha $_" } | Set-Content linhas.txt
 "nome,idade`nAna,30`nBeto,25" | Set-Content pessoas.csv
 ## ler
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Get-Content linhas.txt
 Get-Content linhas.txt -TotalCount 3
 Get-Content linhas.txt -Tail 2
@@ -20,6 +23,7 @@ Get-Content linhas.txt -Raw | Measure-Object -Character
 cat pessoas.csv
 Get-Content pessoas.csv | Select-String Ana
 ## erro
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Get-Content naoexiste.txt   #ERRO
 ## limpar (sempre no fim)
 Set-Location $HOME

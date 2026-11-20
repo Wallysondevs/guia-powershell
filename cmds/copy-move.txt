@@ -5,28 +5,40 @@
 # shell: powershell
 ## preparar pasta de teste
 $T = Join-Path $HOME 'guia-ps-teste'
-New-Item -ItemType Directory -Path $T -Force | Out-Null
+if (Test-Path $T) { throw 'guia-ps-teste já existe: abortar a coleta' }   # [guarda]
+New-Item -ItemType Directory -Path $T -ErrorAction Stop | Out-Null
 Set-Location $T
 # shell: powershell
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 New-Item -ItemType Directory backup, docs | Out-Null
 'oi' | Set-Content nota.txt
 'x' | Set-Content docs\a.txt
 ## copiar
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Copy-Item nota.txt backup\
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Copy-Item nota.txt nota-copia.txt
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Copy-Item docs backup\docs-copia
 Get-ChildItem backup -Recurse -Name
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Copy-Item docs backup\docs-rec -Recurse
 Get-ChildItem backup -Recurse -Name
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Copy-Item nota.txt backup\ -PassThru
 ## mover
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Move-Item nota-copia.txt docs\
 Get-ChildItem docs -Name
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Move-Item docs\nota-copia.txt .\renomeada.txt
 Get-ChildItem -Name
 ## erros
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Copy-Item naoexiste.txt backup\   #ERRO
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Move-Item renomeada.txt backup\nota.txt   #ERRO
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Copy-Item nota.txt backup\ -WhatIf
 ## limpar (sempre no fim)
 Set-Location $HOME

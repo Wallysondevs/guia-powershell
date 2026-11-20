@@ -5,10 +5,13 @@
 # shell: powershell
 ## preparar pasta de teste
 $T = Join-Path $HOME 'guia-ps-teste'
-New-Item -ItemType Directory -Path $T -Force | Out-Null
+if (Test-Path $T) { throw 'guia-ps-teste já existe: abortar a coleta' }   # [guarda]
+New-Item -ItemType Directory -Path $T -ErrorAction Stop | Out-Null
 Set-Location $T
 # shell: powershell
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 ## montar pasta de exemplo (NUNCA listar ~ com -Force: vaza NTUSER.DAT)
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 New-Item -ItemType Directory fotos, docs | Out-Null
 'oi' | Set-Content nota.txt
 'a,b' | Set-Content dados.csv
@@ -17,6 +20,7 @@ New-Item -ItemType Directory fotos, docs | Out-Null
 New-Item -ItemType File .escondido | Out-Null
 (Get-Item .escondido -Force).Attributes += 'Hidden'
 ## listar
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Get-ChildItem
 Get-ChildItem -Name
 Get-ChildItem -Force
@@ -29,8 +33,10 @@ Get-ChildItem -Include *.txt, *.csv -Recurse
 Get-ChildItem | Sort-Object Length -Descending
 Get-ChildItem | Select-Object Name, Length, LastWriteTime
 ## o que é a coluna Mode
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Get-ChildItem -Force | Format-Table Mode, Name
 ## erro
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Get-ChildItem naoexiste   #ERRO
 ## limpar (sempre no fim)
 Set-Location $HOME

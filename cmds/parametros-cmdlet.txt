@@ -5,22 +5,28 @@
 # shell: powershell
 ## preparar pasta de teste
 $T = Join-Path $HOME 'guia-ps-teste'
-New-Item -ItemType Directory -Path $T -Force | Out-Null
+if (Test-Path $T) { throw 'guia-ps-teste já existe: abortar a coleta' }   # [guarda]
+New-Item -ItemType Directory -Path $T -ErrorAction Stop | Out-Null
 Set-Location $T
 # shell: powershell
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 ## parâmetros nomeados, posicionais e switches
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 New-Item a.txt, b.log, c.txt -ItemType File | Out-Null
 Get-ChildItem -Path . -Filter *.txt
 Get-ChildItem . *.txt
 Get-ChildItem -Name
 Get-ChildItem -Pa . -Fi *.txt
 ## valores com espaço
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Get-ChildItem -Path "C:\Program Files" -Name | Select-Object -First 3
 ## erros comuns
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Get-ChildItem -Filtro *.txt   #ERRO
 Get-ChildItem -P .   #ERRO
 Get-Date -Year abc   #ERRO
 ## ver os parâmetros
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 (Get-Command Get-ChildItem).Parameters.Keys | Select-Object -First 15
 ## limpar (sempre no fim)
 Set-Location $HOME

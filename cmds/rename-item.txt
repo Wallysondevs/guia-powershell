@@ -5,22 +5,31 @@
 # shell: powershell
 ## preparar pasta de teste
 $T = Join-Path $HOME 'guia-ps-teste'
-New-Item -ItemType Directory -Path $T -Force | Out-Null
+if (Test-Path $T) { throw 'guia-ps-teste já existe: abortar a coleta' }   # [guarda]
+New-Item -ItemType Directory -Path $T -ErrorAction Stop | Out-Null
 Set-Location $T
 # shell: powershell
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 'oi' | Set-Content nota.txt
 1..3 | ForEach-Object { New-Item "foto$_.JPG" | Out-Null }
 ## renomear
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Rename-Item nota.txt anotacao.txt
 Get-ChildItem -Name
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Rename-Item anotacao.txt -NewName lembrete.txt -PassThru
 ## vários de uma vez
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Get-ChildItem *.JPG | Rename-Item -NewName { $_.Name -replace '\.JPG$', '.jpg' } -WhatIf
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Get-ChildItem *.JPG | Rename-Item -NewName { $_.Name -replace '\.JPG$', '.jpg' }
 Get-ChildItem -Name
 ## erros
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Rename-Item naoexiste.txt x.txt   #ERRO
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Rename-Item lembrete.txt foto1.jpg   #ERRO
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Rename-Item lembrete.txt .\pasta\x.txt   #ERRO
 ## limpar (sempre no fim)
 Set-Location $HOME

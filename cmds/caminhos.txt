@@ -5,16 +5,20 @@
 # shell: powershell
 ## preparar pasta de teste
 $T = Join-Path $HOME 'guia-ps-teste'
-New-Item -ItemType Directory -Path $T -Force | Out-Null
+if (Test-Path $T) { throw 'guia-ps-teste já existe: abortar a coleta' }   # [guarda]
+New-Item -ItemType Directory -Path $T -ErrorAction Stop | Out-Null
 Set-Location $T
 # shell: powershell
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 New-Item -ItemType Directory docs | Out-Null
 'x' | Set-Content docs\a.txt
 ## absoluto x relativo
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Resolve-Path docs\a.txt
 Resolve-Path .\docs\..\docs\a.txt
 Get-Item docs/a.txt | Select-Object FullName
 ## montar caminhos
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Join-Path $HOME 'docs' 'a.txt'   #ERRO no 5.1 (3 partes só no 7)
 Join-Path (Join-Path $HOME 'docs') 'a.txt'
 Split-Path "$T\docs\a.txt" -Leaf
@@ -24,6 +28,7 @@ Split-Path "$T\docs\a.txt" -Extension   #ERRO no 5.1 (parâmetro só no 7)
 $HOME
 $env:USERPROFILE
 ## erro
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Resolve-Path docs\b.txt   #ERRO
 ## limpar (sempre no fim)
 Set-Location $HOME

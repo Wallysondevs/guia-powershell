@@ -5,12 +5,15 @@
 # shell: powershell
 ## preparar pasta de teste
 $T = Join-Path $HOME 'guia-ps-teste'
-New-Item -ItemType Directory -Path $T -Force | Out-Null
+if (Test-Path $T) { throw 'guia-ps-teste já existe: abortar a coleta' }   # [guarda]
+New-Item -ItemType Directory -Path $T -ErrorAction Stop | Out-Null
 Set-Location $T
 # shell: powershell
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 New-Item -ItemType Directory docs | Out-Null
 'oi' | Set-Content nota.txt
 ## existe?
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Test-Path nota.txt
 Test-Path naoexiste.txt
 Test-Path docs -PathType Container
@@ -22,6 +25,7 @@ Test-Path Env:PATH
 Test-Path HKCU:\Software
 if (Test-Path nota.txt) { "Achei!" } else { "Não achei" }
 ## caminho inválido
+$T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 Test-Path 'C:\nome<invalido>.txt'
 Test-Path ''   #ERRO
 ## limpar (sempre no fim)
