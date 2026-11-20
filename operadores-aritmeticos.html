@@ -101,6 +101,16 @@ PS C:\Users\ana&gt; [math]::Max(3, 9)
 </div>
 <p>Exemplo da Ana: 25 convidados, 6 por mesa. <code>[math]::Ceiling(25 / 6)</code> dá as mesas necessárias, porque não dá para ter meia mesa.</p>
 <hr>
+<h2>Formas diferentes de somar uma lista</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>$a + $b + $c</code></td><td>Poucos valores, já em variáveis.</td></tr>
+<tr><td><code>1, 2, 3 | Measure-Object -Sum</code></td><td>Soma uma lista inteira; também dá a média com <code>-Average</code>.</td></tr>
+<tr><td><code>foreach ($n in $lista) { $total += $n }</code></td><td>Quando você precisa fazer algo a mais em cada item (aulas <a href="foreach.html">foreach</a> e <a href="atribuicao.html">Atribuição</a>).</td></tr>
+</table>
+</div>
+<hr>
 <h2>Quando dá errado</h2>
 <div class="cenario">
 <strong>Dividiu por zero</strong>
@@ -117,6 +127,22 @@ InvalidArgument: Cannot convert value "Ana" to type "System.Int32". Error: "The 
 <p>"Não consigo converter Ana para número inteiro." Para dividir, o PowerShell tentou transformar o texto em número e não conseguiu. <strong>Como resolver:</strong> confira se a variável tem mesmo um número; se veio de arquivo, converta (aula <a href="conversao.html">Conversão de Tipos</a>).</p>
 </div>
 <hr>
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>+</code></td><td>Soma (com texto, junta).</td></tr>
+<tr><td><code>-</code></td><td>Subtração.</td></tr>
+<tr><td><code>*</code></td><td>Multiplicação.</td></tr>
+<tr><td><code>/</code></td><td>Divisão.</td></tr>
+<tr><td><code>%</code></td><td>Resto da divisão.</td></tr>
+<tr><td><code>( )</code></td><td>Muda a ordem.</td></tr>
+<tr><td><code>[math]::Abs(x)</code></td><td>Tira o sinal.</td></tr>
+<tr><td><code>[math]::Ceiling(x)</code>, <code>[math]::Floor(x)</code></td><td>Arredonda para cima; para baixo.</td></tr>
+<tr><td><code>[math]::Max(a, b)</code></td><td>O maior dos dois.</td></tr>
+</table>
+</div>
+<hr>
 <h2>Exercícios</h2>
 <div class="exercise">
 <h3>1. Multiplicar</h3>
@@ -128,19 +154,25 @@ InvalidArgument: Cannot convert value "Ana" to type "System.Int32". Error: "The 
 <p>Complete para arredondar 2.1 para cima:</p>
 <div class="ex-code">[math]::<input data-answer="Ceiling" aria-label="resposta">(2.1)</div>
 </div>
+<div class="exercise">
+<h3>3. Para baixo</h3>
+<p>Complete para arredondar 7.9 para baixo:</p>
+<div class="ex-code">[math]::<input data-answer="Floor" aria-label="resposta">(7.9)</div>
+</div>
+
 <div class="mc" data-answer="2">
-<p class="mc-q">3. Quanto dá <code>(2 + 3) * 4</code>?</p>
-<label><input type="radio" name="q3"> 14</label>
-<label><input type="radio" name="q3"> 20</label>
-<label><input type="radio" name="q3"> 24</label>
-<label><input type="radio" name="q3"> 9</label>
+<p class="mc-q">4. Quanto dá <code>(2 + 3) * 4</code>?</p>
+<label><input type="radio" name="q4"> 14</label>
+<label><input type="radio" name="q4"> 20</label>
+<label><input type="radio" name="q4"> 24</label>
+<label><input type="radio" name="q4"> 9</label>
 </div>
 <div class="mc" data-answer="3">
-<p class="mc-q">4. Quanto dá <code>5 % 2</code>?</p>
-<label><input type="radio" name="q4"> 2,5</label>
-<label><input type="radio" name="q4"> 2</label>
-<label><input type="radio" name="q4"> 1</label>
-<label><input type="radio" name="q4"> 0</label>
+<p class="mc-q">5. Quanto dá <code>5 % 2</code>?</p>
+<label><input type="radio" name="q5"> 2,5</label>
+<label><input type="radio" name="q5"> 2</label>
+<label><input type="radio" name="q5"> 1</label>
+<label><input type="radio" name="q5"> 0</label>
 </div>
 <div class="tryps" data-goal="outre:Mesas: 5\b;;src:Ceiling;;semerro">
 <p class="try-task"><strong>Missão final:</strong> 25 convidados, 6 por mesa. Mostre <code>Mesas: 5</code> usando <code>[math]::Ceiling</code>.</p>
