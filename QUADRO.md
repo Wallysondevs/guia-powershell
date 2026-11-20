@@ -12,7 +12,7 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 | `versoes-powershell.html` Windows PowerShell 5.1 × PowerShell 7 | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
 | `instalar.html` Instalar o PowerShell 7 | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
 | `abrir-terminal.html` Abrindo o PowerShell (e o Terminal do Windows) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `simulador.html` O Editor do Guia | Zeca | [x] | [ ] | [ ] | [ ] | [ ] | Adiada: editor wasm ficou na VPS |
+| `simulador.html` Simulador | Zeca | [x] | [ ] | [ ] | [x] | [x] | 4238feb |
 | `primeiro-comando.html` Seu Primeiro Comando | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] |  |
 | `cmdlets.html` Cmdlets: Verbo-Substantivo | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] |  |
 | `parametros-cmdlet.html` Parâmetros dos Comandos | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] |  |
@@ -105,14 +105,18 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 
 ## Conferência 18h (Tito)
 
-NIVEIS tem **51** páginas no Nível 1. Existem **50** arquivos `.html`; falta só `simulador.html`.
+NIVEIS tem **51** páginas no Nível 1; as 51 existem (`simulador.html` em 4238feb). No menu o rótulo do simulador passou a **Simulador**.
 
-**O que falta / quebrado**
+**Em breve (a67aec5):** as **89** páginas do NIVEIS ainda sem arquivo `.html` (Nível 2, o restante do Nível 3, projetos e referência) entram com `{pronta: false}`. O menu mostra "em breve" sem link; o pager pula as não prontas; os `a[href]` internos para essas páginas viram `span` com "(em breve)". O `simulador.html` fica pronta. Assim os links para aulas futuras deixam de dar 404.
 
-- `simulador.html` (Zeca) — arquivo ainda não escrito. Obs do quadro: "Adiada: editor wasm ficou na VPS" (não é aula em andamento). O Anterior/Próximo é gerado pelo `site.js` a partir do NIVEIS (os HTML só têm `.pager` vazio; nenhum link fixo). Efeito: `abrir-terminal.html` aponta Próximo para `simulador.html` e `primeiro-comando.html` aponta Anterior para `simulador.html` (404).
-- `index.html` (Zeca) — página-hub da trilha, sem `.mc`/`.exercise` e sem Resumo. Não é aula; não trato como erro. As outras 49 páginas existentes têm `.mc` e `.exercise` antes do Resumo, e todas carregam `assets/site.js` com `.pager`.
-- Nenhum `href` do Nível 1 aponta para página fora do NIVEIS. Há links para aulas futuras (estão no NIVEIS, arquivo ainda não escrito; níveis 2 e 3, projetos e referência — fora do prazo de hoje): da `index.html`, a trilha de N2/N3/projetos/referência (`objetos`, `arrays`, `funcoes`, `scripts`, `erros`, `csv`, `modulos`, `processos`, `dotnet`, `estilo`, `novidades`, os 9 projetos e as 10 refs); das aulas, `caminhos.html` → `variaveis-ambiente.html`; `get-content.html` → `csv.html`; `set-content.html`, `write-host-output.html` e `foreach.html` → `pipeline.html`; `operador-formato.html` → `get-date.html`; `atribuicao.html` e `if.html` → `arrays.html`; `read-host.html` → `credenciais.html`, `parametros-script.html`, `try-catch.html`; `foreach.html` e `break-continue.html` → `foreach-object.html`.
+**Editor / missões:** b17ae11, modo "rode no seu PC" (`assets/rode-local.js` e `assets/rode-local.css`), carregados quando o `pssim.js` não existe.
+
+**Luna:** `variaveis-automaticas` 78bec34 + fb5190d (missão final com meta estável em `$IsLinux`).
+
+- `index.html` (Zeca) — página-hub da trilha, sem `.mc`/`.exercise` e sem Resumo. Não é aula; não trato como erro.
 
 **Lote 1:** limpo (conferido pela Mira).
 
-**Pendência crítica:** `assets/pssim.js` é carregado pelo `site.js` quando a página tem `.tryps`, mas o arquivo não existe — nem nesta cópia, nem no original. Nenhuma missão (tryps) roda e nenhum `data-goal` é avaliado. Não listo isso como link quebrado em cada página do Nível 1: é um item conhecido, único. A Nova decide o aviso das 19:00.
+**Pendências da próxima sessão:**
+1. `pssim.js` (ainda não existe; o fallback é o rode-local).
+2. Textos das missões ainda dizem "clique em Rodar".
