@@ -201,8 +201,8 @@ Verifique a ortografia do nome ou, se um caminho foi incluído, verifique se o c
 <label><input type="radio" name="q5"> 5.1</label>
 <label><input type="radio" name="q5"> Windows</label>
 </div>
-<div class="tryps" data-goal="out:Linux? True;;semerro">
-<p class="try-task"><strong>Missão final:</strong> mostre <code>Linux? True</code> usando a variável automática certa (o editor é um PowerShell de Linux).</p>
+<div class="tryps" data-goal="outre:Linux\? (True|False);;src:\$IsLinux;;semerro">
+<p class="try-task"><strong>Missão final:</strong> mostre <code>Linux?</code> seguido de <code>True</code> ou <code>False</code>, usando a variável automática certa. No Windows a resposta é <code>False</code>; num PowerShell de Linux, <code>True</code>.</p>
 <pre class="script" data-file="main.ps1">"Linux? $IsWindows"
 </pre>
 <pre class="solucao" data-file="main.ps1">"Linux? $IsLinux"
