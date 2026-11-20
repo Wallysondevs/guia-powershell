@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell break e continue — saindo e pulando voltas do laço | Guia PowerShell</title>
+<meta name="description" content="break e continue no PowerShell: parar um laço, pular um item, rótulo em laço dentro de laço, e a pegadinha do break dentro do ForEach-Object, com saídas reais do 7.7.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">break</span> e <span class="hl">continue</span></h1>
+
+<p class="intro">Nos laços das aulas <a href="foreach.html">foreach</a>, <a href="for.html">for</a> e <a href="while.html">while e do</a>, o PowerShell percorre a lista até o fim, ou enquanto a condição vale. Às vezes a Ana quer parar no meio: achou a primeira nota baixa e não precisa olhar o resto. Outras vezes ela quer só pular um item e seguir. Isso é o trabalho do <code>break</code> (“pare”) e do <code>continue</code> (“siga para o próximo”).</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O <code>break</code>, que encerra o laço na hora e segue o que vem depois dele.</li>
+  <li>O <code>continue</code>, que pula o resto da volta atual e vai para o próximo item.</li>
+  <li>O padrão “procure e pare”: achar o primeiro caso e sair.</li>
+  <li>O que o <code>break</code> faz quando há um laço dentro de outro, e como um <strong>rótulo</strong> (<code>:fora</code>) sai dos dois de uma vez.</li>
+  <li>A pegadinha: dentro do <code>ForEach-Object</code>, use <code>return</code> para pular um item; o <code>break</code> pode parar bem mais do que o laço.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta pessoal da usuária fictícia <code>ana</code>.</p>
+
+<hr>
+
+<h2>A ideia: a lista de compras e a lata amassada</h2>
+<p>A Ana entra no mercado com uma lista. Se ela só precisa de leite e o encontra no primeiro corredor, ela <strong>para de procurar</strong> e vai para o caixa: isso é o <code>break</code>. O que vinha depois na lista nem é olhado, e a vida segue depois da porta do mercado.</p>
+<p>Se no meio da prateleira ela vê uma lata amassada, ela <strong>pula aquela</strong> e pega a próxima: isso é o <code>continue</code>. A compra não acabou; só aquele item foi ignorado.</p>
+<p>Quando ela está numa loja que fica dentro de um shopping, sair só da loja é um <code>break</code> comum. Sair do shopping inteiro pede um nome na porta — um <strong>rótulo</strong>.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>No mercado</th><th>No PowerShell</th></tr>
+<tr><td>Achei o leite, vou embora</td><td><code>break</code>: encerra o laço</td></tr>
+<tr><td>Lata amassada, pego a próxima</td><td><code>continue</code>: pula esta volta, segue no próximo item</td></tr>
+<tr><td>Sair só da loja (o laço de dentro)</td><td><code>break</code> sem rótulo</td></tr>
+<tr><td>Sair do shopping inteiro</td><td><code>break fora</code>, com o rótulo <code>:fora</code></td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>1. <code>break</code>: pare o laço</h2>
+<p>A Ana percorre os números de 1 a 10, mas quer parar ao chegar no 4. O <code>break</code> sai do <code>foreach</code> antes de imprimir o 4. O que vem depois do laço roda normalmente:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; foreach ($n in 1..10) { if ($n -eq 4) { break }; "n = $n" }
+n = 1
+n = 2
+n = 3
+PS C:\Users\ana&gt; "depois do laço"
+depois do laço
+</pre>
+<dl class="anatomy">
+  <dt>foreach ($n in 1..10)</dt><dd>Para cada número de 1 até 10 (aula <a href="foreach.html">foreach</a>).</dd>
+  <dt>if ($n -eq 4) { break }</dt><dd>Quando <code>$n</code> é 4, o <code>break</code> encerra o laço na hora. A linha <code>"n = $n"</code> desta volta nem roda, por isso o 4 não aparece.</dd>
+  <dt>"n = $n"</dt><dd>Só roda quando o <code>if</code> não disparou: 1, 2 e 3.</dd>
+  <dt>"depois do laço"</dt><dd>Está fora do <code>foreach</code>, então roda em seguida. O <code>break</code> não derruba o resto do script; só sai do laço.</dd>
+</dl>
+
+<div class="tryps" data-goal="out:n = 1;;out:n = 3;;out:parei;;src:\bbreak\b;;semerro">
+<p class="try-task"><strong>Experimente:</strong> o laço imprime de 1 a 10. Coloque um <code>break</code> para parar ao chegar no 4: mostre <code>n = 1</code>, <code>n = 2</code>, <code>n = 3</code> e, ao parar, a palavra <code>parei</code>. O 4 e os seguintes não devem ser impressos como <code>n = …</code>.</p>
+<pre class="script" data-file="main.ps1">foreach ($n in 1..10) {
+    "n = $n"
+}
+</pre>
+<pre class="solucao" data-file="main.ps1">foreach ($n in 1..10) {
+    if ($n -eq 4) { "parei"; break }
+    "n = $n"
+}
+</pre>
+</div>
+
+<hr>
+
+<h2>2. <code>continue</code>: pule esta volta</h2>
+<p>Agora a Ana quer mostrar só os ímpares de 1 a 6. Quando o número é par, o <code>continue</code> pula o resto daquela volta e vai para o próximo:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; foreach ($n in 1..6) { if ($n % 2 -eq 0) { continue }; "ímpar: $n" }
+ímpar: 1
+ímpar: 3
+ímpar: 5
+</pre>
+<dl class="anatomy">
+  <dt>$n % 2 -eq 0</dt><dd>O <code>%</code> é o resto da divisão. Se o resto da divisão por 2 é 0, o número é par.</dd>
+  <dt>continue</dt><dd>“Pule o resto desta volta.” A linha <code>"ímpar: $n"</code> não roda para os pares, mas o laço <strong>não acaba</strong>: segue para 3, 5…</dd>
+</dl>
+<div class="tip">A diferença prática: <code>break</code> encerra o laço; <code>continue</code> só pula o item atual e segue.</div>
+
+<div class="tryps" data-goal="out:ímpar: 1;;out:ímpar: 3;;out:ímpar: 5;;src:\bcontinue\b;;semerro">
+<p class="try-task"><strong>Missão:</strong> use <code>continue</code> para pular os pares e mostrar só <code>ímpar: 1</code>, <code>ímpar: 3</code> e <code>ímpar: 5</code>.</p>
+<pre class="script" data-file="main.ps1">foreach ($n in 1..6) {
+    "ímpar: $n"
+}
+</pre>
+<pre class="solucao" data-file="main.ps1">foreach ($n in 1..6) {
+    if ($n % 2 -eq 0) { continue }
+    "ímpar: $n"
+}
+</pre>
+</div>
+
+<hr>
+
+<h2>3. Procurar e parar</h2>
+<p>As notas da turma são 6, 8, 3 e 9. A Ana quer achar a primeira nota menor que 5 e parar ali, sem olhar as seguintes:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $notas = 6, 8, 3, 9
+PS C:\Users\ana&gt; foreach ($nota in $notas) { if ($nota -lt 5) { "Achei nota baixa: $nota"; break } }
+Achei nota baixa: 3
+</pre>
+<p>O 6 e o 8 passaram; o 3 disparou a mensagem e o <code>break</code>. O 9, que vem depois, não foi visitado. Sem o <code>break</code>, o laço continuaria até o fim da lista — o que, nesta lista, daria o mesmo resultado (só há uma nota baixa), mas numa lista com várias notas baixas mostraria todas.</p>
+
+<hr>
+
+<h2>4. Laço dentro de laço e rótulo</h2>
+<p>Quando um <code>foreach</code> está dentro de outro, o <code>break</code> sai <strong>só do laço de dentro</strong>. O de fora continua. Aqui <code>$i</code> é a “linha” e <code>$j</code> é a “coluna”; ao chegar em <code>$j -eq 2</code>, o laço interno para, e a próxima linha começa:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; foreach ($i in 1..3) { foreach ($j in 1..3) { if ($j -eq 2) { break }; "$i-$j" } }
+1-1
+2-1
+3-1
+</pre>
+<p>Saíram só os pares em que a coluna é 1. As voltas com coluna 2 e 3 do laço interno foram abortadas, mas as três linhas (1, 2 e 3) aconteceram.</p>
+<p>Para sair dos dois de uma vez, a Ana cola um <strong>rótulo</strong> no laço de fora: um nome com dois-pontos na frente, <code>:fora</code>, e o <code>break fora</code> aponta para ele:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; :fora foreach ($i in 1..3) { foreach ($j in 1..3) { if ($j -eq 2) { break fora }; "$i-$j" } }
+1-1
+</pre>
+<p>Desta vez, ao chegar em <code>j = 2</code> na primeira linha, o <code>break fora</code> encerrou o laço de fora também. Só apareceu <code>1-1</code>.</p>
+<dl class="anatomy">
+  <dt>:fora</dt><dd>O rótulo, colado na frente do laço que você quer poder encerrar de dentro. O nome você escolhe; evite acento.</dd>
+  <dt>break fora</dt><dd>Encerra o laço que tem esse rótulo, não só o mais interno.</dd>
+</dl>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>A pegadinha do <code>ForEach-Object</code></strong>
+<p>O cmdlet <code>ForEach-Object</code> (aula <a href="foreach.html">foreach</a>, e com mais detalhes em <a href="foreach-object.html">ForEach-Object</a>) não é o laço <code>foreach</code>. Dentro dele, o jeito de pular um item é o <code>return</code>, não o <code>break</code>. Com <code>return</code>, o 3 é pulado e os seguintes aparecem:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 1..5 | ForEach-Object { if ($_ -eq 3) { return }; "item $_" }
+item 1
+item 2
+item 4
+item 5
+</pre>
+<p>Já o <code>break</code> dentro do <code>ForEach-Object</code> não “sai só da esteira”. No laboratório, o comando abaixo ainda tinha uma mensagem dentro do bloco e outra depois dele; as duas sumiram:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; &amp; { 1..5 | ForEach-Object { if ($_ -eq 3) { break }; "item $_" }; "esta linha some" }; "fora do bloco"
+item 1
+item 2
+</pre>
+<dl class="anatomy">
+  <dt>&amp; { ... }</dt><dd>Um bloco que roda na hora. Dentro dele, o <code>ForEach-Object</code> e, em seguida, o texto <code>esta linha some</code>.</dd>
+  <dt>break</dt><dd>Ao chegar no 3, o <code>break</code> não pulou só o item: <code>item 3</code>, <code>item 4</code>, <code>item 5</code>, <code>esta linha some</code> e até o <code>fora do bloco</code> (depois do <code>&amp; { ... }</code>) deixaram de aparecer. Só restaram <code>item 1</code> e <code>item 2</code>.</dd>
+</dl>
+<p><strong>Como evitar:</strong> no laço <code>foreach ($item in $lista)</code>, use <code>break</code> e <code>continue</code> à vontade. No <code>ForEach-Object</code> da esteira, para pular um item use <code>return</code>. Não use <code>break</code> ali: ele pode interromper bem mais do que você esperava.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>break</code></td><td>Encerra o laço atual. O que vem depois do laço roda normalmente.</td></tr>
+<tr><td><code>continue</code></td><td>Pula o resto desta volta e vai para o próximo item.</td></tr>
+<tr><td><code>if ($nota -lt 5) { "..."; break }</code></td><td>Padrão “procure e pare”: achou, mostrou, saiu.</td></tr>
+<tr><td><code>break</code> num laço dentro de outro</td><td>Sai só do laço de dentro. O de fora continua.</td></tr>
+<tr><td><code>:fora foreach (...) { ...; break fora }</code></td><td>O rótulo deixa o <code>break</code> encerrar o laço de fora também.</td></tr>
+<tr><td><code>ForEach-Object { if (...) { return } }</code></td><td>Pula um item da esteira. Evite <code>break</code> aqui.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete para encerrar o laço quando <code>$n</code> for 4:</p>
+<div class="ex-code">if ($n -eq 4) { <input data-answer="break" aria-label="comando"> }</div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual é a saída?</h3>
+<p>No laboratório, depois de <code>foreach ($nota in 6, 8, 3, 9) { if ($nota -lt 5) { "Achei nota baixa: $nota"; break } }</code>, o que apareceu?</p>
+<div class="ex-code"><input data-answer="Achei nota baixa: 3" aria-label="saída"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Complete o comando</h3>
+<p>Complete para pular os números pares e seguir para o próximo:</p>
+<div class="ex-code">if ($n % 2 -eq 0) { <input data-answer="continue" aria-label="comando"> }</div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Qual é a diferença entre <code>break</code> e <code>continue</code>?</p>
+<label><input type="radio" name="q4"> Não há diferença</label>
+<label><input type="radio" name="q4"> O <code>break</code> encerra o laço; o <code>continue</code> só pula a volta atual e segue no próximo item</label>
+<label><input type="radio" name="q4"> O <code>continue</code> encerra o script inteiro</label>
+<label><input type="radio" name="q4"> O <code>break</code> só funciona no <code>switch</code></label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Num <code>foreach</code> dentro de outro <code>foreach</code>, um <code>break</code> sem rótulo faz o quê?</p>
+<label><input type="radio" name="q5"> Sai dos dois laços de uma vez</label>
+<label><input type="radio" name="q5"> Reinicia o laço de fora</label>
+<label><input type="radio" name="q5"> Sai só do laço de dentro; o de fora continua</label>
+<label><input type="radio" name="q5"> Mostra um <code>ParserError</code></label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. Dentro de um <code>ForEach-Object</code>, qual é o jeito seguro de pular um item?</p>
+<label><input type="radio" name="q6"> Usar <code>return</code> (o <code>break</code> pode interromper bem mais do que a esteira)</label>
+<label><input type="radio" name="q6"> Usar <code>break</code>, que só pula o item da vez</label>
+<label><input type="radio" name="q6"> Usar <code>exit</code></label>
+<label><input type="radio" name="q6"> Apagar a variável <code>$_</code></label>
+</div>
+
+<div class="tryps" data-goal="out:Achei nota baixa: 3;;src:\bbreak\b;;semerro">
+<p class="try-task"><strong>Missão final:</strong> percorra as notas 6, 8, 3 e 9, mostre <code>Achei nota baixa: 3</code> ao achar a primeira nota menor que 5, e use <code>break</code> para não continuar depois disso.</p>
+<pre class="script" data-file="main.ps1">$notas = 6, 8, 3, 9
+# complete com foreach, if e break
+</pre>
+<pre class="solucao" data-file="main.ps1">$notas = 6, 8, 3, 9
+foreach ($nota in $notas) {
+    if ($nota -lt 5) { "Achei nota baixa: $nota"; break }
+}
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>break</code> encerra o laço na hora. O que vem depois do laço roda normalmente.</li>
+  <li><code>continue</code> pula o resto da volta atual e segue no próximo item.</li>
+  <li>“Procure e pare”: ao achar o que importava, mostre e dê <code>break</code>.</li>
+  <li>Num laço dentro de outro, o <code>break</code> sai só do de dentro. Um rótulo (<code>:fora</code> e <code>break fora</code>) sai dos dois.</li>
+  <li>No <code>ForEach-Object</code>, use <code>return</code> para pular um item. O <code>break</code> ali pode interromper o bloco inteiro — no laboratório, até a linha depois do bloco deixou de aparecer.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
