@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Comparações — -eq, -ne, -gt, -lt | Guia PowerShell</title>
+<meta name="description" content="Operadores de comparação no PowerShell: -eq, -ne, -gt, -ge, -lt, -le, maiúsculas com -ceq, filtragem de listas e o ParserError real de operador errado.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">Comparações</span> (-eq, -ne, -gt, -lt)</h1>
+
+<p class="intro">A nota é maior que 7? O estoque é menor que 5? O nome é igual a "Ana"? Antes de decidir, o script compara. No PowerShell, as comparações usam palavrinhas com tracinho, como <code>-eq</code> e <code>-gt</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Os operadores <code>-eq</code>, <code>-ne</code>, <code>-gt</code>, <code>-ge</code>, <code>-lt</code> e <code>-le</code>.</li>
+  <li>Por que o PowerShell usa letras (<code>-gt</code>) em vez de <code>&gt;</code>.</li>
+  <li>Que <code>-eq</code> não diferencia maiúsculas, e como diferenciar com <code>-ceq</code>.</li>
+  <li>Que, com uma lista à esquerda, a comparação <strong>filtra</strong> a lista.</li>
+  <li>O erro real de digitar o operador errado.</li>
+</ul>
+</div>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português.</p>
+<hr>
+<h2>A ideia: a balança</h2>
+<p>Comparar é pôr dois valores numa balança e perguntar: são iguais? Este é maior? A resposta é sempre <code>True</code> (verdadeiro) ou <code>False</code> (falso). É essa resposta que o <code>if</code> usa para decidir (aula <a href="if.html">if</a>).</p>
+<hr>
+<h2>1. Números</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 5 -eq 5
+True
+PS C:\Users\ana&gt; 5 -ne 3
+True
+PS C:\Users\ana&gt; 5 -gt 3
+True
+PS C:\Users\ana&gt; 5 -ge 5
+True
+PS C:\Users\ana&gt; 5 -lt 10
+True
+PS C:\Users\ana&gt; 5 -le 4
+False
+</pre>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Operador</th><th>Quer dizer</th></tr>
+<tr><td><code>-eq</code></td><td>igual (<em>equal</em>)</td></tr>
+<tr><td><code>-ne</code></td><td>diferente (<em>not equal</em>)</td></tr>
+<tr><td><code>-gt</code></td><td>maior que (<em>greater than</em>)</td></tr>
+<tr><td><code>-ge</code></td><td>maior ou igual (<em>greater or equal</em>)</td></tr>
+<tr><td><code>-lt</code></td><td>menor que (<em>less than</em>)</td></tr>
+<tr><td><code>-le</code></td><td>menor ou igual (<em>less or equal</em>)</td></tr>
+</table>
+</div>
+<div class="note"><strong>Por que não <code>&gt;</code> e <code>=</code>?</strong> No PowerShell, <code>&gt;</code> já tem outro trabalho: mandar a saída para um arquivo. E <code>=</code> guarda valor numa variável. Por isso as comparações usam letras com tracinho.</div>
+<div class="tryps" data-goal="out:Pode votar;;src:-ge;;semerro">
+<p class="try-task"><strong>Experimente:</strong> com 16 anos já pode votar. Troque <code>-gt</code> por <code>-ge</code> (maior <strong>ou igual</strong>).</p>
+<pre class="script" data-file="main.ps1">$idade = 16
+if ($idade -gt 16) { "Pode votar" } else { "Ainda não" }
+</pre>
+<pre class="solucao" data-file="main.ps1">$idade = 16
+if ($idade -ge 16) { "Pode votar" } else { "Ainda não" }
+</pre>
+</div>
+<h2>2. Texto: -eq não diferencia maiúsculas</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; "Ana" -eq "ana"
+True
+PS C:\Users\ana&gt; "Ana" -ne "Beto"
+True
+PS C:\Users\ana&gt; "Ana" -ceq "ana"
+False
+PS C:\Users\ana&gt; "Ana" -ieq "ANA"
+True
+</pre>
+<p>Por padrão, <code>"Ana"</code> e <code>"ana"</code> são iguais. Para diferenciar maiúsculas, ponha um <code>c</code> (<em>case-sensitive</em>): <code>-ceq</code>, <code>-cne</code>, <code>-cgt</code>… O <code>i</code> (<code>-ieq</code>) deixa explícito que <strong>não</strong> diferencia, igual ao normal.</p>
+<h2>3. Com lista, a comparação filtra</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 1, 2, 3, 2, 5 -eq 2
+2
+2
+PS C:\Users\ana&gt; 1, 2, 3, 2, 5 -gt 2
+3
+5
+</pre>
+<p>Quando há uma lista à esquerda, o resultado não é True/False: é a lista dos itens que passaram no teste. Para perguntar "a lista tem esse item?", use <code>-contains</code> (aula <a href="operadores-colecao.html">-contains e -in</a>).</p>
+<hr>
+<h2>Quando dá errado</h2>
+<div class="cenario">
+<strong>Digitou o operador errado</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 5 -eg 5
+ParserError:
+Line |
+   1 |  5 -eg 5
+     |    ~~~
+     | Unexpected token '-eg' in expression or statement.
+</pre>
+<dl class="anatomy">
+  <dt>ParserError</dt><dd>Erro de "leitura": o PowerShell nem chegou a rodar o comando, porque não entendeu como ele foi escrito.</dd>
+  <dt>Line | 1 … ~~~</dt><dd>A linha com o problema; os <code>~~~</code> sublinham o pedaço errado.</dd>
+  <dt>Unexpected token '-eg'</dt><dd>"Pedaço inesperado: -eg." Não existe <code>-eg</code>; era <code>-eq</code> (com Q).</dd>
+</dl>
+<p>Repare que essa mensagem veio em inglês, mesmo com o Windows em português. No PowerShell 7.7, os erros de <strong>sintaxe</strong> (do jeito de escrever) saem em inglês; os erros de <strong>comando</strong> (como "O termo … não é reconhecido") saem em português.</p>
+<p><strong>Como resolver:</strong> <code>5 -eq 5</code>.</p>
+</div>
+<div class="cenario">
+<strong>Usou <code>=</code> para comparar</strong>
+<p><code>if ($nota = 10)</code> não compara: guarda 10 em <code>$nota</code>, e o <code>if</code> sempre entra. Veja a explicação completa na aula <a href="if.html">if</a>. Use <code>-eq</code>.</p>
+</div>
+<hr>
+<h2>Exercícios</h2>
+<div class="exercise">
+<h3>1. Diferente</h3>
+<p>Complete para perguntar se <code>$a</code> é diferente de 3:</p>
+<div class="ex-code">$a <input data-answer="-ne" aria-label="operador"> 3</div>
+</div>
+<div class="exercise">
+<h3>2. Menor ou igual</h3>
+<p>Complete para "<code>$preco</code> menor ou igual a 50":</p>
+<div class="ex-code">$preco <input data-answer="-le" aria-label="operador"> 50</div>
+</div>
+<div class="mc" data-answer="1">
+<p class="mc-q">3. O que <code>"Ana" -eq "ANA"</code> mostra?</p>
+<label><input type="radio" name="q3"> True</label>
+<label><input type="radio" name="q3"> False</label>
+<label><input type="radio" name="q3"> Erro</label>
+<label><input type="radio" name="q3"> Nada</label>
+</div>
+<div class="mc" data-answer="3">
+<p class="mc-q">4. O que <code>1, 5, 8 -gt 4</code> mostra?</p>
+<label><input type="radio" name="q4"> True</label>
+<label><input type="radio" name="q4"> False</label>
+<label><input type="radio" name="q4"> 5 e 8</label>
+<label><input type="radio" name="q4"> 1</label>
+</div>
+<div class="tryps" data-goal="out:Estoque baixo;;src:-lt;;semerro">
+<p class="try-task"><strong>Missão final:</strong> mostre <code>Estoque baixo</code> quando <code>$estoque</code> for menor que 10.</p>
+<pre class="script" data-file="main.ps1">$estoque = 4
+</pre>
+<pre class="solucao" data-file="main.ps1">$estoque = 4
+if ($estoque -lt 10) { "Estoque baixo" }
+</pre>
+</div>
+<hr>
+<h2>Resumo</h2>
+<ul>
+  <li><code>-eq -ne -gt -ge -lt -le</code> respondem True ou False.</li>
+  <li>Com texto, <code>-eq</code> não diferencia maiúsculas; <code>-ceq</code> diferencia.</li>
+  <li>Com uma lista à esquerda, o operador filtra.</li>
+  <li>Erro de sintaxe (<code>ParserError</code>) sai em inglês no 7.7.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
