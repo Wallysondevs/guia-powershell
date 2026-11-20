@@ -78,7 +78,7 @@ PS C:\Users\ana&gt; "$nomezinha"
 <pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 'Olá, $nome — $($nome.Length) letras'
 Olá, $nome — $($nome.Length) letras
 </pre>
-<h2>Qual usar</h2>
+<h2>Formas diferentes</h2>
 <div class="table-wrap">
 <table class="ref">
 <tr><th>Forma</th><th>Quando</th></tr>
@@ -103,6 +103,17 @@ Olá, $nome — $($nome.Length) letras
 <p>Em <code>"$nota: Excelente"</code>, o <code>:</code> faz o PowerShell ler <code>$nota:</code> como um nome especial, e dá erro de verdade (você vê a mensagem na aula <a href="elseif-else.html">elseif e else</a>). <strong>Como resolver:</strong> <code>"${nota}: Excelente"</code>.</p>
 </div>
 <hr>
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>"Olá, $nome"</code></td><td>Troca a variável pelo valor.</td></tr>
+<tr><td><code>"$($x.Length)"</code></td><td>Propriedade, método ou conta dentro do texto.</td></tr>
+<tr><td><code>"${nome}zinha"</code></td><td>Separa o nome da variável do texto colado.</td></tr>
+<tr><td><code>'$nome'</code></td><td>Aspas simples: não troca nada.</td></tr>
+</table>
+</div>
+<hr>
 <h2>Exercícios</h2>
 <div class="exercise">
 <h3>1. Subexpressão</h3>
@@ -114,19 +125,25 @@ Olá, $nome — $($nome.Length) letras
 <p>Complete para mostrar <code>Anazinha</code>:</p>
 <div class="ex-code">"<input data-answer="${nome}" aria-label="resposta">zinha"</div>
 </div>
+<div class="exercise">
+<h3>3. Sem trocar</h3>
+<p>Que tipo de aspas mostra <code>$nome</code> literalmente, sem trocar? (digite a aspa)</p>
+<div class="ex-code"><input data-answer="&#x27;" aria-label="resposta">Olá, $nome'</div>
+</div>
+
 <div class="mc" data-answer="2">
-<p class="mc-q">3. Com <code>$nome = "Ana"</code>, o que <code>"$nome.Length"</code> mostra?</p>
-<label><input type="radio" name="q3"> 3</label>
-<label><input type="radio" name="q3"> Ana.Length</label>
-<label><input type="radio" name="q3"> $nome.Length</label>
-<label><input type="radio" name="q3"> Erro</label>
+<p class="mc-q">4. Com <code>$nome = "Ana"</code>, o que <code>"$nome.Length"</code> mostra?</p>
+<label><input type="radio" name="q4"> 3</label>
+<label><input type="radio" name="q4"> Ana.Length</label>
+<label><input type="radio" name="q4"> $nome.Length</label>
+<label><input type="radio" name="q4"> Erro</label>
 </div>
 <div class="mc" data-answer="2">
-<p class="mc-q">4. O que <code>"2 + 3 = $(2 + 3)"</code> mostra?</p>
-<label><input type="radio" name="q4"> 2 + 3 = 2 + 3</label>
-<label><input type="radio" name="q4"> 2 + 3 = 5</label>
-<label><input type="radio" name="q4"> 5</label>
-<label><input type="radio" name="q4"> 2 + 3 = $(2 + 3)</label>
+<p class="mc-q">5. O que <code>"2 + 3 = $(2 + 3)"</code> mostra?</p>
+<label><input type="radio" name="q5"> 2 + 3 = 2 + 3</label>
+<label><input type="radio" name="q5"> 2 + 3 = 5</label>
+<label><input type="radio" name="q5"> 5</label>
+<label><input type="radio" name="q5"> 2 + 3 = $(2 + 3)</label>
 </div>
 <div class="tryps" data-goal="out:Ana tem 3 letras;;semerro">
 <p class="try-task"><strong>Missão final:</strong> mostre <code>Ana tem 3 letras</code> usando <code>$nome</code> e a propriedade <code>.Length</code>.</p>
