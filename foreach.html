@@ -140,14 +140,19 @@ PS C:\Users\ana&gt; foreach ($x in $null) { "rodou com [$x]" }
 <hr>
 
 <h2 id="errado">Quando dá errado</h2>
-<p>Para colher estes erros, o código errado foi rodado como texto pelo <code>Invoke-Expression</code>, por isso as mensagens começam com <code>Invoke-Expression:</code>. Digitando direto, a moldura muda um pouco (aparece como <code>ParserError</code>), mas a mensagem é a mesma. Esses erros de leitura do código saem em inglês no PowerShell 7.7, mesmo num Windows em português.</p>
+<p>Os dois erros abaixo são <code>ParserError</code>: erros de leitura do código. O PowerShell recusa a linha antes de rodar qualquer coisa, mostra a linha (<code>Line | 1</code>) e aponta o problema com um tracinho <code>~</code>. Esses erros saem em inglês no PowerShell 7.7, mesmo num Windows em português.</p>
 
 <div class="cenario">
 <strong>Trocar o <code>in</code> por outra palavra</strong>
-<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Invoke-Expression 'foreach ($fruta of $frutas) { $fruta }'
-Invoke-Expression: Missing 'in' after variable in foreach loop. The correct form is: foreach ($a in $b) {...}
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; foreach ($fruta of $frutas) { $fruta }
+ParserError:
+Line |
+   1 |  foreach ($fruta of $frutas) { $fruta }
+     |                 ~
+     | Missing 'in' after variable in foreach loop. The correct form is: foreach ($a in $b) {...}
 </pre>
 <dl class="anatomy">
+  <dt>~</dt><dd>O tracinho aponta logo depois de <code>$fruta</code>, onde deveria vir o <code>in</code>.</dd>
   <dt>Missing 'in' after variable in foreach loop</dt><dd>Quer dizer que faltou a palavra <code>in</code> depois da variável do laço. Quem vem do JavaScript às vezes escreve <code>of</code>.</dd>
   <dt>The correct form is: foreach ($a in $b) {...}</dt><dd>Aqui o próprio PowerShell mostra o modelo certo do <code>foreach</code>.</dd>
 </dl>
@@ -155,10 +160,15 @@ Invoke-Expression: Missing 'in' after variable in foreach loop. The correct form
 
 <div class="cenario">
 <strong>Esquecer os parênteses</strong>
-<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Invoke-Expression 'foreach $fruta in $frutas { $fruta }'
-Invoke-Expression: Missing opening '(' after keyword 'foreach'.
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; foreach $fruta in $frutas { $fruta }
+ParserError:
+Line |
+   1 |  foreach $fruta in $frutas { $fruta }
+     |         ~
+     | Missing opening '(' after keyword 'foreach'.
 </pre>
 <dl class="anatomy">
+  <dt>~</dt><dd>O tracinho aponta logo depois da palavra <code>foreach</code>.</dd>
   <dt>Missing opening '(' after keyword 'foreach'</dt><dd>Quer dizer que faltou abrir parênteses logo depois da palavra <code>foreach</code>. A parte <code>$fruta in $frutas</code> precisa ficar entre parênteses.</dd>
 </dl>
 </div>
