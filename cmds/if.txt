@@ -28,5 +28,3 @@ if ($estoque -lt 5) {
 if ($nota = 10) { "sempre entra: isso é atribuição" }; "nota agora vale $nota"
 Invoke-Expression 'if ($nota -ge 7) "Aprovada"'   #ERRO-PARSE
 Invoke-Expression 'if $nota -ge 7 { "Aprovada" }'   #ERRO-PARSE
-if ($nota > 7) { "entrou" }; Test-Path ./7; Remove-Item ./7 -ErrorAction SilentlyContinue
-NOTA: o último bloco do if.txt cria um arquivo '7' na pasta atual (o > é redirecionamento). Rodar DENTRO da pasta de teste com as guardas, ou trocar por: Invoke-Expression 'if ($nota > 7) {}' em pasta de teste.
