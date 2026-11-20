@@ -196,6 +196,20 @@ Capturado: aviso
 
 <hr>
 
+<h2>Formas diferentes de escrever um aviso ou um detalhe</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>Write-Warning "estoque baixo"</code></td><td>O jeito do dia a dia: o texto vai na posição da mensagem.</td></tr>
+<tr><td><code>Write-Warning -Message "estoque baixo"</code></td><td>A mesma frase, com o parâmetro nomeado. Melhor nos scripts.</td></tr>
+<tr><td><code>Write-Verbose "detalhe" -Verbose</code></td><td>Mostra o detalhe só neste comando, sem mudar a preferência da sessão.</td></tr>
+<tr><td><code>$VerbosePreference = "Continue"</code></td><td>Liga os detalhes para os próximos <code>Write-Verbose</code>. Lembre de voltar para <code>SilentlyContinue</code>.</td></tr>
+<tr><td><code>Write-Information "fato" -InformationAction Continue</code></td><td>Mostra a informação só neste comando.</td></tr>
+</table>
+</div>
+
+<hr>
+
 <h2>Referência rápida</h2>
 <div class="table-wrap">
 <table class="ref">
