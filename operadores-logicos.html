@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Operadores Lógicos — -and, -or, -not e -xor | Guia PowerShell</title>
+<meta name="description" content="Operadores lógicos para quem nunca programou: -and, -or, -not, ! e -xor, juntando comparações, curto-circuito e saídas reais do PowerShell 7.7, explicados em português.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">Operadores Lógicos</span></h1><p class="intro">A Ana dá desconto só quando a compra é grande <strong>e</strong> a pessoa tem cadastro. Uma condição sozinha não resolve: ela precisa juntar duas perguntas. Os operadores lógicos ligam respostas verdadeiras e falsas para formar uma decisão maior.</p><div class="note"><strong>Você vai aprender</strong><ul><li>Juntar condições com <code>-and</code> (e) e <code>-or</code> (ou).</li><li>Inverter uma resposta com <code>-not</code>.</li><li>Reconhecer o ou exclusivo, <code>-xor</code>.</li><li>Entender por que às vezes o lado direito nem roda.</li></ul></div><p>As saídas reais desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português. Os exemplos do editor são exercícios, não transcrições do laboratório.</p>
+<hr><h2>A ideia: as regras de um desconto</h2><p>Imagine dois carimbos num cartão. Uma promoção exige <strong>os dois</strong>: é o <code>-and</code>. Outra aceita <strong>pelo menos um</strong>: é o <code>-or</code>. Uma terceira exige <strong>exatamente um</strong>, nunca ambos: é o <code>-xor</code>. O <code>-not</code> troca um sim por não, e um não por sim.</p>
+<hr><h2>1. E: as duas condições precisam ser verdadeiras</h2><p><code>$true</code> significa verdadeiro; <code>$false</code>, falso. São valores lógicos, sem aspas. Comece com respostas prontas, antes de montar perguntas maiores.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $true -and $true
+True
+PS C:\Users\ana&gt; $true -and $false
+False
+</pre>
+<dl class="anatomy"><dt>$true -and $true</dt><dd>Verdadeiro <em>e</em> verdadeiro: o resultado é <code>True</code>.</dd><dt>$true -and $false</dt><dd>Uma resposta falsa já basta para o conjunto ser <code>False</code>.</dd><dt>-and</dt><dd><em>And</em> é “e”. Fica entre duas condições.</dd></dl>
+<hr><h2>2. Ou: basta uma condição verdadeira</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $true -or $false
+True
+PS C:\Users\ana&gt; $false -or $false
+False
+</pre>
+<dl class="anatomy"><dt>-or</dt><dd><em>Or</em> é “ou”. Basta um dos lados ser verdadeiro. Se ambos forem verdadeiros, também dá verdadeiro.</dd><dt>$false -or $false</dt><dd>Nenhum dos lados atende à regra: <code>False</code>.</dd></dl>
+<div class="tryps" data-goal="out:Desconto: False;;src:-and;;semerro"><p class="try-task"><strong>Experimente:</strong> O desconto exige compra grande <strong>e</strong> cadastro. Troque o operador para que, neste caso, apareça <code>Desconto: False</code>.</p><pre class="script" data-file="main.ps1">$compraGrande = $true
+$temCadastro = $false
+&quot;Desconto: &quot; + ($compraGrande -or $temCadastro)
+</pre><pre class="solucao" data-file="main.ps1">$compraGrande = $true
+$temCadastro = $false
+&quot;Desconto: &quot; + ($compraGrande -and $temCadastro)
+</pre></div>
+<hr><h2>3. Inverter e escolher exatamente uma opção</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; -not $false
+True
+PS C:\Users\ana&gt; -not $true
+False
+PS C:\Users\ana&gt; !$false
+True
+PS C:\Users\ana&gt; $true -xor $true
+False
+PS C:\Users\ana&gt; $true -xor $false
+True
+</pre>
+<dl class="anatomy"><dt>-not $false</dt><dd><em>Not</em> é “não”: inverte falso para verdadeiro.</dd><dt>!$false</dt><dd>O ponto de exclamação também inverte. Prefira <code>-not</code> ao começar: ele explica melhor a intenção.</dd><dt>-xor</dt><dd>“Ou exclusivo”: verdadeiro só quando exatamente um dos lados é verdadeiro. Dois verdadeiros dão falso.</dd></dl>
+<hr><h2>4. Juntando comparações de verdade</h2><p>Agora cada lado é uma pergunta. Os parênteses deixam visível onde começa e termina cada comparação.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; (5 -gt 3) -and (2 -lt 10)
+True
+PS C:\Users\ana&gt; (5 -gt 3) -and (2 -gt 10)
+False
+PS C:\Users\ana&gt; $nome = &quot;Ana&quot;
+PS C:\Users\ana&gt; ($null -eq $nome) -or ($nome -eq &quot;Ana&quot;)
+True
+</pre>
+<dl class="anatomy"><dt>(5 -gt 3)</dt><dd>5 é maior que 3: verdadeiro.</dd><dt>(2 -lt 10)</dt><dd>2 é menor que 10: verdadeiro. Os dois juntos com <code>-and</code> dão verdadeiro.</dd><dt>($null -eq $nome) -or ($nome -eq "Ana")</dt><dd>O nome está ausente <em>ou</em> é Ana? Aqui vale a segunda condição. <code>-eq</code> compara igualdade, não guarda um valor.</dd></dl>
+<hr><h2>5. Atalho: o lado direito só roda se precisar</h2><p>Isso se chama <strong>curto-circuito</strong>. Com <code>-and</code>, se o primeiro lado é falso, o conjunto já é falso. Com <code>-or</code>, se o primeiro lado é verdadeiro, o conjunto já é verdadeiro. Não é necessário avaliar o resto.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $false -and (1 / 0)
+False
+PS C:\Users\ana&gt; $true -or (1 / 0)
+True
+</pre>
+<p>O <code>1 / 0</code> é uma divisão impossível, mas aqui não foi executado: por isso não houve erro. Não conte com o lado direito para fazer uma tarefa obrigatória, como atualizar um contador.</p><hr><h2>Formas diferentes de combinar condições</h2>
+<div class="table-wrap"><table class="ref"><tr><th>Forma</th><th>Quando usar / o que faz</th></tr><tr><td><code>a -and b</code></td><td>Exigir todas as condições.</td></tr><tr><td><code>a -or b</code></td><td>Aceitar pelo menos uma condição.</td></tr><tr><td><code>-not (a)</code></td><td>Inverter uma condição inteira.</td></tr><tr><td><code>!$valor</code></td><td>Forma curta da negação.</td></tr><tr><td><code>a -xor b</code></td><td>Aceitar exatamente uma das duas condições.</td></tr></table></div>
+<hr><h2>Quando dá errado</h2>
+<div class="cenario"><strong>Usou -xor querendo aceitar as duas opções</strong><pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $true -xor $true
+False
+PS C:\Users\ana&gt; $true -xor $false
+True
+</pre>
+<p>Não há mensagem de erro: é um erro de lógica. O primeiro resultado é <code>False</code> porque os dois lados são verdadeiros. Use <code>-or</code> quando ambos também puderem valer; reserve <code>-xor</code> para uma escolha exclusiva.</p></div><div class="cenario"><strong>Esperou que uma divisão fosse executada</strong><p>No trecho do curto-circuito, nenhum erro foi coletado porque a divisão nem rodou. Se uma ação precisa acontecer sempre, execute-a numa linha separada, não no lado direito de <code>-and</code> ou <code>-or</code>.</p></div><p>Esta coleta não contém mensagens de erro para os operadores lógicos. Os casos acima mostram resultados reais inesperados, sem inventar diagnóstico do terminal.</p><hr><h2>Referência rápida</h2>
+<div class="table-wrap"><table class="ref"><tr><th>Forma</th><th>Quando usar / o que faz</th></tr><tr><td><code>$true -and $false</code></td><td>False: os dois precisariam ser verdadeiros.</td></tr><tr><td><code>$true -or $false</code></td><td>True: um basta.</td></tr><tr><td><code>-not $true</code></td><td>False: inverte o valor.</td></tr><tr><td><code>$true -xor $true</code></td><td>False: ambos verdadeiros não é exclusivo.</td></tr><tr><td><code>$false -and expressão</code></td><td>A expressão da direita não roda.</td></tr><tr><td><code>$true -or expressão</code></td><td>A expressão da direita não roda.</td></tr></table></div>
+<hr><h2>Exercícios</h2><div class="exercise"><h3>1. Complete</h3><p>Exija as duas condições.</p><div class="ex-code">$a <input data-answer="-and" aria-label="resposta 1"> $b</div></div>
+<div class="exercise"><h3>2. Complete</h3><p>Aceite pelo menos uma condição.</p><div class="ex-code">$a <input data-answer="-or" aria-label="resposta 2"> $b</div></div>
+<div class="exercise"><h3>3. Complete</h3><p>Inverta falso para verdadeiro.</p><div class="ex-code"><input data-answer="-not|!" aria-label="resposta 3"> $false</div></div>
+<div class="mc" data-answer="2"><p class="mc-q">4. Quanto dá verdadeiro <code>-xor</code> verdadeiro?</p><label><input type="radio" name="q4"> True</label><label><input type="radio" name="q4"> False</label><label><input type="radio" name="q4"> Um texto</label><label><input type="radio" name="q4"> Um erro</label></div>
+<div class="mc" data-answer="3"><p class="mc-q">5. Em <code>$false -and (1 / 0)</code>, a divisão roda?</p><label><input type="radio" name="q5"> Sim</label><label><input type="radio" name="q5"> Só no Windows</label><label><input type="radio" name="q5"> Não, o primeiro lado já decide o resultado</label></div>
+<div class="mc" data-answer="3"><p class="mc-q">6. Qual operador aceita os dois lados verdadeiros?</p><label><input type="radio" name="q6"> -xor</label><label><input type="radio" name="q6"> -not</label><label><input type="radio" name="q6"> -or</label></div>
+<div class="tryps" data-goal="out:Faça seu cadastro;;src:-not;;semerro"><p class="try-task"><strong>Experimente:</strong> Escreva um aviso para quando <strong>não</strong> houver cadastro. Use <code>-not</code> na condição para mostrar <code>Faça seu cadastro</code>.</p><pre class="script" data-file="main.ps1">$temCadastro = $false
+if ($temCadastro) {
+    &#x27;Faça seu cadastro&#x27;
+}
+</pre><pre class="solucao" data-file="main.ps1">$temCadastro = $false
+if (-not $temCadastro) {
+    &#x27;Faça seu cadastro&#x27;
+}
+</pre></div>
+<hr><h2>Resumo</h2>
+<ul><li><code>-and</code> exige os dois; <code>-or</code> aceita um ou ambos.</li><li><code>-not</code> e <code>!</code> invertem o valor lógico.</li><li><code>-xor</code> só aceita exatamente um verdadeiro.</li><li>Use parênteses para deixar as comparações claras.</li><li>O curto-circuito pode impedir a avaliação do lado direito.</li></ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
