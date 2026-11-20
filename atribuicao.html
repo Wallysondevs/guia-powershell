@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Operadores de Atribuição — =, +=, -=, ++ e -- | Guia PowerShell</title>
+<meta name="description" content="Operadores de atribuição para quem nunca programou: =, +=, -=, *=, /=, %=, ++ e --, e como acrescentar em listas e textos, com saídas reais do PowerShell 7.7.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">Operadores de Atribuição</span></h1><p class="intro">A Ana controla o estoque da lojinha numa variável. Chegou mercadoria: soma. Vendeu: diminui. Em vez de escrever <code>$estoque = $estoque + 5</code>, o PowerShell tem atalhos que fazem a conta e guardam o resultado na mesma variável.</p><div class="note"><strong>Você vai aprender</strong><ul><li>A guardar um valor com <code>=</code>.</li><li>A usar <code>+=</code>, <code>-=</code>, <code>*=</code>, <code>/=</code> e <code>%=</code>.</li><li>A somar e diminuir 1 com <code>++</code> e <code>--</code>.</li><li>A acrescentar itens numa lista e pedaços num texto com <code>+=</code>.</li></ul></div><p>As saídas reais desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português. Os exemplos do editor são exercícios, não transcrições do laboratório.</p>
+<hr><h2>A ideia: o quadro de estoque</h2><p>Pense num quadro branco com o número de cadernos. Quando chegam 5, você não escreve uma conta ao lado: apaga o número antigo e escreve o novo. Os operadores de atribuição fazem isso: calculam e <strong>substituem</strong> o valor guardado.</p>
+<hr><h2>1. Começando com =</h2><p>O <code>=</code> guarda o valor da direita na variável da esquerda (aula <a href="variaveis.html">Variáveis</a>). Ele não compara: para comparar, use <code>-eq</code>.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $n = 10
+PS C:\Users\ana&gt; $n
+10
+</pre>
+<hr><h2>2. Fazendo a conta no mesmo lugar</h2><p>Cada linha muda o valor de <code>$n</code>, e a linha seguinte mostra o novo valor. Acompanhe: 10, 15, 12, 24, 6 e 0.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $n += 5
+PS C:\Users\ana&gt; $n
+15
+PS C:\Users\ana&gt; $n -= 3
+PS C:\Users\ana&gt; $n
+12
+PS C:\Users\ana&gt; $n *= 2
+PS C:\Users\ana&gt; $n
+24
+PS C:\Users\ana&gt; $n /= 4
+PS C:\Users\ana&gt; $n
+6
+PS C:\Users\ana&gt; $n %= 3
+PS C:\Users\ana&gt; $n
+0
+</pre>
+<dl class="anatomy"><dt>$n += 5</dt><dd>O mesmo que <code>$n = $n + 5</code>: 10 vira 15.</dd><dt>$n -= 3</dt><dd>Diminui 3: 15 vira 12.</dd><dt>$n *= 2</dt><dd>Multiplica por 2: 12 vira 24.</dd><dt>$n /= 4</dt><dd>Divide por 4: 24 vira 6.</dd><dt>$n %= 3</dt><dd>Guarda o <strong>resto</strong> da divisão por 3. 6 dividido por 3 dá resto 0.</dd></dl>
+<div class="tryps" data-goal="out:Estoque: 15;;src:\+=;;semerro"><p class="try-task"><strong>Experimente:</strong> Chegaram 5 cadernos. Use <code>+=</code> para atualizar o estoque e mostrar <code>Estoque: 15</code>.</p><pre class="script" data-file="main.ps1">$estoque = 10
+
+&quot;Estoque: $estoque&quot;
+</pre><pre class="solucao" data-file="main.ps1">$estoque = 10
+$estoque += 5
+&quot;Estoque: $estoque&quot;
+</pre></div>
+<hr><h2>3. Somando e diminuindo 1: ++ e --</h2>
+<p><code>$i++</code> soma 1 a <code>$i</code>, e <code>$i--</code> diminui 1. É o jeito curto de <code>$i += 1</code> e <code>$i -= 1</code>, muito usado para contar voltas (aula <a href="for.html">for</a>). Também existe a forma com o sinal antes, <code>++$i</code>.</p><div class="warning"><strong>Saída não publicada:</strong> o trecho de <code>++</code> e <code>--</code> colhido no laboratório mostrou <code>$i</code> sempre valendo 1, o que não corresponde ao comportamento desses operadores. Isso parece um efeito do coletor, por isso a saída ficou fora da aula até ser colhida de novo. Rode o “Experimente” abaixo para ver o resultado no PowerShell do editor.</div><div class="tryps" data-goal="out:Visitas: 2;;src:\+\+;;semerro"><p class="try-task"><strong>Experimente:</strong> Conte duas visitas usando <code>++</code> duas vezes, para aparecer <code>Visitas: 2</code>.</p><pre class="script" data-file="main.ps1">$visitas = 0
+
+&quot;Visitas: $visitas&quot;
+</pre><pre class="solucao" data-file="main.ps1">$visitas = 0
+$visitas++
+$visitas++
+&quot;Visitas: $visitas&quot;
+</pre></div>
+<hr><h2>4. Acrescentando na lista e no texto</h2><p>O <code>+=</code> também funciona com listas e textos: acrescenta no fim.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $lista = 1, 2, 3
+PS C:\Users\ana&gt; $lista += 4
+PS C:\Users\ana&gt; $lista
+1
+2
+3
+4
+PS C:\Users\ana&gt; $texto = &quot;Oi&quot;
+PS C:\Users\ana&gt; $texto += &quot; mundo&quot;
+PS C:\Users\ana&gt; $texto
+Oi mundo
+</pre>
+<dl class="anatomy"><dt>$lista += 4</dt><dd>Acrescenta o 4 no fim da lista (aula <a href="arrays.html">Arrays</a>).</dd><dt>$texto += " mundo"</dt><dd>Gruda “ mundo” no fim de “Oi”. Repare no espaço dentro das aspas.</dd></dl>
+<hr><h2>Formas diferentes de mudar uma variável</h2>
+<div class="table-wrap"><table class="ref"><tr><th>Forma</th><th>Quando usar / o que faz</th></tr><tr><td><code>$n = $n + 5</code></td><td>Por extenso: claro, mas repete o nome.</td></tr><tr><td><code>$n += 5</code></td><td>O atalho: mais curto e comum.</td></tr><tr><td><code>$i++</code></td><td>Somar 1, por exemplo num contador.</td></tr><tr><td><code>$i--</code></td><td>Diminuir 1.</td></tr><tr><td><code>$lista += 4</code></td><td>Acrescentar um item numa lista pequena.</td></tr></table></div>
+<hr><h2>Quando dá errado</h2>
+<div class="cenario"><strong>A conta deu outro valor que o esperado</strong><p>Na coleta, <code>$n %= 3</code> deixou <code>$n</code> com <code>0</code>. Não é erro: <code>%=</code> guarda o resto da divisão, não o resultado da divisão. Se queria dividir, use <code>/=</code>.</p></div><div class="cenario"><strong>O texto ficou grudado</strong><p>Com <code>$texto += "mundo"</code>, sem espaço, o resultado seria um texto grudado. Na coleta, o espaço estava dentro das aspas: <code>" mundo"</code>, e por isso saiu <code>Oi mundo</code>.</p></div><p>Esta coleta não traz uma mensagem de erro para os operadores de atribuição; os casos acima explicam resultados reais que confundem.</p><hr><h2>Referência rápida</h2>
+<div class="table-wrap"><table class="ref"><tr><th>Forma</th><th>Quando usar / o que faz</th></tr><tr><td><code>$n = 10</code></td><td>Guarda 10.</td></tr><tr><td><code>$n += 5</code></td><td>Soma 5 e guarda.</td></tr><tr><td><code>$n -= 3</code></td><td>Diminui 3 e guarda.</td></tr><tr><td><code>$n *= 2</code></td><td>Multiplica por 2 e guarda.</td></tr><tr><td><code>$n /= 4</code></td><td>Divide por 4 e guarda.</td></tr><tr><td><code>$n %= 3</code></td><td>Guarda o resto da divisão por 3.</td></tr><tr><td><code>$i++ / $i--</code></td><td>Soma ou diminui 1.</td></tr></table></div>
+<hr><h2>Exercícios</h2><div class="exercise"><h3>1. Complete</h3><p>Some 10 ao total.</p><div class="ex-code">$total <input data-answer="+=" aria-label="resposta 1"> 10</div></div>
+<div class="exercise"><h3>2. Complete</h3><p>Diminua 1 do estoque.</p><div class="ex-code">$estoque<input data-answer="--" aria-label="resposta 2"></div></div>
+<div class="exercise"><h3>3. Complete</h3><p>Acrescente "uva" na lista.</p><div class="ex-code">$frutas <input data-answer="+=" aria-label="resposta 3"> &quot;uva&quot;</div></div>
+<div class="mc" data-answer="3"><p class="mc-q">4. Depois de <code>$n = 10; $n -= 4</code>, quanto vale <code>$n</code>?</p><label><input type="radio" name="q4"> 14</label><label><input type="radio" name="q4"> 4</label><label><input type="radio" name="q4"> 6</label><label><input type="radio" name="q4"> 10</label></div>
+<div class="mc" data-answer="2"><p class="mc-q">5. O que o <code>%=</code> guarda?</p><label><input type="radio" name="q5"> A porcentagem</label><label><input type="radio" name="q5"> O resto da divisão</label><label><input type="radio" name="q5"> O dobro</label><label><input type="radio" name="q5"> O resultado da divisão</label></div>
+<div class="mc" data-answer="3"><p class="mc-q">6. <code>$texto += " mundo"</code> faz o quê?</p><label><input type="radio" name="q6"> Soma números</label><label><input type="radio" name="q6"> Apaga o texto</label><label><input type="radio" name="q6"> Acrescenta “ mundo” no fim do texto</label><label><input type="radio" name="q6"> Compara dois textos</label></div>
+<hr><h2>Resumo</h2>
+<ul><li><code>=</code> guarda um valor; não compara.</li><li><code>+=</code>, <code>-=</code>, <code>*=</code>, <code>/=</code> e <code>%=</code> fazem a conta e guardam.</li><li><code>++</code> e <code>--</code> somam ou diminuem 1.</li><li><code>+=</code> também acrescenta em listas e textos.</li></ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
