@@ -146,7 +146,7 @@
       '<div class="ts-editor"><label class="psf-sr" for="' + id + '-cod">Código do script ' + esc(arq) + '</label>' +
       '<textarea class="ts-code psf-cod" id="' + id + '-cod" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea></div>' +
       '<ol class="psf-passos"><li>Clique em <strong>Copiar código</strong>.</li><li>Cole no seu PowerShell 7 e aperte Enter.</li><li>Copie o que o PowerShell <strong>respondeu</strong> (não o comando) e cole abaixo.</li></ol>' +
-      '<label class="psf-rot" for="' + id + '-out">Cole aqui a resposta do PowerShell (a saída, não o código)</label>' +
+      '<label class="psf-rot" for="' + id + '-out">Cole aqui o que o PowerShell respondeu (não o comando)</label>' +
       '<textarea class="psf-out" id="' + id + '-out" rows="5" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Ex.: o texto que apareceu no terminal depois de você apertar Enter"></textarea>' +
       '<div class="ex-actions psf-acoes"><button type="button" class="psf-conferir">Conferir</button>' +
       '<button type="button" class="secondary psf-ver" disabled title="Liberado depois do primeiro Conferir">Ver solução</button></div>' +
@@ -175,12 +175,19 @@
       // Detecta quando a pessoa colou o código em vez da saída
       var norm = function (t) { return t.replace(/\r\n?/g, "\n").replace(/^PS [^>\n]*>\s*/gm, "").replace(/\s+/g, " ").trim().toLowerCase(); };
       var colado = norm(out.value);
-      if (colado && (colado === norm(cod.value) || colado === norm(inicial) || (sol && colado === norm(sol.textContent)))) {
+      if (!colado) {
+        resDiv.innerHTML = '<p class="ex-result bad">Cole primeiro o que o PowerShell respondeu. Se ele não mostrou nada (alguns comandos são silenciosos quando dão certo), escreva <code>(sem saída)</code> na caixa.</p>';
+        out.focus(); return;
+      }
+      var linhasCod = [cod.value, inicial, sol ? sol.textContent : ""].join("\n").split("\n").map(norm).filter(function (l) { return l && l.charAt(0) !== "#"; });
+      var linhasCol = out.value.split("\n").map(norm).filter(Boolean);
+      var soCodigo = linhasCol.length && linhasCol.every(function (l) { return linhasCod.indexOf(l) >= 0; });
+      if (soCodigo || colado === norm(cod.value) || colado === norm(inicial) || (sol && colado === norm(sol.textContent))) {
         resDiv.innerHTML = '<p class="ex-result bad">Parece que você colou o <strong>código</strong>, não a saída. Rode esse código no seu PowerShell 7 e cole aqui o que ele <strong>respondeu</strong>.</p>';
         out.focus(); return;
       }
       var metas;
-      try { metas = psfAvaliar(goal, cod.value, out.value); }
+      try { metas = psfAvaliar(goal, cod.value, /^\s*\(sem sa[ií]da\)\s*$/i.test(out.value) ? "" : out.value); }
       catch (e) { resDiv.innerHTML = '<p class="ex-result bad">Não consegui conferir esta missão (' + esc(e.message) + ').</p>'; return; }
       var faltam = 0, manuais = 0, html = '<ul class="psf-metas">';
       metas.forEach(function (m) {
