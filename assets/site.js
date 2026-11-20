@@ -166,7 +166,7 @@ var NIVEIS = [
       ["credenciais.html", "Senhas e Credenciais (SecureString)"],
       ["cmd-para-powershell.html", "Do cmd para o PowerShell"],
       ["bash-para-powershell.html", "Do Bash para o PowerShell"],
-      ["novidades.html", "Novidades do PowerShell 7.6"]
+      ["novidades.html", "Novidades do PowerShell 7.7"]
     ]}
   ]},
   { id: "pj", nome: "Projetos", curto: "Projetos", desc: "Mão na massa", grupos: [
