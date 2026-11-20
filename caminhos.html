@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Caminhos no Windows e no Linux — Join-Path, Split-Path e Resolve-Path | Guia PowerShell</title>
+<meta name="description" content="Caminhos no PowerShell 7: absoluto e relativo, ponto e dois pontos, Resolve-Path, Join-Path com três partes, Split-Path com -Leaf, -Parent e -Extension, $HOME e $env:USERPROFILE, as diferenças do Windows PowerShell 5.1 e o erro real de um arquivo que não existe.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+
+<h1>Caminhos no <span class="hl">Windows</span> e no Linux</h1>
+
+<p class="intro">Um <strong>caminho</strong> é o endereço de um arquivo ou de uma pasta. No Windows ele usa a barra invertida (<code>\</code>) e uma letra de disco (<code>C:</code>); no Linux, a barra comum (<code>/</code>) e um começo em <code>/</code>. O PowerShell 7 roda nos dois, e por isso esta aula ensina a <strong>montar</strong> e a <strong>desmontar</strong> caminhos com comandos que funcionam nos dois sistemas — em vez de colar as barras na mão.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A diferença entre caminho <strong>absoluto</strong> e caminho <strong>relativo</strong>.</li>
+  <li>O <code>.</code> (pasta atual) e o <code>..</code> (pasta de cima).</li>
+  <li>O <code>Resolve-Path</code>, que transforma um caminho relativo no endereço completo.</li>
+  <li>Que no Windows a barra comum <code>/</code> também funciona.</li>
+  <li>O <code>Join-Path</code>, que junta pedaços no separador certo — no 7, com três (ou mais) partes de uma vez.</li>
+  <li>O <code>Split-Path</code>, que devolve o nome (<code>-Leaf</code>), a pasta (<code>-Parent</code>) ou a extensão (<code>-Extension</code>, só no 7).</li>
+  <li>O <code>$HOME</code> e o <code>$env:USERPROFILE</code>, que apontam para a pasta pessoal no Windows.</li>
+</ul>
+</div>
+
+<p>Todas as saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta de teste <code>C:\Users\ana\guia-ps-teste</code>, que tinha a subpasta <code>docs</code> e o arquivo <code>docs\a.txt</code>. Não temos saídas de um laboratório Linux nesta aula: a diferença do Linux fica explicada no texto, sem inventar um prompt.</p>
+
+<hr>
+
+<h2>A ideia: endereço completo × "dois quarteirões à frente"</h2>
+<p>Se você manda uma carta, escreve o endereço inteiro: cidade, rua, número. Isso é um caminho <strong>absoluto</strong>: começa no disco (<code>C:\</code>) e não depende de onde você está. Se você diz "a padaria, dois quarteirões à frente", a pessoa precisa saber <em>onde você está</em> para entender. Isso é um caminho <strong>relativo</strong>.</p>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>No dia a dia</th><th>No PowerShell (Windows)</th></tr>
+<tr><td>O endereço completo da carta</td><td><code>C:\Users\ana\guia-ps-teste\docs\a.txt</code> (absoluto)</td></tr>
+<tr><td>"A padaria, dois quarteirões à frente"</td><td><code>docs\a.txt</code> (relativo à pasta atual)</td></tr>
+<tr><td>"Aqui mesmo"</td><td><code>.</code> — a pasta atual</td></tr>
+<tr><td>"Um andar acima"</td><td><code>..</code> — a pasta-mãe</td></tr>
+</table>
+</div>
+<p>No Linux, o mesmo arquivo numa pasta de teste da Ana teria um endereço no estilo <code>/home/ana/guia-ps-teste/docs/a.txt</code>, com barra comum e sem letra de disco. O jeito de pensar (absoluto × relativo, <code>.</code> e <code>..</code>) é o mesmo.</p>
+
+<hr>
+
+<h2>1. Do relativo para o absoluto: <code>Resolve-Path</code></h2>
+<p>Estando em <code>guia-ps-teste</code>, o caminho relativo <code>docs\a.txt</code> vira o endereço completo:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Resolve-Path docs\a.txt
+
+Path
+----
+C:\Users\ana\guia-ps-teste\docs\a.txt</pre>
+<dl class="anatomy">
+  <dt>Resolve-Path</dt><dd>"Resolva o caminho": tome este endereço (relativo ou com <code>.</code> e <code>..</code>) e me devolva o absoluto, já conferido no disco.</dd>
+  <dt>docs\a.txt</dt><dd>O caminho relativo: a pasta <code>docs</code>, dentro da atual, e o arquivo <code>a.txt</code> dentro dela.</dd>
+  <dt>C:\Users\ana\guia-ps-teste\docs\a.txt</dt><dd>A resposta: o mesmo arquivo, com o endereço completo a partir do disco <code>C:</code>.</dd>
+</dl>
+<p>O <code>Resolve-Path</code> só funciona se o caminho <strong>já existe</strong>. Se o arquivo ainda não foi criado, ele dá erro (você vê isso no fim da aula). Para montar o endereço de um arquivo novo, use o <code>Join-Path</code>.</p>
+
+<hr>
+
+<h2>2. O vai-e-volta do <code>.</code> e do <code>..</code></h2>
+<p>Dá para escrever um caminho "andando" pelas pastas: <code>.</code> é "aqui", <code>..</code> é "sobe um nível". Este aqui parece uma volta desnecessária, mas o PowerShell desembaraça e chega no mesmo arquivo:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Resolve-Path .\docs\..\docs\a.txt
+
+Path
+----
+C:\Users\ana\guia-ps-teste\docs\a.txt</pre>
+<dl class="anatomy">
+  <dt>.</dt><dd>A pasta atual, <code>guia-ps-teste</code>.</dd>
+  <dt>docs</dt><dd>Desce para <code>docs</code>.</dd>
+  <dt>..</dt><dd>Sobe de volta para <code>guia-ps-teste</code>.</dd>
+  <dt>docs\a.txt</dt><dd>Desce de novo para <code>docs</code> e pega o <code>a.txt</code>.</dd>
+</dl>
+<p>É o mesmo endereço de antes. No dia a dia você não escreve uma volta dessas de propósito, mas ela aparece quando um script junta pedaços e você quer conferir "isso cai onde, afinal?".</p>
+
+<hr>
+
+<h2>3. A barra comum também vale no Windows</h2>
+<p>O Windows prefere a barra invertida <code>\</code>, mas o PowerShell aceita a barra comum <code>/</code> nos caminhos. O <code>Get-Item</code> ("obter o item") pega o arquivo e o <code>Select-Object FullName</code> mostra o nome completo:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-Item docs/a.txt | Select-Object FullName
+
+FullName
+--------
+C:\Users\ana\guia-ps-teste\docs\a.txt</pre>
+<p>Pedimos <code>docs/a.txt</code> (barra comum) e a resposta veio no jeito do Windows, com <code>\</code>. Nos scripts, o mais seguro ainda é deixar o <code>Join-Path</code> escolher o separador: o mesmo script roda no Windows e no Linux.</p>
+
+<div class="tryps" data-goal="out:a.txt;;src:Split-Path;;src:-Leaf;;semerro">
+<p class="try-task"><strong>Experimente:</strong> use o <code>Join-Path</code> e o <code>Split-Path -Leaf</code> para obter só o nome do arquivo <code>a.txt</code>, sem depender da barra do sistema.</p>
+<pre class="script" data-file="main.ps1">Join-Path 'docs' 'a.txt'
+</pre>
+<pre class="solucao" data-file="main.ps1">Split-Path (Join-Path 'docs' 'a.txt') -Leaf
+</pre>
+</div>
+
+<hr>
+
+<h2>4. Juntando pedaços: <code>Join-Path</code> <span class="versao">7.7</span></h2>
+<p>O <code>Join-Path</code> ("juntar caminho") recebe as partes e coloca o separador certo entre elas. No PowerShell 7 ele aceita <strong>três ou mais</strong> pedaços de uma vez:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Join-Path $HOME 'docs' 'a.txt'
+C:\Users\ana\docs\a.txt</pre>
+<dl class="anatomy">
+  <dt>Join-Path</dt><dd>O montador de endereços.</dd>
+  <dt>$HOME</dt><dd>A pasta pessoal (aqui, <code>C:\Users\ana</code>).</dd>
+  <dt>'docs' e 'a.txt'</dt><dd>Os pedaços seguintes. O PowerShell 7 encaixa os três, com <code>\</code> no Windows.</dd>
+</dl>
+<p>O resultado foi <code>C:\Users\ana\docs\a.txt</code> — a pasta <code>docs</code> da Ana, <strong>não</strong> a da pasta de teste. É isso mesmo: o <code>Join-Path</code> junta o que você passou, sem olhar se o arquivo existe. Por isso ele é o comando certo para montar o caminho de um arquivo que você ainda vai criar.</p>
+<p>Se você estiver no 5.1, ou quiser um jeito que funciona nas duas versões, junte de dois em dois:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Join-Path (Join-Path $HOME 'docs') 'a.txt'
+C:\Users\ana\docs\a.txt</pre>
+<p>O resultado, no 7.7, é o mesmo. No 5.1, o de três partes <strong>não roda</strong>:</p>
+<div class="note"><strong>No Windows PowerShell 5.1</strong> o <code>Join-Path</code> só aceita dois pedaços. O terceiro vira um argumento a mais, e aparece o erro de parâmetro posicional:
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana\guia-ps-teste&gt; Join-Path $HOME 'docs' 'a.txt'
+Join-Path : Não é possível localizar um parâmetro posicional que aceite o argumento 'a.txt'.</pre>
+Use o jeito aninhado, <code>Join-Path (Join-Path $HOME 'docs') 'a.txt'</code>, que funciona nos dois.
+</div>
+
+<hr>
+
+<h2>5. Desmontando: <code>Split-Path</code></h2>
+<p>O contrário do <code>Join-Path</code> é o <code>Split-Path</code> ("dividir caminho"): ele devolve um pedaço. Nos exemplos abaixo, <code>$T</code> é a pasta de teste, <code>C:\Users\ana\guia-ps-teste</code>.</p>
+<p>O <code>-Leaf</code> ("folha") é o nome no fim, o arquivo ou a última pasta:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Split-Path "$T\docs\a.txt" -Leaf
+a.txt</pre>
+<p>O <code>-Parent</code> ("pai") é a pasta que contém esse item:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Split-Path "$T\docs\a.txt" -Parent
+C:\Users\ana\guia-ps-teste\docs</pre>
+<p>O <code>-Extension</code> ("extensão") devolve o <code>.txt</code>, o <code>.csv</code> e companhia. Este parâmetro é do <strong>PowerShell 7</strong>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Split-Path "$T\docs\a.txt" -Extension
+.txt</pre>
+<div class="note"><strong>No Windows PowerShell 5.1</strong> o parâmetro <code>-Extension</code> não existe:
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana\guia-ps-teste&gt; Split-Path "$T\docs\a.txt" -Extension
+Split-Path : Não é possível localizar um parâmetro que coincida com o nome de parâmetro 'Extension'.</pre>
+No 5.1, uma saída é pegar o <code>-Leaf</code> e ler a extensão no próprio texto, mais à frente, com métodos de string.
+</div>
+
+<div class="tryps" data-goal="out:.txt;;src:Split-Path;;src:-Extension;;semerro">
+<p class="try-task"><strong>Missão:</strong> use <code>Split-Path -Extension</code> para mostrar a extensão do caminho montado com <code>Join-Path</code>.</p>
+<pre class="script" data-file="main.ps1">Split-Path (Join-Path 'docs' 'a.txt') -Leaf
+</pre>
+<pre class="solucao" data-file="main.ps1">Split-Path (Join-Path 'docs' 'a.txt') -Extension
+</pre>
+</div>
+
+<hr>
+
+<h2>6. O separador e a pasta pessoal</h2>
+<p>Se você quiser ver o separador que o sistema está usando, o .NET guarda isso em <code>[System.IO.Path]::DirectorySeparatorChar</code> (é um pedaço mais técnico; por enquanto, leia como "o caractere que separa pastas neste computador"):</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; [System.IO.Path]::DirectorySeparatorChar
+\</pre>
+<p>No Windows é a barra invertida. No Linux seria a barra comum. É exatamente por isso que a gente deixa o <code>Join-Path</code> escolher, em vez de escrever a barra na mão.</p>
+<p>A pasta pessoal aparece em dois lugares, no Windows:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; $HOME
+C:\Users\ana</pre>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; $env:USERPROFILE
+C:\Users\ana</pre>
+<p>O <code>$HOME</code> é a variável automática do PowerShell, e funciona também no Linux (lá ela aponta para <code>/home/ana</code>). O <code>$env:USERPROFILE</code> é a variável de ambiente do Windows com o mesmo valor neste computador. Pedimos o nome <code>USERPROFILE</code> direto, sem listar todas as variáveis de ambiente. A aula delas é <a href="variaveis-ambiente.html">Variáveis de Ambiente</a>.</p>
+
+<hr>
+
+<h2>Formas diferentes de montar um caminho</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>Join-Path $HOME 'docs' 'a.txt'</code></td><td>No PowerShell 7: o jeito mais claro de juntar vários pedaços.</td></tr>
+<tr><td><code>Join-Path (Join-Path $HOME 'docs') 'a.txt'</code></td><td>Quando o script também precisa rodar no 5.1.</td></tr>
+<tr><td><code>Resolve-Path docs\a.txt</code></td><td>Quando o arquivo já existe e você quer o endereço absoluto conferido.</td></tr>
+<tr><td>Escrever <code>C:\Users\ana\…</code> na mão</td><td>Evite em script: quebra no Linux e no computador de outra pessoa.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>O <code>Resolve-Path</code> de um arquivo que não existe</strong>
+<p>Na pasta <code>docs</code> havia só o <code>a.txt</code>. Pedimos o <code>b.txt</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Resolve-Path docs\b.txt
+Resolve-Path: Não é possível localizar o caminho 'C:\Users\ana\guia-ps-teste\docs\b.txt' porque ele não existe.</pre>
+<dl class="anatomy">
+  <dt>Resolve-Path:</dt><dd>Quem está reclamando.</dd>
+  <dt>Não é possível localizar o caminho '…\docs\b.txt' porque ele não existe.</dt><dd>O comando não monta um endereço imaginário: ele confirma no disco, e o <code>b.txt</code> não estava lá. A mensagem traz o caminho absoluto que ele tentou, para você conferir.</dd>
+</dl>
+<p><strong>Como resolver:</strong> confira o nome (é <code>a.txt</code>, não <code>b.txt</code>) ou, se a ideia era só <strong>montar</strong> o endereço de um arquivo novo, troque para o <code>Join-Path</code>, que não exige que o caminho exista.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Resolve-Path docs\a.txt</code></td><td>Devolve o caminho absoluto, se o item existir.</td></tr>
+<tr><td><code>Join-Path $HOME 'docs' 'a.txt'</code></td><td>Junta três pedaços (PowerShell 7).</td></tr>
+<tr><td><code>Join-Path (Join-Path $HOME 'docs') 'a.txt'</code></td><td>O mesmo, de dois em dois (também no 5.1).</td></tr>
+<tr><td><code>Split-Path '…\a.txt' -Leaf</code></td><td>Devolve o nome no fim, <code>a.txt</code>.</td></tr>
+<tr><td><code>Split-Path '…\a.txt' -Parent</code></td><td>Devolve a pasta que contém o item.</td></tr>
+<tr><td><code>Split-Path '…\a.txt' -Extension</code></td><td>Devolve a extensão, <code>.txt</code> (PowerShell 7).</td></tr>
+<tr><td><code>$HOME</code></td><td>A pasta pessoal (nos dois sistemas).</td></tr>
+<tr><td><code>$env:USERPROFILE</code></td><td>A pasta pessoal, pelo nome do Windows.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete para juntar a pasta pessoal com <code>docs</code>:</p>
+<div class="ex-code"><input data-answer="Join-Path" aria-label="comando"> $HOME 'docs'</div>
+</div>
+
+<div class="exercise">
+<h3>2. Só o nome do arquivo</h3>
+<p>Qual parâmetro do <code>Split-Path</code> devolve o nome no fim (<code>a.txt</code>)?</p>
+<div class="ex-code">Split-Path $caminho -<input data-answer="Leaf" aria-label="parâmetro"></div>
+</div>
+
+<div class="exercise">
+<h3>3. O atalho da pasta atual</h3>
+<p>Qual símbolo quer dizer "a pasta em que eu estou"?</p>
+<div class="ex-code"><input data-answer="." aria-label="símbolo"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Qual é a diferença entre <code>Resolve-Path</code> e <code>Join-Path</code>?</p>
+<label><input type="radio" name="q4"> Nenhuma: os dois apagam o arquivo</label>
+<label><input type="radio" name="q4"> O <code>Resolve-Path</code> confirma um caminho que já existe; o <code>Join-Path</code> só monta o endereço, mesmo que o arquivo ainda não exista</label>
+<label><input type="radio" name="q4"> O <code>Join-Path</code> só funciona no Linux</label>
+<label><input type="radio" name="q4"> O <code>Resolve-Path</code> muda de pasta</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">5. O <code>Join-Path $HOME 'docs' 'a.txt'</code> (três pedaços) funciona no Windows PowerShell 5.1?</p>
+<label><input type="radio" name="q5"> Não: no 5.1 só valem dois pedaços; use um <code>Join-Path</code> dentro do outro</label>
+<label><input type="radio" name="q5"> Sim, do mesmo jeito</label>
+<label><input type="radio" name="q5"> Só se o arquivo já existir</label>
+<label><input type="radio" name="q5"> Só com barra comum</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">6. Você rodou <code>Resolve-Path docs\b.txt</code> e apareceu "não é possível localizar o caminho". O que fazer?</p>
+<label><input type="radio" name="q6"> Reiniciar o Windows</label>
+<label><input type="radio" name="q6"> Apagar a pasta <code>docs</code></label>
+<label><input type="radio" name="q6"> Conferir o nome do arquivo ou, se for um caminho novo, montar com <code>Join-Path</code></label>
+<label><input type="radio" name="q6"> Trocar o PowerShell pelo <code>cmd</code></label>
+</div>
+
+<div class="tryps" data-goal="out:docs;;src:Split-Path;;src:-Parent;;semerro">
+<p class="try-task"><strong>Missão final:</strong> mostre a pasta-mãe do caminho <code>docs/a.txt</code> (use <code>Join-Path</code> e <code>Split-Path -Parent</code>).</p>
+<pre class="script" data-file="main.ps1">Split-Path (Join-Path 'docs' 'a.txt') -Leaf
+</pre>
+<pre class="solucao" data-file="main.ps1">Split-Path (Join-Path 'docs' 'a.txt') -Parent
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Caminho absoluto começa no disco (ou em <code>/</code>, no Linux) e não depende da pasta atual; o relativo, sim.</li>
+  <li><code>.</code> é a pasta atual; <code>..</code> é a de cima. <code>Resolve-Path</code> desembaraça e confirma no disco.</li>
+  <li><code>Join-Path</code> monta o endereço no separador certo. No 7 dá para passar três ou mais pedaços; no 5.1, só dois.</li>
+  <li><code>Split-Path</code> devolve o nome (<code>-Leaf</code>), a pasta (<code>-Parent</code>) ou, no 7, a extensão (<code>-Extension</code>).</li>
+  <li><code>$HOME</code> é a pasta pessoal nos dois sistemas; <code>$env:USERPROFILE</code> é o nome do Windows para a mesma pasta.</li>
+  <li>Se o <code>Resolve-Path</code> não acha o arquivo, confira o nome ou monte o caminho novo com <code>Join-Path</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
