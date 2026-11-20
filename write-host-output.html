@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Write-Host e Write-Output — mostrar texto na tela | Guia PowerShell</title>
+<meta name="description" content="Write-Host e Write-Output para quem nunca usou terminal: a diferença entre a esteira e a tela, guardar em variável, cores, -Separator, -NoNewline e os erros reais, explicados em português.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Write-Host</span> e <span class="hl">Write-Output</span>: Mostrando Coisas na Tela</h1>
+
+<p class="intro">A Ana quer que o script dela avise "Olá, Ana!", mostre a lista de frutas da feira e, às vezes, destaque um aviso em amarelo. No PowerShell há dois jeitos de pôr texto na tela, o <code>Write-Output</code> e o <code>Write-Host</code>. Na tela os dois parecem iguais, mas por dentro fazem coisas bem diferentes. Nesta aula você vai ver qual usar em cada situação.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A mostrar texto com <code>Write-Output</code>, com <code>Write-Host</code> e só com as aspas.</li>
+  <li>Que o <code>Write-Output</code> manda o resultado <strong>pela esteira</strong> (pipeline), e o <code>Write-Host</code> só pinta a tela.</li>
+  <li>Por que o que sai do <code>Write-Host</code> não pode ser guardado numa variável.</li>
+  <li>A usar cores (<code>-ForegroundColor</code>), separadores (<code>-Separator</code>) e a juntar linhas (<code>-NoNewline</code>).</li>
+  <li>A ler os erros reais de quem mistura os dois.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português.</p>
+
+<hr>
+
+<h2>A ideia: a esteira e o letreiro</h2>
+<p>Imagine uma fábrica. O <code>Write-Output</code> coloca a peça na <strong>esteira</strong>: ela pode seguir para a próxima máquina (outro comando), ser guardada numa caixa (uma variável) ou, se a esteira acabar, cair na tela. O <code>Write-Host</code> é um <strong>letreiro luminoso</strong> na parede: todo mundo vê, pode ter cor, mas nada vai para a esteira. Ninguém consegue pegar o letreiro e colocar numa caixa.</p>
+
+<hr>
+
+<h2>1. Os dois na tela</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Write-Output "Olá, Ana!"
+Olá, Ana!
+PS C:\Users\ana&gt; Write-Host "Olá, Ana!"
+Olá, Ana!
+PS C:\Users\ana&gt; "Olá, Ana!"
+Olá, Ana!
+</pre>
+<dl class="anatomy">
+  <dt>Write-Output</dt><dd>"Escrever na saída". <em>Write</em> é "escrever", e <em>Output</em> é "saída": a esteira do PowerShell.</dd>
+  <dt>Write-Host</dt><dd>"Escrever no anfitrião". O <em>Host</em> ("anfitrião") é a janela do terminal. O texto vai direto para a tela.</dd>
+  <dt>"Olá, Ana!"</dt><dd>Um texto sozinho numa linha. O PowerShell entende como <code>Write-Output "Olá, Ana!"</code>: é o jeito mais curto e o mais usado.</dd>
+</dl>
+<p>Na tela, as três linhas dão o mesmo resultado. A diferença aparece quando você tenta <strong>usar</strong> o resultado.</p>
+
+<hr>
+
+<h2>2. A diferença: quem segue pela esteira</h2>
+<p>O <code>Measure-Object</code> ("medir objeto") conta quantos itens chegaram pela esteira. Veja o que ele recebe de cada um:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Write-Output "maçã","banana","uva" | Measure-Object
+
+Count             : 3
+Average           : 
+Sum               : 
+Maximum           : 
+Minimum           : 
+StandardDeviation : 
+Property          : 
+
+PS C:\Users\ana&gt; Write-Host "maçã","banana","uva" | Measure-Object
+maçã banana uva
+
+Count             : 0
+Average           : 
+Sum               : 
+Maximum           : 
+Minimum           : 
+StandardDeviation : 
+Property          : 
+
+</pre>
+<dl class="anatomy">
+  <dt>|</dt><dd>A barra vertical liga a esteira de um comando à entrada do próximo (aula <a href="pipeline.html">Pipeline</a>).</dd>
+  <dt>Count : 3</dt><dd>Com <code>Write-Output</code>, as 3 frutas chegaram ao <code>Measure-Object</code>.</dd>
+  <dt>maçã banana uva / Count : 0</dt><dd>Com <code>Write-Host</code>, as frutas foram pintadas na tela (numa linha só, separadas por espaço), e <strong>nenhuma</strong> chegou ao <code>Measure-Object</code>: ele contou 0.</dd>
+</dl>
+
+<p>O mesmo vale para variáveis. O <code>[$texto]</code> entre colchetes mostra o que ficou guardado:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $texto = Write-Output "guardado"; "Na variável: [$texto]"
+Na variável: [guardado]
+PS C:\Users\ana&gt; $texto = Write-Host "não guardado"; "Na variável: [$texto]"
+não guardado
+Na variável: []
+</pre>
+<p>Com <code>Write-Host</code>, o texto apareceu na hora e a variável ficou vazia: <code>[]</code>. O <code>;</code> separa dois comandos na mesma linha.</p>
+
+<div class="tryps" data-goal="out:Guardado: [Olá, Ana!];;semerro">
+<p class="try-task"><strong>Experimente:</strong> a variável <code>$saudacao</code> está saindo vazia. Troque o comando da primeira linha para que o texto fique guardado e apareça <code>Guardado: [Olá, Ana!]</code>.</p>
+<pre class="script" data-file="main.ps1">$saudacao = Write-Host 'Olá, Ana!'
+"Guardado: [$saudacao]"
+</pre>
+<pre class="solucao" data-file="main.ps1">$saudacao = Write-Output 'Olá, Ana!'
+"Guardado: [$saudacao]"
+</pre>
+</div>
+
+<hr>
+
+<h2>3. Cores, separadores e linha contínua (só <code>Write-Host</code>)</h2>
+<p>Se o <code>Write-Host</code> não serve para a esteira, para que ele existe? Para <strong>enfeitar a tela</strong>: mensagens para a pessoa que está olhando.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Write-Host "Atenção" -ForegroundColor Yellow
+Atenção
+PS C:\Users\ana&gt; Write-Host "a","b","c" -Separator " | "
+a | b | c
+PS C:\Users\ana&gt; Write-Host "sem quebra " -NoNewline; Write-Host "de linha"
+sem quebra de linha
+</pre>
+<dl class="anatomy">
+  <dt>-ForegroundColor Yellow</dt><dd>"Cor da frente": a cor das letras. No terminal de verdade, "Atenção" sai em amarelo (aqui na página não dá para ver a cor). Também existe <code>-BackgroundColor</code>, a cor do fundo.</dd>
+  <dt>-Separator " | "</dt><dd>"Separador": o que vai entre os itens. Sem ele, o separador é um espaço.</dd>
+  <dt>-NoNewline</dt><dd>"Sem nova linha": não pula de linha no fim, e o próximo texto continua ao lado.</dd>
+</dl>
+
+<div class="tryps" data-goal="out:maçã - banana - uva;;src:-Separator;;semerro">
+<p class="try-task"><strong>Experimente:</strong> faça as frutas aparecerem separadas por <code> - </code> (espaço, traço, espaço), assim: <code>maçã - banana - uva</code>.</p>
+<pre class="script" data-file="main.ps1">Write-Host 'maçã', 'banana', 'uva'
+</pre>
+<pre class="solucao" data-file="main.ps1">Write-Host 'maçã', 'banana', 'uva' -Separator ' - '
+</pre>
+</div>
+
+<hr>
+
+<h2>Formas diferentes de mostrar texto</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>"Olá"</code> (texto sozinho)</td><td>O jeito do dia a dia. É o mesmo que <code>Write-Output</code>.</td></tr>
+<tr><td><code>Write-Output "Olá"</code></td><td>Quando você quer deixar claro, no script, que aquilo é resultado. Vai pela esteira.</td></tr>
+<tr><td><code>echo "Olá"</code></td><td>Apelido do <code>Write-Output</code> (aula <a href="aliases.html">Apelidos</a>). Bom no terminal; evite em scripts.</td></tr>
+<tr><td><code>Write-Host "Olá" -ForegroundColor Green</code></td><td>Mensagens só para quem está olhando: cores, menus, "Pronto!". Não vai pela esteira.</td></tr>
+<tr><td><code>Write-Warning</code>, <code>Write-Error</code>…</td><td>Avisos e erros têm comandos próprios (aula <a href="write-outros.html">Outros Write</a>).</td></tr>
+</table>
+</div>
+<div class="tip"><strong>Regra prática:</strong> se alguém (outro comando, uma variável, um arquivo) pode precisar do resultado, use <code>Write-Output</code> ou o texto sozinho. Use <code>Write-Host</code> só para enfeitar a tela.</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Cor no <code>Write-Output</code></strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Write-Output "oi" -ForegroundColor Red
+oi
+-ForegroundColor
+Red
+</pre>
+<p>Não apareceu erro, mas o resultado está errado: nada ficou vermelho e o PowerShell mostrou três linhas. O <code>Write-Output</code> não tem o parâmetro <code>-ForegroundColor</code>, então ele tratou <code>-ForegroundColor</code> e <code>Red</code> como mais dois textos para mostrar.</p>
+<p><strong>Como resolver:</strong> cor é coisa do <code>Write-Host</code>: <code>Write-Host "oi" -ForegroundColor Red</code>.</p>
+</div>
+
+<div class="cenario">
+<strong>Uma cor que não existe</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Write-Host "oi" -ForegroundColor Roxo
+Write-Host: Não é possível associar o parâmetro 'ForegroundColor'. Cannot convert value "Roxo" to type "System.ConsoleColor". Error: "Unable to match the identifier name Roxo to a valid enumerator name. Specify one of the following enumerator names and try again:
+Black, DarkBlue, DarkGreen, DarkCyan, DarkRed, DarkMagenta, DarkYellow, Gray, DarkGray, Blue, Green, Cyan, Red, Magenta, Yellow, White"
+</pre>
+<dl class="anatomy">
+  <dt>Não é possível associar o parâmetro 'ForegroundColor'</dt><dd>O valor que você deu não serve para esse parâmetro.</dd>
+  <dt>Cannot convert value "Roxo" to type "System.ConsoleColor"</dt><dd>"Não dá para converter 'Roxo' numa cor do console." As cores têm nomes fixos, em inglês.</dd>
+  <dt>Specify one of the following…</dt><dd>"Escolha um destes": a lista das 16 cores que valem. Roxo é <code>Magenta</code> ou <code>DarkMagenta</code>.</dd>
+</dl>
+<p><strong>Como resolver:</strong> use um nome da lista, em inglês: <code>Write-Host "oi" -ForegroundColor Magenta</code>.</p>
+</div>
+
+<div class="cenario">
+<strong>A variável ficou vazia</strong>
+<p>Você fez <code>$resultado = Write-Host "..."</code> e depois <code>$resultado</code> não tem nada. Como viu na seção 2, o <code>Write-Host</code> não entrega nada para a variável.</p>
+<p><strong>Como resolver:</strong> troque por <code>Write-Output</code> ou pelo texto sozinho.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>"texto"</code></td><td>Mostra o texto (pela esteira).</td></tr>
+<tr><td><code>Write-Output "texto"</code></td><td>O mesmo, escrito por extenso.</td></tr>
+<tr><td><code>Write-Host "texto"</code></td><td>Mostra na tela, fora da esteira.</td></tr>
+<tr><td><code>-ForegroundColor Yellow</code></td><td>Cor das letras (só <code>Write-Host</code>).</td></tr>
+<tr><td><code>-BackgroundColor DarkBlue</code></td><td>Cor do fundo (só <code>Write-Host</code>).</td></tr>
+<tr><td><code>-Separator " | "</code></td><td>O que vai entre os itens (só <code>Write-Host</code>).</td></tr>
+<tr><td><code>-NoNewline</code></td><td>Não pula de linha no fim (só <code>Write-Host</code>).</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Mostre "Pronto!" com letras verdes:</p>
+<div class="ex-code">Write-Host "Pronto!" <input data-answer="-ForegroundColor" aria-label="parâmetro"> Green</div>
+</div>
+
+<div class="exercise">
+<h3>2. Para a esteira</h3>
+<p>Complete para que as frutas sigam pela esteira e o <code>Measure-Object</code> conte 2:</p>
+<div class="ex-code"><input data-answer="Write-Output|echo" aria-label="comando"> "maçã","uva" | Measure-Object</div>
+</div>
+
+<div class="exercise">
+<h3>3. Lado a lado</h3>
+<p>Complete para que "Carregando..." e "ok" saiam na mesma linha:</p>
+<div class="ex-code">Write-Host "Carregando... " <input data-answer="-NoNewline" aria-label="parâmetro">; Write-Host "ok"</div>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">4. O que <code>$x = Write-Host "oi"</code> guarda em <code>$x</code>?</p>
+<label><input type="radio" name="q4"> O texto "oi"</label>
+<label><input type="radio" name="q4"> Um erro</label>
+<label><input type="radio" name="q4"> Nada: a variável fica vazia</label>
+<label><input type="radio" name="q4"> A cor do texto</label>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">5. Uma linha só com <code>"Olá"</code> equivale a qual comando?</p>
+<label><input type="radio" name="q5"> <code>Write-Host "Olá"</code></label>
+<label><input type="radio" name="q5"> <code>Write-Output "Olá"</code></label>
+<label><input type="radio" name="q5"> <code>Read-Host "Olá"</code></label>
+<label><input type="radio" name="q5"> Nenhum: dá erro</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. Quando o <code>Write-Host</code> é a melhor escolha?</p>
+<label><input type="radio" name="q6"> Para mensagens coloridas só para quem está olhando a tela</label>
+<label><input type="radio" name="q6"> Para guardar resultados numa variável</label>
+<label><input type="radio" name="q6"> Para mandar dados ao próximo comando da esteira</label>
+<label><input type="radio" name="q6"> Para gravar um arquivo</label>
+</div>
+
+<div class="tryps" data-goal="out:Itens: 3;;src:\bWrite-Output\b;;semerro">
+<p class="try-task"><strong>Missão final:</strong> o script deveria mostrar <code>Itens: 3</code>, mas mostra <code>Itens: 0</code>. Conserte a primeira linha para as frutas irem pela esteira, usando <code>Write-Output</code>.</p>
+<pre class="script" data-file="main.ps1">$medida = Write-Host 'maçã', 'banana', 'uva' | Measure-Object
+"Itens: " + $medida.Count
+</pre>
+<pre class="solucao" data-file="main.ps1">$medida = Write-Output 'maçã', 'banana', 'uva' | Measure-Object
+"Itens: " + $medida.Count
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Write-Output</code> (ou o texto sozinho) manda o resultado pela esteira: dá para guardar, contar e passar adiante.</li>
+  <li><code>Write-Host</code> só pinta a tela: nada vai para a variável nem para o próximo comando.</li>
+  <li>Cores (<code>-ForegroundColor</code>), <code>-Separator</code> e <code>-NoNewline</code> são do <code>Write-Host</code>.</li>
+  <li>As cores têm 16 nomes fixos, em inglês; um nome errado dá "Não é possível associar o parâmetro".</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
