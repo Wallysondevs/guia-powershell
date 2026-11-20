@@ -97,7 +97,7 @@ PS C:\Users\ana&gt; [bool]$null
 False
 </pre>
 <p>O texto <code>"false"</code> virou <strong>True</strong>! Para o <code>[bool]</code>, qualquer texto que não está vazio é verdadeiro, não importa o que está escrito. Veja <a href="booleanos-null.html">$true, $false e $null</a>.</p>
-<h2>Qual usar</h2>
+<h2>Formas diferentes</h2>
 <div class="table-wrap">
 <table class="ref">
 <tr><th>Forma</th><th>Quando</th></tr>
@@ -123,6 +123,20 @@ InvalidArgument: Cannot convert value "não é data" to type "System.DateTime". 
 <p>"O texto não foi reconhecido como uma data válida. Há uma palavra desconhecida começando na posição 0." <strong>Como resolver:</strong> use o formato <code>"2026-11-20"</code> (ano-mês-dia), que funciona sempre.</p>
 </div>
 <hr>
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>[int]$x</code></td><td>Converte para inteiro (erro se não der).</td></tr>
+<tr><td><code>[string]$x</code></td><td>Converte para texto.</td></tr>
+<tr><td><code>[double]"3.14"</code></td><td>Converte para decimal (use ponto).</td></tr>
+<tr><td><code>[datetime]"2026-11-20"</code></td><td>Converte para data.</td></tr>
+<tr><td><code>$x -as [int]</code></td><td>Tenta converter; <code>$null</code> se não der.</td></tr>
+<tr><td><code>$x -is [int]</code></td><td>Pergunta o tipo.</td></tr>
+<tr><td><code>[bool]$x</code></td><td>Vazio, 0 e $null viram False; o resto, True.</td></tr>
+</table>
+</div>
+<hr>
 <h2>Exercícios</h2>
 <div class="exercise">
 <h3>1. Para número</h3>
@@ -134,19 +148,25 @@ InvalidArgument: Cannot convert value "não é data" to type "System.DateTime". 
 <p>Complete para tentar converter sem dar erro:</p>
 <div class="ex-code">"abc" <input data-answer="-as" aria-label="operador"> [int]</div>
 </div>
+<div class="exercise">
+<h3>3. Pergunte o tipo</h3>
+<p>Complete para perguntar se <code>$x</code> é texto:</p>
+<div class="ex-code">$x <input data-answer="-is" aria-label="operador"> [string]</div>
+</div>
+
 <div class="mc" data-answer="3">
-<p class="mc-q">3. Quanto dá <code>[double]"3,14"</code>?</p>
-<label><input type="radio" name="q3"> 3,14</label>
-<label><input type="radio" name="q3"> 3</label>
-<label><input type="radio" name="q3"> 314</label>
-<label><input type="radio" name="q3"> Erro</label>
+<p class="mc-q">4. Quanto dá <code>[double]"3,14"</code>?</p>
+<label><input type="radio" name="q4"> 3,14</label>
+<label><input type="radio" name="q4"> 3</label>
+<label><input type="radio" name="q4"> 314</label>
+<label><input type="radio" name="q4"> Erro</label>
 </div>
 <div class="mc" data-answer="2">
-<p class="mc-q">4. O que <code>[bool]"false"</code> mostra?</p>
-<label><input type="radio" name="q4"> False</label>
-<label><input type="radio" name="q4"> True</label>
-<label><input type="radio" name="q4"> Nada</label>
-<label><input type="radio" name="q4"> Erro</label>
+<p class="mc-q">5. O que <code>[bool]"false"</code> mostra?</p>
+<label><input type="radio" name="q5"> False</label>
+<label><input type="radio" name="q5"> True</label>
+<label><input type="radio" name="q5"> Nada</label>
+<label><input type="radio" name="q5"> Erro</label>
 </div>
 <div class="tryps" data-goal="out:Inválido;;src:-as;;semerro">
 <p class="try-task"><strong>Missão final:</strong> use <code>-as [int]</code> para mostrar <code>Inválido</code> quando <code>$entrada</code> não for número.</p>
