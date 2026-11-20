@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Write-Warning, Write-Verbose e companhia — avisos, detalhes e erros | Guia PowerShell</title>
+<meta name="description" content="Write-Warning, Write-Verbose, Write-Debug, Write-Information, Write-Error e Write-Progress no PowerShell: cada um num fluxo, com saídas reais do 7.7, e o Write-Error que não para o script.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Write-Warning</span>, <span class="hl">Write-Verbose</span> e companhia</h1>
+
+<p class="intro">Na aula <a href="write-host-output.html">Write-Host × Write-Output</a> você viu dois jeitos de pôr texto na tela. O PowerShell ainda tem outros comandos de escrever, cada um com um papel: um aviso amarelo, um detalhe escondido, uma informação, um erro que não para o script e uma barra de progresso. Nesta aula a Ana usa esses comandos na lojinha dela, para avisar que o estoque está baixo e registrar o que aconteceu.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O <code>Write-Warning</code>, que mostra um aviso (no Windows em português, com o prefixo <code>AVISO:</code>).</li>
+  <li>O <code>Write-Verbose</code> e o <code>Write-Debug</code>, escondidos por padrão, e como revelá-los com <code>-Verbose</code> e <code>-Debug</code>.</li>
+  <li>O <code>Write-Information</code> e o parâmetro <code>-InformationAction Continue</code>.</li>
+  <li>Que o <code>Write-Error</code> escreve um erro, mas <strong>não para</strong> o script.</li>
+  <li>Que o <code>Write-Progress</code> desenha uma barra na janela, e não vira texto no terminal.</li>
+  <li>Os fluxos numerados, e como o <code>3&gt;&amp;1</code> captura um aviso na esteira.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta pessoal da usuária fictícia <code>ana</code>.</p>
+
+<hr>
+
+<h2>A ideia: os canais da lojinha</h2>
+<p>Pense na lojinha da Ana como um estabelecimento com vários canais de comunicação. O letreiro da vitrine é o que todo mundo lê (o <code>Write-Output</code> da aula anterior). O cartaz amarelo de “piso molhado” é um <strong>aviso</strong>: aparece sempre, para ninguém escorregar. O caderno de estoque só é aberto se alguém pedir os detalhes. A lanterna só acende quando a Ana está consertando uma prateleira. O boletim informa um fato. O livro de reclamações registra um problema, mas a loja <strong>não fecha</strong>. E o “aguarde, estamos atendendo” é uma barra de progresso na janela, não um texto na lista do dia.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Na lojinha</th><th>No PowerShell</th></tr>
+<tr><td>O cartaz amarelo de aviso</td><td><code>Write-Warning</code></td></tr>
+<tr><td>O caderno de detalhes, só se pedirem</td><td><code>Write-Verbose</code></td></tr>
+<tr><td>A lanterna da manutenção</td><td><code>Write-Debug</code></td></tr>
+<tr><td>O boletim informativo</td><td><code>Write-Information</code></td></tr>
+<tr><td>O livro de reclamações (a loja segue aberta)</td><td><code>Write-Error</code></td></tr>
+<tr><td>A plaquinha “aguarde”</td><td><code>Write-Progress</code></td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>1. Um aviso: <code>Write-Warning</code></h2>
+<p>Quando o estoque está baixo, a Ana quer um aviso visível. O <code>Write-Warning</code> (“escrever aviso”) faz isso:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Write-Warning "O estoque de caneta está baixo"
+AVISO: O estoque de caneta está baixo
+</pre>
+<dl class="anatomy">
+  <dt>Write-Warning</dt><dd>O cmdlet: verbo <code>Write</code> (“escrever”) + substantivo <code>Warning</code> (“aviso”).</dd>
+  <dt>"O estoque de caneta está baixo"</dt><dd>A mensagem. As aspas não aparecem na resposta.</dd>
+  <dt>AVISO:</dt><dd>O prefixo que o PowerShell 7.7, num Windows em português, coloca na frente. A mensagem em si sai igual.</dd>
+</dl>
+<p>Diferente do <code>Write-Verbose</code>, o aviso <strong>aparece por padrão</strong>: você não precisa ligar nada.</p>
+
+<div class="tryps" data-goal="out:caderno;;src:\bWrite-Warning\b;;semerro">
+<p class="try-task"><strong>Experimente:</strong> troque “caneta” por “caderno” no aviso e clique em Rodar.</p>
+<pre class="script" data-file="main.ps1">Write-Warning "O estoque de caneta está baixo"
+</pre>
+<pre class="solucao" data-file="main.ps1">Write-Warning "O estoque de caderno está baixo"
+</pre>
+</div>
+<div class="note">No editor do guia, que roda um PowerShell 7 de Linux, o prefixo pode aparecer em inglês (<code>WARNING:</code> em vez de <code>AVISO:</code>). A mensagem que você escreveu é a mesma. Por isso a missão procura a palavra <code>caderno</code>, e não o prefixo.</div>
+
+<hr>
+
+<h2>2. Detalhes escondidos: <code>Write-Verbose</code></h2>
+<p>O <code>Write-Verbose</code> (“escrever detalhado”) guarda uma mensagem que <strong>não aparece</strong>, a menos que você peça. É o caderno da lojinha: só abre quem perguntou.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Write-Verbose "Detalhe para quem pediu"
+PS C:\Users\ana&gt; Write-Verbose "Detalhe para quem pediu" -Verbose
+DETALHADO: Detalhe para quem pediu
+PS C:\Users\ana&gt; $VerbosePreference
+SilentlyContinue
+</pre>
+<dl class="anatomy">
+  <dt>Write-Verbose "Detalhe para quem pediu"</dt><dd>Sozinho, não mostrou nada: o prompt voltou na linha seguinte. Não é erro; a mensagem ficou escondida.</dd>
+  <dt>-Verbose</dt><dd>O parâmetro que pede: “mostre os detalhes deste comando”. Aí aparece o prefixo <code>DETALHADO:</code> e a mensagem.</dd>
+  <dt>$VerbosePreference</dt><dd>A preferência da sessão para mensagens detalhadas. No laboratório o valor era <code>SilentlyContinue</code> (“continuar em silêncio”): por isso o detalhe fica escondido até você passar <code>-Verbose</code>.</dd>
+</dl>
+
+<div class="tryps" data-goal="out:Detalhe para quem pediu;;src:\bWrite-Verbose\b;;src:-Verbose;;semerro">
+<p class="try-task"><strong>Missão:</strong> a mensagem detalhada não aparece. Acrescente <code>-Verbose</code> para ela ser mostrada.</p>
+<pre class="script" data-file="main.ps1">Write-Verbose "Detalhe para quem pediu"
+</pre>
+<pre class="solucao" data-file="main.ps1">Write-Verbose "Detalhe para quem pediu" -Verbose
+</pre>
+</div>
+
+<hr>
+
+<h2>3. A lanterna: <code>Write-Debug</code></h2>
+<p>O <code>Write-Debug</code> (“escrever depuração”) é do mesmo tipo: escondido por padrão, e aparece com <code>-Debug</code>.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Write-Debug "Valor de x: 5"
+PS C:\Users\ana&gt; Write-Debug "Valor de x: 5" -Debug
+DEPURAR: Valor de x: 5
+</pre>
+<p>Sem <code>-Debug</code>, nada na tela. Com <code>-Debug</code>, o prefixo no Windows em português foi <code>DEPURAR:</code>, seguido do texto. Use para valores que só importam enquanto você está caçando um problema no script.</p>
+
+<hr>
+
+<h2>4. Uma informação: <code>Write-Information</code></h2>
+<p>O <code>Write-Information</code> (“escrever informação”) também fica escondido por padrão. Para ele aparecer nesta sessão, o laboratório usou o parâmetro <code>-InformationAction Continue</code> (“ação de informação: continuar, e mostrar”).</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Write-Information "Informação"
+PS C:\Users\ana&gt; Write-Information "Informação" -InformationAction Continue
+Informação
+</pre>
+<dl class="anatomy">
+  <dt>Write-Information "Informação"</dt><dd>Sozinho, não mostrou nada.</dd>
+  <dt>-InformationAction Continue</dt><dd>Pede para mostrar a informação e seguir adiante. Desta vez a palavra <code>Informação</code> apareceu, <strong>sem prefixo</strong> (diferente do <code>AVISO:</code> e do <code>DETALHADO:</code>).</dd>
+</dl>
+
+<hr>
+
+<h2>5. Um erro que não para: <code>Write-Error</code></h2>
+<p>O <code>Write-Error</code> (“escrever erro”) registra um problema, em geral em vermelho. A diferença importante: ele <strong>não interrompe</strong> o script. A linha seguinte roda normalmente. É o livro de reclamações: o problema fica registrado, e a loja segue aberta.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Write-Error "Arquivo de notas não encontrado"
+Write-Error: Arquivo de notas não encontrado
+PS C:\Users\ana&gt; "Depois do Write-Error, o script segue"
+Depois do Write-Error, o script segue
+</pre>
+<dl class="anatomy">
+  <dt>Write-Error</dt><dd>O cmdlet que escreve no fluxo de erro.</dd>
+  <dt>Write-Error:</dt><dd>O prefixo da mensagem no console do PowerShell 7. Depois dele vem o texto que você passou: <code>Arquivo de notas não encontrado</code>.</dd>
+  <dt>"Depois do Write-Error, o script segue"</dt><dd>O próximo comando rodou e mostrou o texto. O erro não derrubou a sessão.</dd>
+</dl>
+<div class="note">Há outro tipo de erro, o de <strong>sintaxe</strong> (quando o PowerShell nem consegue ler o que você digitou). Esse, no 7.7, aparece em inglês mesmo no Windows em português, e pode impedir o resto do bloco de rodar. O <code>Write-Error</code> não é esse caso: é um erro de cmdlet, e o script continua.</div>
+
+<hr>
+
+<h2>6. A barra na janela: <code>Write-Progress</code></h2>
+<p>O <code>Write-Progress</code> (“escrever progresso”) desenha uma barra na janela do terminal enquanto um trabalho longo roda. Essa barra <strong>não vira texto</strong> na coleta: ela só é vista ao vivo, na tela. No laboratório, o que deu para confirmar foi que o comando existe e é um cmdlet:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Command Write-Progress | Select-Object Name, CommandType
+
+Name           CommandType
+----           -----------
+Write-Progress      Cmdlet
+</pre>
+<p>Por isso esta aula não mostra uma barra inventada. Quando você rodar o <code>Write-Progress</code> no seu Windows, a barra aparece na janela; no editor do guia, que não é essa janela, o efeito visual pode não existir.</p>
+
+<hr>
+
+<h2>7. Os fluxos numerados</h2>
+<p>Por baixo, cada tipo de mensagem viaja num <strong>fluxo</strong> (um cano) com um número. O fluxo 1 é a saída de sucesso, a esteira do <code>Write-Output</code>. O fluxo 3 é o dos avisos. Dá para desviar um aviso para a esteira com <code>3&gt;&amp;1</code> (“o fluxo 3 vai para o 1”) e, aí sim, capturá-lo com outro comando:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Write-Warning "aviso" 3&gt;&amp;1 | ForEach-Object { "Capturado: $_" }
+Capturado: aviso
+</pre>
+<dl class="anatomy">
+  <dt>Write-Warning "aviso"</dt><dd>O aviso de sempre.</dd>
+  <dt>3&gt;&amp;1</dt><dd>O desvio: o fluxo 3 (aviso) é mandado para o fluxo 1 (sucesso), e assim entra na esteira.</dd>
+  <dt>| ForEach-Object { "Capturado: $_" }</dt><dd>Para cada item que chegou pela esteira, monta o texto <code>Capturado:</code> mais o item. O <code>$_</code> é o item da vez (aula <a href="foreach.html">foreach</a>). O aviso chegou como o texto <code>aviso</code>.</dd>
+</dl>
+<div class="tip">Os números que mais aparecem: <strong>1</strong> é a saída de sucesso, <strong>2</strong> é o erro, <strong>3</strong> é o aviso, <strong>4</strong> é o detalhado, <strong>5</strong> é a depuração e <strong>6</strong> é a informação. Nesta aula o laboratório só coletou o desvio do fluxo 3.</div>
+
+<hr>
+
+<h2>Qual usar?</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Comando</th><th>Aparece por padrão?</th><th>Quando usar</th></tr>
+<tr><td><code>Write-Output</code> / texto sozinho</td><td>Sim (esteira)</td><td>O resultado do script, o que pode ser guardado ou passado adiante. Aula <a href="write-host-output.html">Write-Host × Write-Output</a>.</td></tr>
+<tr><td><code>Write-Host</code></td><td>Sim (só a tela)</td><td>Enfeite colorido, que não precisa seguir pela esteira.</td></tr>
+<tr><td><code>Write-Warning</code></td><td>Sim (<code>AVISO:</code>)</td><td>Algo que a pessoa precisa ver, mas que não é um erro fatal.</td></tr>
+<tr><td><code>Write-Verbose</code></td><td>Não (use <code>-Verbose</code>)</td><td>Detalhes de acompanhamento, só quando alguém pedir.</td></tr>
+<tr><td><code>Write-Debug</code></td><td>Não (use <code>-Debug</code>)</td><td>Valores e pistas enquanto você caça um problema.</td></tr>
+<tr><td><code>Write-Information</code></td><td>Não (use <code>-InformationAction Continue</code>)</td><td>Um fato informativo, sem ser aviso nem resultado.</td></tr>
+<tr><td><code>Write-Error</code></td><td>Sim (fluxo de erro)</td><td>Registrar um problema <strong>sem</strong> parar o script.</td></tr>
+<tr><td><code>Write-Progress</code></td><td>Barra na janela</td><td>Mostrar andamento de um trabalho longo. Não sai como texto.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>O <code>Write-Verbose</code> “não funciona”</strong>
+<p>Você escreveu <code>Write-Verbose "Detalhe para quem pediu"</code> e a tela ficou em branco. Não é defeito: a preferência padrão é <code>SilentlyContinue</code>, como o laboratório mostrou. <strong>Como resolver:</strong> acrescente <code>-Verbose</code> naquele comando. O mesmo vale para o <code>Write-Debug</code> (com <code>-Debug</code>) e para o <code>Write-Information</code> (com <code>-InformationAction Continue</code>).</p>
+</div>
+
+<div class="cenario">
+<strong>O <code>Write-Error</code> assusta, mas o script segue</strong>
+<p>A mensagem em vermelho <code>Write-Error: Arquivo de notas não encontrado</code> parece que “deu pau”. No laboratório, o comando seguinte rodou normalmente e mostrou <code>Depois do Write-Error, o script segue</code>. <strong>Como entender:</strong> o <code>Write-Error</code> registra o problema e continua. Se você quiser parar de verdade, isso é assunto de outro comando (<code>throw</code> ou <code>exit</code>), em aulas mais à frente.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Write-Warning "texto"</code></td><td>Mostra um aviso (no 7.7 em português: <code>AVISO: texto</code>).</td></tr>
+<tr><td><code>Write-Verbose "texto"</code></td><td>Não mostra nada, por padrão.</td></tr>
+<tr><td><code>Write-Verbose "texto" -Verbose</code></td><td>Mostra o detalhe (<code>DETALHADO: texto</code>).</td></tr>
+<tr><td><code>$VerbosePreference</code></td><td>A preferência dos detalhes. No laboratório: <code>SilentlyContinue</code>.</td></tr>
+<tr><td><code>Write-Debug "texto" -Debug</code></td><td>Mostra a depuração (<code>DEPURAR: texto</code>).</td></tr>
+<tr><td><code>Write-Information "texto" -InformationAction Continue</code></td><td>Mostra a informação, sem prefixo.</td></tr>
+<tr><td><code>Write-Error "texto"</code></td><td>Escreve um erro e <strong>não</strong> para o script.</td></tr>
+<tr><td><code>Get-Command Write-Progress</code></td><td>Confirma que o cmdlet da barra de progresso existe.</td></tr>
+<tr><td><code>Write-Warning "aviso" 3&gt;&amp;1</code></td><td>Manda o aviso para a esteira de sucesso, para poder capturá-lo.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete para mostrar o aviso de estoque baixo:</p>
+<div class="ex-code"><input data-answer="Write-Warning" aria-label="cmdlet"> "O estoque de caneta está baixo"</div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual é a saída?</h3>
+<p>No laboratório, o que apareceu com <code>Write-Verbose "Detalhe para quem pediu"</code> (sem <code>-Verbose</code>)?</p>
+<div class="ex-code"><input data-answer="|nada|nada.|(nada)|nenhuma|nenhum" aria-label="saída"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Complete o parâmetro</h3>
+<p>Complete para o detalhe aparecer na tela:</p>
+<div class="ex-code">Write-Verbose "Detalhe para quem pediu" <input data-answer="-Verbose" aria-label="parâmetro"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Por que o <code>Write-Verbose</code> não mostrou nada, sozinho, no laboratório?</p>
+<label><input type="radio" name="q4"> Porque o comando não existe no PowerShell 7</label>
+<label><input type="radio" name="q4"> Porque a preferência padrão é <code>SilentlyContinue</code>: o detalhe fica escondido até alguém pedir com <code>-Verbose</code></label>
+<label><input type="radio" name="q4"> Porque a mensagem estava em português</label>
+<label><input type="radio" name="q4"> Porque faltou o <code>Write-Host</code></label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Depois de um <code>Write-Error</code>, o que acontece com a linha seguinte do script?</p>
+<label><input type="radio" name="q5"> O PowerShell fecha a janela</label>
+<label><input type="radio" name="q5"> A linha seguinte nunca roda</label>
+<label><input type="radio" name="q5"> A linha seguinte roda normalmente: o <code>Write-Error</code> não para o script</label>
+<label><input type="radio" name="q5"> Todas as variáveis são apagadas</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. No comando <code>Write-Warning "aviso" 3&gt;&amp;1</code>, o que o <code>3&gt;&amp;1</code> faz?</p>
+<label><input type="radio" name="q6"> Manda o fluxo 3 (aviso) para o fluxo 1 (sucesso), para o aviso poder seguir pela esteira</label>
+<label><input type="radio" name="q6"> Apaga o aviso</label>
+<label><input type="radio" name="q6"> Liga o modo <code>-Verbose</code></label>
+<label><input type="radio" name="q6"> Transforma o aviso numa barra de progresso</label>
+</div>
+
+<div class="tryps" data-goal="out:estoque baixo;;out:pedido enviado;;src:\bWrite-Warning\b;;src:\bWrite-Information\b;;src:-InformationAction;;semerro">
+<p class="try-task"><strong>Missão final:</strong> mostre um aviso contendo <code>estoque baixo</code> com <code>Write-Warning</code>, e uma informação contendo <code>pedido enviado</code> com <code>Write-Information</code> (lembre do <code>-InformationAction Continue</code>, senão a informação não aparece).</p>
+<pre class="script" data-file="main.ps1"># aviso e informação da lojinha
+</pre>
+<pre class="solucao" data-file="main.ps1">Write-Warning "estoque baixo"
+Write-Information "pedido enviado" -InformationAction Continue
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Write-Warning</code> mostra um aviso por padrão (<code>AVISO:</code> no 7.7 em português).</li>
+  <li><code>Write-Verbose</code> e <code>Write-Debug</code> ficam escondidos até você pedir com <code>-Verbose</code> ou <code>-Debug</code>. A preferência dos detalhes, no laboratório, era <code>SilentlyContinue</code>.</li>
+  <li><code>Write-Information</code> também fica escondido; com <code>-InformationAction Continue</code>, a mensagem aparece sem prefixo.</li>
+  <li><code>Write-Error</code> registra um erro e <strong>não</strong> para o script: a linha seguinte roda.</li>
+  <li><code>Write-Progress</code> desenha uma barra na janela, que não vira texto no terminal.</li>
+  <li>Os fluxos têm número: o 3 é o aviso. Com <code>3&gt;&amp;1</code>, o aviso entra na esteira e pode ser capturado.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
