@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Operador de Formato — o -f, alinhamento e números | Guia PowerShell</title>
+<meta name="description" content="O operador -f para quem nunca programou: lacunas {0} e {1}, colunas alinhadas, números N2, D4 e P0, datas e o erro real de formato inválido, explicados em português.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">Operador de Formato</span> (<code>-f</code>)</h1><p class="intro">A Ana quer montar frases como “Ana tem 30 anos” e uma tabelinha da lojinha com as colunas alinhadas. Em vez de grudar pedaços de texto com <code>+</code>, ela escreve um <strong>molde</strong> com lugares marcados e deixa o operador <code>-f</code> preencher.</p><div class="note"><strong>Você vai aprender</strong><ul><li>A preencher um molde com <code>{0}</code>, <code>{1}</code>… e o operador <code>-f</code>.</li><li>A alinhar colunas à esquerda e à direita.</li><li>A formatar números (<code>N2</code>, <code>D4</code>, <code>P0</code>) e datas.</li><li>A ler o erro real de um formato que não existe.</li></ul></div><p>As saídas reais desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português. Os exemplos do editor são exercícios, não transcrições do laboratório.</p>
+<hr><h2>A ideia: o formulário com lacunas</h2><p>Pense num formulário impresso: “____ tem ____ anos”. Cada lacuna tem um número: a primeira é <code>{0}</code>, a segunda é <code>{1}</code>. O <code>-f</code> (de <em>format</em>, “formatar”) pega a lista de valores à direita e escreve cada um na lacuna com o mesmo número.</p>
+<hr><h2>1. Preenchendo as lacunas</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; &quot;{0} tem {1} anos&quot; -f &quot;Ana&quot;, 30
+Ana tem 30 anos
+PS C:\Users\ana&gt; &quot;{1} vem antes de {0}&quot; -f &quot;primeiro&quot;, &quot;segundo&quot;
+segundo vem antes de primeiro
+</pre>
+<dl class="anatomy"><dt>"{0} tem {1} anos"</dt><dd>O molde, à esquerda. Os números entre chaves marcam as lacunas.</dd><dt>-f</dt><dd>O operador de formato.</dd><dt>"Ana", 30</dt><dd>Os valores, separados por vírgula. O primeiro é o número 0, o segundo é o 1: a contagem começa do zero.</dd><dt>{1} vem antes de {0}</dt><dd>A ordem no molde pode ser qualquer uma: cada lacuna busca o valor pelo número.</dd></dl>
+<div class="tryps" data-goal="out:Ana comprou 3 cadernos;;src:-f;;semerro"><p class="try-task"><strong>Experimente:</strong> Complete os valores à direita do <code>-f</code> para aparecer <code>Ana comprou 3 cadernos</code>.</p><pre class="script" data-file="main.ps1">&quot;{0} comprou {1} cadernos&quot; -f 
+</pre><pre class="solucao" data-file="main.ps1">&quot;{0} comprou {1} cadernos&quot; -f &#x27;Ana&#x27;, 3
+</pre></div>
+<hr><h2>2. Alinhando colunas</h2><p>Depois do número da lacuna, uma vírgula e uma largura reservam espaço. Assim as linhas ficam como uma tabela.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; &quot;{0,-10}|{1,8}&quot; -f &quot;nome&quot;, &quot;idade&quot;
+nome      |   idade
+PS C:\Users\ana&gt; &quot;{0,-10}|{1,8}&quot; -f &quot;Ana&quot;, 30
+Ana       |      30
+</pre>
+<dl class="anatomy"><dt>{0,-10}</dt><dd>Reserva 10 caracteres e encosta o texto à <strong>esquerda</strong> (número negativo).</dd><dt>{1,8}</dt><dd>Reserva 8 caracteres e encosta o valor à <strong>direita</strong> (número positivo), como os números de uma planilha.</dd><dt>|</dt><dd>Aqui é só um caractere do molde, para você ver onde termina cada coluna.</dd></dl>
+<hr><h2>3. Números e datas</h2><p>Depois de dois-pontos vem o <strong>formato</strong>. A data do exemplo é fixa, para não depender do dia em que a aula foi colhida.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; &quot;{0:N2}&quot; -f 1234.5
+1.234,50
+PS C:\Users\ana&gt; &quot;{0:D4}&quot; -f 42
+0042
+PS C:\Users\ana&gt; &quot;{0:P0}&quot; -f 0.25
+25%
+PS C:\Users\ana&gt; &quot;{0:yyyy-MM-dd}&quot; -f [datetime]&quot;2026-11-20&quot;
+2026-11-20
+</pre>
+<dl class="anatomy"><dt>{0:N2}</dt><dd>Número com separador de milhar e 2 casas decimais. No Windows em português, saiu <code>1.234,50</code>: ponto no milhar e vírgula nos centavos. Em outro idioma do sistema o separador pode mudar.</dd><dt>{0:D4}</dt><dd>Inteiro com 4 dígitos, completando com zeros à esquerda: <code>0042</code>. Bom para códigos de produto.</dd><dt>{0:P0}</dt><dd>Porcentagem sem casas decimais: 0,25 vira <code>25%</code>.</dd><dt>{0:yyyy-MM-dd}</dt><dd>Data no formato ano-mês-dia. <code>MM</code> maiúsculo é mês; <code>mm</code> minúsculo seria minutos.</dd></dl>
+<div class="note">O <code>N2</code> e o <code>P0</code> seguem o idioma do sistema. O editor do guia roda um PowerShell de Linux, então lá a pontuação pode sair diferente da mostrada acima.</div><div class="tryps" data-goal="out:Produto 0007;;src:D4;;semerro"><p class="try-task"><strong>Experimente:</strong> Os códigos da lojinha têm sempre 4 dígitos. Troque o formato para que o 7 apareça como <code>Produto 0007</code>.</p><pre class="script" data-file="main.ps1">&quot;Produto {0}&quot; -f 7
+</pre><pre class="solucao" data-file="main.ps1">&quot;Produto {0:D4}&quot; -f 7
+</pre></div>
+<hr><h2>Formas diferentes de montar texto</h2>
+<div class="table-wrap"><table class="ref"><tr><th>Forma</th><th>Quando usar / o que faz</th></tr><tr><td><code>&quot;{0} tem {1} anos&quot; -f $nome, $idade</code></td><td>Moldes com vários valores, colunas e números formatados.</td></tr><tr><td><code>&quot;$nome tem $idade anos&quot;</code></td><td>Frases simples com variáveis (aula <a href="interpolacao.html">Interpolação</a>).</td></tr><tr><td><code>$nome + &quot; tem &quot; + $idade</code></td><td>Juntar poucos pedaços; fica difícil de ler quando cresce.</td></tr><tr><td><code>Get-Date -Format &quot;yyyy-MM-dd&quot;</code></td><td>Só a data de hoje formatada (aula <a href="get-date.html">Get-Date</a>).</td></tr></table></div>
+<hr><h2>Quando dá errado</h2>
+<div class="cenario"><strong>Um formato que não existe</strong><pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; &quot;{0:Z}&quot; -f 42
+InvalidOperation: Error formatting a string: Format specifier was invalid..
+</pre>
+<dl class="anatomy"><dt>InvalidOperation:</dt><dd>“Operação inválida”: o PowerShell não conseguiu fazer o que foi pedido.</dd><dt>Error formatting a string</dt><dd>“Erro ao formatar um texto.”</dd><dt>Format specifier was invalid..</dt><dd>“O especificador de formato era inválido.” <code>Z</code> não é um formato de número. Os dois pontos no fim saíram assim mesmo na mensagem real.</dd></dl>
+<p><strong>Como resolver:</strong> use um formato que existe, como <code>N2</code>, <code>D4</code> ou <code>P0</code>.</p></div><div class="cenario"><strong>As chaves ficaram trocadas</strong><p>Se você escreve <code>{1}</code> antes de <code>{0}</code>, o PowerShell obedece, sem erro, como no exemplo “segundo vem antes de primeiro”. Se a frase saiu fora de ordem, confira os números das lacunas.</p></div><hr><h2>Referência rápida</h2>
+<div class="table-wrap"><table class="ref"><tr><th>Forma</th><th>Quando usar / o que faz</th></tr><tr><td><code>{0}, {1}</code></td><td>Lacunas: o primeiro e o segundo valor.</td></tr><tr><td><code>{0,-10}</code></td><td>10 de largura, alinhado à esquerda.</td></tr><tr><td><code>{0,8}</code></td><td>8 de largura, alinhado à direita.</td></tr><tr><td><code>{0:N2}</code></td><td>Número com 2 casas decimais e milhar.</td></tr><tr><td><code>{0:D4}</code></td><td>Inteiro com 4 dígitos, zeros à esquerda.</td></tr><tr><td><code>{0:P0}</code></td><td>Porcentagem sem casas.</td></tr><tr><td><code>{0:yyyy-MM-dd}</code></td><td>Data como ano-mês-dia.</td></tr></table></div>
+<hr><h2>Exercícios</h2><div class="exercise"><h3>1. Complete</h3><p>Complete o operador.</p><div class="ex-code">&quot;{0} chegou&quot; <input data-answer="-f" aria-label="resposta 1"> &quot;Ana&quot;</div></div>
+<div class="exercise"><h3>2. Complete</h3><p>Complete a lacuna do segundo valor.</p><div class="ex-code">&quot;{0} tem {<input data-answer="1" aria-label="resposta 2">} anos&quot; -f &quot;Ana&quot;, 30</div></div>
+<div class="exercise"><h3>3. Complete</h3><p>Complete para 2 casas decimais.</p><div class="ex-code">&quot;{0:<input data-answer="N2" aria-label="resposta 3">}&quot; -f 9.5</div></div>
+<div class="mc" data-answer="1"><p class="mc-q">4. Em <code>"{0}" -f "a", "b"</code>, qual valor entra?</p><label><input type="radio" name="q4"> a</label><label><input type="radio" name="q4"> b</label><label><input type="radio" name="q4"> os dois</label><label><input type="radio" name="q4"> nenhum</label></div>
+<div class="mc" data-answer="2"><p class="mc-q">5. O que <code>{0,-10}</code> faz?</p><label><input type="radio" name="q5"> Tira 10 caracteres</label><label><input type="radio" name="q5"> Reserva 10 caracteres e alinha à esquerda</label><label><input type="radio" name="q5"> Mostra o número -10</label><label><input type="radio" name="q5"> Arredonda para 10</label></div>
+<div class="mc" data-answer="3"><p class="mc-q">6. Qual formato mostra 42 como 0042?</p><label><input type="radio" name="q6"> N4</label><label><input type="radio" name="q6"> P4</label><label><input type="radio" name="q6"> D4</label><label><input type="radio" name="q6"> Z4</label></div>
+<hr><h2>Resumo</h2>
+<ul><li>O molde fica à esquerda do <code>-f</code>; os valores, à direita.</li><li><code>{0}</code> é o primeiro valor; a contagem começa do zero.</li><li>Largura com vírgula: negativa alinha à esquerda, positiva à direita.</li><li>Formato com dois-pontos: <code>N2</code>, <code>D4</code>, <code>P0</code>, <code>yyyy-MM-dd</code>.</li><li>Um formato inexistente dá “Format specifier was invalid”.</li></ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
