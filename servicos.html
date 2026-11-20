@@ -177,6 +177,19 @@ Get-Service: Não é possível localizar nenhum serviço com o nome de serviço 
 
 <hr>
 
+<h2>Formas diferentes de consultar um serviço</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>Get-Service -Name Spooler</code></td><td><span class="versao">só Windows</span> O jeito deste guia: consulta só esse serviço, pelo nome. Só leitura.</td></tr>
+<tr><td><code>Get-Service Spooler</code></td><td><span class="versao">só Windows</span> A mesma consulta, com o nome na posição. Nunca omita o nome.</td></tr>
+<tr><td><code>Get-CimInstance Win32_Service -Filter "Name='Spooler'"</code></td><td><span class="versao">só Windows</span> O mesmo serviço, via CIM, já filtrado pelo nome. Também é só leitura.</td></tr>
+<tr><td><code>sc.exe query Spooler</code></td><td><span class="versao">só Windows</span> A consulta clássica daquele serviço. Também é só leitura, e também exige o nome.</td></tr>
+</table>
+</div>
+
+<hr>
+
 <h2>Referência rápida</h2>
 <div class="table-wrap">
 <table class="ref">
