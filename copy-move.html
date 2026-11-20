@@ -213,6 +213,20 @@ What If: Executando a operação "Copiar Arquivo" no destino "Item: C:\Users\ana
 
 <hr>
 
+<h2>Formas diferentes de copiar e mover</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>Copy-Item -Path nota.txt -Destination backup\</code></td><td>O jeito deste guia nos scripts: origem e destino nomeados.</td></tr>
+<tr><td><code>Copy-Item nota.txt backup\</code></td><td>A mesma cópia, pelos posicionais.</td></tr>
+<tr><td><code>copy nota.txt backup\</code> ou <code>cp nota.txt backup\</code></td><td>Apelidos de <code>Copy-Item</code>. Só no terminal.</td></tr>
+<tr><td><code>Move-Item -Path nota-copia.txt -Destination docs\</code></td><td>Muda o arquivo de pasta, com os nomes dos parâmetros. Ele some da origem.</td></tr>
+<tr><td><code>move nota-copia.txt docs\</code> ou <code>mv nota-copia.txt docs\</code></td><td>Apelidos de <code>Move-Item</code>. Só no terminal.</td></tr>
+</table>
+</div>
+
+<hr>
+
 <h2>Referência rápida</h2>
 <div class="table-wrap">
 <table class="ref">
