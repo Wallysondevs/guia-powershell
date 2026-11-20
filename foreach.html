@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell foreach — repetindo para cada item | Guia PowerShell</title>
+<meta name="description" content="Aprenda o laço foreach do PowerShell: repetir um bloco para cada item de uma lista, somar valores e evitar os erros comuns, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">foreach</span></h1>
+
+<p class="intro">A Ana tem uma lista de frutas, uma lista de gastos do mês e uma lista de notas da turma. Fazer a mesma coisa com cada item, um por um, à mão, cansa. Nesta aula você vai usar o <code>foreach</code> ("para cada") para o PowerShell repetir um bloco de comandos uma vez para cada item de uma lista.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A repetir um bloco para cada item de uma lista com <code>foreach (... in ...)</code>.</li>
+  <li>A somar os valores de uma lista.</li>
+  <li>A repetir um número certo de vezes com um intervalo, como <code>1..5</code>.</li>
+  <li>A guardar numa variável tudo o que o laço produziu.</li>
+  <li>A diferença entre <code>foreach</code> e <code>ForEach-Object</code>.</li>
+  <li>O que acontece com uma lista vazia e os erros de digitação mais comuns.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português.</p>
+
+<hr>
+
+<h2>A ideia: a fila do caixa</h2>
+<p>Pense na fila de um caixa de supermercado. O caixa chama o primeiro cliente, atende, chama o próximo, atende, e assim até a fila acabar. Ele faz <strong>o mesmo atendimento</strong> para cada pessoa, só muda quem está na frente dele. O <code>foreach</code> é esse caixa: a lista é a fila, e a variável do laço é "o cliente da vez".</p>
+
+<hr>
+
+<h2>1. O básico: para cada item da lista</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $frutas = "maçã", "banana", "uva"
+PS C:\Users\ana&gt; foreach ($fruta in $frutas) { "Eu gosto de $fruta" }
+Eu gosto de maçã
+Eu gosto de banana
+Eu gosto de uva
+</pre>
+<dl class="anatomy">
+  <dt>foreach</dt><dd>"Para cada". A palavra que começa a repetição (o <strong>laço</strong>).</dd>
+  <dt>($fruta in $frutas)</dt><dd>"Cada <code>$fruta</code> <strong>em</strong> <code>$frutas</code>". O <code>$frutas</code> é a lista inteira. O <code>$fruta</code> é a variável que, a cada volta, guarda um item: primeiro "maçã", depois "banana", depois "uva". O nome você escolhe. O costume é o singular da lista.</dd>
+  <dt>{ "Eu gosto de $fruta" }</dt><dd>O bloco que se repete. Ele rodou 3 vezes, uma por fruta.</dd>
+</dl>
+
+<div class="tryps" data-goal="out:Bom dia, Ana!;;out:Bom dia, Beto!;;out:Bom dia, Caio!;;src:\bforeach\b;;semerro">
+<p class="try-task"><strong>Experimente:</strong> complete o <code>foreach</code> para dar bom dia a cada pessoa da lista: <code>Bom dia, Ana!</code>, <code>Bom dia, Beto!</code> e <code>Bom dia, Caio!</code>.</p>
+<pre class="script" data-file="main.ps1">$pessoas = "Ana", "Beto", "Caio"
+
+</pre>
+<pre class="solucao" data-file="main.ps1">$pessoas = "Ana", "Beto", "Caio"
+foreach ($pessoa in $pessoas) {
+    "Bom dia, $pessoa!"
+}
+</pre>
+</div>
+
+<hr>
+
+<h2>2. Somando uma lista</h2>
+<p>Um uso clássico: somar os gastos do mês. Comece com o total em zero e, a cada volta, acrescente o gasto da vez:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $gastos = 12.5, 30, 7.25
+PS C:\Users\ana&gt; $total = 0
+PS C:\Users\ana&gt; foreach ($g in $gastos) { $total += $g }
+PS C:\Users\ana&gt; "Total: $total"
+Total: 49.75
+</pre>
+<dl class="anatomy">
+  <dt>$total = 0</dt><dd>O "cofrinho" começa vazio, antes do laço.</dd>
+  <dt>$total += $g</dt><dd>"Some <code>$g</code> ao que já está em <code>$total</code>" (aula <a href="atribuicao.html">Atribuição</a>). Voltas: 0 + 12.5 = 12.5, depois + 30 = 42.5, depois + 7.25 = 49.75.</dd>
+  <dt>(nada na tela)</dt><dd>O laço não mostrou nada, porque <code>$total += $g</code> só guarda. O resultado aparece na linha seguinte.</dd>
+</dl>
+
+<hr>
+
+<h2>3. Repetindo um número de vezes: <code>1..5</code></h2>
+<p>O <code>1..5</code> cria a lista 1, 2, 3, 4, 5. Com ele, o <code>foreach</code> repete o bloco 5 vezes:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; foreach ($n in 1..5) { "Linha $n" }
+Linha 1
+Linha 2
+Linha 3
+Linha 4
+Linha 5
+</pre>
+<dl class="anatomy">
+  <dt>1..5</dt><dd>O operador de intervalo: todos os números inteiros de 1 até 5, incluindo os dois.</dd>
+</dl>
+
+<hr>
+
+<h2>4. Guardando o resultado do laço</h2>
+<p>Tudo o que o bloco "solta" pode ir direto para uma variável. Ela vira uma lista com os resultados:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $dobro = foreach ($n in 1..3) { $n * 2 }
+PS C:\Users\ana&gt; $dobro -join ", "
+2, 4, 6
+</pre>
+<dl class="anatomy">
+  <dt>$dobro = foreach ...</dt><dd>Em vez de aparecer na tela, cada <code>$n * 2</code> foi guardado em <code>$dobro</code>.</dd>
+  <dt>-join ", "</dt><dd>Junta os itens da lista num texto só, separados por vírgula e espaço.</dd>
+</dl>
+
+<hr>
+
+<h2>Formas diferentes: <code>foreach</code> × <code>ForEach-Object</code></h2>
+<p>Existe também o cmdlet <code>ForEach-Object</code>, que recebe os itens pelo pipeline (o <code>|</code>, aula <a href="pipeline.html">Pipeline</a>). Dentro dele, o item da vez se chama <code>$_</code> (aula <a href="variaveis-automaticas.html">Variáveis Automáticas</a>):</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 1..3 | ForEach-Object { $_ * 10 }
+10
+20
+30
+</pre>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Como escreve</th><th>Quando usar</th></tr>
+<tr><td><code>foreach</code> (palavra-chave)</td><td><code>foreach ($n in $lista) { $n }</code></td><td>Nos scripts, quando a lista já está numa variável. A variável tem um nome claro.</td></tr>
+<tr><td><code>ForEach-Object</code> (cmdlet)</td><td><code>$lista | ForEach-Object { $_ }</code></td><td>No meio de um pipeline, recebendo itens de outro comando. Mais detalhes na aula <a href="foreach-object.html">ForEach-Object</a>.</td></tr>
+<tr><td><code>for</code></td><td><code>for ($i = 0; $i -lt 3; $i++) { }</code></td><td>Quando você precisa do número da posição ou de passos diferentes de 1. Veja a aula <a href="for.html">for</a>.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Lista vazia e <code>$null</code></h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; foreach ($x in @()) { "nunca" }; "lista vazia: nada rodou"
+lista vazia: nada rodou
+PS C:\Users\ana&gt; foreach ($x in $null) { "rodou com [$x]" }
+</pre>
+<p>Com uma lista vazia (<code>@()</code>), o bloco não roda nenhuma vez, e não é erro: a fila estava vazia, o caixa não atendeu ninguém. Com <code>$null</code> (o "nada"), também não roda: repare que depois do segundo comando não apareceu nenhuma linha. Isso é útil: se um comando não encontrou nada, o seu <code>foreach</code> simplesmente não faz nada.</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+<p>Para colher estes erros, o código errado foi rodado como texto pelo <code>Invoke-Expression</code>, por isso as mensagens começam com <code>Invoke-Expression:</code>. Digitando direto, a moldura muda um pouco, mas a mensagem é a mesma.</p>
+
+<div class="cenario">
+<strong>Trocar o <code>in</code> por outra palavra</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Invoke-Expression 'foreach ($fruta of $frutas) { $fruta }'
+Invoke-Expression: Missing 'in' after variable in foreach loop. The correct form is: foreach ($a in $b) {...}
+</pre>
+<dl class="anatomy">
+  <dt>Missing 'in' after variable in foreach loop</dt><dd>"Falta o 'in' depois da variável no laço foreach." Quem vem do JavaScript às vezes escreve <code>of</code>.</dd>
+  <dt>The correct form is: foreach ($a in $b) {...}</dt><dd>"A forma correta é...": o próprio PowerShell mostra o modelo certo.</dd>
+</dl>
+</div>
+
+<div class="cenario">
+<strong>Esquecer os parênteses</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Invoke-Expression 'foreach $fruta in $frutas { $fruta }'
+Invoke-Expression: Missing opening '(' after keyword 'foreach'.
+</pre>
+<dl class="anatomy">
+  <dt>Missing opening '(' after keyword 'foreach'</dt><dd>"Falta o '(' de abertura depois da palavra 'foreach'." A parte <code>$fruta in $frutas</code> precisa ficar entre parênteses.</dd>
+</dl>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>foreach ($item in $lista) { ... }</code></td><td>Roda o bloco uma vez para cada item.</td></tr>
+<tr><td><code>foreach ($n in 1..5) { ... }</code></td><td>Repete 5 vezes, com <code>$n</code> de 1 a 5.</td></tr>
+<tr><td><code>$total = 0</code> + <code>$total += $item</code></td><td>Soma os itens.</td></tr>
+<tr><td><code>$r = foreach (...) { ... }</code></td><td>Guarda o que o laço produziu.</td></tr>
+<tr><td><code>$lista | ForEach-Object { $_ }</code></td><td>A versão de pipeline.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. A palavra que falta</h3>
+<p>Complete para mostrar cada cor da lista:</p>
+<div class="ex-code">foreach ($cor <input data-answer="in" aria-label="palavra"> $cores) { $cor }</div>
+</div>
+
+<div class="exercise">
+<h3>2. Cinco vezes</h3>
+<p>Complete o intervalo para repetir de 1 a 5:</p>
+<div class="ex-code">foreach ($n in <input data-answer="1..5" aria-label="intervalo">) { "Volta $n" }</div>
+</div>
+
+<div class="exercise">
+<h3>3. Somando</h3>
+<p>Complete o operador que soma cada preço ao total:</p>
+<div class="ex-code">foreach ($p in $precos) { $total <input data-answer="+=" aria-label="operador"> $p }</div>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">4. Quantas vezes roda o bloco de <code>foreach ($x in "a", "b", "c", "d") { $x }</code>?</p>
+<label><input type="radio" name="q4"> 1</label>
+<label><input type="radio" name="q4"> 3</label>
+<label><input type="radio" name="q4"> 4</label>
+<label><input type="radio" name="q4"> Infinitas</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">5. O que acontece com <code>foreach ($x in @()) { "oi" }</code>?</p>
+<label><input type="radio" name="q5"> Nada: o bloco não roda nenhuma vez</label>
+<label><input type="radio" name="q5"> Mostra "oi" uma vez</label>
+<label><input type="radio" name="q5"> Dá erro de lista vazia</label>
+<label><input type="radio" name="q5"> Fica repetindo para sempre</label>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">6. Dentro do <code>ForEach-Object</code>, como se chama o item da vez?</p>
+<label><input type="radio" name="q6"> <code>$item</code></label>
+<label><input type="radio" name="q6"> <code>$_</code></label>
+<label><input type="radio" name="q6"> <code>$in</code></label>
+<label><input type="radio" name="q6"> <code>$this</code></label>
+</div>
+
+<div class="tryps" data-goal="out:Total do mês: 120;;src:\bforeach\b;;src:\+=;;semerro">
+<p class="try-task"><strong>Missão final:</strong> a Ana anotou as contas do mês: 45, 30, 25 e 20. Use um <code>foreach</code> com <code>+=</code> para somar tudo e mostrar <code>Total do mês: 120</code>.</p>
+<pre class="script" data-file="main.ps1">$contas = 45, 30, 25, 20
+$total = 0
+
+"Total do mês: $total"
+</pre>
+<pre class="solucao" data-file="main.ps1">$contas = 45, 30, 25, 20
+$total = 0
+foreach ($conta in $contas) {
+    $total += $conta
+}
+"Total do mês: $total"
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>foreach ($item in $lista) { ... }</code> roda o bloco uma vez para cada item.</li>
+  <li>A variável do laço guarda o item da vez. Escolha um nome claro, como o singular da lista.</li>
+  <li><code>1..5</code> cria uma lista de números e serve para repetir um número certo de vezes.</li>
+  <li>Dá para guardar tudo o que o laço produziu: <code>$r = foreach (...) { ... }</code>.</li>
+  <li>Lista vazia ou <code>$null</code>: o bloco não roda, e não é erro.</li>
+  <li>Nos scripts, prefira <code>foreach</code>. No meio de um pipeline, use <code>ForEach-Object</code> com <code>$_</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
