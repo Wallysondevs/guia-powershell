@@ -8,18 +8,18 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 | Página | Autor | cmds | ① | ② | ③ | ④ | Obs |
 |---|---|---|---|---|---|---|---|
 | `index.html` Início | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] | Escrever por último |
-| `introducao.html` O que é PowerShell | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `versoes-powershell.html` Windows PowerShell 5.1 × PowerShell 7 | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `instalar.html` Instalar o PowerShell 7 | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `abrir-terminal.html` Abrindo o PowerShell (e o Terminal do Windows) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `introducao.html` O que é PowerShell | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] | aula conceitual; sem 'Formas diferentes' de propósito |
+| `versoes-powershell.html` Windows PowerShell 5.1 × PowerShell 7 | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] | aula conceitual; sem 'Formas diferentes' de propósito |
+| `instalar.html` Instalar o PowerShell 7 | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] | aula conceitual; sem 'Formas diferentes' de propósito |
+| `abrir-terminal.html` Abrindo o PowerShell (e o Terminal do Windows) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] | aula conceitual; sem 'Formas diferentes' de propósito |
 | `simulador.html` Simulador | Zeca | [x] | [ ] | [ ] | [x] | [x] | 4238feb |
 | `primeiro-comando.html` Seu Primeiro Comando | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] |  |
 | `cmdlets.html` Cmdlets: Verbo-Substantivo | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] |  |
-| `parametros-cmdlet.html` Parâmetros dos Comandos | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] |  |
+| `parametros-cmdlet.html` Parâmetros dos Comandos | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] | b7ab3fc (Formas diferentes) |
 | `get-help.html` Get-Help: a Ajuda | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] |  |
 | `get-command.html` Get-Command: Achando Comandos | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
 | `aliases.html` Apelidos (ls, dir, cd) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `teclado.html` Tab, Histórico e Atalhos | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `teclado.html` Tab, Histórico e Atalhos | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] | 50cb961 (Formas diferentes) |
 
 ## Pastas e Arquivos
 
@@ -29,14 +29,14 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 | `set-location.html` Mudando de Pasta (Set-Location) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
 | `get-childitem.html` Listando (Get-ChildItem) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
 | `caminhos.html` Caminhos no Windows e no Linux | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `new-item.html` Criando Arquivos e Pastas (New-Item) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `copy-move.html` Copiando e Movendo (Copy-Item e Move-Item) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `new-item.html` Criando Arquivos e Pastas (New-Item) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] | 1901da7 (Formas diferentes) |
+| `copy-move.html` Copiando e Movendo (Copy-Item e Move-Item) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] | 541498e (Formas diferentes) |
 | `rename-item.html` Renomeando (Rename-Item) | Tito | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] |  |
 | `remove-item.html` Apagando (Remove-Item) | Tito | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] | confirmação de pasta cheia só descrita (não coletável em -NonInteractive) |
 | `get-content.html` Lendo Arquivos (Get-Content) | Tito | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] |  |
 | `set-content.html` Escrevendo Arquivos (Set-Content e Add-Content) | Tito | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] |  |
-| `test-path.html` Existe? (Test-Path) | Zeca (rascunho dele, combinado 17:36) | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] | 0573e13 |
-| `provedores.html` Drives e Provedores (Env:, HKCU:) | Zeca (rascunho dele, combinado 17:36) | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] | 0573e13 |
+| `test-path.html` Existe? (Test-Path) | Zeca (rascunho dele, combinado 17:36) | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] | 0573e13 + fdeeb0a (Formas diferentes) |
+| `provedores.html` Drives e Provedores (Env:, HKCU:) | Zeca (rascunho dele, combinado 17:36) | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] | 0573e13 + 46f5cff (Formas diferentes) |
 
 ## Variáveis e Tipos
 
@@ -70,7 +70,7 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 |---|---|---|---|---|---|---|---|
 | `write-host-output.html` Write-Host × Write-Output | Tito | [x] | [x] | [x] | [x] | [x] | c66eb98 |
 | `read-host.html` Read-Host: Lendo o Teclado | Tito | [x] | [x] | [x] | [x] | [x] | b592d9f+8db4a53; prompt interativo descrito em prosa (não coletado) |
-| `write-outros.html` Write-Warning, Write-Verbose e Companhia | Zeca | [x] | [x] | [x] | [x] | [x] | 5ba714f |
+| `write-outros.html` Write-Warning, Write-Verbose e Companhia | Zeca | [x] | [x] | [x] | [x] | [x] | 5ba714f + b0b69d9 (Formas diferentes) |
 
 ## Decisões
 
@@ -87,7 +87,7 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 | `foreach.html` foreach | Tito | [x] | [x] | [x] | [x] | [x] | 50d5817+39cf79c |
 | `for.html` for | Tito | [x] | [x] | [x] | [x] | [x] | 85ded7d |
 | `while.html` while e do | Zeca | [x] | [x] | [x] | [x] | [x] | 19f9722 |
-| `break-continue.html` break e continue | Zeca | [x] | [x] | [x] | [x] | [x] | 900be27 |
+| `break-continue.html` break e continue | Zeca | [x] | [x] | [x] | [x] | [x] | 900be27 + ab46049 (Formas diferentes) |
 
 ## Lotes de coleta
 
@@ -99,9 +99,9 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 
 | Página | Autor | cmds | ① | ② | ③ | ④ | Obs |
 |---|---|---|---|---|---|---|---|
-| `usuarios-locais.html` Usuários e Grupos Locais | Zeca | [x] | [x] | [x] | [x] | [x] | 8b58f07; o Get-LocalUser final é ilustrativo |
-| `registro.html` O Registro do Windows | Zeca | [x] | [x] | [x] | [x] | [x] | e2fc558 |
-| `servicos.html` Serviços (Get-Service) | Zeca | [x] | [x] | [x] | [x] | [x] | 668a2ff |
+| `usuarios-locais.html` Usuários e Grupos Locais | Zeca | [x] | [x] | [x] | [x] | [x] | 8b58f07 + 9d52687 + c17c35b; o Get-LocalUser final é ilustrativo; aviso nas missões: não execute o texto da string |
+| `registro.html` O Registro do Windows | Zeca | [x] | [x] | [x] | [x] | [x] | e2fc558 + 9e6f793 (Formas diferentes) |
+| `servicos.html` Serviços (Get-Service) | Zeca | [x] | [x] | [x] | [x] | [x] | 668a2ff + 53b2f10 (Formas diferentes) |
 
 ## Conferência 18h (Tito)
 
