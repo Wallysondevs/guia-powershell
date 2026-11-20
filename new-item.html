@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell New-Item — criando arquivos e pastas | Guia PowerShell</title>
+<meta name="description" content="Criar arquivos e pastas no PowerShell com New-Item: -ItemType, -Value, mkdir, o erro real de arquivo que já existe, -Force e o ensaio -WhatIf, com saídas reais do PowerShell 7.7.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Criando com <span class="hl">New-Item</span></h1>
+
+<p class="intro">Você já sabe olhar pastas e andar por elas. Agora vai <strong>criar</strong> as suas: um arquivo em branco, uma pasta nova, vários itens de uma vez e até uma frase já dentro do arquivo. O comando é o <code>New-Item</code> (verbo <code>New</code>, "novo", + substantivo <code>Item</code>, "item": "crie um item").</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A criar um arquivo com <code>New-Item</code> e a ler a tabela que ele devolve (o "comprovante").</li>
+  <li>O parâmetro <code>-ItemType</code>, para escolher entre arquivo (<code>File</code>) e pasta (<code>Directory</code>).</li>
+  <li>O parâmetro <code>-Value</code>, que já coloca um texto no arquivo novo.</li>
+  <li>A criar pastas no meio do caminho (<code>a\b\c</code>) e vários arquivos de uma vez.</li>
+  <li>Que o <code>mkdir</code> é uma <strong>função</strong> que chama o <code>New-Item</code> por baixo.</li>
+  <li>O que acontece quando o arquivo já existe, o <code>-Force</code> e o ensaio <code>-WhatIf</code>.</li>
+</ul>
+</div>
+
+<p>Todas as saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta de teste da usuária fictícia <code>ana</code>. No Windows PowerShell 5.1 os comandos são os mesmos; quando a mensagem muda, a aula avisa.</p>
+
+<div class="warning">
+<strong>Pratique numa pasta de teste.</strong> Todos os exemplos desta aula foram rodados dentro de <code>C:\Users\ana\guia-ps-teste</code>. No seu computador, crie uma pasta só para treinar e trabalhe nela. Um jeito seguro: <code>New-Item -ItemType Directory -Path (Join-Path $HOME 'guia-ps-teste')</code> e depois <code>Set-Location (Join-Path $HOME 'guia-ps-teste')</code>. Assim você não mexe nas suas fotos, documentos ou no Windows. No fim da prática, apague só essa pasta.
+</div>
+
+<hr>
+
+<h2>A ideia: um pedido na secretaria</h2>
+<p>Pense na secretaria de uma escola. Você chega e pede: "abra uma pasta nova chamada fotos" ou "faça uma folha em branco chamada nota.txt". A secretaria cria o que você pediu, coloca no armário e te devolve um <strong>comprovante</strong>: o nome, a data e o tamanho.</p>
+<p>O <code>New-Item</code> funciona igual. Você diz o nome (e, se quiser, o tipo e o conteúdo). Ele cria o item e mostra uma tabelinha — o comprovante. Se você não pedir conteúdo, a folha sai em branco.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Na secretaria</th><th>No PowerShell</th></tr>
+<tr><td>O pedido ("uma folha chamada nota.txt")</td><td>O comando <code>New-Item nota.txt</code></td></tr>
+<tr><td>O tipo: folha ou pasta</td><td>O parâmetro <code>-ItemType File</code> ou <code>Directory</code></td></tr>
+<tr><td>A primeira frase já escrita na folha</td><td>O parâmetro <code>-Value "texto"</code></td></tr>
+<tr><td>O comprovante com nome, data e tamanho</td><td>A tabela que o <code>New-Item</code> mostra</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>1. Uma folha em branco</h2>
+<p>Na pasta de teste, digite isto e aperte <kbd>Enter</kbd>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; New-Item nota.txt
+
+    Diretório: C:\Users\ana\guia-ps-teste
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          20/11/2026    17:13              0 nota.txt
+
+</pre>
+<dl class="anatomy">
+  <dt>New-Item</dt><dd>O comando: "crie um item". Sem <code>-ItemType</code>, o PowerShell entende que você quer um <strong>arquivo</strong>.</dd>
+  <dt>nota.txt</dt><dd>O nome do arquivo novo, na pasta onde você está. A extensão <code>.txt</code> é só parte do nome: indica que é um texto, mas o PowerShell não liga para isso na hora de criar.</dd>
+  <dt>Diretório:</dt><dd>Onde o item foi criado: <code>C:\Users\ana\guia-ps-teste</code>.</dd>
+  <dt>Mode</dt><dd>Os atributos. <code>-a---</code> quer dizer que é um arquivo (a de <em>archive</em>). Uma pasta aparece com <code>d</code> na frente.</dd>
+  <dt>LastWriteTime</dt><dd>A data e a hora da última alteração. Num item recém-criado, é "agora".</dd>
+  <dt>Length</dt><dd>O tamanho em bytes. <code>0</code> é folha em branco: não tem nada dentro.</dd>
+  <dt>Name</dt><dd>O nome que você pediu: <code>nota.txt</code>.</dd>
+</dl>
+<p>Repare nas linhas em branco em volta do título <code>Diretório:</code>: é o jeito do PowerShell desenhar essa tabela. Não é erro.</p>
+
+<hr>
+
+<h2>2. Uma pasta nova: <code>-ItemType Directory</code></h2>
+<p>Para criar uma pasta, você precisa dizer o tipo. O parâmetro <code>-ItemType</code> (tipo do item) aceita <code>Directory</code> ("diretório", o nome técnico de pasta) ou <code>File</code> (arquivo).</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; New-Item -ItemType Directory fotos
+
+    Diretório: C:\Users\ana\guia-ps-teste
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----          20/11/2026    17:13                fotos
+
+</pre>
+<dl class="anatomy">
+  <dt>-ItemType</dt><dd>O parâmetro que escolhe o tipo. Tem um espaço antes do hífen, como nos outros parâmetros.</dd>
+  <dt>Directory</dt><dd>O valor: "pasta". Sem aspas, porque é uma palavra só.</dd>
+  <dt>fotos</dt><dd>O nome da pasta nova.</dd>
+  <dt>d----</dt><dd>O <code>d</code> no Mode confirma: é uma pasta. A coluna Length fica vazia: pasta não tem tamanho de arquivo.</dd>
+</dl>
+
+<div class="tryps" data-goal="arquivo:fotos;;src:\bNew-Item\b;;src:Directory;;semerro">
+<p class="try-task"><strong>Experimente:</strong> crie uma pasta chamada <code>fotos</code> com <code>New-Item</code> e <code>-ItemType Directory</code>.</p>
+<pre class="script" data-file="main.ps1"># crie a pasta fotos
+</pre>
+<pre class="solucao" data-file="main.ps1">New-Item -ItemType Directory fotos
+</pre>
+</div>
+
+<hr>
+
+<h2>3. Já com texto dentro: <code>-Value</code></h2>
+<p>E se você quiser a folha já escrita? O parâmetro <code>-Value</code> ("valor") coloca o texto no arquivo na hora de criar. O <code>-Path</code> deixa explícito o nome do arquivo; sem ele também funciona, como no primeiro exemplo.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; New-Item -Path relatorio.txt -Value "Primeira linha"
+
+    Diretório: C:\Users\ana\guia-ps-teste
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          20/11/2026    17:13             14 relatorio.txt
+
+PS C:\Users\ana\guia-ps-teste&gt; Get-Content relatorio.txt
+Primeira linha
+</pre>
+<dl class="anatomy">
+  <dt>-Path relatorio.txt</dt><dd>O caminho (aqui, só o nome) do arquivo que vai nascer.</dd>
+  <dt>-Value "Primeira linha"</dt><dd>O conteúdo inicial. As aspas não entram no arquivo: só o texto. O tamanho passou a ser <code>14</code> bytes — o comprimento de <code>Primeira linha</code>.</dd>
+  <dt>Get-Content relatorio.txt</dt><dd>"Obter o conteúdo": lê o arquivo e mostra o texto. Tem aula própria, <a href="get-content.html">Lendo Arquivos</a>.</dd>
+</dl>
+
+<div class="tryps" data-goal="arquivo:relatorio.txt~Primeira linha;;src:\bNew-Item\b;;semerro">
+<p class="try-task"><strong>Missão:</strong> crie o arquivo <code>relatorio.txt</code> já com o texto <code>Primeira linha</code>, usando <code>New-Item</code> e <code>-Value</code>.</p>
+<pre class="script" data-file="main.ps1"># crie relatorio.txt com texto dentro
+</pre>
+<pre class="solucao" data-file="main.ps1">New-Item -Path relatorio.txt -Value "Primeira linha"
+</pre>
+</div>
+
+<hr>
+
+<h2>4. Pastas no meio do caminho</h2>
+<p>Quer criar <code>a\b\c</code> de uma vez, mesmo que <code>a</code> e <code>b</code> ainda não existam? O <code>New-Item</code> abre o caminho inteiro e devolve o comprovante só do <strong>último</strong> pedaço — a pasta <code>c</code>, que ficou dentro de <code>a\b</code>.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; New-Item -ItemType Directory a\b\c
+
+    Diretório: C:\Users\ana\guia-ps-teste\a\b
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----          20/11/2026    17:13                c
+
+</pre>
+<p>O título <code>Diretório:</code> agora é <code>C:\Users\ana\guia-ps-teste\a\b</code>: é lá que a pasta <code>c</code> nasceu. As pastas <code>a</code> e <code>b</code> também foram criadas, mas não ganharam uma tabela só para elas.</p>
+
+<hr>
+
+<h2>5. Vários arquivos de uma vez</h2>
+<p>Você pode passar uma lista de nomes, separados por vírgula. Com <code>-ItemType File</code>, fica claro que são arquivos (e não pastas).</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; New-Item -ItemType File um.txt, dois.txt
+
+    Diretório: C:\Users\ana\guia-ps-teste
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          20/11/2026    17:13              0 um.txt
+-a---          20/11/2026    17:13              0 dois.txt
+
+</pre>
+<p>Os dois nasceram vazios (<code>Length</code> 0), na mesma pasta, no mesmo horário. A vírgula é que monta a lista.</p>
+
+<hr>
+
+<h2>6. O atalho <code>mkdir</code></h2>
+<p>Quem vem do <code>cmd</code> ou do Linux já conhece o <code>mkdir</code> ("make directory", "fazer diretório"). No PowerShell ele também cria pasta — e o comprovante é o mesmo do <code>New-Item</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; mkdir docs
+
+    Diretório: C:\Users\ana\guia-ps-teste
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----          20/11/2026    17:13                docs
+
+PS C:\Users\ana\guia-ps-teste&gt; Get-Command mkdir | Select-Object Name, CommandType
+
+Name  CommandType
+----  -----------
+mkdir    Function
+
+</pre>
+<p>O <code>Get-Command mkdir</code> mostra a ficha dele: o nome é <code>mkdir</code>, mas o <code>CommandType</code> é <code>Function</code>, não um cmdlet. É uma função pronta que, por baixo, chama o <code>New-Item -ItemType Directory</code>. Funciona, e é ótimo no terminal do dia a dia. Nos scripts deste guia, preferimos o <code>New-Item</code> por extenso: fica óbvio o que a linha faz.</p>
+<div class="note">Função não é a mesma coisa que apelido (<code>alias</code>). Apelido é só outro nome para o mesmo comando (aula <a href="aliases.html">Apelidos</a>). Função é um pedacinho de código com nome. O efeito, aqui, é o mesmo: nasce uma pasta.</div>
+
+<hr>
+
+<h2>Formas de criar</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>New-Item nota.txt</code></td><td>Arquivo novo e vazio, na pasta atual.</td></tr>
+<tr><td><code>New-Item -ItemType Directory fotos</code></td><td>Pasta nova. É o jeito deste guia nos scripts.</td></tr>
+<tr><td><code>New-Item -Path relatorio.txt -Value "texto"</code></td><td>Arquivo já com conteúdo.</td></tr>
+<tr><td><code>New-Item -ItemType File um.txt, dois.txt</code></td><td>Vários arquivos vazios de uma vez.</td></tr>
+<tr><td><code>mkdir docs</code></td><td>Atalho no terminal, para quem já conhece o nome. Nos scripts, use o <code>New-Item</code>.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>O arquivo já existe</strong>
+<p>Tentamos criar de novo o <code>nota.txt</code>, que já estava na pasta:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; New-Item nota.txt
+New-Item: The file 'C:\Users\ana\guia-ps-teste\nota.txt' already exists.
+</pre>
+<p>A mensagem veio em <strong>inglês</strong>, mesmo no Windows em português. Isso acontece em alguns cmdlets do PowerShell 7: copie igual e leia com calma. Linha por linha:</p>
+<dl class="anatomy">
+  <dt>New-Item:</dt><dd>Qual comando reclamou.</dd>
+  <dt>The file '…\nota.txt' already exists.</dt><dd>"O arquivo já existe." Ele se recusou a sobrescrever o que já estava lá. Nada foi apagado.</dd>
+</dl>
+<p><strong>Como resolver:</strong> escolha outro nome, ou — só se você <strong>tiver certeza</strong> — use o <code>-Force</code> da próxima seção. Conferir com <a href="test-path.html">Test-Path</a> antes de criar também evita o erro.</p>
+<div class="note"><strong>No Windows PowerShell 5.1</strong> a mesma situação sai em português (<code>O arquivo '…' já existe.</code>) e vem com a ficha técnica longa (<code>No linha:</code>, <code>CategoryInfo</code>, <code>IOException</code>), no mesmo estilo do erro da aula <a href="primeiro-comando.html">Seu Primeiro Comando</a>.</div>
+</div>
+
+<h3>Reescrever de propósito: <code>-Force</code></h3>
+<p>O parâmetro <code>-Force</code> ("à força") manda criar mesmo assim. No laboratório, o <code>nota.txt</code> já existia e foi recriado:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; New-Item nota.txt -Force
+
+    Diretório: C:\Users\ana\guia-ps-teste
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          20/11/2026    17:13              0 nota.txt
+
+</pre>
+<div class="warning">
+<strong>Cuidado com o <code>-Force</code>.</strong> O comprovante mostra <code>Length</code> 0: o arquivo voltou a ficar <strong>vazio</strong>. O conteúdo antigo se perde, sem pergunta e sem ir para a Lixeira. Só use quando a intenção for realmente começar de novo.
+</div>
+
+<hr>
+
+<h2>Ensaiar sem criar: <code>-WhatIf</code></h2>
+<p>Quer ver o que o comando <strong>faria</strong>, sem mexer em nada? O parâmetro <code>-WhatIf</code> ("e se?") é um ensaio. Ele conta a operação e o destino, e para por aí.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; New-Item teste.txt -WhatIf
+What If: Executando a operação "Criar Arquivo" no destino "Destino: C:\Users\ana\guia-ps-teste\teste.txt".
+</pre>
+<dl class="anatomy">
+  <dt>-WhatIf</dt><dd>Não cria o arquivo. Só descreve o que aconteceria.</dd>
+  <dt>What If:</dt><dd>"E se…". No PowerShell 7 a frase começa assim, com I maiúsculo.</dd>
+  <dt>Executando a operação "Criar Arquivo"</dt><dd>O que ele faria: criar um arquivo.</dd>
+  <dt>Destino: C:\Users\ana\guia-ps-teste\teste.txt</dt><dd>Onde o arquivo nasceria. Depois do ensaio, <code>teste.txt</code> <strong>não</strong> está na pasta.</dd>
+</dl>
+<div class="note"><strong>No Windows PowerShell 5.1</strong> a mesma frase começa com <code>What if</code> (i minúsculo) e diz <code>Realizando a operação</code> em vez de <code>Executando a operação</code>. O efeito é o mesmo: nada é criado.</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>New-Item nota.txt</code></td><td>Cria um arquivo vazio chamado <code>nota.txt</code>.</td></tr>
+<tr><td><code>New-Item -ItemType Directory fotos</code></td><td>Cria a pasta <code>fotos</code>.</td></tr>
+<tr><td><code>New-Item -Path relatorio.txt -Value "texto"</code></td><td>Cria o arquivo já com o texto.</td></tr>
+<tr><td><code>New-Item -ItemType Directory a\b\c</code></td><td>Cria o caminho inteiro; o comprovante é da última pasta.</td></tr>
+<tr><td><code>New-Item -ItemType File um.txt, dois.txt</code></td><td>Cria vários arquivos vazios de uma vez.</td></tr>
+<tr><td><code>mkdir docs</code></td><td>Atalho (função) para criar a pasta <code>docs</code>.</td></tr>
+<tr><td><code>New-Item nota.txt -Force</code></td><td>Recria o arquivo mesmo se ele já existir (e esvazia o conteúdo).</td></tr>
+<tr><td><code>New-Item teste.txt -WhatIf</code></td><td>Ensaia a criação, sem criar de verdade.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete para criar a pasta <code>fotos</code>:</p>
+<div class="ex-code">New-Item -ItemType <input data-answer="Directory" aria-label="tipo"> fotos</div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual é a saída?</h3>
+<p>Depois de <code>New-Item -Path relatorio.txt -Value "Primeira linha"</code>, o que <code>Get-Content relatorio.txt</code> mostra?</p>
+<div class="ex-code">Saída: <input data-answer="Primeira linha" aria-label="saída"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Complete o ensaio</h3>
+<p>Complete para o PowerShell <strong>contar</strong> o que faria, sem criar o arquivo:</p>
+<div class="ex-code">New-Item teste.txt -<input data-answer="WhatIf" aria-label="parâmetro"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. No comprovante de <code>New-Item nota.txt</code>, o <code>Length</code> veio <code>0</code>. O que isso quer dizer?</p>
+<label><input type="radio" name="q4"> O comando falhou</label>
+<label><input type="radio" name="q4"> O arquivo está vazio</label>
+<label><input type="radio" name="q4"> O arquivo tem 0 dias de vida</label>
+<label><input type="radio" name="q4"> A pasta não existe</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Você rodou <code>New-Item nota.txt</code> e apareceu <code>The file '…\nota.txt' already exists.</code> O que aconteceu?</p>
+<label><input type="radio" name="q5"> O PowerShell apagou o arquivo antigo</label>
+<label><input type="radio" name="q5"> O arquivo foi para a Lixeira</label>
+<label><input type="radio" name="q5"> Ele não criou de novo: o arquivo que já existia continuou lá</label>
+<label><input type="radio" name="q5"> É preciso reiniciar o computador</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. O que o <code>Get-Command mkdir</code> mostrou sobre o <code>mkdir</code>?</p>
+<label><input type="radio" name="q6"> Que ele é uma função (<code>Function</code>)</label>
+<label><input type="radio" name="q6"> Que ele é um arquivo <code>.txt</code></label>
+<label><input type="radio" name="q6"> Que ele não existe no PowerShell 7</label>
+<label><input type="radio" name="q6"> Que ele apaga pastas</label>
+</div>
+
+<div class="tryps" data-goal="arquivo:um.txt;;arquivo:dois.txt;;src:\bNew-Item\b;;semerro">
+<p class="try-task"><strong>Missão final:</strong> crie, de uma vez, os arquivos vazios <code>um.txt</code> e <code>dois.txt</code> com <code>New-Item -ItemType File</code>.</p>
+<pre class="script" data-file="main.ps1"># crie um.txt e dois.txt
+</pre>
+<pre class="solucao" data-file="main.ps1">New-Item -ItemType File um.txt, dois.txt
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>New-Item</code> cria um item: arquivo ou pasta. Sem <code>-ItemType</code>, nasce um arquivo.</li>
+  <li><code>-ItemType Directory</code> cria pasta; <code>-ItemType File</code> deixa explícito que é arquivo.</li>
+  <li><code>-Value "texto"</code> já coloca conteúdo no arquivo novo.</li>
+  <li>Dá para criar um caminho inteiro (<code>a\b\c</code>) e vários nomes de uma vez, separados por vírgula.</li>
+  <li><code>mkdir</code> é uma função que cria pasta; nos scripts, prefira o <code>New-Item</code>.</li>
+  <li>Se o arquivo já existe, o PowerShell 7 recusa (mensagem em inglês: <code>already exists</code>). O <code>-Force</code> recria e <strong>esvazia</strong> o arquivo.</li>
+  <li><code>-WhatIf</code> ensaia sem criar. Pratique sempre numa pasta de teste.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
