@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell O Registro do Windows — HKCU, HKLM, Get-ItemProperty e New-Item | Guia PowerShell</title>
+<meta name="description" content="O Registro do Windows no PowerShell: drives HKCU e HKLM, leitura de uma propriedade, chave de teste em HKCU:\Software\GuiaPowerShell, -WhatIf ao apagar e os erros reais em português, colhidos no PowerShell 7.7.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>O <span class="hl">Registro</span> do Windows</h1>
+
+<p class="intro">O Windows guarda muita configuração numa espécie de ficha enorme, chamada <strong>Registro</strong>. Programas e o próprio sistema leem e escrevem lá. No PowerShell, essa ficha aparece como se fosse um disco: os drives <code>HKCU:</code> e <code>HKLM:</code>, com as mesmas famílias de comandos que você já usa em pastas (<code>New-Item</code>, <code>Get-ChildItem</code>, <code>Remove-Item</code>). Mexer no lugar errado pode estragar o Windows. Por isso esta aula escreve <strong>somente</strong> numa chave de teste, e a apaga no fim.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Que o Registro é um provedor <span class="versao">só Windows</span>, com os drives <code>HKCU:</code> (usuário atual) e <code>HKLM:</code> (o computador inteiro).</li>
+  <li>A <strong>ler</strong> uma propriedade pelo nome, com <code>Get-ItemProperty</code> e <code>Get-ItemPropertyValue</code>.</li>
+  <li>A criar a chave de teste <code>HKCU:\Software\GuiaPowerShell</code>, gravar valores (<code>String</code> e <code>DWord</code>), alterar, criar uma subchave e apagar um valor.</li>
+  <li>A ensaiar a remoção com <code>-WhatIf</code> e, no fim, apagar a chave e conferir que ela sumiu (<code>Test-Path</code> deu <code>False</code>).</li>
+  <li>Os erros reais em português: propriedade que não existe e caminho que não existe.</li>
+</ul>
+</div>
+
+<p>Todas as saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta pessoal da usuária fictícia <code>ana</code>. O editor do guia é um PowerShell 7 de Linux: o provedor do Registro <strong>não existe</strong> lá. As missões pedem que você <strong>escreva</strong> o comando certo, sem tentá-lo no editor.</p>
+
+<div class="warning">
+<strong>Esses comandos mudam o sistema.</strong> Pratique somente com a chave de teste <code>HKCU:\Software\GuiaPowerShell</code>. Não grave, não renomeie e não apague nenhuma outra chave. <code>HKLM:</code> nesta aula é <strong>só leitura</strong>, e só de três propriedades já pedidas pelo nome — nada de dono do Windows, listas de programas ou outras fichas. Uma remoção no Registro <strong>não vai para a Lixeira</strong>. No fim, apague a chave de teste e confira que ela não existe mais.
+</div>
+
+<hr>
+
+<h2>A ideia: um armário de fichas</h2>
+<p>Pense num armário no porão do Windows, cheio de pastas. Cada gaveta é um <strong>hive</strong> (uma colmeia de chaves). Dentro há pastas (as <strong>chaves</strong>) e, em cada pasta, formulários preenchidos (os <strong>valores</strong>, cada um com um nome e um conteúdo). Você já viu esse armário de relance na aula de <a href="provedores.html">drives e provedores</a>; agora vamos abrir uma pasta só nossa, escrever nela e fechá-la no fim.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>No armário</th><th>No PowerShell</th></tr>
+<tr><td>A gaveta das suas coisas</td><td><code>HKCU:</code> — <code>HKEY_CURRENT_USER</code>, o usuário atual</td></tr>
+<tr><td>A gaveta do prédio inteiro</td><td><code>HKLM:</code> — <code>HKEY_LOCAL_MACHINE</code>, o computador (só leitura nesta aula)</td></tr>
+<tr><td>Uma pasta dentro da gaveta</td><td>Uma <strong>chave</strong>, como <code>HKCU:\Software\GuiaPowerShell</code></td></tr>
+<tr><td>Um campo no formulário</td><td>Uma <strong>propriedade</strong> (nome + valor), como <code>Versao = 1.0</code></td></tr>
+<tr><td>A mesma chave de sempre</td><td><code>New-Item</code>, <code>Get-ChildItem</code>, <code>Remove-Item</code>, agora no Registro</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>1. Os dois drives: <code>HKCU</code> e <code>HKLM</code></h2>
+<p>O provedor se chama <code>Registry</code>. Pedindo só os drives dele:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-PSDrive -PSProvider Registry
+
+Name           Used (GB)     Free (GB) Provider      Root                                                CurrentLocation
+----           ---------     --------- --------      ----                                                ---------------
+HKCU                                   Registry      HKEY_CURRENT_USER
+HKLM                                   Registry      HKEY_LOCAL_MACHINE
+
+</pre>
+<dl class="anatomy">
+  <dt>HKCU</dt><dd><em>HKEY_CURRENT_USER</em>: as configurações da conta que está logada. É o único lugar em que esta aula <strong>escreve</strong>.</dd>
+  <dt>HKLM</dt><dd><em>HKEY_LOCAL_MACHINE</em>: as configurações do computador. Mudar daqui pode afetar todo mundo que usa a máquina. Nesta aula, só lemos.</dd>
+  <dt>Used / Free</dt><dd>Vieram em branco: o Registro não é um disco com gigabytes livres.</dd>
+</dl>
+
+<hr>
+
+<h2>2. Ler uma propriedade, pelo nome</h2>
+<p>O Windows guarda a versão em <code>HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion</code>. Pedimos <strong>só três nomes</strong>, e depois só o número da compilação:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' | Select-Object ProductName, DisplayVersion, CurrentBuild
+
+ProductName                     DisplayVersion CurrentBuild
+-----------                     -------------- ------------
+Windows 10 Pro for Workstations 22H2           19045
+
+PS C:\Users\ana&gt; Get-ItemPropertyValue -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name CurrentBuild
+19045
+</pre>
+<dl class="anatomy">
+  <dt>Get-ItemProperty</dt><dd>"Obter propriedades do item." Devolve um objeto com os valores daquela chave. Aqui filtramos para três nomes, e só isso.</dd>
+  <dt>Get-ItemPropertyValue</dt><dd>"Obter o valor da propriedade." Com <code>-Name</code>, devolve só o conteúdo: <code>19045</code>, sem o resto da ficha.</dd>
+</dl>
+<p>No seu computador o texto da edição pode ser outro. Não peça propriedades além dessas três — principalmente nada que identifique o dono da máquina.</p>
+
+<div class="tryps" data-goal="src:Get-PSDrive;;src:-PSProvider;;src:Registry;;semerro">
+<p class="try-task"><strong>Experimente:</strong> o editor do guia não tem o Registro do Windows, então <strong>não rode</strong> o cmdlet. Escreva, numa string, o comando que lista só os drives do provedor <code>Registry</code>, e deixe o <code>Write-Output</code> mostrar a string.</p>
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'Get-PSDrive -PSProvider Registry'
+Write-Output $comando
+</pre>
+</div>
+
+<hr>
+
+<h2>3. Criar a chave de teste e os valores</h2>
+<p>A chave de teste mora em <code>HKCU:\Software\GuiaPowerShell</code> — dentro da gaveta do usuário atual, num nome combinado, que ninguém mais deve estar usando. O <code>New-Item</code>, o mesmo da aula de <a href="new-item.html">criar arquivos</a>, cria a chave:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; New-Item -Path 'HKCU:\Software\GuiaPowerShell'
+
+    Hive: HKEY_CURRENT_USER\Software
+
+Name                           Property
+----                           --------
+GuiaPowerShell
+
+</pre>
+<p>O comprovante mostra o hive (<code>HKEY_CURRENT_USER\Software</code>) e o nome da chave nova, ainda sem propriedades. Agora gravamos dois valores: um texto (<code>String</code>) e um número inteiro (<code>DWord</code>).</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; New-ItemProperty -Path 'HKCU:\Software\GuiaPowerShell' -Name 'Versao' -Value '1.0' -PropertyType String
+
+Versao       : 1.0
+PSPath       : Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\Software\GuiaPowerShell
+PSParentPath : Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\Software
+PSChildName  : GuiaPowerShell
+PSDrive      : HKCU
+PSProvider   : Microsoft.PowerShell.Core\Registry
+
+PS C:\Users\ana&gt; New-ItemProperty -Path 'HKCU:\Software\GuiaPowerShell' -Name 'Contador' -Value 1 -PropertyType DWord
+
+Contador     : 1
+PSPath       : Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\Software\GuiaPowerShell
+PSParentPath : Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\Software
+PSChildName  : GuiaPowerShell
+PSDrive      : HKCU
+PSProvider   : Microsoft.PowerShell.Core\Registry
+
+</pre>
+<dl class="anatomy">
+  <dt>New-ItemProperty</dt><dd>"Nova propriedade do item." <code>-Name</code> é o campo, <code>-Value</code> é o conteúdo, <code>-PropertyType</code> é o tipo: <code>String</code> (texto) ou <code>DWord</code> (número inteiro de 32 bits).</dd>
+  <dt>Versao / Contador</dt><dd>Os valores que a gente pediu. É o que interessa.</dd>
+  <dt>PSPath, PSDrive, PSProvider</dt><dd>O provedor acrescenta esses campos para dizer onde a chave mora. Não são valores que você gravou.</dd>
+</dl>
+<p>Lendo a chave inteira, os dois valores aparecem juntos:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-ItemProperty -Path 'HKCU:\Software\GuiaPowerShell'
+
+Versao       : 1.0
+Contador     : 1
+PSPath       : Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\Software\GuiaPowerShell
+PSParentPath : Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\Software
+PSChildName  : GuiaPowerShell
+PSDrive      : HKCU
+PSProvider   : Microsoft.PowerShell.Core\Registry
+
+</pre>
+
+<hr>
+
+<h2>4. Alterar, criar uma subchave e apagar um valor</h2>
+<p>O <code>Set-ItemProperty</code> muda um valor que já existe. O <code>Contador</code> passou de 1 para 2, e o <code>Get-ItemPropertyValue</code> confirma:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Set-ItemProperty -Path 'HKCU:\Software\GuiaPowerShell' -Name 'Contador' -Value 2
+PS C:\Users\ana&gt; Get-ItemPropertyValue -Path 'HKCU:\Software\GuiaPowerShell' -Name 'Contador'
+2
+</pre>
+<p>Uma <strong>subchave</strong> é uma pasta dentro da pasta. O <code>New-Item</code> cria <code>Config</code> dentro da chave de teste, e o <code>Get-ChildItem</code> lista o que tem dentro — só a subchave, neste caso:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; New-Item -Path 'HKCU:\Software\GuiaPowerShell\Config'
+
+    Hive: HKEY_CURRENT_USER\Software\GuiaPowerShell
+
+Name                           Property
+----                           --------
+Config
+
+PS C:\Users\ana&gt; Get-ChildItem -Path 'HKCU:\Software\GuiaPowerShell'
+
+    Hive: HKEY_CURRENT_USER\Software\GuiaPowerShell
+
+Name                           Property
+----                           --------
+Config
+
+</pre>
+<p>O <code>Remove-ItemProperty</code> apaga <strong>um valor</strong>, não a chave. Depois de tirar a <code>Versao</code>, a leitura mostra só o <code>Contador</code>, já com o valor 2:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Remove-ItemProperty -Path 'HKCU:\Software\GuiaPowerShell' -Name 'Versao'
+PS C:\Users\ana&gt; Get-ItemProperty -Path 'HKCU:\Software\GuiaPowerShell'
+
+Contador     : 2
+PSPath       : Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\Software\GuiaPowerShell
+PSParentPath : Microsoft.PowerShell.Core\Registry::HKEY_CURRENT_USER\Software
+PSChildName  : GuiaPowerShell
+PSDrive      : HKCU
+PSProvider   : Microsoft.PowerShell.Core\Registry
+
+</pre>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>A propriedade não existe</strong>
+<p>Pedimos o valor de um nome que nunca foi gravado na chave de teste:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-ItemPropertyValue -Path 'HKCU:\Software\GuiaPowerShell' -Name 'NaoExiste'
+Get-ItemPropertyValue: A propriedade NaoExiste não existe no caminho HKEY_CURRENT_USER\Software\GuiaPowerShell.
+</pre>
+<dl class="anatomy">
+  <dt>Get-ItemPropertyValue:</dt><dd>Qual comando reclamou.</dd>
+  <dt>A propriedade NaoExiste não existe</dt><dd>A mensagem veio em <strong>português</strong>. O nome <code>NaoExiste</code> não estava na chave. Nada foi criado nem apagado.</dd>
+  <dt>no caminho HKEY_CURRENT_USER\Software\GuiaPowerShell</dt><dd>A chave em si existia; o que faltava era só aquele campo.</dd>
+</dl>
+<p><strong>Como resolver:</strong> confira o nome com <code>Get-ItemProperty</code> (ele lista os valores que estão lá) ou grave o campo antes com <code>New-ItemProperty</code>.</p>
+</div>
+
+<div class="cenario">
+<strong>O caminho não existe</strong>
+<p>Pedimos uma chave que nunca foi criada:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Item -Path 'HKCU:\Software\GuiaNaoExiste'
+Get-Item: Não é possível localizar o caminho 'HKCU:\Software\GuiaNaoExiste' porque ele não existe.
+</pre>
+<p>A mensagem, também em português, é a mesma ideia do arquivo que não está na pasta: o caminho <code>HKCU:\Software\GuiaNaoExiste</code> não existe. Confira a grafia, ou crie a chave de teste com <code>New-Item</code> antes de gravar valores. E não tente "adivinhar" outras chaves para inspecionar — fique na de teste.</p>
+</div>
+
+<hr>
+
+<h2>5. Ensaio com <code>-WhatIf</code> e limpeza</h2>
+<p>Apagar uma chave do Registro é definitivo. O hábito seguro é ensaiar antes, com <code>-WhatIf</code> ("e se?"). Ele conta o que faria e <strong>não apaga</strong>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Remove-Item -Path 'HKCU:\Software\GuiaPowerShell' -Recurse -WhatIf
+What If: Executando a operação "Remover Chave" no destino "Item: HKEY_CURRENT_USER\Software\GuiaPowerShell".
+</pre>
+<dl class="anatomy">
+  <dt>-WhatIf</dt><dd>Não remove nada. Só descreve a operação.</dd>
+  <dt>-Recurse</dt><dd>"Em profundidade." Sem isso, o <code>Remove-Item</code> recusaria a chave porque ela ainda tinha a subchave <code>Config</code>. Aqui o <code>-Recurse</code> vale <strong>somente</strong> para a chave de teste, cujo caminho está escrito por extenso, sem curinga.</dd>
+  <dt>What If: Executando a operação "Remover Chave"</dt><dd>O ensaio, em português. Depois desta linha, a chave <strong>ainda existia</strong>.</dd>
+</dl>
+<p>No fim da prática, a chave de teste foi apagada de verdade, e o <a href="test-path.html">Test-Path</a> confirmou que ela não existia mais:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Remove-Item -Path 'HKCU:\Software\GuiaPowerShell' -Recurse -ErrorAction SilentlyContinue
+PS C:\Users\ana&gt; Test-Path 'HKCU:\Software\GuiaPowerShell'
+False
+</pre>
+<p>O <code>-ErrorAction SilentlyContinue</code> manda o comando seguir quieto se a chave já tiver sumido — útil no roteiro de limpeza, para não parar no meio. O <code>False</code> é o que importa: a chave de teste não está mais no Registro.</p>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Get-PSDrive -PSProvider Registry</code></td><td>Mostra os drives <code>HKCU</code> e <code>HKLM</code>.</td></tr>
+<tr><td><code>Get-ItemProperty -Path '…' | Select-Object Nome1, Nome2</code></td><td>Lê só as propriedades pedidas.</td></tr>
+<tr><td><code>Get-ItemPropertyValue -Path '…' -Name CurrentBuild</code></td><td>Devolve só o valor daquele nome.</td></tr>
+<tr><td><code>New-Item -Path 'HKCU:\Software\GuiaPowerShell'</code></td><td>Cria a chave de teste (só essa).</td></tr>
+<tr><td><code>New-ItemProperty -Path '…' -Name 'Versao' -Value '1.0' -PropertyType String</code></td><td>Grava um valor de texto.</td></tr>
+<tr><td><code>Set-ItemProperty -Path '…' -Name 'Contador' -Value 2</code></td><td>Altera um valor que já existe.</td></tr>
+<tr><td><code>Get-ChildItem -Path 'HKCU:\Software\GuiaPowerShell'</code></td><td>Lista as subchaves da chave de teste.</td></tr>
+<tr><td><code>Remove-ItemProperty -Path '…' -Name 'Versao'</code></td><td>Apaga um valor, não a chave.</td></tr>
+<tr><td><code>Remove-Item -Path 'HKCU:\Software\GuiaPowerShell' -Recurse -WhatIf</code></td><td>Ensaia a remoção da chave de teste, sem apagar.</td></tr>
+<tr><td><code>Test-Path 'HKCU:\Software\GuiaPowerShell'</code></td><td>Confere se a chave de teste ainda existe.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete para listar só os drives do Registro:</p>
+<div class="ex-code">Get-PSDrive -PSProvider <input data-answer="Registry" aria-label="provedor"></div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual é o valor?</h3>
+<p>Depois de <code>Set-ItemProperty … -Name 'Contador' -Value 2</code>, o que <code>Get-ItemPropertyValue … -Name 'Contador'</code> mostrou no laboratório?</p>
+<div class="ex-code">Valor: <input data-answer="2" aria-label="valor"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Complete o ensaio</h3>
+<p>Complete para o PowerShell <strong>contar</strong> o que faria, sem apagar a chave de teste:</p>
+<div class="ex-code">Remove-Item -Path 'HKCU:\Software\GuiaPowerShell' -Recurse -<input data-answer="WhatIf" aria-label="parâmetro"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Onde esta aula permite <strong>escrever</strong>?</p>
+<label><input type="radio" name="q4"> Em qualquer chave de <code>HKLM:</code></label>
+<label><input type="radio" name="q4"> Só na chave de teste <code>HKCU:\Software\GuiaPowerShell</code></label>
+<label><input type="radio" name="q4"> Em <code>HKCU:\Software</code> inteiro</label>
+<label><input type="radio" name="q4"> Em nenhum lugar: o Registro é só leitura</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Você rodou <code>Remove-Item -Path 'HKCU:\Software\GuiaPowerShell' -Recurse -WhatIf</code> e apareceu <code>What If: Executando a operação "Remover Chave"…</code>. A chave foi apagada?</p>
+<label><input type="radio" name="q5"> Sim, e foi para a Lixeira</label>
+<label><input type="radio" name="q5"> Sim, na hora</label>
+<label><input type="radio" name="q5"> Não: o <code>-WhatIf</code> só ensaiou, a chave continuou lá</label>
+<label><input type="radio" name="q5"> Só a subchave <code>Config</code> foi apagada</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. O <code>Get-ItemPropertyValue</code> pediu o nome <code>NaoExiste</code> e o PowerShell 7 respondeu em português. O que a mensagem disse, em essência?</p>
+<label><input type="radio" name="q6"> Que a propriedade <code>NaoExiste</code> não existe naquela chave</label>
+<label><input type="radio" name="q6"> Que o drive <code>HKCU:</code> não existe</label>
+<label><input type="radio" name="q6"> Que a chave de teste foi apagada</label>
+<label><input type="radio" name="q6"> Que é preciso reiniciar o computador</label>
+</div>
+
+<div class="tryps" data-goal="src:Remove-Item;;src:GuiaPowerShell;;src:-WhatIf;;semerro">
+<p class="try-task"><strong>Missão final:</strong> ainda numa string, escreva o comando que <strong>ensaia</strong> a remoção da chave de teste <code>HKCU:\Software\GuiaPowerShell</code>, com <code>-Recurse</code> e <code>-WhatIf</code>. Não chame o cmdlet: o editor não deve mexer no Registro.</p>
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = "Remove-Item -Path 'HKCU:\Software\GuiaPowerShell' -Recurse -WhatIf"
+Write-Output $comando
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>O Registro é um armário de configurações do Windows. No PowerShell ele aparece como os drives <code>HKCU:</code> (usuário atual) e <code>HKLM:</code> (o computador). É <span class="versao">só Windows</span>.</li>
+  <li>Pratique somente na chave de teste <code>HKCU:\Software\GuiaPowerShell</code>. <code>HKLM:</code> nesta aula é só leitura, e só das propriedades pedidas pelo nome.</li>
+  <li><code>Get-ItemProperty</code> / <code>Get-ItemPropertyValue</code> leem; <code>New-Item</code> cria a chave; <code>New-ItemProperty</code> e <code>Set-ItemProperty</code> gravam e alteram valores; <code>Remove-ItemProperty</code> apaga um valor.</li>
+  <li><code>-WhatIf</code> ensaia a remoção sem apagar. No fim, <code>Remove-Item -Recurse</code> na chave de teste e <code>Test-Path</code> deve dar <code>False</code>.</li>
+  <li>Os erros desta aula saíram em português: propriedade que não existe e caminho que não existe.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
