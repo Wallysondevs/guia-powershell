@@ -152,13 +152,14 @@ PS C:\Users\ana&gt; Set-StrictMode -Off
 
 <div class="cenario">
 <strong>Vírgula no lugar de ponto e vírgula</strong>
-<p>Este erro foi colhido rodando o código errado como texto, com o <code>Invoke-Expression</code>; por isso a mensagem começa com <code>Invoke-Expression:</code>.</p>
-<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Invoke-Expression 'for ($i = 1, $i -le 3, $i++) { $i }'
-Invoke-Expression: Could not compare "1" to "3 1". Error: "Cannot convert the "System.Object[]" value of type "System.Object[]" to type "System.Int32"."
+<p>Colhido num terminal novo, onde o <code>$i</code> ainda não existia:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; for ($i = 1, $i -le 3, $i++) { $i }
+InvalidOperation: Could not compare "1" to "3 0". Error: "Cannot convert the "System.Object[]" value of type "System.Object[]" to type "System.Int32"."
 </pre>
 <dl class="anatomy">
-  <dt>for ($i = 1, $i -le 3, $i++)</dt><dd>Com vírgulas, o PowerShell não enxerga mais três partes. A vírgula, para ele, cria uma <strong>lista</strong>, então tudo virou uma expressão só, cheia de listas.</dd>
-  <dt>Could not compare "1" to "3 1"</dt><dd>Quer dizer que ele não conseguiu comparar o número 1 com <code>3 1</code>, que é uma lista de dois valores (3 e 1), e não um número.</dd>
+  <dt>for ($i = 1, $i -le 3, $i++)</dt><dd>Com vírgulas, o PowerShell não enxerga mais três partes. A vírgula, para ele, cria uma <strong>lista</strong>, então tudo virou uma expressão só, cheia de listas. Repare que não é um <code>ParserError</code>: o código é "válido", e o erro só aparece quando ele roda.</dd>
+  <dt>InvalidOperation</dt><dd>O tipo do erro: uma operação inválida, descoberta durante a execução.</dd>
+  <dt>Could not compare "1" to "3 0"</dt><dd>Quer dizer que ele não conseguiu comparar o número 1 com <code>3 0</code>, que é uma lista de dois valores (3 e 0), e não um número.</dd>
   <dt>Cannot convert ... System.Object[] ... to type "System.Int32"</dt><dd>O motivo: uma lista (<code>System.Object[]</code>) não pode ser convertida num número inteiro (<code>System.Int32</code>).</dd>
 </dl>
 <p><strong>Como resolver:</strong> as três partes do <code>for</code> se separam com <strong>ponto e vírgula</strong>: <code>for ($i = 1; $i -le 3; $i++)</code>.</p>
