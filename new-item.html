@@ -253,6 +253,20 @@ What If: Executando a operação "Criar Arquivo" no destino "Destino: C:\Users\a
 
 <hr>
 
+<h2>Formas diferentes de criar</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>New-Item -ItemType Directory -Path docs</code></td><td>O jeito deste guia nos scripts: pasta nova, com o tipo e o caminho nomeados.</td></tr>
+<tr><td><code>New-Item docs -ItemType Directory</code></td><td>A mesma pasta, com o caminho na posição.</td></tr>
+<tr><td><code>mkdir docs</code></td><td>Atalho (função) no terminal; por baixo chama o <code>New-Item -ItemType Directory</code>. Nos scripts, o nome completo.</td></tr>
+<tr><td><code>md docs</code></td><td>Apelido de <code>mkdir</code>. Só no terminal.</td></tr>
+<tr><td><code>ni nota.txt</code></td><td>Apelido de <code>New-Item</code>: cria o arquivo vazio <code>nota.txt</code>. Nos scripts, o nome completo.</td></tr>
+</table>
+</div>
+
+<hr>
+
 <h2>Referência rápida</h2>
 <div class="table-wrap">
 <table class="ref">
