@@ -20,7 +20,6 @@ Set-LocalUser -Name 'guia-teste' -Description 'Conta de teste do Guia PowerShell
 Get-LocalUser -Name 'guia-teste' | Select-Object Name, Description
 ## grupo Usuários
 Add-LocalGroupMember -Group 'Usuários' -Member 'guia-teste'
-Get-LocalGroupMember -Group 'Usuários' -Member 'guia-teste'
 Remove-LocalGroupMember -Group 'Usuários' -Member 'guia-teste'
 ## erros
 New-LocalUser -Name 'guia-teste' -NoPassword   #ERRO
