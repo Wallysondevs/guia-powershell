@@ -131,6 +131,17 @@ PS C:\Users\ana&gt; Get-Variable IsWindows, IsLinux, IsMacOS -ErrorAction Silent
 </pre>
 </div>
 <hr>
+<h2>Formas diferentes de saber a versão</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>$PSVersionTable.PSVersion</code></td><td>Só a versão, em colunas.</td></tr>
+<tr><td><code>$PSVersionTable</code></td><td>A ficha técnica inteira.</td></tr>
+<tr><td><code>$PSEdition</code></td><td>Só a edição: <code>Core</code> (7) ou <code>Desktop</code> (5.1).</td></tr>
+<tr><td><code>$Host.Version</code></td><td>A versão do programa que hospeda o PowerShell; no console costuma bater com a do PowerShell, mas em outros programas pode ser outra. Prefira <code>$PSVersionTable</code>.</td></tr>
+</table>
+</div>
+<hr>
 <h2>Quando dá errado</h2>
 <div class="cenario">
 <strong>Leu o <code>$?</code> tarde demais</strong>
@@ -170,19 +181,25 @@ Verifique a ortografia do nome ou, se um caminho foi incluído, verifique se o c
 <p>Complete para multiplicar cada item por 2:</p>
 <div class="ex-code">1, 2, 3 | ForEach-Object { <input data-answer="$_" aria-label="resposta"> * 2 }</div>
 </div>
+<div class="exercise">
+<h3>3. Sistema</h3>
+<p>Complete com a variável que diz se o sistema é Windows (só no 7):</p>
+<div class="ex-code">if (<input data-answer="$IsWindows" aria-label="resposta">) { "Windows" }</div>
+</div>
+
 <div class="mc" data-answer="2">
-<p class="mc-q">3. Depois de um comando que deu erro, quanto vale <code>$?</code>?</p>
-<label><input type="radio" name="q3"> True</label>
-<label><input type="radio" name="q3"> False</label>
-<label><input type="radio" name="q3"> $null</label>
-<label><input type="radio" name="q3"> 0</label>
+<p class="mc-q">4. Depois de um comando que deu erro, quanto vale <code>$?</code>?</p>
+<label><input type="radio" name="q4"> True</label>
+<label><input type="radio" name="q4"> False</label>
+<label><input type="radio" name="q4"> $null</label>
+<label><input type="radio" name="q4"> 0</label>
 </div>
 <div class="mc" data-answer="2">
-<p class="mc-q">4. No Windows PowerShell 5.1, o que <code>$PSEdition</code> mostra?</p>
-<label><input type="radio" name="q4"> Core</label>
-<label><input type="radio" name="q4"> Desktop</label>
-<label><input type="radio" name="q4"> 5.1</label>
-<label><input type="radio" name="q4"> Windows</label>
+<p class="mc-q">5. No Windows PowerShell 5.1, o que <code>$PSEdition</code> mostra?</p>
+<label><input type="radio" name="q5"> Core</label>
+<label><input type="radio" name="q5"> Desktop</label>
+<label><input type="radio" name="q5"> 5.1</label>
+<label><input type="radio" name="q5"> Windows</label>
 </div>
 <div class="tryps" data-goal="out:Linux? True;;semerro">
 <p class="try-task"><strong>Missão final:</strong> mostre <code>Linux? True</code> usando a variável automática certa (o editor é um PowerShell de Linux).</p>
