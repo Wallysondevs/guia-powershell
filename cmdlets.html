@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Cmdlets: Verbo-Substantivo — Get-Verb, Get-Command e a regra dos nomes | Guia PowerShell</title>
+<meta name="description" content="O padrão Verbo-Substantivo dos cmdlets do PowerShell: Get-Verb, os verbos Get, Set, New e Remove, a família Item, o Get-Command para inspecionar um comando, e o erro real de um nome inventado em português (Pegar-Data), explicado linha por linha.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Cmdlets</span>: Verbo-Substantivo</h1>
+
+<p class="intro">Na aula anterior você digitou <code>Get-Date</code> e o PowerShell entendeu. Não foi sorte: quase todo comando do PowerShell segue a mesma regra de nome, <strong>Verbo-Substantivo</strong>. Nesta aula você vai aprender a ler esse nome, conhecer os verbos que mais aparecem e descobrir a “família” de um substantivo. No fim, a gente erra de propósito, traduzindo o comando para o português, para ver a mensagem real.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é um <strong>cmdlet</strong> (lê-se “comand-let”) e a regra <strong>Verbo-Substantivo</strong>.</li>
+  <li>O <code>Get-Verb</code>, que lista os verbos oficiais, e quantos existem no PowerShell 7.</li>
+  <li>Os quatro verbos que você mais vai usar: <code>Get</code>, <code>Set</code>, <code>New</code> e <code>Remove</code>.</li>
+  <li>O <code>Get-Command</code>, para achar os cmdlets de um verbo ou de um substantivo.</li>
+  <li>A ficha de um cmdlet: nome, tipo, módulo e versão.</li>
+  <li>O erro real de quem inventa um nome em português, como <code>Pegar-Data</code>.</li>
+</ul>
+</div>
+
+<p>Todas as saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta pessoal da usuária fictícia <code>ana</code>. Quando o Windows PowerShell 5.1 responde diferente, a aula avisa.</p>
+
+<hr>
+
+<h2>A ideia: uma caixa de ferramentas com etiqueta</h2>
+<p>Pense numa caixa de ferramentas em que cada ferramenta tem uma etiqueta de duas partes: <strong>o que ela faz</strong> e <strong>em quê ela faz</strong>. Não existe uma ferramenta genérica chamada “data” ou “arquivo”. Existe “obter a data”, “criar um item”, “apagar um item”.</p>
+<p>No PowerShell é igual. O nome do comando — o <strong>cmdlet</strong>, um “comandinho” pronto — é sempre <strong>Verbo-Substantivo</strong>, colados por um hífen, sem espaço: <code>Get-Date</code>, <code>New-Item</code>, <code>Remove-Item</code>.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Na caixa de ferramentas</th><th>No PowerShell</th></tr>
+<tr><td>O que a ferramenta faz</td><td>O <strong>verbo</strong>: <code>Get</code>, <code>New</code>, <code>Set</code>, <code>Remove</code>…</td></tr>
+<tr><td>Em quê ela faz</td><td>O <strong>substantivo</strong>: <code>Date</code>, <code>Item</code>, <code>Process</code>…</td></tr>
+<tr><td>A etiqueta completa</td><td>O cmdlet: <code>Get-Date</code>, <code>New-Item</code></td></tr>
+<tr><td>O gaveteiro das etiquetas</td><td>O <code>Get-Verb</code> e o <code>Get-Command</code></td></tr>
+</table>
+</div>
+
+<p>Você já usou um: <code>Get-Date</code>. Vale reler as duas metades.</p>
+<dl class="anatomy">
+  <dt>Get</dt><dd>O verbo: “obter”, “pegar”, “mostrar”. Cmdlets com <code>Get</code> em geral <strong>só leem</strong>: não apagam nem mudam nada. São os mais seguros para praticar.</dd>
+  <dt>-</dt><dd>O hífen junta as duas partes. Sem ele, ou com um espaço no meio (<code>Get Date</code>, <code>GetDate</code>), o PowerShell não reconhece o nome.</dd>
+  <dt>Date</dt><dd>O substantivo: “data”. Juntos: “obter a data”.</dd>
+</dl>
+<div class="note">Cmdlet se fala “comand-let”. É o nome que a Microsoft deu aos comandos nativos do PowerShell. Existem outros tipos de comando (funções, apelidos, programas de fora); a aula <a href="get-command.html">Get-Command: Achando Comandos</a> aprofunda isso. Por enquanto, pense: cmdlet = comando nativo com nome Verbo-Substantivo.</div>
+
+<hr>
+
+<h2>1. Quais verbos existem? <code>Get-Verb</code></h2>
+<p>O próprio PowerShell lista os verbos oficiais. O comando abaixo pede os verbos e, na mesma linha, pede para mostrar só os 10 primeiros. A barra vertical <code>|</code> é o <strong>pipeline</strong> (“esteira”): a saída de um comando entra no seguinte. Você vai estudá-lo com calma mais adiante; por enquanto leia assim: “pegue os verbos e mostre só os 10 primeiros”.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Verb | Select-Object -First 10
+
+Verb   AliasPrefix Group  Description
+----   ----------- -----  -----------
+Add    a           Common Adds a resource to a container, or attaches an item to another item
+Clear  cl          Common Removes all the resources from a container but does not delete the container
+Close  cs          Common Changes the state of a resource to make it inaccessible, unavailable, or unusable
+Copy   cp          Common Copies a resource to another name or to another container
+Enter  et          Common Specifies an action that allows the user to move into a resource
+Exit   ex          Common Sets the current environment or context to the most recently used context
+Find   fd          Common Looks for an object in a container that is unknown, implied, optional, or specified
+Format f           Common Arranges objects in a specified form or layout
+Get    g           Common Specifies an action that retrieves a resource
+Hide   h           Common Makes a resource undetectable
+</pre><dl class="anatomy">
+  <dt>Get-Verb</dt><dd>O cmdlet que lista os verbos oficiais. Ele também segue a regra: verbo <code>Get</code> + substantivo <code>Verb</code>.</dd>
+  <dt>| Select-Object -First 10</dt><dd>Depois da esteira, “quero só os 10 primeiros”. Sem isso, a lista inteira desceria a tela.</dd>
+  <dt>Verb</dt><dd>O verbo em si: <code>Add</code>, <code>Get</code>, <code>Hide</code>…</dd>
+  <dt>AliasPrefix</dt><dd>Uma abreviação oficial curta do verbo (o <code>g</code> de <code>Get</code>, o <code>a</code> de <code>Add</code>). Ela aparece em alguns apelidos; a aula <a href="aliases.html">Apelidos</a> explica isso.</dd>
+  <dt>Group</dt><dd>A família do verbo. Estes 10 primeiros são do grupo <code>Common</code> (“comuns”).</dd>
+  <dt>Description</dt><dd>A descrição oficial, <strong>em inglês</strong>, mesmo no Windows em português. É o texto da Microsoft; não é erro de tradução da sua máquina.</dd>
+</dl>
+<p>Quantos verbos oficiais são, no total? Peça a contagem:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; (Get-Verb).Count
+100
+</pre><p>Os parênteses pedem: “primeiro rode o <code>Get-Verb</code>, depois conte o resultado”. No PowerShell 7.7 desta máquina, o número é <strong>100</strong>.</p>
+<div class="note"><strong>No Windows PowerShell 5.1</strong> a lista é um pouco menor: <code>(Get-Verb).Count</code> deu <strong>98</strong>. E a tabela padrão do <code>Get-Verb</code> mostra só as colunas <code>Verb</code> e <code>Group</code> — sem <code>AliasPrefix</code> e sem a descrição.</div>
+
+<div class="tryps" data-goal="src:\bGet-Verb\b;;src:-Verb;;semerro">
+<p class="try-task"><strong>Experimente:</strong> troque o comando para mostrar só o verbo <code>Get</code>, com <code>Get-Verb -Verb Get</code>, e clique em Rodar.</p>
+<pre class="script" data-file="main.ps1">Get-Verb | Select-Object -First 10
+</pre>
+<pre class="solucao" data-file="main.ps1">Get-Verb -Verb Get
+</pre>
+</div>
+
+<hr>
+
+<h2>2. Os quatro verbos que você mais vai usar</h2>
+<p>De cem verbos, quatro resolvem a maior parte do dia a dia. Dá para pedi-los de uma vez só:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Verb -Verb Get, Set, New, Remove | Format-Table Verb, Group, Description
+
+Verb   Group  Description
+----   -----  -----------
+Get    Common Specifies an action that retrieves a resource
+New    Common Creates a resource
+Remove Common Deletes a resource from a container
+Set    Common Replaces data on an existing resource or creates a resource that contains some data
+</pre><div class="table-wrap">
+<table class="ref">
+<tr><th>Verbo</th><th>Em português</th><th>O que faz, na prática</th></tr>
+<tr><td><code>Get</code></td><td>Obter, pegar, listar</td><td>Mostra algo que já existe, <strong>sem mudar</strong>. Comece sempre por aqui.</td></tr>
+<tr><td><code>New</code></td><td>Criar</td><td>Cria algo novo: um arquivo, uma pasta, uma variável.</td></tr>
+<tr><td><code>Set</code></td><td>Definir, alterar</td><td>Muda algo que já existe (ou cria com algum valor).</td></tr>
+<tr><td><code>Remove</code></td><td>Remover, apagar</td><td>Tira algo de um lugar. Use com calma.</td></tr>
+</table>
+</div>
+<p>Uma dica de ouro: enquanto estiver aprendendo, fique nos <code>Get-*</code>. Eles só leem. Os <code>Remove-*</code> e muitos <code>Set-*</code> mudam o computador — neste guia, quando a gente precisar deles, a demonstração acontece numa pasta de teste e é desfeita no fim.</p>
+<div class="note"><strong>No Windows PowerShell 5.1</strong> o mesmo comando roda, mas a coluna <code>Description</code> vem vazia: o <code>Get-Verb</code> do 5.1 não traz esse texto.</div>
+
+<hr>
+
+<h2>3. Quantos cmdlets começam com <code>Get</code>?</h2>
+<p>Se o verbo é a ação, dá para perguntar ao PowerShell: “quantos comandos seus usam o verbo <code>Get</code>?”. Quem responde é o <code>Get-Command</code> (aula completa logo adiante). O <code>Measure-Object</code> conta o que chegou pela esteira.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Command -Verb Get | Measure-Object
+
+Count             : 432
+Average           : 
+Sum               : 
+Maximum           : 
+Minimum           : 
+StandardDeviation : 
+Property          : 
+</pre><p>O que importa nesta aula é o <code>Count</code>: <strong>432</strong> cmdlets (e outros comandos) com o verbo <code>Get</code>, neste computador, no PowerShell 7.7. Os outros campos (média, soma, máximo…) vêm vazios porque a gente não pediu para medir uma propriedade — só quis a quantidade.</p>
+<div class="note">Esse número <strong>não é fixo</strong>: ele depende da versão do PowerShell e do que está instalado. No Windows PowerShell 5.1, na mesma máquina, a conta deu <strong>437</strong>. Não tente decorar o número; o que vale é o jeito de perguntar.</div>
+
+<hr>
+
+<h2>4. A família de um substantivo: <code>Item</code></h2>
+<p>Agora o outro lado da etiqueta. Se o substantivo é o “em quê”, que ferramentas existem para mexer com um <code>Item</code> (um arquivo, uma pasta, uma entrada)? Peça os comandos cujo substantivo é <code>Item</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Command -Noun Item | Format-Table Name, CommandType
+
+Name        CommandType
+----        -----------
+Clear-Item       Cmdlet
+Copy-Item        Cmdlet
+Get-Item         Cmdlet
+Invoke-Item      Cmdlet
+Move-Item        Cmdlet
+New-Item         Cmdlet
+Remove-Item      Cmdlet
+Rename-Item      Cmdlet
+Set-Item         Cmdlet
+</pre><p>Olha que organização: é uma família inteira. <code>Get-Item</code> obtém, <code>New-Item</code> cria, <code>Copy-Item</code> copia, <code>Move-Item</code> move, <code>Rename-Item</code> renomeia, <code>Remove-Item</code> apaga, <code>Set-Item</code> altera, <code>Clear-Item</code> esvazia, <code>Invoke-Item</code> “abre” o item (como um clique duplo). Você não precisa decorar a lista: quando esquecer, pergunta de novo com <code>Get-Command -Noun Item</code>.</p>
+<p>A coluna <code>CommandType</code> diz o tipo: aqui todos são <code>Cmdlet</code>. Isso vai importar na aula <a href="get-command.html">Get-Command: Achando Comandos</a>.</p>
+
+<div class="tryps" data-goal="src:\bGet-Command\b;;src:-Noun;;out:Get-Item;;semerro">
+<p class="try-task"><strong>Missão:</strong> liste os comandos cujo substantivo é <code>Item</code>.</p>
+<pre class="script" data-file="main.ps1">Get-Command -Verb Get
+</pre>
+<pre class="solucao" data-file="main.ps1">Get-Command -Noun Item
+</pre>
+</div>
+
+<hr>
+
+<h2>5. A ficha de um cmdlet</h2>
+<p>Também dá para inspecionar <strong>um</strong> comando pelo nome completo. Abaixo, a gente não lista os processos do computador: só pergunta ao <code>Get-Command</code> o que ele sabe sobre o cmdlet <code>Get-Process</code>. O <code>Format-List</code> mostra cada campo numa linha.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Command Get-Process | Format-List Name, CommandType, Source, Version
+
+Name        : Get-Process
+CommandType : Cmdlet
+Source      : Microsoft.PowerShell.Management
+Version     : 7.0.0.0
+</pre><dl class="anatomy">
+  <dt>Name</dt><dd>O nome do cmdlet: <code>Get-Process</code>.</dd>
+  <dt>CommandType</dt><dd><code>Cmdlet</code>: é um comando nativo do PowerShell, não um apelido nem um programa de fora.</dd>
+  <dt>Source</dt><dd>O <strong>módulo</strong> de onde ele vem, aqui <code>Microsoft.PowerShell.Management</code>. Módulo = uma caixa de cmdlets sobre o mesmo assunto.</dd>
+  <dt>Version</dt><dd>A versão desse módulo: <code>7.0.0.0</code>. Não confunda com a versão do PowerShell (nesta máquina, 7.7): o módulo pode ter um número próprio.</dd>
+</dl>
+<div class="note"><strong>No Windows PowerShell 5.1</strong> a ficha é a mesma, mas a versão do módulo aparece como <code>3.1.0.0</code>.</div>
+
+<hr>
+
+<h2>Formas diferentes de descobrir um nome</h2>
+<p>Quando você não lembra o cmdlet certo, estas três perguntas costumam bastar:</p>
+<pre class="file" data-file="descobrir.ps1">Get-Verb
+Get-Command -Verb Get
+Get-Command -Noun Item
+</pre>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você pergunta</th><th>Quando usar</th></tr>
+<tr><td><code>Get-Verb</code></td><td>Para rever a lista de verbos oficiais (o que o comando <strong>faz</strong>).</td></tr>
+<tr><td><code>Get-Command -Verb Get</code></td><td>Para listar os comandos de um verbo. Troque <code>Get</code> por <code>New</code>, <code>Set</code>…</td></tr>
+<tr><td><code>Get-Command -Noun Item</code></td><td>Para ver a família de um substantivo (o “em quê”).</td></tr>
+</table>
+</div>
+<p>Na dúvida entre um verbo e um substantivo, comece pelo substantivo: a família <code>Item</code> cabe numa olhada; a lista do verbo <code>Get</code> tem centenas de nomes.</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Traduzir o nome para o português</strong>
+<p>Uma armadilha clássica de quem está começando: pensar “obter a data” e digitar o nome em português.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Pegar-Data
+Pegar-Data: O termo "Pegar-Data" não é reconhecido como um nome de um cmdlet, função, arquivo de script ou programa executável.
+Verifique a ortografia do nome ou, se um caminho foi incluído, verifique se o caminho está correto e tente novamente.
+</pre><p>A mensagem aparece em <strong>vermelho</strong>, mas é o mesmo tipo de erro da aula <a href="primeiro-comando.html">Seu Primeiro Comando</a>. Linha por linha:</p>
+<dl class="anatomy">
+  <dt>Pegar-Data:</dt><dd>O nome que você digitou. Ele até <em>parece</em> um cmdlet (tem verbo, hífen e substantivo), mas não é um nome oficial.</dd>
+  <dt>O termo "Pegar-Data" não é reconhecido…</dt><dd>O PowerShell procurou um comando, uma função, um script ou um programa com esse nome e não achou.</dd>
+  <dt>Verifique a ortografia do nome…</dt><dd>A dica: confira se o nome existe. Aqui o problema não é um typo pequeno: o nome oficial é em inglês, <code>Get-Date</code>.</dd>
+</dl>
+<p><strong>Como resolver:</strong> use o verbo oficial em inglês. Se não lembrar, pergunte com <code>Get-Command -Noun Date</code> ou com o <code>Get-Help</code> da próxima aula. O erro não estragou nada.</p>
+<div class="note"><strong>No Windows PowerShell 5.1</strong> a mensagem é a mesma ideia, só que mais comprida: ela traz o “No linha:1 caractere:1”, os tils sublinhando o nome e a ficha técnica em inglês (<code>CommandNotFoundException</code>), como você já viu no erro do <code>Get-Dat</code>.</div>
+</div>
+
+<div class="cenario">
+<strong>Esquecer o hífen ou inventar o substantivo</strong>
+<p><code>GetDate</code>, <code>Get Date</code> ou um substantivo que não existe também caem no “não é reconhecido”. O nome precisa ser o oficial, com o hífen, as duas partes coladas. Na dúvida, não invente: pergunte ao <code>Get-Command</code>.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Get-Verb</code></td><td>Lista os verbos oficiais dos cmdlets.</td></tr>
+<tr><td><code>Get-Verb -Verb Get, Set, New, Remove</code></td><td>Mostra só esses quatro verbos.</td></tr>
+<tr><td><code>(Get-Verb).Count</code></td><td>Conta quantos verbos oficiais existem (100 no 7.7 desta máquina).</td></tr>
+<tr><td><code>Get-Command -Verb Get</code></td><td>Lista os comandos com o verbo <code>Get</code>.</td></tr>
+<tr><td><code>Get-Command -Noun Item</code></td><td>Lista a família de cmdlets do substantivo <code>Item</code>.</td></tr>
+<tr><td><code>Get-Command Get-Process</code></td><td>Mostra a ficha de um comando (nome, tipo, módulo, versão).</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete o cmdlet que obtém a data e a hora de agora:</p>
+<div class="ex-code"><input data-answer="Get-Date" aria-label="comando"></div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual é o verbo?</h3>
+<p>No cmdlet <code>New-Item</code>, qual é o verbo?</p>
+<div class="ex-code"><input data-answer="New" aria-label="verbo"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Qual é o substantivo?</h3>
+<p>No cmdlet <code>Remove-Item</code>, qual é o substantivo?</p>
+<div class="ex-code"><input data-answer="Item" aria-label="substantivo"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. O que o <code>Get-Command -Noun Item</code> mostra?</p>
+<label><input type="radio" name="q4"> Todos os verbos oficiais do PowerShell</label>
+<label><input type="radio" name="q4"> Os comandos cujo substantivo é <code>Item</code></label>
+<label><input type="radio" name="q4"> Só o cmdlet <code>Get-Item</code></label>
+<label><input type="radio" name="q4"> A data e a hora de agora</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Você digitou <code>Pegar-Data</code> e apareceu “não é reconhecido”. Por quê?</p>
+<label><input type="radio" name="q5"> Porque faltou o parâmetro <code>-Format</code></label>
+<label><input type="radio" name="q5"> Porque o PowerShell só aceita comandos em maiúsculas</label>
+<label><input type="radio" name="q5"> Porque o nome oficial é em inglês: <code>Get-Date</code></label>
+<label><input type="radio" name="q5"> Porque é preciso instalar o comando <code>Pegar-Data</code></label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. Qual verbo é o mais seguro para praticar, porque em geral só lê e não muda nada?</p>
+<label><input type="radio" name="q6"> <code>Get</code></label>
+<label><input type="radio" name="q6"> <code>Set</code></label>
+<label><input type="radio" name="q6"> <code>New</code></label>
+<label><input type="radio" name="q6"> <code>Remove</code></label>
+</div>
+
+<div class="tryps" data-goal="src:\bGet-Command\b;;src:-Noun;;src:\bGet-Verb\b;;out:Get-Item;;semerro">
+<p class="try-task"><strong>Missão final:</strong> escreva duas linhas: uma que mostre os verbos oficiais e outra que liste os comandos cujo substantivo é <code>Item</code>.</p>
+<pre class="script" data-file="main.ps1">
+</pre>
+<pre class="solucao" data-file="main.ps1">Get-Verb
+Get-Command -Noun Item
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Cmdlet (“comand-let”) é o comando nativo do PowerShell. O nome segue a regra <strong>Verbo-Substantivo</strong>, com hífen e sem espaço: <code>Get-Date</code>, <code>New-Item</code>.</li>
+  <li>Os nomes são em <strong>inglês</strong>. Traduzir (<code>Pegar-Data</code>) dá o erro “não é reconhecido”.</li>
+  <li><code>Get-Verb</code> lista os verbos oficiais: 100 no PowerShell 7.7 desta máquina (98 no 5.1).</li>
+  <li>Os quatro verbos do dia a dia são <code>Get</code> (obter, só lê), <code>New</code> (criar), <code>Set</code> (alterar) e <code>Remove</code> (apagar).</li>
+  <li><code>Get-Command -Verb Get</code> lista os comandos de um verbo; <code>Get-Command -Noun Item</code> mostra a família de um substantivo.</li>
+  <li><code>Get-Command Get-Process</code> mostra a ficha de um comando (tipo, módulo, versão), sem listar os processos.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
