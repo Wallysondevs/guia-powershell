@@ -247,6 +247,20 @@ Get-ChildItem: Cannot find drive. A drive with the name 'Z' does not exist.
 
 <hr>
 
+<h2>Formas diferentes de ler um provedor</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>$env:PATH</code></td><td>Atalho que devolve só o valor da variável de ambiente <code>PATH</code>.</td></tr>
+<tr><td><code>Get-Item Env:PATH</code></td><td>A mesma variável, como item do drive <code>Env:</code> (nome e valor). Peça sempre um nome.</td></tr>
+<tr><td><code>Get-ChildItem Env:PATH</code></td><td>Também lê só esse item. Nunca liste o drive <code>Env:</code> sem um nome.</td></tr>
+<tr><td><code>Get-ChildItem HKCU:\ -Name</code></td><td><span class="versao">só Windows</span> Lista só os nomes das chaves na raiz do Registro do usuário, pelo drive <code>HKCU:</code>.</td></tr>
+<tr><td><code>Get-ChildItem Registry::HKEY_CURRENT_USER -Name</code></td><td><span class="versao">só Windows</span> O mesmo lugar, pelo caminho completo do provedor, sem o atalho <code>HKCU:</code>.</td></tr>
+</table>
+</div>
+
+<hr>
+
 <h2>Referência rápida</h2>
 <div class="table-wrap">
 <table class="ref">
