@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell for — o laço com contador | Guia PowerShell</title>
+<meta name="description" content="Aprenda o laço for do PowerShell: começo, condição e passo, contagens de 2 em 2 e regressivas, listas pela posição e os erros comuns, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">for</span></h1>
+
+<p class="intro">O <a href="foreach.html">foreach</a> anda pela lista item por item. Às vezes, porém, você quer controlar a contagem: contar de 2 em 2, fazer uma contagem regressiva, ou saber a <strong>posição</strong> de cada item (1º, 2º, 3º...). Para isso existe o <code>for</code> ("para"), o laço com contador.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>As três partes do <code>for</code>: começo, condição e passo.</li>
+  <li>A contar de 2 em 2 e de trás para frente.</li>
+  <li>A percorrer uma lista pela posição, com <code>$lista[$i]</code> e <code>.Count</code>.</li>
+  <li>Quando usar <code>for</code> e quando usar <code>foreach</code>.</li>
+  <li>Os erros comuns: passar do fim da lista, usar vírgula no lugar de <code>;</code> e o laço infinito.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português.</p>
+
+<hr>
+
+<h2>A ideia: a volta na pista de corrida</h2>
+<p>A Ana vai correr na pista do parque. Antes de sair, ela combina três coisas: <strong>começo</strong> ("estou na volta 1"), <strong>quando parar</strong> ("enquanto eu estiver na volta 5 ou menos, continuo") e <strong>o passo</strong> ("a cada volta, somo 1 no contador"). O <code>for</code> é exatamente esse combinado, escrito numa linha só.</p>
+
+<hr>
+
+<h2>1. O básico: as três partes</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; for ($i = 1; $i -le 5; $i++) { "Volta $i" }
+Volta 1
+Volta 2
+Volta 3
+Volta 4
+Volta 5
+</pre>
+<dl class="anatomy">
+  <dt>for</dt><dd>"Para". Começa o laço com contador.</dd>
+  <dt>$i = 1</dt><dd><strong>Começo</strong>: roda uma vez só, antes de tudo. Cria o contador <code>$i</code> valendo 1. (O nome <code>$i</code>, de "índice", é um costume antigo da programação.)</dd>
+  <dt>;</dt><dd>O ponto e vírgula separa as três partes.</dd>
+  <dt>$i -le 5</dt><dd><strong>Condição</strong>: testada antes de cada volta. Enquanto <code>$i</code> for menor ou igual (<code>-le</code>, de <em>less or equal</em>) a 5, o bloco roda. Quando ficar falsa, o laço acaba.</dd>
+  <dt>$i++</dt><dd><strong>Passo</strong>: roda depois de cada volta. O <code>++</code> soma 1 ao contador (aula <a href="atribuicao.html">Atribuição</a>).</dd>
+  <dt>{ "Volta $i" }</dt><dd>O bloco que se repete.</dd>
+</dl>
+<p>Passo a passo: <code>$i</code> vale 1, 1 ≤ 5, mostra "Volta 1", <code>$i</code> vira 2... até <code>$i</code> virar 6. Aí 6 ≤ 5 é falso e o laço termina, sem mostrar "Volta 6".</p>
+
+<div class="tryps" data-goal="out:Tabuada: 3 x 10 = 30;;src:\bfor\s*\(;;semerro">
+<p class="try-task"><strong>Experimente:</strong> o script mostra a tabuada do 3 só até 5. Mude a condição do <code>for</code> para ir até 10.</p>
+<pre class="script" data-file="main.ps1">for ($i = 1; $i -le 5; $i++) {
+    "Tabuada: 3 x $i = $(3 * $i)"
+}
+</pre>
+<pre class="solucao" data-file="main.ps1">for ($i = 1; $i -le 10; $i++) {
+    "Tabuada: 3 x $i = $(3 * $i)"
+}
+</pre>
+</div>
+
+<hr>
+
+<h2>2. De 2 em 2 e de trás para frente</h2>
+<p>Mudando o passo, você muda a contagem. Com <code>$i += 2</code>, o contador pula de 2 em 2:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; for ($i = 0; $i -le 10; $i += 2) { $i }
+0
+2
+4
+6
+8
+10
+</pre>
+<p>Para contar de trás para frente, comece alto, use <code>-ge</code> (maior ou igual) na condição e <code>$i--</code> (tira 1) no passo:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; for ($i = 3; $i -ge 1; $i--) { "$i..." }; "Já!"
+3...
+2...
+1...
+Já!
+</pre>
+<dl class="anatomy">
+  <dt>$i += 2</dt><dd>Soma 2 ao contador a cada volta.</dd>
+  <dt>$i -ge 1</dt><dd>Continua enquanto o contador for 1 ou mais.</dd>
+  <dt>$i--</dt><dd>Tira 1 do contador a cada volta.</dd>
+  <dt>; "Já!"</dt><dd>Fora do laço: o <code>;</code> aqui separa dois comandos na mesma linha. O "Já!" aparece uma vez só, depois que o laço acaba.</dd>
+</dl>
+
+<hr>
+
+<h2>3. Percorrendo uma lista pela posição</h2>
+<p>As listas guardam os itens em posições numeradas a partir de <strong>zero</strong>: <code>$alunos[0]</code> é o primeiro, <code>$alunos[1]</code> o segundo. O <code>.Count</code> diz quantos itens há. Com o <code>for</code>, dá para numerar a lista da turma:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $alunos = "Ana", "Beto", "Caio"
+PS C:\Users\ana&gt; for ($i = 0; $i -lt $alunos.Count; $i++) { "$($i + 1). $($alunos[$i])" }
+1. Ana
+2. Beto
+3. Caio
+</pre>
+<dl class="anatomy">
+  <dt>$i = 0</dt><dd>Começa no zero, a primeira posição.</dd>
+  <dt>$i -lt $alunos.Count</dt><dd>Enquanto <code>$i</code> for <strong>menor que</strong> (<code>-lt</code>, de <em>less than</em>) 3. As posições são 0, 1 e 2: a posição 3 não existe.</dd>
+  <dt>$alunos[$i]</dt><dd>O item que está na posição <code>$i</code>.</dd>
+  <dt>"$($i + 1). ..."</dt><dd>O <code>$( )</code> calcula uma conta dentro do texto. Somamos 1 para mostrar "1." em vez de "0." (gente conta a partir do 1).</dd>
+</dl>
+
+<hr>
+
+<h2>Formas diferentes de repetir</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Como escreve</th><th>Quando usar</th></tr>
+<tr><td><code>foreach</code></td><td><code>foreach ($a in $alunos) { $a }</code></td><td>Passar por todos os itens, sem precisar da posição. É o mais simples e o mais usado.</td></tr>
+<tr><td><code>for</code></td><td><code>for ($i = 0; $i -lt $alunos.Count; $i++) { }</code></td><td>Quando a posição importa, ou a contagem é especial (de 2 em 2, regressiva).</td></tr>
+<tr><td><code>foreach</code> + intervalo</td><td><code>foreach ($n in 1..5) { }</code></td><td>Repetir um número fixo de vezes, de 1 em 1. Mais curto que o <code>for</code>.</td></tr>
+<tr><td><code>while</code></td><td><code>while ($condicao) { }</code></td><td>Quando não dá para saber quantas voltas serão. Veja a aula <a href="while.html">while e do</a>.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Passar do fim da lista</strong>
+<p>A lista <code>$alunos</code> tem as posições 0, 1 e 2. E se você pedir a posição 3, por exemplo com <code>-le</code> no lugar de <code>-lt</code> na condição?</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $alunos[3]
+PS C:\Users\ana&gt; $null -eq $alunos[3]
+True
+PS C:\Users\ana&gt; Set-StrictMode -Version Latest; $alunos[3]
+OperationStopped: Index was outside the bounds of the array.
+PS C:\Users\ana&gt; Set-StrictMode -Off
+</pre>
+<dl class="anatomy">
+  <dt>$alunos[3]</dt><dd>Normalmente, o PowerShell não reclama: devolve <code>$null</code> (nada) e não mostra nada. O <code>$null -eq $alunos[3]</code> dando <code>True</code> confirma. Num laço, isso vira uma volta "fantasma", com um aluno vazio.</dd>
+  <dt>Set-StrictMode -Version Latest</dt><dd>Liga o "modo rigoroso", em que o PowerShell reclama de erros como esse em vez de seguir em silêncio.</dd>
+  <dt>OperationStopped</dt><dd>A operação foi interrompida.</dd>
+  <dt>Index was outside the bounds of the array</dt><dd>Mensagem do .NET (a base do PowerShell), por isso em inglês. Quer dizer que a posição pedida está fora dos limites da lista: ela não tem posição 3.</dd>
+  <dt>Set-StrictMode -Off</dt><dd>Desliga o modo rigoroso de novo.</dd>
+</dl>
+<p><strong>Como evitar:</strong> com posições que começam no zero, use <code>$i -lt $lista.Count</code> (menor que), nunca <code>-le</code>.</p>
+</div>
+
+<div class="cenario">
+<strong>Vírgula no lugar de ponto e vírgula</strong>
+<p>Este erro foi colhido rodando o código errado como texto, com o <code>Invoke-Expression</code>; por isso a mensagem começa com <code>Invoke-Expression:</code>.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Invoke-Expression 'for ($i = 1, $i -le 3, $i++) { $i }'
+Invoke-Expression: Could not compare "1" to "3 1". Error: "Cannot convert the "System.Object[]" value of type "System.Object[]" to type "System.Int32"."
+</pre>
+<dl class="anatomy">
+  <dt>for ($i = 1, $i -le 3, $i++)</dt><dd>Com vírgulas, o PowerShell não enxerga mais três partes. A vírgula, para ele, cria uma <strong>lista</strong>, então tudo virou uma expressão só, cheia de listas.</dd>
+  <dt>Could not compare "1" to "3 1"</dt><dd>Quer dizer que ele não conseguiu comparar o número 1 com <code>3 1</code>, que é uma lista de dois valores (3 e 1), e não um número.</dd>
+  <dt>Cannot convert ... System.Object[] ... to type "System.Int32"</dt><dd>O motivo: uma lista (<code>System.Object[]</code>) não pode ser convertida num número inteiro (<code>System.Int32</code>).</dd>
+</dl>
+<p><strong>Como resolver:</strong> as três partes do <code>for</code> se separam com <strong>ponto e vírgula</strong>: <code>for ($i = 1; $i -le 3; $i++)</code>.</p>
+</div>
+
+<div class="cenario">
+<strong>O laço infinito</strong>
+<p>Se o passo anda no sentido errado, a condição nunca fica falsa. Aqui o <code>$i--</code> faz o contador <strong>descer</strong>, e ele sempre vai ser menor ou igual a 3. Para a demonstração não travar, pusemos uma parada de emergência com <code>break</code> (aula <a href="break-continue.html">break e continue</a>):</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; for ($i = 1; $i -le 3; $i--) { $i; if ($i -lt -2) { "(parei o laço infinito na mão)"; break } }
+1
+0
+-1
+-2
+-3
+(parei o laço infinito na mão)
+</pre>
+<p>Não aparece mensagem de erro: o PowerShell só faz o que foi pedido, para sempre. Sem o <code>break</code>, os números continuariam descendo sem parar.</p>
+<p><strong>Como resolver:</strong> se o terminal "travou" num laço, aperte <kbd>Ctrl</kbd>+<kbd>C</kbd> para interromper. Depois confira se o passo (<code>++</code> ou <code>--</code>) combina com a condição (<code>-le</code> sobe, <code>-ge</code> desce).</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>for ($i = 1; $i -le 5; $i++) { }</code></td><td>Conta de 1 a 5.</td></tr>
+<tr><td><code>for ($i = 0; $i -le 10; $i += 2) { }</code></td><td>Conta de 2 em 2.</td></tr>
+<tr><td><code>for ($i = 3; $i -ge 1; $i--) { }</code></td><td>Contagem regressiva.</td></tr>
+<tr><td><code>for ($i = 0; $i -lt $lista.Count; $i++) { $lista[$i] }</code></td><td>Percorre a lista pela posição.</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>C</kbd></td><td>Interrompe um laço que não para.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. O separador</h3>
+<p>Complete com o símbolo que separa as partes do <code>for</code>:</p>
+<div class="ex-code">for ($i = 1<input data-answer=";" aria-label="símbolo"> $i -le 5; $i++) { $i }</div>
+</div>
+
+<div class="exercise">
+<h3>2. Contagem regressiva</h3>
+<p>Complete o passo para contar de 10 até 1:</p>
+<div class="ex-code">for ($i = 10; $i -ge 1; <input data-answer="$i--" aria-label="passo">) { $i }</div>
+</div>
+
+<div class="exercise">
+<h3>3. Até o fim da lista</h3>
+<p>Complete a condição para passar por todas as posições de <code>$frutas</code>, sem passar do fim:</p>
+<div class="ex-code">for ($i = 0; $i <input data-answer="-lt" aria-label="operador"> $frutas.Count; $i++) { $frutas[$i] }</div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Quantas vezes roda o bloco de <code>for ($i = 0; $i -lt 4; $i++) { }</code>?</p>
+<label><input type="radio" name="q4"> 3</label>
+<label><input type="radio" name="q4"> 4</label>
+<label><input type="radio" name="q4"> 5</label>
+<label><input type="radio" name="q4"> Infinitas</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Numa lista com 3 itens, qual é a posição do <strong>último</strong>?</p>
+<label><input type="radio" name="q5"> 3</label>
+<label><input type="radio" name="q5"> 1</label>
+<label><input type="radio" name="q5"> 2</label>
+<label><input type="radio" name="q5"> -3</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. O que há de errado em <code>for ($i = 1; $i -le 3; $i--) { $i }</code>?</p>
+<label><input type="radio" name="q6"> O contador desce e a condição nunca fica falsa: laço infinito</label>
+<label><input type="radio" name="q6"> Faltam vírgulas entre as partes</label>
+<label><input type="radio" name="q6"> O <code>$i</code> precisa começar em zero</label>
+<label><input type="radio" name="q6"> Não há nada de errado</label>
+</div>
+
+<div class="tryps" data-goal="out:3º lugar: Caio;;out:1º lugar: Ana;;src:\bfor\s*\(;;semerro">
+<p class="try-task"><strong>Missão final:</strong> a corrida terminou e a lista <code>$chegada</code> está na ordem de chegada. Complete o <code>for</code> para mostrar cada pessoa com a sua colocação: <code>1º lugar: Ana</code>, <code>2º lugar: Beto</code>, <code>3º lugar: Caio</code>.</p>
+<pre class="script" data-file="main.ps1">$chegada = 'Ana', 'Beto', 'Caio'
+for ($i = 0; $i -lt $chegada.Count; $i++) {
+
+}
+</pre>
+<pre class="solucao" data-file="main.ps1">$chegada = 'Ana', 'Beto', 'Caio'
+for ($i = 0; $i -lt $chegada.Count; $i++) {
+    "$($i + 1)º lugar: $($chegada[$i])"
+}
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>for (começo; condição; passo) { ... }</code>: as três partes se separam com <code>;</code>.</li>
+  <li>O começo roda uma vez; a condição é testada antes de cada volta; o passo roda depois de cada volta.</li>
+  <li>Mude o passo para contar de 2 em 2 (<code>$i += 2</code>) ou para trás (<code>$i--</code>).</li>
+  <li>Listas começam na posição 0: percorra com <code>$i -lt $lista.Count</code>.</li>
+  <li>Para passar por todos os itens sem precisar da posição, o <code>foreach</code> é mais simples.</li>
+  <li>Laço que não para? <kbd>Ctrl</kbd>+<kbd>C</kbd>, e confira se o passo combina com a condição.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
