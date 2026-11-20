@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Textos — aspas simples × duplas | Guia PowerShell</title>
+<meta name="description" content="Textos no PowerShell para iniciantes: aspas simples e duplas, quando a variável vira valor, `n e `t, aspas dentro do texto e o erro real de aspas sem fechar.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">Textos</span>: Aspas Simples × Duplas</h1>
+
+<p class="intro">Nomes, recados, linhas de relatório: quase todo script trabalha com texto. No PowerShell, texto vai entre aspas, e existem dois tipos de aspas que se comportam de um jeito diferente. Saber qual usar evita muita confusão.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A escrever textos com aspas simples <code>' '</code> e duplas <code>" "</code>.</li>
+  <li>A diferença: só as duplas trocam <code>$variavel</code> pelo valor e entendem o acento grave <code>`</code>.</li>
+  <li>A colocar aspas dentro do texto.</li>
+  <li>Os caracteres especiais <code>`n</code> (nova linha) e <code>`t</code> (tabulação).</li>
+</ul>
+</div>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português.</p>
+<hr>
+<h2>A ideia: carimbo × formulário</h2>
+<p>Aspas simples são um <strong>carimbo</strong>: o que está escrito sai exatamente igual, sempre. Aspas duplas são um <strong>formulário com lacunas</strong>: onde houver <code>$nome</code>, o PowerShell preenche com o valor antes de mostrar.</p>
+<hr>
+<h2>1. Os dois jeitos</h2>
+<p>Texto (em inglês, <em>string</em>, "corda" de letras) vai entre aspas. Sem variável dentro, os dois jeitos dão o mesmo resultado:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 'Olá, Ana'
+Olá, Ana
+PS C:\Users\ana&gt; "Olá, Ana"
+Olá, Ana
+</pre>
+<h2>2. O que muda: o cifrão e o acento grave</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $nome = "Ana"
+PS C:\Users\ana&gt; 'Olá, $nome'
+Olá, $nome
+PS C:\Users\ana&gt; "Olá, $nome"
+Olá, Ana
+PS C:\Users\ana&gt; 'uma quebra:`nainda na mesma linha'
+uma quebra:`nainda na mesma linha
+PS C:\Users\ana&gt; "uma quebra:`nagora em duas"
+uma quebra:
+agora em duas
+</pre>
+<dl class="anatomy">
+  <dt>'Olá, $nome'</dt><dd>Aspas simples: o <code>$nome</code> sai como está escrito.</dd>
+  <dt>"Olá, $nome"</dt><dd>Aspas duplas: o <code>$nome</code> vira <code>Ana</code>.</dd>
+  <dt>`n</dt><dd>O acento grave (<code>`</code>, a "crase" do teclado) seguido de <code>n</code> é uma <strong>nova linha</strong>. Só funciona entre aspas duplas.</dd>
+</dl>
+<div class="tip"><strong>Boa prática:</strong> use aspas simples quando o texto não tem variável. Assim você tem certeza de que nada vai ser trocado sem querer.</div>
+<div class="tryps" data-goal="out:Olá, Ana;;semerro">
+<p class="try-task"><strong>Experimente:</strong> o texto mostra <code>$nome</code> em vez do nome. Troque as aspas simples por duplas e rode.</p>
+<pre class="script" data-file="main.ps1">$nome = 'Ana'
+'Olá, $nome'
+</pre>
+<pre class="solucao" data-file="main.ps1">$nome = 'Ana'
+"Olá, $nome"
+</pre>
+</div>
+<h2>3. Aspas dentro do texto</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 'ela disse "oi"'
+ela disse "oi"
+PS C:\Users\ana&gt; "ela disse 'oi'"
+ela disse 'oi'
+PS C:\Users\ana&gt; "ela disse `"oi`""
+ela disse "oi"
+PS C:\Users\ana&gt; 'it''s ok'
+it's ok
+</pre>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Jeito</th><th>Quando usar</th></tr>
+<tr><td><code>'ela disse "oi"'</code></td><td>Aspas duplas dentro de simples: sem problema.</td></tr>
+<tr><td><code>"ela disse 'oi'"</code></td><td>Simples dentro de duplas: sem problema.</td></tr>
+<tr><td><code>"`"oi`""</code></td><td>Dupla dentro de dupla: ponha <code>`</code> antes.</td></tr>
+<tr><td><code>'it''s'</code></td><td>Simples dentro de simples: escreva duas vezes.</td></tr>
+</table>
+</div>
+<h2>4. Caracteres especiais</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; "coluna1`tcoluna2"
+coluna1	coluna2
+</pre>
+<p><code>`t</code> é a tabulação (o "pulo" da tecla <kbd>Tab</kbd>), útil para alinhar colunas. Os mais usados: <code>`n</code> (nova linha), <code>`t</code> (tabulação), <code>`"</code> (aspas duplas), <code>`$</code> (um cifrão de verdade entre aspas duplas).</p>
+<hr>
+<h2>Quando dá errado</h2>
+<div class="cenario">
+<strong>Esqueceu de fechar as aspas</strong>
+<p>Este erro foi colhido com <code>Invoke-Expression</code>, que roda um texto como comando. Digitado direto no console, o PowerShell não mostra erro: ele fica esperando o resto, com o prompt <code>&gt;&gt;</code>, até você fechar o texto (ou apertar <kbd>Ctrl</kbd>+<kbd>C</kbd> para desistir). Num script, aparece a mesma mensagem.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Invoke-Expression '"texto sem fechar'
+Invoke-Expression: The string is missing the terminator: ".
+</pre>
+<p>"Falta o terminador do texto: <code>"</code>." Toda aspa aberta precisa de uma igual fechando.</p>
+<p><strong>Como resolver:</strong> <code>"texto fechado"</code>.</p>
+</div>
+<div class="cenario">
+<strong>O texto mostrou <code>$nome</code> em vez do nome</strong>
+<p>Não é erro do PowerShell: você usou aspas simples. Troque por duplas.</p>
+</div>
+<hr>
+<h2>Exercícios</h2>
+<div class="exercise">
+<h3>1. Aspas certas</h3>
+<p>Complete com o tipo de aspas que troca a variável pelo valor (digite a aspa):</p>
+<div class="ex-code"><input data-answer="&quot;" aria-label="aspa">Olá, $nome"</div>
+</div>
+<div class="exercise">
+<h3>2. Nova linha</h3>
+<p>O que vai depois do acento grave para pular linha?</p>
+<div class="ex-code">"linha1`<input data-answer="n" aria-label="resposta">linha2"</div>
+</div>
+<div class="mc" data-answer="2">
+<p class="mc-q">3. Com <code>$nome = "Ana"</code>, o que <code>'Oi, $nome'</code> mostra?</p>
+<label><input type="radio" name="q3"> Oi, Ana</label>
+<label><input type="radio" name="q3"> Oi, $nome</label>
+<label><input type="radio" name="q3"> Oi,</label>
+<label><input type="radio" name="q3"> Erro</label>
+</div>
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Como escrever <code>it's</code> entre aspas simples?</p>
+<label><input type="radio" name="q4"> <code>'it's'</code></label>
+<label><input type="radio" name="q4"> <code>'it''s'</code></label>
+<label><input type="radio" name="q4"> <code>'it`s'</code></label>
+<label><input type="radio" name="q4"> Não dá</label>
+</div>
+<div class="tryps" data-goal="out:A loja &quot;Bem-Estar&quot;;;semerro">
+<p class="try-task"><strong>Missão final:</strong> mostre exatamente <code>A loja "Bem-Estar" abriu</code>, com as aspas duplas no texto.</p>
+<pre class="script" data-file="main.ps1">'A loja Bem-Estar abriu'
+</pre>
+<pre class="solucao" data-file="main.ps1">'A loja "Bem-Estar" abriu'
+</pre>
+</div>
+<hr>
+<h2>Resumo</h2>
+<ul>
+  <li>Aspas simples: o texto sai exatamente como está.</li>
+  <li>Aspas duplas: <code>$variavel</code> vira o valor e <code>`n</code>, <code>`t</code> funcionam.</li>
+  <li>Sem variável, prefira aspas simples.</li>
+  <li>Para aspas dentro: misture os tipos, use <code>`"</code> ou repita <code>''</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
