@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell -contains e -in — o item está na lista? | Guia PowerShell</title>
+<meta name="description" content="Operadores de coleção no PowerShell: -contains, -in, -notcontains, -notin, lista vazia e a confusão real com pedaços de texto.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">-contains</span> e <span class="hl">-in</span></h1>
+
+<p class="intro">A Ana tem a lista de convidadas da festa e a lista de produtos da lojinha. A pergunta mais comum sobre uma lista é: esse item está nela? Para isso existem o <code>-contains</code> e o <code>-in</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A perguntar se uma lista tem um item com <code>-contains</code>.</li>
+  <li>A mesma pergunta ao contrário com <code>-in</code>.</li>
+  <li>As versões negativas <code>-notcontains</code> e <code>-notin</code>.</li>
+  <li>Que esses operadores não procuram pedaços dentro de um texto.</li>
+</ul>
+</div>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português.</p>
+<hr>
+<h2>A ideia: a lista de convidados</h2>
+<p>Na porta da festa, o segurança tem a lista. Dá para fazer a pergunta de dois jeitos: "a lista <strong>contém</strong> a Beto?" (<code>-contains</code>) ou "o Beto <strong>está na</strong> lista?" (<code>-in</code>). A resposta é a mesma; só muda a ordem da frase.</p>
+<hr>
+<h2>1. -contains: a lista é quem contém</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; "Ana", "Beto", "Caio" -contains "Beto"
+True
+PS C:\Users\ana&gt; "Ana", "Beto", "Caio" -contains "beto"
+True
+PS C:\Users\ana&gt; "Ana", "Beto", "Caio" -ccontains "beto"
+False
+PS C:\Users\ana&gt; "Ana", "Beto", "Caio" -notcontains "Dora"
+True
+</pre>
+<dl class="anatomy">
+  <dt>"Ana", "Beto", "Caio"</dt><dd>A lista, à <strong>esquerda</strong>.</dd>
+  <dt>-contains</dt><dd>"Contém". Não diferencia maiúsculas; <code>-ccontains</code> diferencia.</dd>
+  <dt>"Beto"</dt><dd>O item procurado, à direita.</dd>
+</dl>
+<div class="tryps" data-goal="out:Pode entrar;;src:-contains;;semerro">
+<p class="try-task"><strong>Experimente:</strong> a Dora foi convidada, mas não está na lista. Acrescente <code>"Dora"</code> à lista e rode.</p>
+<pre class="script" data-file="main.ps1">$convidados = "Ana", "Beto", "Caio"
+if ($convidados -contains "Dora") { "Pode entrar" } else { "Não está na lista" }
+</pre>
+<pre class="solucao" data-file="main.ps1">$convidados = "Ana", "Beto", "Caio", "Dora"
+if ($convidados -contains "Dora") { "Pode entrar" } else { "Não está na lista" }
+</pre>
+</div>
+<h2>2. -in: o valor está na lista</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; "Beto" -in "Ana", "Beto", "Caio"
+True
+PS C:\Users\ana&gt; "Dora" -notin "Ana", "Beto", "Caio"
+True
+PS C:\Users\ana&gt; 2 -in 1, 2, 3
+True
+</pre>
+<p>Igual ao <code>-contains</code>, com o item à esquerda e a lista à direita. Muitas vezes fica mais natural de ler: <code>if ($dia -in "sab", "dom")</code>.</p>
+<h2>Qual usar</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando</th></tr>
+<tr><td><code>$lista -contains $item</code></td><td>Quando a frase começa pela lista.</td></tr>
+<tr><td><code>$item -in $lista</code></td><td>Quando a frase começa pelo item (mais natural num <code>if</code>).</td></tr>
+<tr><td><code>-notcontains</code>, <code>-notin</code></td><td>Para perguntar "não está".</td></tr>
+</table>
+</div>
+<h2>3. Lista vazia</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; @() -contains "Ana"
+False
+PS C:\Users\ana&gt; $null -in @()
+False
+</pre>
+<p>Lista vazia não contém nada, então a resposta é <code>False</code>, sem erro.</p>
+<hr>
+<h2>Quando dá errado</h2>
+<div class="cenario">
+<strong>Procurou uma letra dentro de um texto</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; "a" -in "abc"
+False
+PS C:\Users\ana&gt; "abc" -contains "a"
+False
+</pre>
+<p>Não dá erro, mas a resposta surpreende: <code>False</code>. Para o <code>-in</code> e o <code>-contains</code>, <code>"abc"</code> é uma lista de <strong>um item só</strong> (o texto inteiro), e esse item não é <code>"a"</code>. Eles comparam itens inteiros, não pedaços.</p>
+<p><strong>Como resolver:</strong> para procurar um pedaço dentro de um texto, use <code>-like "*a*"</code> ou <code>-match "a"</code> (aula <a href="operadores-texto.html">Comparando Textos</a>).</p>
+</div>
+<div class="cenario">
+<strong>Inverteu a ordem</strong>
+<p><code>"Beto" -contains "Ana", "Beto"</code> pergunta se o texto "Beto" contém a lista, e dá False. No <code>-contains</code>, a lista vem <strong>antes</strong>; no <code>-in</code>, <strong>depois</strong>.</p>
+</div>
+<hr>
+<h2>Exercícios</h2>
+<div class="exercise">
+<h3>1. Contém</h3>
+<p>Complete para perguntar se a lista tem "pão":</p>
+<div class="ex-code">$compras <input data-answer="-contains" aria-label="operador"> "pão"</div>
+</div>
+<div class="exercise">
+<h3>2. Está na lista</h3>
+<p>Complete para perguntar se <code>$dia</code> é sábado ou domingo:</p>
+<div class="ex-code">$dia <input data-answer="-in" aria-label="operador"> "sab", "dom"</div>
+</div>
+<div class="mc" data-answer="2">
+<p class="mc-q">3. O que <code>"a" -in "abc"</code> mostra?</p>
+<label><input type="radio" name="q3"> True</label>
+<label><input type="radio" name="q3"> False</label>
+<label><input type="radio" name="q3"> a</label>
+<label><input type="radio" name="q3"> Erro</label>
+</div>
+<div class="mc" data-answer="1">
+<p class="mc-q">4. O que <code>"Ana", "Beto" -contains "ana"</code> mostra?</p>
+<label><input type="radio" name="q4"> True</label>
+<label><input type="radio" name="q4"> False</label>
+<label><input type="radio" name="q4"> Ana</label>
+<label><input type="radio" name="q4"> Erro</label>
+</div>
+<div class="tryps" data-goal="out:Fim de semana;;src:-in;;semerro">
+<p class="try-task"><strong>Missão final:</strong> com <code>-in</code>, mostre <code>Fim de semana</code> quando <code>$dia</code> for <code>"sab"</code> ou <code>"dom"</code>.</p>
+<pre class="script" data-file="main.ps1">$dia = "dom"
+</pre>
+<pre class="solucao" data-file="main.ps1">$dia = "dom"
+if ($dia -in "sab", "dom") { "Fim de semana" }
+</pre>
+</div>
+<hr>
+<h2>Resumo</h2>
+<ul>
+  <li><code>lista -contains item</code> e <code>item -in lista</code> respondem a mesma pergunta.</li>
+  <li><code>-notcontains</code> e <code>-notin</code> perguntam o contrário.</li>
+  <li>Não diferenciam maiúsculas; <code>-ccontains</code> diferencia.</li>
+  <li>Comparam itens inteiros: para pedaços de texto, use <code>-like</code> ou <code>-match</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
