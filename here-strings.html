@@ -95,7 +95,7 @@ Sua matrícula está ativa.
 <h2>Quando dá errado</h2>
 <div class="cenario">
 <strong>Espaço antes do fechamento</strong>
-<p>Este erro foi colhido com <code>Invoke-Expression</code>, que roda um texto como comando (o <code>`n</code> dentro dele faz as quebras de linha). Num script, o mesmo engano mostra a mesma mensagem, com outra moldura em volta.</p>
+<p>Este erro foi colhido com <code>Invoke-Expression</code>, que roda um texto como comando (o <code>`n</code> dentro dele faz as quebras de linha). Num script o PowerShell também acusa o erro, mas essa saída não foi colhida.</p>
 <pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Invoke-Expression "@`" `nOlá`n `"@"
 Invoke-Expression: White space is not allowed before the string terminator.
 </pre>
@@ -142,7 +142,7 @@ Invoke-Expression: White space is not allowed before the string terminator.
 <label><input type="radio" name="q4"> Preço:</label>
 <label><input type="radio" name="q4"> Erro</label>
 </div>
-<div class="tryps" data-goal="out:Loja da Ana;;outre:Loja da Ana\nAberta;;semerro">
+<div class="tryps" data-goal="out:Loja da Ana;;outre:Loja da Ana\nAberta;;src:@&quot;;;semerro">
 <p class="try-task"><strong>Missão final:</strong> monte uma here-string com duas linhas: <code>Loja da $dona</code> e <code>Aberta</code>, e mostre.</p>
 <pre class="script" data-file="main.ps1">$dona = "Ana"
 </pre>

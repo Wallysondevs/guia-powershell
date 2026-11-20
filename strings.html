@@ -96,7 +96,7 @@ coluna1	coluna2
 <h2>Quando dá errado</h2>
 <div class="cenario">
 <strong>Esqueceu de fechar as aspas</strong>
-<p>Este erro foi colhido com <code>Invoke-Expression</code>, que roda um texto como comando. Digitado direto no console, o PowerShell não mostra erro: ele fica esperando o resto, com o prompt <code>&gt;&gt;</code>, até você fechar o texto (ou apertar <kbd>Ctrl</kbd>+<kbd>C</kbd> para desistir). Num script, aparece a mesma mensagem.</p>
+<p>Este erro foi colhido com <code>Invoke-Expression</code>, que roda um texto como comando. Digitado direto no console, o PowerShell não mostra erro: ele fica esperando o resto, com o prompt <code>&gt;&gt;</code>, até você fechar o texto (ou apertar <kbd>Ctrl</kbd>+<kbd>C</kbd> para desistir). Num script o PowerShell também acusa o erro, mas essa saída não foi colhida.</p>
 <pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Invoke-Expression '"texto sem fechar'
 Invoke-Expression: The string is missing the terminator: ".
 </pre>

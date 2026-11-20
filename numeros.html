@@ -117,12 +117,12 @@ PS C:\Users\ana&gt; 1_000_000
 Verifique a ortografia do nome ou, se um caminho foi incluído, verifique se o caminho está correto e tente novamente.
 </pre>
 <p><code>0b</code> escreve um número em binário (base 2): <code>1010</code> é 10. Já o sublinhado como separador de milhar (<code>1_000_000</code>), que existe em outras linguagens, <strong>não funciona</strong> no PowerShell: ele achou que era o nome de um comando. Escreva <code>1000000</code>.</p>
-<div class="note"><strong>Windows PowerShell 5.1:</strong> o binário <code>0b</code> não existe lá. Ele também acha que é um comando (o <code>#ERRO</code> é só um comentário que estava na linha):
-<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; 0b1010   #ERRO
+<div class="note"><strong>Windows PowerShell 5.1:</strong> o binário <code>0b</code> não existe lá. Ele também acha que é um comando:
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; 0b1010
 0b1010 : O termo '0b1010' não é reconhecido como nome de cmdlet, função, arquivo de script ou programa operável. 
 Verifique a grafia do nome ou, se um caminho tiver sido incluído, veja se o caminho está correto e tente novamente.
 No linha:1 caractere:1
-+ 0b1010   #ERRO
++ 0b1010
 + ~~~~~~
     + CategoryInfo          : ObjectNotFound: (0b1010:String) [], CommandNotFoundException
     + FullyQualifiedErrorId : CommandNotFoundException
