@@ -71,7 +71,7 @@ WSManStackVersion              3.0
 <dl class="anatomy">
   <dt>PSVersion 7.7.0</dt><dd>A versão. Se aparecer 7.7 (ou outra 7.x), você está no PowerShell 7.</dd>
   <dt>PSEdition Core</dt><dd>A edição “Core”: é o PowerShell 7. No 5.1 este campo diz <code>Desktop</code>.</dd>
-  <dt>OS e Platform</dt><dd>Só o 7 traz esses dois na tabela: aqui, Windows. No editor deste guia, que roda um PowerShell 7 de Linux, o sistema aparece diferente — e tudo bem.</dd>
+  <dt>OS e Platform</dt><dd>Só o 7 traz esses dois na tabela: aqui, Windows. O simulador deste guia imita esse mesmo Windows.</dd>
 </dl>
 <p>Dá para pedir só a edição:</p>
 <pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $PSVersionTable.PSEdition
@@ -154,7 +154,7 @@ MachinePolicy       Undefined
 <p>A maior parte dos comandos desta escola funciona nos dois. Estas três, não: existem só no PowerShell 7. Por isso o guia ensina o 7.</p>
 
 <h3><code>Join-Path</code> com três partes <span class="versao">7.7</span></h3>
-<p><code>Join-Path</code> monta um caminho de pasta. No 5.1 ele aceita só duas partes (a base e um filho). No 7 você pode passar três ou mais de uma vez: a pasta, a subpasta e o arquivo, por exemplo. No editor deste guia (PowerShell 7 de Linux) o separador sai como <code>/</code>; no Windows sai como <code>\</code>. A ideia é a mesma.</p>
+<p><code>Join-Path</code> monta um caminho de pasta. No 5.1 ele aceita só duas partes (a base e um filho). No 7 você pode passar três ou mais de uma vez: a pasta, a subpasta e o arquivo, por exemplo. No Windows (e no simulador deste guia) o separador sai como <code>\</code>; no Linux e no macOS sai como <code>/</code>. A ideia é a mesma.</p>
 
 <div class="tryps" data-goal="out:docs;;out:fotos;;out:capa.jpg;;src:Join-Path;;semerro">
 <p class="try-task"><strong>Experimente:</strong> junte três partes de uma vez, <code>docs</code>, <code>fotos</code> e <code>capa.jpg</code>, com um único <code>Join-Path</code>.</p>

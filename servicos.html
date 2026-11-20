@@ -32,7 +32,7 @@
 </ul>
 </div>
 
-<p>Todas as saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta pessoal da usuária fictícia <code>ana</code>. O editor do guia é um PowerShell 7 de Linux: não conte com o serviço <code>Spooler</code> lá. As missões pedem que você <strong>escreva</strong> o comando certo, sem tentá-lo no editor.</p>
+<p>Todas as saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta pessoal da usuária fictícia <code>ana</code>. O simulador do guia <strong>não imita</strong> serviços: esses cmdlets respondem só com um aviso. As missões pedem que você <strong>escreva</strong> o comando certo numa string, sem executá-lo.</p>
 
 <div class="warning">
 <strong>Nunca use <code>Get-Service</code> sem um nome nos exemplos desta aula.</strong> Sem <code>-Name</code>, o comando lista <strong>todos</strong> os serviços do computador — uma lista longa, que inclui o que está instalado aí. Sempre consulte pelo nome, como <code>Get-Service -Name Spooler</code>. Ligar, parar ou reiniciar um serviço (<code>Start-Service</code>, <code>Stop-Service</code>, <code>Restart-Service</code>) muda o sistema e em geral pede administrador: nesta aula eles aparecem só como explicação, sem saída colhida. Se um dia precisar realmente usá-los, ensaie antes com <code>-WhatIf</code>.
