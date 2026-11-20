@@ -33,7 +33,7 @@
 </ul>
 </div>
 
-<p>Todas as saídas desta aula foram colhidas no <strong>Windows PowerShell 5.1</strong> de um Windows em português, na pasta pessoal da usuária fictícia <code>ana</code>. No PowerShell 7 os comandos são os mesmos; quando a resposta muda, a aula avisa.</p>
+<p>Todas as saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta pessoal da usuária fictícia <code>ana</code>. No Windows PowerShell 5.1, que já vem no Windows, os comandos são os mesmos; quando a resposta muda, a aula avisa.</p>
 
 <hr>
 
@@ -52,7 +52,7 @@
 </div>
 
 <h3>Lendo o prompt</h3>
-<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; </pre>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; </pre>
 <dl class="anatomy">
   <dt>PS</dt><dd>"PowerShell". Mostra que quem está atendendo é o PowerShell, e não o <code>cmd</code> antigo (o prompt do <code>cmd</code> não tem esse <code>PS</code>).</dd>
   <dt>C:\Users\ana</dt><dd>A <strong>pasta onde você está</strong> agora: a pasta pessoal da Ana, no disco <code>C:</code>. Ela muda quando você muda de pasta (aula <a href="set-location.html">Mudando de Pasta</a>).</dd>
@@ -64,10 +64,9 @@
 
 <h2>1. Que dia é hoje? <code>Get-Date</code></h2>
 <p>Digite exatamente isto e aperte <kbd>Enter</kbd>:</p>
-<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; Get-Date
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Date
 
-sexta-feira, 20 de novembro de 2026 17:04:12
-
+sexta-feira, 20 de novembro de 2026 17:13:08
 
 </pre>
 <dl class="anatomy">
@@ -75,7 +74,7 @@ sexta-feira, 20 de novembro de 2026 17:04:12
   <dt>-</dt><dd>O hífen junta o verbo ao substantivo, sem espaço.</dd>
   <dt>Date</dt><dd>O <strong>substantivo</strong>: "data". Juntos: "obter a data". Essa regra Verbo-Substantivo tem uma aula só para ela: <a href="cmdlets.html">Cmdlets: Verbo-Substantivo</a>.</dd>
 </dl>
-<p>O PowerShell respondeu com o dia da semana, a data e a hora, em português, porque o Windows está em português. Repare nas <strong>linhas em branco</strong> antes e depois: é o jeito do PowerShell mostrar uma data inteira. Não é erro.</p>
+<p>O PowerShell respondeu com o dia da semana, a data e a hora, em português, porque o Windows está em português. Repare na <strong>linha em branco</strong> antes e depois: é o jeito do PowerShell mostrar uma data inteira. Não é erro.</p>
 <div class="note">O PowerShell <strong>não liga para maiúsculas e minúsculas</strong> nos nomes dos comandos: <code>get-date</code> e <code>GET-DATE</code> fazem a mesma coisa. Neste guia escrevemos <code>Get-Date</code> porque é o jeito oficial e o mais fácil de ler.</div>
 
 <div class="tryps" data-goal="outre:\d{4};;semerro">
@@ -90,7 +89,7 @@ sexta-feira, 20 de novembro de 2026 17:04:12
 
 <h2>2. Do seu jeito: <code>-Format</code></h2>
 <p>E se você só quiser a data, no formato que a gente escreve no Brasil? Muitos comandos aceitam <strong>parâmetros</strong>: palavras que começam com hífen e mudam o jeito do comando trabalhar.</p>
-<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; Get-Date -Format "dd/MM/yyyy"
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Date -Format "dd/MM/yyyy"
 20/11/2026
 </pre>
 <dl class="anatomy">
@@ -103,7 +102,7 @@ sexta-feira, 20 de novembro de 2026 17:04:12
 <hr>
 
 <h2>3. Escrevendo na tela: <code>Write-Output</code></h2>
-<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; Write-Output "Olá, mundo!"
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Write-Output "Olá, mundo!"
 Olá, mundo!
 </pre>
 <dl class="anatomy">
@@ -124,7 +123,7 @@ Olá, mundo!
 
 <h2>4. O terminal também é calculadora</h2>
 <p>Você não precisa de comando nenhum para fazer uma conta: digite a conta e aperte <kbd>Enter</kbd>.</p>
-<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; 2 + 3
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 2 + 3
 5
 </pre>
 <p>O PowerShell calculou e mostrou o resultado. Os outros sinais (<code>-</code>, <code>*</code> para vezes, <code>/</code> para dividir) e as pegadinhas das contas estão na aula <a href="operadores-aritmeticos.html">Operadores Aritméticos</a>.</p>
@@ -134,7 +133,7 @@ Olá, mundo!
 
 <h2>5. Deu certo? <code>$?</code></h2>
 <p>Depois de qualquer comando, o PowerShell guarda num lugar especial chamado <code>$?</code> se o último comando <strong>deu certo</strong>. Para ver, digite <code>$?</code> e aperte <kbd>Enter</kbd>:</p>
-<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; $?
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $?
 True
 </pre>
 <p><code>True</code> é "verdadeiro" em inglês: o comando anterior funcionou. Quando o último comando falha, o <code>$?</code> fica <code>False</code> ("falso"). Isso vai ser muito útil nos scripts; por enquanto, basta saber que ele existe. As variáveis que começam com <code>$</code> e já vêm prontas são assunto da aula <a href="variaveis-automaticas.html">Variáveis Automáticas</a>.</p>
@@ -164,6 +163,18 @@ echo "Olá, mundo!"
 <div class="cenario">
 <strong>Nome do comando digitado errado</strong>
 <p>Faltou o <code>e</code> no fim de <code>Get-Date</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Dat
+Get-Dat: O termo "Get-Dat" não é reconhecido como um nome de um cmdlet, função, arquivo de script ou programa executável.
+Verifique a ortografia do nome ou, se um caminho foi incluído, verifique se o caminho está correto e tente novamente.
+</pre>
+<p>A mensagem aparece em <strong>vermelho</strong> e assusta, mas é só o PowerShell dizendo "não conheço esse nome". Linha por linha:</p>
+<dl class="anatomy">
+  <dt>Get-Dat:</dt><dd>O nome que você digitou, para você saber de qual comando ele está falando.</dd>
+  <dt>O termo "Get-Dat" não é reconhecido…</dt><dd>O que aconteceu: ele procurou um comando chamado <code>Get-Dat</code> e não achou nenhum com esse nome.</dd>
+  <dt>Verifique a ortografia do nome…</dt><dd>A dica: confira se você escreveu certo. É quase sempre isso.</dd>
+</dl>
+<p><strong>Como resolver:</strong> confira a grafia (<code>Get-Date</code>) e rode de novo. Não precisa fechar a janela nem "limpar" nada: o erro não estragou coisa nenhuma.</p>
+<div class="note"><strong>No Windows PowerShell 5.1</strong> a mesma mensagem é mais comprida: ela mostra também onde está o erro e uma "ficha técnica" em inglês.
 <pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; Get-Dat
 Get-Dat : O termo 'Get-Dat' não é reconhecido como nome de cmdlet, função, arquivo de script ou programa operável.
 Verifique a grafia do nome ou, se um caminho tiver sido incluído, veja se o caminho está correto e tente novamente.
@@ -173,16 +184,7 @@ No linha:1 caractere:1
     + CategoryInfo          : ObjectNotFound: (Get-Dat:String) [], CommandNotFoundException
     + FullyQualifiedErrorId : CommandNotFoundException
 </pre>
-<p>A mensagem aparece em <strong>vermelho</strong> e assusta, mas é só o PowerShell dizendo "não conheço esse nome". Linha por linha:</p>
-<dl class="anatomy">
-  <dt>Get-Dat : O termo 'Get-Dat' não é reconhecido…</dt><dd>O que aconteceu: ele procurou um comando chamado <code>Get-Dat</code> e não achou nenhum com esse nome.</dd>
-  <dt>Verifique a grafia do nome…</dt><dd>A dica: confira se você escreveu certo. É quase sempre isso.</dd>
-  <dt>No linha:1 caractere:1</dt><dd>Onde está o problema: na linha 1, a partir da letra 1. Num script com muitas linhas, isso ajuda a achar o erro.</dd>
-  <dt>+ ~~~~~~~</dt><dd>Os tils ficam embaixo do pedaço que deu problema, como um sublinhado.</dd>
-  <dt>CategoryInfo / FullyQualifiedErrorId</dt><dd>A "ficha técnica" do erro: <code>ObjectNotFound</code> ("objeto não encontrado") e <code>CommandNotFoundException</code> ("comando não encontrado"). Útil para pesquisar na internet; no começo, pode ignorar.</dd>
-</dl>
-<p><strong>Como resolver:</strong> confira a grafia (<code>Get-Date</code>) e rode de novo. Não precisa fechar a janela nem "limpar" nada: o erro não estragou coisa nenhuma.</p>
-<div class="note">No PowerShell 7 a mesma mensagem é mais curta, sem as linhas de <code>CategoryInfo</code>. A ideia é a mesma.</div>
+<code>No linha:1 caractere:1</code> diz onde está o problema, os tils <code>~~~~~~~</code> sublinham o pedaço errado, e <code>CommandNotFoundException</code> ("comando não encontrado") é útil para pesquisar na internet.</div>
 </div>
 
 <div class="cenario">
