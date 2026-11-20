@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Here-Strings — textos de várias linhas | Guia PowerShell</title>
+<meta name="description" content="Here-strings no PowerShell: textos de várias linhas com @&quot; &quot;@ e @&#x27; &#x27;@, guardar em variável e o erro real do espaço antes do fechamento.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">Textos de Várias Linhas</span> (Here-Strings)</h1>
+
+<p class="intro">A Ana precisa mandar o mesmo e-mail de boas-vindas para cada aluna nova, com várias linhas. Em vez de montar o texto pedaço por pedaço, ela cola o bloco inteiro numa here-string.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A escrever textos de várias linhas com <code>@" "@</code> e <code>@' '@</code>.</li>
+  <li>A diferença entre a versão com aspas duplas (troca variáveis) e simples (texto puro).</li>
+  <li>A guardar um texto longo numa variável.</li>
+  <li>A regra do fechamento no começo da linha, e o erro real quando ela é quebrada.</li>
+</ul>
+</div>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português.</p>
+<hr>
+<h2>A ideia: colar um bloco inteiro</h2>
+<p>Às vezes você quer um texto grande, com várias linhas: um e-mail, um aviso, um trecho de configuração. Em vez de juntar linha por linha com <code>`n</code>, a <strong>here-string</strong> ("texto aqui") deixa você colar o bloco inteiro entre uma marca de abertura e uma de fechamento.</p>
+<hr>
+<h2>1. Com aspas duplas: troca as variáveis</h2>
+<p>No console, depois da primeira linha, o prompt vira <code>&gt;&gt;</code>: o PowerShell está esperando o resto.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $nome = "Ana"
+PS C:\Users\ana&gt; $curso = "PowerShell"
+PS C:\Users\ana&gt; @"
+&gt;&gt; Olá, $nome!
+&gt;&gt; Bem-vinda ao curso de $curso.
+&gt;&gt; "@
+Olá, Ana!
+Bem-vinda ao curso de PowerShell.
+</pre>
+<dl class="anatomy">
+  <dt>@"</dt><dd>Abre a here-string. Nada pode vir depois na mesma linha.</dd>
+  <dt>as linhas do meio</dt><dd>O texto, do jeito que você quer. Aspas dentro não precisam de cuidado nenhum.</dd>
+  <dt>"@</dt><dd>Fecha. Precisa ficar <strong>no começo da linha</strong>, sem espaço antes.</dd>
+</dl>
+<h2>2. Com aspas simples: texto puro</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; @'
+&gt;&gt; Olá, $nome!
+&gt;&gt; O preço é $10.
+&gt;&gt; '@
+Olá, $nome!
+O preço é $10.
+</pre>
+<p>Igual às aspas simples comuns: nada é trocado. Bom para textos com <code>$</code> que não é variável.</p>
+<h2>3. Guardar numa variável</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $carta = @"
+&gt;&gt; Prezada $nome,
+&gt;&gt; Seu cadastro foi aceito.
+&gt;&gt; "@
+PS C:\Users\ana&gt; $carta
+Prezada Ana,
+Seu cadastro foi aceito.
+</pre>
+<p>Num script (<code>.ps1</code>) fica assim, sem os <code>&gt;&gt;</code>:</p>
+<pre class="file" data-file="carta.ps1">$nome = "Ana"
+$carta = @"
+Prezada $nome,
+Seu cadastro foi aceito.
+"@
+$carta
+</pre>
+<div class="tryps" data-goal="out:Bem-vinda, Ana!;;semerro">
+<p class="try-task"><strong>Experimente:</strong> a carta mostra <code>$nome</code> em vez do nome. Troque <code>@'</code> e <code>'@</code> por <code>@"</code> e <code>"@</code>.</p>
+<pre class="script" data-file="main.ps1">$nome = 'Ana'
+@'
+Bem-vinda, $nome!
+Sua matrícula está ativa.
+'@
+</pre>
+<pre class="solucao" data-file="main.ps1">$nome = 'Ana'
+@"
+Bem-vinda, $nome!
+Sua matrícula está ativa.
+"@
+</pre>
+</div>
+<hr>
+<h2>Quando dá errado</h2>
+<div class="cenario">
+<strong>Espaço antes do fechamento</strong>
+<p>Este erro foi colhido com <code>Invoke-Expression</code>, que roda um texto como comando (o <code>`n</code> dentro dele faz as quebras de linha). Num script, o mesmo engano mostra a mesma mensagem, com outra moldura em volta.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Invoke-Expression "@`" `nOlá`n `"@"
+Invoke-Expression: White space is not allowed before the string terminator.
+</pre>
+<p>"Não é permitido espaço antes do terminador do texto." O <code>"@</code> estava com um espaço na frente. Isso acontece muito quando o código está indentado dentro de um <code>if</code>.</p>
+<p><strong>Como resolver:</strong> encoste o <code>"@</code> (ou <code>'@</code>) na margem esquerda, mesmo que o resto do código esteja indentado.</p>
+</div>
+<div class="cenario">
+<strong>O console fica preso em <code>&gt;&gt;</code></strong>
+<p>Se o fechamento estiver errado, o console interativo não mostra erro: continua esperando com <code>&gt;&gt;</code>. Digite <code>"@</code> no começo de uma linha, ou aperte <kbd>Ctrl</kbd>+<kbd>C</kbd> para desistir.</p>
+</div>
+<hr>
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>@" … "@</code></td><td>Várias linhas, troca variáveis.</td></tr>
+<tr><td><code>@' … '@</code></td><td>Várias linhas, texto puro.</td></tr>
+<tr><td>Fechamento</td><td>Sempre no começo da linha, sozinho.</td></tr>
+</table>
+</div>
+<hr>
+<h2>Exercícios</h2>
+<div class="exercise">
+<h3>1. Abertura</h3>
+<p>Complete a abertura de uma here-string que troca variáveis:</p>
+<div class="ex-code">$texto = <input data-answer="@&quot;" aria-label="abertura"></div>
+</div>
+<div class="exercise">
+<h3>2. Fechamento</h3>
+<p>Como se fecha a here-string com aspas simples?</p>
+<div class="ex-code"><input data-answer="&#x27;@" aria-label="fechamento"></div>
+</div>
+<div class="mc" data-answer="2">
+<p class="mc-q">3. Onde o fechamento <code>"@</code> precisa ficar?</p>
+<label><input type="radio" name="q3"> Em qualquer lugar</label>
+<label><input type="radio" name="q3"> No começo da linha, sem espaço antes</label>
+<label><input type="radio" name="q3"> Na mesma linha da abertura</label>
+<label><input type="radio" name="q3"> Depois de um ponto e vírgula</label>
+</div>
+<div class="mc" data-answer="2">
+<p class="mc-q">4. O que <code>@' Preço: $10 '@</code> (em várias linhas) mostra?</p>
+<label><input type="radio" name="q4"> Preço: 10</label>
+<label><input type="radio" name="q4"> Preço: $10</label>
+<label><input type="radio" name="q4"> Preço:</label>
+<label><input type="radio" name="q4"> Erro</label>
+</div>
+<div class="tryps" data-goal="out:Loja da Ana;;outre:Loja da Ana\nAberta;;semerro">
+<p class="try-task"><strong>Missão final:</strong> monte uma here-string com duas linhas: <code>Loja da $dona</code> e <code>Aberta</code>, e mostre.</p>
+<pre class="script" data-file="main.ps1">$dona = "Ana"
+</pre>
+<pre class="solucao" data-file="main.ps1">$dona = "Ana"
+@"
+Loja da $dona
+Aberta
+"@
+</pre>
+</div>
+<hr>
+<h2>Resumo</h2>
+<ul>
+  <li><code>@" … "@</code>: várias linhas, com variáveis.</li>
+  <li><code>@' … '@</code>: várias linhas, texto puro.</li>
+  <li>A abertura termina a linha; o fechamento começa a linha.</li>
+  <li>Espaço antes do fechamento dá erro.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
