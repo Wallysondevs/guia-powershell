@@ -1,0 +1,18 @@
+# while — autor Tito
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Erros de SINTAXE (#ERRO-PARSE) precisam rodar isolados (Invoke-Expression), senão derrubam o arquivo todo.
+# Só linguagem: nenhuma lista cria nem apaga arquivo, não precisa de pasta de teste.
+# shell: pwsh
+## while
+$estoque = 3
+while ($estoque -gt 0) { "Vendi 1, restam $($estoque - 1)"; $estoque-- }
+## while que não roda
+$estoque = 0
+while ($estoque -gt 0) { "nunca" }; "while não rodou nenhuma vez"
+## do-while e do-until rodam pelo menos uma vez
+do { "do-while rodou com $estoque" } while ($estoque -gt 0)
+$n = 1
+do { "n = $n"; $n *= 2 } until ($n -gt 10)
+## erro
+Invoke-Expression 'while $estoque -gt 0 { $estoque-- }'   #ERRO-PARSE
+$i = 0; while ($true) { $i++; if ($i -ge 1000) { "freio de segurança em $i"; break } }

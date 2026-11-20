@@ -1,0 +1,24 @@
+# write-outros — autor Tito
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Erros de SINTAXE (#ERRO-PARSE) precisam rodar isolados (Invoke-Expression), senão derrubam o arquivo todo.
+# Só linguagem: nenhuma lista cria nem apaga arquivo, não precisa de pasta de teste.
+# shell: pwsh
+## Write-Warning
+Write-Warning "O estoque de caneta está baixo"
+## Write-Verbose (escondido por padrão)
+Write-Verbose "Detalhe para quem pediu"
+Write-Verbose "Detalhe para quem pediu" -Verbose
+$VerbosePreference
+## Write-Debug
+Write-Debug "Valor de x: 5"
+Write-Debug "Valor de x: 5" -Debug
+## Write-Information
+Write-Information "Informação"
+Write-Information "Informação" -InformationAction Continue
+## Write-Error (não para o script)
+Write-Error "Arquivo de notas não encontrado"   #ERRO
+"Depois do Write-Error, o script segue"
+## Write-Progress (só de olhar: em janela aparece a barra)
+Get-Command Write-Progress | Select-Object Name, CommandType
+## os fluxos numerados
+Write-Warning "aviso" 3>&1 | ForEach-Object { "Capturado: $_" }

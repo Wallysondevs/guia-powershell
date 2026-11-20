@@ -1,0 +1,22 @@
+# elseif-else — autor Tito
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Erros de SINTAXE (#ERRO-PARSE) precisam rodar isolados (Invoke-Expression), senão derrubam o arquivo todo.
+# Só linguagem: nenhuma lista cria nem apaga arquivo, não precisa de pasta de teste.
+# shell: pwsh
+## else
+$nota = 5
+if ($nota -ge 7) { "Aprovada" } else { "Recuperação" }
+## elseif
+foreach ($nota in 9.5, 7, 5, 2) {
+    if ($nota -ge 9) { "$nota: Excelente" }
+    elseif ($nota -ge 7) { "$nota: Aprovada" }
+    elseif ($nota -ge 5) { "$nota: Recuperação" }
+    else { "$nota: Reprovada" }
+}
+## a ordem importa
+$nota = 9.5
+if ($nota -ge 5) { "Recuperação" } elseif ($nota -ge 9) { "Excelente" }
+## erros
+Invoke-Expression 'if ($nota -ge 7) { "A" } else if ($nota -ge 5) { "B" }'   #ERRO-PARSE
+Invoke-Expression 'if ($nota -ge 7) { "A" } elsif ($nota -ge 5) { "B" }'   #ERRO-PARSE
+Invoke-Expression 'else { "sozinho" }'   #ERRO-PARSE

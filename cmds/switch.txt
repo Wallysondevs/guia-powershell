@@ -1,0 +1,26 @@
+# switch — autor Tito
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Erros de SINTAXE (#ERRO-PARSE) precisam rodar isolados (Invoke-Expression), senão derrubam o arquivo todo.
+# Só linguagem: nenhuma lista cria nem apaga arquivo, não precisa de pasta de teste.
+# shell: pwsh
+## básico
+$dia = "sab"
+switch ($dia) {
+    "sab" { "Fim de semana" }
+    "dom" { "Fim de semana" }
+    default { "Dia útil" }
+}
+## sem break, todas as que casam rodam
+switch (5) { 5 { "cinco" } { $_ -gt 3 } { "maior que 3" } default { "outro" } }
+switch (5) { 5 { "cinco"; break } { $_ -gt 3 } { "maior que 3" } }
+## maiúsculas
+switch ("SAB") { "sab" { "casou sem diferenciar" } }
+switch -CaseSensitive ("SAB") { "sab" { "casou" } default { "não casou" } }
+## -Wildcard e -Regex
+switch -Wildcard ("foto.jpg") { "*.jpg" { "imagem" } "*.txt" { "texto" } }
+switch -Regex ("pedido-2026-123") { '^\w+-(\d{4})' { "ano: $($Matches[1])" } }
+## lista na entrada
+switch (1, 2, 3) { 1 { "um" } 2 { "dois" } default { "outro: $_" } }
+## erro
+Invoke-Expression 'switch ($dia) { "sab" "Fim de semana" }'   #ERRO-PARSE
+Invoke-Expression 'switch $dia { "sab" { "x" } }'   #ERRO-PARSE
