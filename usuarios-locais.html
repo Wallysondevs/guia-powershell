@@ -245,6 +245,19 @@ Get-LocalUser: Usuário guia-teste não encontrado. « ilustrativo
 
 <hr>
 
+<h2>Formas diferentes de consultar um usuário</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>Get-LocalUser -Name "guia-teste"</code></td><td><span class="versao">só Windows</span> O jeito deste guia: consulta só essa conta, pelo nome. Só leitura.</td></tr>
+<tr><td><code>Get-LocalUser "guia-teste"</code></td><td><span class="versao">só Windows</span> A mesma consulta, com o nome na posição. Nunca omita o nome.</td></tr>
+<tr><td><code>Get-CimInstance Win32_UserAccount -Filter "Name='guia-teste'"</code></td><td><span class="versao">só Windows</span> A mesma conta, via CIM, já filtrada pelo nome. Também é só leitura.</td></tr>
+<tr><td><code>net user guia-teste</code></td><td><span class="versao">só Windows</span> A consulta clássica daquela conta. Também é só leitura, e também exige o nome.</td></tr>
+</table>
+</div>
+
+<hr>
+
 <h2>Referência rápida</h2>
 <div class="table-wrap">
 <table class="ref">
