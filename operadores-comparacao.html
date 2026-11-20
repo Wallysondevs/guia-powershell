@@ -91,6 +91,18 @@ PS C:\Users\ana&gt; 1, 2, 3, 2, 5 -gt 2
 </pre>
 <p>Quando há uma lista à esquerda, o resultado não é True/False: é a lista dos itens que passaram no teste. Para perguntar "a lista tem esse item?", use <code>-contains</code> (aula <a href="operadores-colecao.html">-contains e -in</a>).</p>
 <hr>
+<h2>Formas diferentes de comparar texto</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>-eq</code></td><td>Igual, sem diferenciar maiúsculas. O padrão.</td></tr>
+<tr><td><code>-ceq</code></td><td>Igual, diferenciando maiúsculas.</td></tr>
+<tr><td><code>-like "Ana*"</code></td><td>Igual a um padrão com curinga (aula <a href="operadores-texto.html">Comparando Textos</a>).</td></tr>
+<tr><td><code>-match "^Ana"</code></td><td>Padrão com expressão regular (mesma aula).</td></tr>
+<tr><td><code>-contains</code>, <code>-in</code></td><td>O item está numa lista? (aula <a href="operadores-colecao.html">-contains e -in</a>).</td></tr>
+</table>
+</div>
+<hr>
 <h2>Quando dá errado</h2>
 <div class="cenario">
 <strong>Digitou o operador errado</strong>
@@ -114,6 +126,19 @@ Line |
 <p><code>if ($nota = 10)</code> não compara: guarda 10 em <code>$nota</code>, e o <code>if</code> sempre entra. Veja a explicação completa na aula <a href="if.html">if</a>. Use <code>-eq</code>.</p>
 </div>
 <hr>
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>-eq</code>, <code>-ne</code></td><td>Igual, diferente.</td></tr>
+<tr><td><code>-gt</code>, <code>-ge</code></td><td>Maior, maior ou igual.</td></tr>
+<tr><td><code>-lt</code>, <code>-le</code></td><td>Menor, menor ou igual.</td></tr>
+<tr><td><code>-ceq</code>, <code>-cne</code>…</td><td>Diferenciam maiúsculas.</td></tr>
+<tr><td><code>lista -eq valor</code></td><td>Filtra a lista.</td></tr>
+<tr><td><code>=</code></td><td>Guarda valor; <strong>não</strong> compara.</td></tr>
+</table>
+</div>
+<hr>
 <h2>Exercícios</h2>
 <div class="exercise">
 <h3>1. Diferente</h3>
@@ -125,19 +150,25 @@ Line |
 <p>Complete para "<code>$preco</code> menor ou igual a 50":</p>
 <div class="ex-code">$preco <input data-answer="-le" aria-label="operador"> 50</div>
 </div>
-<div class="mc" data-answer="1">
-<p class="mc-q">3. O que <code>"Ana" -eq "ANA"</code> mostra?</p>
-<label><input type="radio" name="q3"> True</label>
-<label><input type="radio" name="q3"> False</label>
-<label><input type="radio" name="q3"> Erro</label>
-<label><input type="radio" name="q3"> Nada</label>
+<div class="exercise">
+<h3>3. Maior que</h3>
+<p>Complete para "<code>$nota</code> maior que 9":</p>
+<div class="ex-code">$nota <input data-answer="-gt" aria-label="operador"> 9</div>
 </div>
-<div class="mc" data-answer="3">
-<p class="mc-q">4. O que <code>1, 5, 8 -gt 4</code> mostra?</p>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">4. O que <code>"Ana" -eq "ANA"</code> mostra?</p>
 <label><input type="radio" name="q4"> True</label>
 <label><input type="radio" name="q4"> False</label>
-<label><input type="radio" name="q4"> 5 e 8</label>
-<label><input type="radio" name="q4"> 1</label>
+<label><input type="radio" name="q4"> Erro</label>
+<label><input type="radio" name="q4"> Nada</label>
+</div>
+<div class="mc" data-answer="3">
+<p class="mc-q">5. O que <code>1, 5, 8 -gt 4</code> mostra?</p>
+<label><input type="radio" name="q5"> True</label>
+<label><input type="radio" name="q5"> False</label>
+<label><input type="radio" name="q5"> 5 e 8</label>
+<label><input type="radio" name="q5"> 1</label>
 </div>
 <div class="tryps" data-goal="out:Estoque baixo;;src:-lt;;semerro">
 <p class="try-task"><strong>Missão final:</strong> mostre <code>Estoque baixo</code> quando <code>$estoque</code> for menor que 10.</p>
