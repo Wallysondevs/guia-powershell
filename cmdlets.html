@@ -91,7 +91,7 @@ Hide   h           Common Makes a resource undetectable
 <div class="note"><strong>No Windows PowerShell 5.1</strong> a lista é um pouco menor: <code>(Get-Verb).Count</code> deu <strong>98</strong>. E a tabela padrão do <code>Get-Verb</code> mostra só as colunas <code>Verb</code> e <code>Group</code> — sem <code>AliasPrefix</code> e sem a descrição.</div>
 
 <div class="tryps" data-goal="src:\bGet-Verb\b;;src:-Verb;;semerro">
-<p class="try-task"><strong>Experimente:</strong> troque o comando para mostrar só o verbo <code>Get</code>, com <code>Get-Verb -Verb Get</code>, e clique em Rodar.</p>
+<p class="try-task"><strong>Experimente:</strong> troque o comando para mostrar só o verbo <code>Get</code>, com <code>Get-Verb -Verb Get</code>, e rode.</p>
 <pre class="script" data-file="main.ps1">Get-Verb | Select-Object -First 10
 </pre>
 <pre class="solucao" data-file="main.ps1">Get-Verb -Verb Get

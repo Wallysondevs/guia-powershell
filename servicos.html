@@ -74,7 +74,7 @@ Running  Spooler            Spooler de Impressão
 </dl>
 
 <div class="tryps" data-goal="src:Get-Service;;src:-Name;;src:Spooler;;semerro">
-<p class="try-task"><strong>Experimente:</strong> o editor do guia não tem o Spooler do Windows, então <strong>não rode</strong> o cmdlet. Escreva, numa string, o comando que consulta o serviço <code>Spooler</code> pelo nome, e deixe o <code>Write-Output</code> mostrar a string.</p>
+<p class="try-task"><strong>Experimente:</strong> neste guia a gente <strong>não roda</strong> o cmdlet (não vamos consultar o Spooler do Windows). Escreva, numa string, o comando que consulta o serviço <code>Spooler</code> pelo nome, e deixe o <code>Write-Output</code> mostrar a string.</p>
 <pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
 $comando = ''
 Write-Output $comando
@@ -250,7 +250,7 @@ Get-Service: Não é possível localizar nenhum serviço com o nome de serviço 
 </div>
 
 <div class="tryps" data-goal="src:Get-Service;;src:Spooler;;src:Select-Object;;src:StartType;;semerro">
-<p class="try-task"><strong>Missão final:</strong> ainda numa string, escreva o comando que consulta o <code>Spooler</code> e seleciona <code>Name</code>, <code>DisplayName</code>, <code>Status</code> e <code>StartType</code>. Não chame o cmdlet: o editor não deve consultar serviços do Windows.</p>
+<p class="try-task"><strong>Missão final:</strong> ainda numa string, escreva o comando que consulta o <code>Spooler</code> e seleciona <code>Name</code>, <code>DisplayName</code>, <code>Status</code> e <code>StartType</code>. Não chame o cmdlet: nada deve consultar serviços do Windows.</p>
 <pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
 $comando = ''
 Write-Output $comando

@@ -16,6 +16,8 @@
 //   (se o script inicial já é a solução, os dois podem dar ok).
 // Se não existir, cai no modo rode-local (a273e59):
 //   campo vazio → "Cole primeiro o que o PowerShell respondeu", zero ✔;
+//   colar o script, a solução, ou os mesmos com o prompt "PS C:\Users\ana>"
+//     → não dá ✔ nem "Missão cumprida!";
 //   "(sem saída)" → semerro vira ☐, sem ✔ automático;
 //   quando só sobram ☐ → "Quase lá!", nunca "Missão cumprida!".
 //
@@ -171,6 +173,32 @@ function soSrcOuSemerro(goal) {
   });
 }
 
+const stats = {
+  caixas: 0,
+  negativos: 0,
+  falsoPositivo: 0,
+  quaseLa: 0,
+  quaseLaFalhou: 0
+};
+
+function casoNegativo(nome, caso, r, problemas) {
+  stats.negativos++;
+  if (r.erro) {
+    problemas.push(nome + ": " + caso + ": " + r.erro);
+    return;
+  }
+  const ticks = r.ticks || 0;
+  const cumpriu = /Missão cumprida/.test(r.texto);
+  if (ticks !== 0 || cumpriu) {
+    stats.falsoPositivo++;
+    const det = [];
+    if (ticks) det.push(ticks + " ✔");
+    if (cumpriu) det.push("“Missão cumprida!”");
+    problemas.push(nome + ": caso negativo “" + caso + "” deu " + det.join(" e ") +
+      " (viu: " + JSON.stringify(r.texto).slice(0, 160) + ")");
+  }
+}
+
 async function testarComRodeLocal(pg, problemas, notas) {
   const okUi = await pg.waitForFunction(() => {
     const caixas = document.querySelectorAll(".tryps");
@@ -187,21 +215,35 @@ async function testarComRodeLocal(pg, problemas, notas) {
   for (let i = 0; i < n; i++) {
     const c = await pg.evaluate((i) => {
       const box = document.querySelectorAll(".tryps")[i];
+      const pre = box.querySelector("pre.script");
       const sol = box.querySelector("pre.solucao");
+      const trim = (s) => String(s || "").replace(/^\n+/, "").replace(/\s+$/, "");
       return {
         goal: box.getAttribute("data-goal") || "",
-        solucao: sol ? sol.textContent.replace(/^\n+/, "").replace(/\s+$/, "") : ""
+        script: pre ? trim(pre.textContent) : "",
+        solucao: sol ? trim(sol.textContent) : ""
       };
     }, i);
     const nome = "caixa " + (i + 1);
+    stats.caixas++;
+    const prompt = "PS C:\\Users\\ana> ";
 
     const vazio = await conferir(pg, i, "");
     if (vazio.erro) { problemas.push(nome + ": " + vazio.erro); continue; }
-    if (vazio.ticks !== 0) problemas.push(nome + ": campo vazio mostrou " + vazio.ticks + " ✔ (deveria ser zero, inclusive no semerro)");
+    casoNegativo(nome, "campo vazio", vazio, problemas);
     if (!/Cole primeiro o que o PowerShell respondeu/.test(vazio.texto)) {
       problemas.push(nome + ": campo vazio deveria pedir para colar a resposta (viu: " + JSON.stringify(vazio.texto).slice(0, 160) + ")");
     }
-    if (/Missão cumprida/.test(vazio.texto)) problemas.push(nome + ": campo vazio mostrou “Missão cumprida!”");
+
+    casoNegativo(nome, "só o prompt", await conferir(pg, i, "PS C:\\Users\\ana>"), problemas);
+    if (c.script) {
+      casoNegativo(nome, "colar o script", await conferir(pg, i, c.script), problemas);
+      casoNegativo(nome, "colar o script com prompt", await conferir(pg, i, prompt + c.script), problemas);
+    }
+    if (c.solucao) {
+      casoNegativo(nome, "colar a solução", await conferir(pg, i, c.solucao), problemas);
+      casoNegativo(nome, "colar a solução com prompt", await conferir(pg, i, prompt + c.solucao), problemas);
+    }
 
     const marc = await conferir(pg, i, "(sem saída)", c.solucao || null);
     if (marc.erro) { problemas.push(nome + ": " + marc.erro); continue; }
@@ -209,15 +251,18 @@ async function testarComRodeLocal(pg, problemas, notas) {
     const temSemerro = /(^|;;)\s*semerro\b/.test(c.goal);
     if (temSemerro) {
       if (!semerroManual) problemas.push(nome + ": com “(sem saída)” o semerro deveria virar ☐ “confirme que o comando executou sem erros no seu terminal”");
-      // o ✔ automático do semerro não pode aparecer; outros ✔ (src) podem
     }
     if (/Missão cumprida/.test(marc.texto)) {
       problemas.push(nome + ": com “(sem saída)” apareceu “Missão cumprida!” (o esperado, se só sobram ☐, é “Quase lá!”)");
     }
     if (soSrcOuSemerro(c.goal) && c.solucao) {
       if (marc.falhas) problemas.push(nome + ": missão só src/semerro com a solução e “(sem saída)” ainda tem ✘: " + JSON.stringify(marc.texto).slice(0, 160));
-      if (!/Quase lá!/.test(marc.texto)) {
-        problemas.push(nome + ": no positivo (só src/semerro) o esperado é “Quase lá!”, viu: " + JSON.stringify(marc.texto).slice(0, 160));
+      if (/Quase lá!/.test(marc.texto) && !marc.falhas) stats.quaseLa++;
+      else {
+        stats.quaseLaFalhou++;
+        if (!/Quase lá!/.test(marc.texto)) {
+          problemas.push(nome + ": no positivo (só src/semerro) o esperado é “Quase lá!”, viu: " + JSON.stringify(marc.texto).slice(0, 160));
+        }
       }
     }
   }
@@ -307,6 +352,14 @@ async function testarPagina(nav, base, pagina) {
     await nav.close();
     srv.close();
   }
-  console.log("\n" + paginas.length + " página(s), " + ruins + " com problema" + (fotos ? "; prints em " + fotos : ""));
+  const linhas = [
+    paginas.length + " página(s), " + ruins + " com problema" + (fotos ? "; prints em " + fotos : ""),
+    "caixas testadas (rode-local): " + stats.caixas,
+    "casos negativos (campo vazio, colar script, colar solução, com prompt PS C:\\Users\\ana>): " +
+      stats.negativos + " conferidos, " + stats.falsoPositivo + " falso(s) positivo(s)",
+    "positivo com “(sem saída)” nas missões só src/semerro: " +
+      stats.quaseLa + " “Quase lá!”, " + stats.quaseLaFalhou + " falha(s)"
+  ];
+  console.log("\n" + linhas.join("\n"));
   process.exitCode = ruins ? 1 : 0;
 })().catch((e) => { console.error(e); process.exitCode = 1; process.exit(1); });

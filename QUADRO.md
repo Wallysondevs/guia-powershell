@@ -119,7 +119,6 @@ NIVEIS tem **51** páginas no Nível 1; as 51 existem (`simulador.html` em 4238f
 
 **Pendências da próxima sessão:**
 1. `pssim.js` (ainda não existe; o fallback é o rode-local).
-2. Textos das missões ainda dizem "clique em Rodar".
 
 
 ## Fechamento do Nível 1 (20/11/2026, 18:50)
@@ -132,8 +131,7 @@ NIVEIS tem **51** páginas no Nível 1; as 51 existem (`simulador.html` em 4238f
 
 **Pendências da próxima sessão:**
 1. `pssim.js` (não existe; fallback é o rode-local).
-2. Textos das missões que ainda dizem "clique em Rodar".
-3. Cerca de 10 páginas ainda dizem que o editor do guia é um PowerShell de Linux (ex.: `variaveis-automaticas`, que diz que lá o `$IsLinux` dá True, `get-location`, `abrir-terminal`, `versoes-powershell`). Reescrever junto com o pssim.js; não têm dado do Wallyson.
+2. Cerca de 10 páginas ainda dizem que o editor do guia é um PowerShell de Linux (ex.: `variaveis-automaticas`, que diz que lá o `$IsLinux` dá True, `get-location`, `abrir-terminal`, `versoes-powershell`). Reescrever junto com o pssim.js; não têm dado do Wallyson. (Os textos das *missões* que falavam em "clique em Rodar" / "no editor" já foram trocados por texto neutro.)
 
 
 ## Simulador pssim.js — etapas
@@ -221,3 +219,16 @@ Critério de pronto: as missões destravadas na etapa (e nas anteriores) passam 
 **E8** destrava: `elseif-else-2` e `3`, `switch-1` a `3`, `break-continue-1` a `3`, `for-1` e `2`, `foreach-1` e `2`, `while-1` a `3`.
 
 Frequência de cmdlets e recursos (quantas missões cada um destrava, com Começando e Pastas primeiro nos `ids`): ver `tools/missoes.json`, chave `frequencia`.
+
+## Teste no navegador
+
+**20/11/2026, 19:26 (America/Sao_Paulo).** `timeout 180 node tools/testar-navegador.js --todas -q`, com `puppeteer-core` temporário em `tools/node_modules` e `CHROMIUM=/usr/bin/google-chrome`. Sem `pssim.js` (caminho rode-local, a273e59). O 404 de `assets/pssim.js` é ignorado. `node_modules` não entra no git.
+
+| | Total |
+|---|---|
+| Páginas | 54, **0 com problema** |
+| Caixas `.tryps` | 129 |
+| Casos negativos (campo vazio; colar o script; colar a solução; só o prompt `PS C:\Users\ana>`; script ou solução com esse prompt) | **768** conferidos, **0** falso(s) positivo(s) (nenhum ✔ nem “Missão cumprida!”) |
+| Positivo com `(sem saída)` nas missões só `src`/`semerro` | **19** “Quase lá!”, **0** falha(s) |
+
+Os textos das missões não dizem mais “clique em Rodar”, “veja no editor” nem “aperte Rodar”: o pedido é neutro (serve no rode-local e no pssim). A pendência 2 foi encerrada. O aviso do `rode-local.js` ainda menciona a frase antiga; isso fica com o Zeca.

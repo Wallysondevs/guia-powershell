@@ -91,7 +91,7 @@ PS C:\Users\ana&gt; Get-ItemPropertyValue -Path 'HKLM:\SOFTWARE\Microsoft\Window
 <p>No seu computador o texto da edição pode ser outro. Não peça propriedades além dessas três — principalmente nada que identifique o dono da máquina.</p>
 
 <div class="tryps" data-goal="src:Get-PSDrive;;src:-PSProvider;;src:Registry;;semerro">
-<p class="try-task"><strong>Experimente:</strong> o editor do guia não tem o Registro do Windows, então <strong>não rode</strong> o cmdlet. Escreva, numa string, o comando que lista só os drives do provedor <code>Registry</code>, e deixe o <code>Write-Output</code> mostrar a string.</p>
+<p class="try-task"><strong>Experimente:</strong> neste guia a gente <strong>não roda</strong> o cmdlet (não vamos consultar o Registro do Windows). Escreva, numa string, o comando que lista só os drives do provedor <code>Registry</code>, e deixe o <code>Write-Output</code> mostrar a string.</p>
 <pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
 $comando = ''
 Write-Output $comando
@@ -317,7 +317,7 @@ False
 </div>
 
 <div class="tryps" data-goal="src:Remove-Item;;src:GuiaPowerShell;;src:-WhatIf;;semerro">
-<p class="try-task"><strong>Missão final:</strong> ainda numa string, escreva o comando que <strong>ensaia</strong> a remoção da chave de teste <code>HKCU:\Software\GuiaPowerShell</code>, com <code>-Recurse</code> e <code>-WhatIf</code>. Não chame o cmdlet: o editor não deve mexer no Registro.</p>
+<p class="try-task"><strong>Missão final:</strong> ainda numa string, escreva o comando que <strong>ensaia</strong> a remoção da chave de teste <code>HKCU:\Software\GuiaPowerShell</code>, com <code>-Recurse</code> e <code>-WhatIf</code>. Não chame o cmdlet: nada deve mexer no Registro.</p>
 <pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
 $comando = ''
 Write-Output $comando
