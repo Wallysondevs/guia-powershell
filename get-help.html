@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Get-Help: a Ajuda — Get-Help, -Examples, -Parameter, -Online e Get-Date -? | Guia PowerShell</title>
+<meta name="description" content="Como pedir ajuda no PowerShell 7 com Get-Help: a ajuda parcial de fábrica, o -Examples quando os arquivos de ajuda não estão instalados, o -Parameter, a busca com curinga, os tópicos about_, o atalho -? e a diferença entre help (função) e Get-Help (cmdlet).">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Get-Help</span>: a Ajuda</h1>
+
+<p class="intro">Você não precisa decorar parâmetro nenhum. O PowerShell traz o próprio manual: o <code>Get-Help</code>. Nesta aula você vai pedir a ajuda do <code>Get-Date</code>, ver o que ela mostra de fábrica (é uma ajuda <strong>parcial</strong>), aprender a pedir exemplos, a ficha de um parâmetro e uma busca por nome — e entender por que, neste computador, os exemplos ainda não aparecem.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O <code>Get-Help</code>, o cmdlet que mostra a ajuda de outro comando.</li>
+  <li>A ler as seções <code>NOME</code>, <code>SYNTAX</code>, <code>ALIASES</code> e <code>REMARKS</code>.</li>
+  <li>O que é a <strong>ajuda parcial</strong> (quando os arquivos de ajuda não estão instalados) e o que fazer nesse caso.</li>
+  <li>Os parâmetros <code>-Examples</code>, <code>-Parameter</code> e a ideia do <code>-Online</code>.</li>
+  <li>A buscar com curinga: <code>Get-Help *location*</code> e os tópicos <code>about_*</code>.</li>
+  <li>O atalho <code>Get-Date -?</code> e a diferença entre <code>help</code> e <code>Get-Help</code>.</li>
+</ul>
+</div>
+
+<p>Todas as saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, <strong>sem</strong> rodar o <code>Update-Help</code> (ele instala arquivos no sistema; neste guia a gente não faz isso). O que você vai ver é a ajuda de fábrica, a mesma de um PowerShell 7 recém-instalado. Quando o Windows PowerShell 5.1 responde diferente, a aula avisa.</p>
+
+<hr>
+
+<h2>A ideia: o manual que vem na caixa</h2>
+<p>Pense no manual de uma cafeteira. Você não precisa memorizar cada botão: abre o livrinho, acha o capítulo e segue o exemplo. O <code>Get-Help</code> é esse manual. O detalhe é que, de fábrica, a caixa às vezes vem só com o sumário — a lista dos botões — e não com os exemplos completos. É exatamente o que acontece aqui.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>No manual da cafeteira</th><th>No PowerShell</th></tr>
+<tr><td>Abrir o capítulo de um botão</td><td><code>Get-Help Get-Date</code></td></tr>
+<tr><td>Pedir um exemplo de uso</td><td><code>Get-Help Get-Date -Examples</code></td></tr>
+<tr><td>Ler só a ficha de um botão</td><td><code>Get-Help Get-Date -Parameter Format</code></td></tr>
+<tr><td>Abrir o manual no site do fabricante</td><td><code>Get-Help Get-Date -Online</code></td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>1. Pedindo a ajuda: <code>Get-Help Get-Date</code></h2>
+<p>O primeiro argumento do <code>Get-Help</code> é o nome do comando sobre o qual você quer a ajuda. Vamos perguntar sobre o <code>Get-Date</code>, que você já conhece:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Help Get-Date
+
+NOME
+    Get-Date
+    
+SYNTAX
+    Get-Date [[-Date] &lt;datetime&gt;] [-Year &lt;int&gt;] [-Month &lt;int&gt;] [-Day &lt;int&gt;] [-Hour &lt;int&gt;] [-Minute &lt;int&gt;] [-Second 
+    &lt;int&gt;] [-Millisecond &lt;int&gt;] [-DisplayHint {Date | Time | DateTime}] [-Format &lt;string&gt;] [-AsUTC] [&lt;CommonParameters&gt;]
+    
+    Get-Date [[-Date] &lt;datetime&gt;] -UFormat &lt;string&gt; [-Year &lt;int&gt;] [-Month &lt;int&gt;] [-Day &lt;int&gt;] [-Hour &lt;int&gt;] [-Minute 
+    &lt;int&gt;] [-Second &lt;int&gt;] [-Millisecond &lt;int&gt;] [-DisplayHint {Date | Time | DateTime}] [-AsUTC] [&lt;CommonParameters&gt;]
+    
+    Get-Date -UnixTimeSeconds &lt;long&gt; [-Year &lt;int&gt;] [-Month &lt;int&gt;] [-Day &lt;int&gt;] [-Hour &lt;int&gt;] [-Minute &lt;int&gt;] [-Second 
+    &lt;int&gt;] [-Millisecond &lt;int&gt;] [-DisplayHint {Date | Time | DateTime}] [-Format &lt;string&gt;] [-AsUTC] [&lt;CommonParameters&gt;]
+    
+    Get-Date -UnixTimeSeconds &lt;long&gt; -UFormat &lt;string&gt; [-Year &lt;int&gt;] [-Month &lt;int&gt;] [-Day &lt;int&gt;] [-Hour &lt;int&gt;] [-Minute 
+    &lt;int&gt;] [-Second &lt;int&gt;] [-Millisecond &lt;int&gt;] [-DisplayHint {Date | Time | DateTime}] [-AsUTC] [&lt;CommonParameters&gt;]
+    
+
+ALIASES
+    Nenhum
+    
+
+REMARKS
+    Get-Help cannot find the Help files for this cmdlet on this computer. It is displaying only partial help.
+        -- To download and install Help files for the module that includes this cmdlet, use Update-Help.
+        -- To view the Help topic for this cmdlet online, type: "Get-Help Get-Date -Online" or
+           go to https://go.microsoft.com/fwlink/?LinkID=2096615.
+</pre><dl class="anatomy">
+  <dt>Get-Help</dt><dd>O cmdlet da ajuda: verbo <code>Get</code> + substantivo <code>Help</code> (“obter a ajuda”).</dd>
+  <dt>Get-Date</dt><dd>O comando sobre o qual você quer a ajuda. Não é um parâmetro com hífen: é o nome, logo em seguida.</dd>
+  <dt>NOME</dt><dd>O nome do cmdlet. Aqui, simplesmente <code>Get-Date</code>.</dd>
+  <dt>SYNTAX</dt><dd>A “receita” de uso: o nome do comando e os parâmetros que ele aceita. No PowerShell 7, este título veio em <strong>inglês</strong> (no 5.1, aparece <code>SINTAXE</code>). Os quatro blocos são conjuntos de parâmetros diferentes: você escolhe um conjunto por vez, não mistura tudo.</dd>
+  <dt>[-Format &lt;string&gt;]</dt><dd>Um parâmetro opcional (está entre colchetes) que pede um texto (o formato). Você já usou: <code>-Format "dd/MM/yyyy"</code>.</dd>
+  <dt>[&lt;CommonParameters&gt;]</dt><dd>Os parâmetros comuns, que quase todo cmdlet tem (<code>-ErrorAction</code>, <code>-Verbose</code>…). A aula anterior mostrou vários na lista do <code>Get-ChildItem</code>.</dd>
+  <dt>ALIASES</dt><dd>Os apelidos deste cmdlet. <code>Nenhum</code> quer dizer que o <code>Get-Date</code> não tem apelido oficial.</dd>
+  <dt>REMARKS</dt><dd>Os comentários. Aqui está o aviso mais importante desta aula: a ajuda é <strong>parcial</strong>.</dd>
+</dl>
+<p>Leia o aviso com calma. O PowerShell está dizendo duas coisas: ele <strong>não achou os arquivos de ajuda</strong> deste cmdlet neste computador, e por isso está mostrando só o essencial (o nome e a sintaxe). E ele oferece dois caminhos: baixar os arquivos com <code>Update-Help</code>, ou ler a ajuda na internet com <code>-Online</code> (o endereço aparece logo abaixo).</p>
+<div class="note">Neste guia a gente <strong>não roda o <code>Update-Help</code></strong>: ele baixa e instala arquivos no sistema. A ajuda que você vê é a de fábrica. Se um dia você quiser a ajuda completa no <em>seu</em> computador, o próprio recado acima explica como. A alternativa que não instala nada é o <code>Get-Help Get-Date -Online</code>, que abre a documentação oficial no navegador. Não colhemos a saída do <code>-Online</code> aqui, porque ela não é um texto no terminal: ela abre uma página.</div>
+<div class="note"><strong>No Windows PowerShell 5.1</strong> as seções vêm em português (<code>SINTAXE</code>, <code>COMENTÁRIOS</code>), e a sintaxe de fábrica é bem mais curta: praticamente só <code>Get-Date [[-Date] &lt;datetime&gt;] [&lt;CommonParameters&gt;]</code>, duas vezes. O PowerShell 7, mesmo na ajuda parcial, já lista <code>-Year</code>, <code>-Month</code>, <code>-Format</code>, <code>-AsUTC</code>, <code>-UFormat</code> e <code>-UnixTimeSeconds</code>.</div>
+
+<div class="tryps" data-goal="src:\bGet-Help\b;;src:Get-Date;;semerro">
+<p class="try-task"><strong>Experimente:</strong> peça a ajuda do <code>Get-Date</code> e clique em Rodar. A ajuda do editor pode ser mais completa do que a desta aula; o comando é o mesmo.</p>
+<pre class="script" data-file="main.ps1">Get-Date
+</pre>
+<pre class="solucao" data-file="main.ps1">Get-Help Get-Date
+</pre>
+</div>
+
+<hr>
+
+<h2>2. Pedindo exemplos: <code>-Examples</code></h2>
+<p>O parâmetro <code>-Examples</code> pede só os exemplos de uso. É o capítulo mais gostoso do manual — quando os arquivos de ajuda estão instalados. Neste computador, de fábrica, eis o que sai:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Help Get-Date -Examples
+
+NOME
+    Get-Date
+
+ALIASES
+    Nenhum
+    
+
+REMARKS
+    Get-Help cannot find the Help files for this cmdlet on this computer. It is displaying only partial help.
+        -- To download and install Help files for the module that includes this cmdlet, use Update-Help.
+        -- To view the Help topic for this cmdlet online, type: "Get-Help Get-Date -Online" or
+           go to https://go.microsoft.com/fwlink/?LinkID=2096615.
+</pre><p>Não veio exemplo nenhum: só o nome, “nenhum apelido” e o mesmo recado de ajuda parcial. Não é que o <code>Get-Date</code> não tenha exemplos. É que os exemplos moram nos arquivos de ajuda, e eles não estão aqui. Sem esses arquivos, <code>-Examples</code> não tem de onde tirar o capítulo.</p>
+
+<div class="cenario">
+<strong>Os exemplos não aparecem</strong>
+<p>Se você rodar <code>Get-Help Get-Date -Examples</code> e a tela vier quase vazia, como a de cima, não é typo e não é o PowerShell “quebrado”. É o aviso dos <code>REMARKS</code> acontecendo na prática.</p>
+<p><strong>Como resolver, no seu computador, se você quiser a ajuda completa:</strong> ou roda o <code>Update-Help</code> (precisa de internet e, em alguns casos, de administrador; neste guia a gente não faz isso por você), ou usa <code>Get-Help Get-Date -Online</code> e lê os exemplos na documentação oficial, sem instalar nada. Enquanto isso, as aulas deste guia já trazem os exemplos colhidos no laboratório, com a saída real.</p>
+</div>
+
+<hr>
+
+<h2>3. A ficha de um parâmetro: <code>-Parameter</code></h2>
+<p>Para ler um parâmetro só, use <code>-Parameter</code> e o nome dele, sem o hífen no valor. Vamos olhar o <code>-Format</code>, que você já usou:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Help Get-Date -Parameter Format
+
+-Format &lt;string&gt;
+    
+    Required?                    false
+    Position?                    Named
+    Accept pipeline input?       false
+    Parameter set name           DateAndFormat, UnixTimeSecondsAndFormat
+    Aliases                      Nenhum
+    Dynamic?                     false
+    Accept wildcard characters?  false
+    
+</pre><dl class="anatomy">
+  <dt>-Format &lt;string&gt;</dt><dd>O nome do parâmetro e o tipo do valor: um texto (<code>string</code>).</dd>
+  <dt>Required? false</dt><dd>“Obrigatório? não.” Você pode rodar o <code>Get-Date</code> sem o <code>-Format</code>; ele só muda o jeito de mostrar.</dd>
+  <dt>Position? Named</dt><dd>“Posição? nomeado.” Este parâmetro <strong>não</strong> é posicional: você precisa escrever o nome, <code>-Format</code>. Não adianta soltar o <code>"dd/MM/yyyy"</code> solto na linha e esperar que ele entenda.</dd>
+  <dt>Accept pipeline input? false</dt><dd>Ele não aceita valor chegando pela esteira (<code>|</code>). O valor vai no próprio comando.</dd>
+  <dt>Parameter set name</dt><dd>Os conjuntos de parâmetros em que o <code>-Format</code> aparece: <code>DateAndFormat</code> e <code>UnixTimeSecondsAndFormat</code>. Por isso ele estava em alguns blocos da <code>SYNTAX</code>, e não em todos.</dd>
+  <dt>Aliases / Dynamic? / Accept wildcard characters?</dt><dd>Não tem apelido, não é um parâmetro dinâmico, e não aceita curinga (<code>*</code>) no valor.</dd>
+</dl>
+<p>Mesmo com a ajuda parcial, a ficha do parâmetro veio completa. É um dos pedaços que o PowerShell 7 consegue montar sem os arquivos baixados.</p>
+<div class="note"><strong>No Windows PowerShell 5.1</strong> os rótulos desta ficha vêm em português (<code>Necessário?</code>, <code>Posição? Nomeado</code>, <code>Aceitar entrada do pipeline?</code>, <code>Dinâmico?</code>) e não aparece a linha <code>Accept wildcard characters?</code>.</div>
+
+<div class="tryps" data-goal="src:\bGet-Help\b;;src:-Parameter;;src:Format;;semerro">
+<p class="try-task"><strong>Missão:</strong> peça a ficha do parâmetro <code>Format</code> do <code>Get-Date</code>.</p>
+<pre class="script" data-file="main.ps1">Get-Help Get-Date
+</pre>
+<pre class="solucao" data-file="main.ps1">Get-Help Get-Date -Parameter Format
+</pre>
+</div>
+
+<hr>
+
+<h2>4. Buscando pelo nome: o curinga <code>*</code></h2>
+<p>Quando você não lembra o nome exato, o <code>Get-Help</code> aceita o <code>*</code> no meio do texto, no mesmo espírito do <code>-Filter *.txt</code>. A busca abaixo acha tópicos cujo nome contém <code>location</code> (“localização”, “pasta atual”):</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Help *location*
+
+Name                              Category  Module                    Synopsis
+----                              --------  ------                    --------
+Get-Location                      Cmdlet    Microsoft.PowerShell.Man… …
+Pop-Location                      Cmdlet    Microsoft.PowerShell.Man… …
+Push-Location                     Cmdlet    Microsoft.PowerShell.Man… …
+Set-Location                      Cmdlet    Microsoft.PowerShell.Man… …
+Get-WinHomeLocation               Cmdlet    International             Get-WinHomeLocation…
+Set-WinHomeLocation               Cmdlet    International             Set-WinHomeLocation…
+</pre><p>Apareceram os quatro cmdlets de pasta que você vai ver em <a href="get-location.html">Onde Estou (Get-Location)</a> e <a href="set-location.html">Mudando de Pasta (Set-Location)</a> — <code>Get-Location</code>, <code>Set-Location</code>, <code>Push-Location</code> e <code>Pop-Location</code> — e mais dois só do Windows, <code>Get-WinHomeLocation</code> e <code>Set-WinHomeLocation</code>, de uma configuração internacional. Não se preocupe com esses dois agora.</p>
+<p>Repare também no <code>Synopsis</code> (o resumo de uma linha): em vários itens ele aparece como <code>…</code>. De novo a ajuda parcial: sem os arquivos, o PowerShell às vezes não tem o texto do resumo para mostrar.</p>
+
+<hr>
+
+<h2>5. Os tópicos <code>about_*</code></h2>
+<p>Além da ajuda de cada cmdlet, o PowerShell tem textos sobre assuntos: variáveis, funções, operadores, e por aí vai. Esses tópicos começam com <code>about_</code>. A busca abaixo pede os que existem e pede só os 8 primeiros:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Help about_* | Select-Object -First 8
+
+Name                              Category  Module                    Synopsis
+----                              --------  ------                    --------
+about_BeforeEach_AfterEach        HelpFile                            performed at the beginning and end of every It bl…
+about_Mocking                     HelpFile                            Pester provides a set of Mocking functions making…
+about_Pester                      HelpFile                            Pester is a BDD based test runner for PowerShell.
+about_should                      HelpFile                            Provides assertion convenience methods for compar…
+about_TestDrive                   HelpFile                            A PSDrive for file activity limited to the scope …
+</pre><p>Pedimos 8, mas só vieram <strong>5</strong>. E os cinco são do <strong>Pester</strong>, um módulo de testes que veio neste computador, não os textos clássicos do PowerShell (<code>about_Variables</code>, <code>about_Functions</code>…). Acontece o mesmo de antes: os tópicos oficiais <code>about_</code> moram nos arquivos de ajuda. Sem o <code>Update-Help</code>, a busca acha sobretudo o que algum módulo já trouxe junto.</p>
+<p>Quando a ajuda completa estiver instalada no seu computador, a mesma busca fica bem maior. Até lá, o <code>-Online</code> e as aulas deste guia cobrem o caminho.</p>
+
+<hr>
+
+<h2>6. O atalho <code>-?</code></h2>
+<p>Todo cmdlet aceita o parâmetro <code>-?</code>, que é um atalho para a ajuda dele. <code>Get-Date -?</code> é o mesmo pedido que <code>Get-Help Get-Date</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Date -?
+
+NOME
+    Get-Date
+    
+SYNTAX
+    Get-Date [[-Date] &lt;datetime&gt;] [-Year &lt;int&gt;] [-Month &lt;int&gt;] [-Day &lt;int&gt;] [-Hour &lt;int&gt;] [-Minute &lt;int&gt;] [-Second 
+    &lt;int&gt;] [-Millisecond &lt;int&gt;] [-DisplayHint {Date | Time | DateTime}] [-Format &lt;string&gt;] [-AsUTC] [&lt;CommonParameters&gt;]
+    
+    Get-Date [[-Date] &lt;datetime&gt;] -UFormat &lt;string&gt; [-Year &lt;int&gt;] [-Month &lt;int&gt;] [-Day &lt;int&gt;] [-Hour &lt;int&gt;] [-Minute 
+    &lt;int&gt;] [-Second &lt;int&gt;] [-Millisecond &lt;int&gt;] [-DisplayHint {Date | Time | DateTime}] [-AsUTC] [&lt;CommonParameters&gt;]
+    
+    Get-Date -UnixTimeSeconds &lt;long&gt; [-Year &lt;int&gt;] [-Month &lt;int&gt;] [-Day &lt;int&gt;] [-Hour &lt;int&gt;] [-Minute &lt;int&gt;] [-Second 
+    &lt;int&gt;] [-Millisecond &lt;int&gt;] [-DisplayHint {Date | Time | DateTime}] [-Format &lt;string&gt;] [-AsUTC] [&lt;CommonParameters&gt;]
+    
+    Get-Date -UnixTimeSeconds &lt;long&gt; -UFormat &lt;string&gt; [-Year &lt;int&gt;] [-Month &lt;int&gt;] [-Day &lt;int&gt;] [-Hour &lt;int&gt;] [-Minute 
+    &lt;int&gt;] [-Second &lt;int&gt;] [-Millisecond &lt;int&gt;] [-DisplayHint {Date | Time | DateTime}] [-AsUTC] [&lt;CommonParameters&gt;]
+    
+
+ALIASES
+    Nenhum
+    
+
+REMARKS
+    Get-Help cannot find the Help files for this cmdlet on this computer. It is displaying only partial help.
+        -- To download and install Help files for the module that includes this cmdlet, use Update-Help.
+        -- To view the Help topic for this cmdlet online, type: "Get-Help Get-Date -Online" or
+           go to https://go.microsoft.com/fwlink/?LinkID=2096615.
+</pre><p>A saída é a mesma da primeira seção: nome, sintaxe, apelidos e o recado da ajuda parcial. Use o que for mais fácil de lembrar. Nos scripts e neste guia, preferimos o <code>Get-Help</code> por extenso, que deixa claro o que a linha está fazendo.</p>
+
+<hr>
+
+<h2>7. <code>help</code> ou <code>Get-Help</code>?</h2>
+<p>Você vai encontrar gente digitando só <code>help Get-Date</code>, sem o <code>Get-</code>. Não é o mesmo comando. O <code>help</code> é uma <strong>função</strong> que por baixo chama o <code>Get-Help</code> (e, no terminal, costuma mostrar a ajuda página por página). Confira o tipo:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Command help | Select-Object Name, CommandType
+
+Name CommandType
+---- -----------
+help    Function
+</pre><dl class="anatomy">
+  <dt>Name: help</dt><dd>O nome que a pessoa digita.</dd>
+  <dt>CommandType: Function</dt><dd>É uma <strong>função</strong>, não um cmdlet. O cmdlet de verdade é o <code>Get-Help</code>.</dd>
+</dl>
+<p>Os dois servem para pedir ajuda. Neste guia usamos o <code>Get-Help</code> nos scripts, pelo nome completo, no mesmo espírito de preferir <code>Write-Output</code> a <code>echo</code> (aula <a href="aliases.html">Apelidos</a>).</p>
+
+<hr>
+
+<h2>Formas diferentes de pedir ajuda</h2>
+<pre class="file" data-file="pedir-ajuda.ps1">Get-Help Get-Date
+Get-Date -?
+Get-Help Get-Date -Examples
+Get-Help Get-Date -Parameter Format
+Get-Help Get-Date -Online
+</pre>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>Get-Help Get-Date</code></td><td>O pedido padrão: nome, sintaxe e recados.</td></tr>
+<tr><td><code>Get-Date -?</code></td><td>Atalho no terminal, a mesma ajuda do comando acima.</td></tr>
+<tr><td><code>Get-Help Get-Date -Examples</code></td><td>Só os exemplos — quando os arquivos de ajuda estão instalados; de fábrica, pode vir vazio.</td></tr>
+<tr><td><code>Get-Help Get-Date -Parameter Format</code></td><td>A ficha de um parâmetro só.</td></tr>
+<tr><td><code>Get-Help Get-Date -Online</code></td><td>Abre a documentação oficial no navegador, sem instalar nada.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Get-Help Get-Date</code></td><td>Mostra a ajuda do <code>Get-Date</code> (de fábrica, a versão parcial).</td></tr>
+<tr><td><code>Get-Help Get-Date -Examples</code></td><td>Pede os exemplos. Sem os arquivos de ajuda, eles não aparecem.</td></tr>
+<tr><td><code>Get-Help Get-Date -Parameter Format</code></td><td>Mostra a ficha do parâmetro <code>-Format</code>.</td></tr>
+<tr><td><code>Get-Help *location*</code></td><td>Lista os tópicos de ajuda cujo nome contém <code>location</code>.</td></tr>
+<tr><td><code>Get-Help about_*</code></td><td>Lista os tópicos de assunto (os <code>about_</code>).</td></tr>
+<tr><td><code>Get-Date -?</code></td><td>Atalho para <code>Get-Help Get-Date</code>.</td></tr>
+<tr><td><code>Get-Command help</code></td><td>Mostra que <code>help</code> é uma função, não um cmdlet.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete para pedir a ajuda do <code>Get-Date</code>:</p>
+<div class="ex-code"><input data-answer="Get-Help" aria-label="comando"> Get-Date</div>
+</div>
+
+<div class="exercise">
+<h3>2. Complete o parâmetro</h3>
+<p>Complete para ver a ficha do parâmetro <code>Format</code>:</p>
+<div class="ex-code">Get-Help Get-Date -<input data-answer="Parameter" aria-label="parâmetro"> Format</div>
+</div>
+
+<div class="exercise">
+<h3>3. Qual é o atalho?</h3>
+<p>Complete o atalho que pede a mesma ajuda de <code>Get-Help Get-Date</code>:</p>
+<div class="ex-code">Get-Date -<input data-answer="?" aria-label="atalho"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Você rodou <code>Get-Help Get-Date -Examples</code> e não apareceu exemplo nenhum, só o recado de ajuda parcial. O que isso significa?</p>
+<label><input type="radio" name="q4"> Que o <code>Get-Date</code> não tem exemplos</label>
+<label><input type="radio" name="q4"> Que os arquivos de ajuda não estão instalados neste computador</label>
+<label><input type="radio" name="q4"> Que o comando foi digitado errado</label>
+<label><input type="radio" name="q4"> Que é preciso reiniciar o Windows</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. O que o <code>Get-Help Get-Date -Online</code> faz?</p>
+<label><input type="radio" name="q5"> Instala os arquivos de ajuda no sistema</label>
+<label><input type="radio" name="q5"> Apaga a ajuda parcial</label>
+<label><input type="radio" name="q5"> Abre a documentação oficial no navegador, sem instalar nada</label>
+<label><input type="radio" name="q5"> Lista os processos do computador</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. Qual é a diferença entre <code>help</code> e <code>Get-Help</code>?</p>
+<label><input type="radio" name="q6"> <code>help</code> é uma função; <code>Get-Help</code> é o cmdlet</label>
+<label><input type="radio" name="q6"> <code>help</code> só funciona no Windows PowerShell 5.1</label>
+<label><input type="radio" name="q6"> São dois nomes do <code>Get-Date</code></label>
+<label><input type="radio" name="q6"> <code>help</code> instala os arquivos de ajuda; <code>Get-Help</code> só lê</label>
+</div>
+
+<div class="tryps" data-goal="src:\bGet-Help\b;;src:\*location\*;;out:Get-Location;;semerro">
+<p class="try-task"><strong>Missão final:</strong> busque os tópicos de ajuda cujo nome contém <code>location</code>, com o curinga <code>*</code>.</p>
+<pre class="script" data-file="main.ps1">Get-Help Get-Date
+</pre>
+<pre class="solucao" data-file="main.ps1">Get-Help *location*
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Get-Help Get-Date</code> mostra a ajuda do comando. De fábrica, no PowerShell 7, ela pode ser <strong>parcial</strong>: nome e sintaxe, sem os textos longos nem os exemplos.</li>
+  <li>O recado nos <code>REMARKS</code> explica: faltam os arquivos de ajuda. O <code>Update-Help</code> os instala (neste guia a gente não roda). O <code>-Online</code> abre a documentação na internet, sem instalar nada.</li>
+  <li><code>-Examples</code> pede os exemplos; sem os arquivos, a saída vem quase vazia. <code>-Parameter Format</code> mostra a ficha de um parâmetro — e esta, mesmo parcial, já veio completa.</li>
+  <li><code>Get-Help *location*</code> busca pelo nome com curinga. <code>Get-Help about_*</code> lista tópicos de assunto; sem a ajuda instalada, podem aparecer só os de algum módulo (aqui, o Pester).</li>
+  <li><code>Get-Date -?</code> é atalho de <code>Get-Help Get-Date</code>. O <code>help</code> (sem o <code>Get-</code>) é uma função; o cmdlet é o <code>Get-Help</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
