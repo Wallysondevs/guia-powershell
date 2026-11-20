@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Set-Location — Mudando de Pasta | Guia PowerShell</title>
+<meta name="description" content="Como mudar de pasta no PowerShell 7 com Set-Location e cd, subir com .., ir para casa com ~, usar aspas em nomes com espaço, a pilha Push-Location e Pop-Location, o cd - (só no 7) e os erros reais de pasta inexistente e de espaço sem aspas.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+
+<h1>Mudando de Pasta (<span class="hl">Set-Location</span>)</h1>
+
+<p class="intro">Você já sabe perguntar <em>onde</em> está. Agora vai <strong>andar</strong>: entrar numa subpasta, subir um nível, ir para a pasta pessoal, marcar um lugar para voltar e — no PowerShell 7 — desfazer o último passo com <code>cd -</code>. Também vai ver os dois erros mais comuns: pasta que não existe e nome com espaço sem aspas.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O <code>Set-Location</code>, que muda a pasta atual, e o apelido <code>cd</code>.</li>
+  <li>O <code>..</code>, que sobe um nível, e o <code>~</code>, que é a pasta pessoal.</li>
+  <li>Por que um nome com espaço precisa de aspas.</li>
+  <li>A pilha de pastas: <code>Push-Location</code> e <code>Pop-Location</code>.</li>
+  <li>O <code>cd -</code>, que volta à pasta anterior — uma novidade do PowerShell 7.</li>
+  <li>Os erros reais de uma pasta inexistente e de um espaço sem aspas.</li>
+</ul>
+</div>
+
+<p>Todas as saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta de teste <code>C:\Users\ana\guia-ps-teste</code>. Nela já existiam duas subpastas: <code>fotos</code> e <code>minhas notas</code> (este último nome tem um espaço, de propósito). No seu computador, pratique numa pasta de teste, não na raiz do disco.</p>
+
+<hr>
+
+<h2>A ideia: os cômodos de uma casa</h2>
+<p>A pasta atual é o cômodo em que você está. <code>Set-Location fotos</code> é atravessar a porta e entrar no quarto das fotos. <code>..</code> é voltar para o corredor. <code>~</code> é ir direto para a sua casa (a pasta pessoal). O prompt, na porta, troca a plaquinha toda vez que você anda.</p>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Na casa</th><th>No PowerShell</th></tr>
+<tr><td>Entrar no quarto das fotos</td><td><code>Set-Location fotos</code></td></tr>
+<tr><td>Voltar ao corredor</td><td><code>Set-Location ..</code></td></tr>
+<tr><td>Ir para casa, de qualquer cômodo</td><td><code>Set-Location ~</code></td></tr>
+<tr><td>Deixar um marcador na porta e dar uma olhada no quarto</td><td><code>Push-Location</code> e <code>Pop-Location</code></td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>1. Entrando numa subpasta</h2>
+<p>Estando em <code>guia-ps-teste</code>, entre em <code>fotos</code> e peça a pasta atual para confirmar:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Set-Location fotos; Get-Location
+
+Path
+----
+C:\Users\ana\guia-ps-teste\fotos</pre>
+<dl class="anatomy">
+  <dt>Set-Location</dt><dd>Verbo <code>Set</code> ("definir") + substantivo <code>Location</code>: "mude o local".</dd>
+  <dt>fotos</dt><dd>O destino, em relação à pasta atual: a subpasta <code>fotos</code>.</dd>
+  <dt>Get-Location</dt><dd>Na mesma linha, depois do <code>;</code>, confirma para onde você foi. O <code>;</code> separa dois comandos: o PowerShell roda um e, em seguida, o outro.</dd>
+</dl>
+<p>O caminho virou <code>C:\Users\ana\guia-ps-teste\fotos</code>. O próximo prompt já nasce nessa pasta.</p>
+
+<div class="tryps" data-goal="src:\bSet-Location\b;;arquivo:fotos;;semerro">
+<p class="try-task"><strong>Experimente:</strong> crie uma pasta <code>fotos</code> e entre nela com <code>Set-Location</code>.</p>
+<pre class="script" data-file="main.ps1">New-Item -ItemType Directory -Name fotos -Force | Out-Null
+</pre>
+<pre class="solucao" data-file="main.ps1">New-Item -ItemType Directory -Name fotos -Force | Out-Null
+Set-Location fotos
+</pre>
+</div>
+
+<hr>
+
+<h2>2. Subindo um nível: <code>..</code></h2>
+<p>Dois pontos seguidos, <code>..</code>, querem dizer "a pasta de cima" (a pasta-mãe). De dentro de <code>fotos</code>, suba de volta para <code>guia-ps-teste</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste\fotos&gt; Set-Location ..; Get-Location
+
+Path
+----
+C:\Users\ana\guia-ps-teste</pre>
+<p>O prompt volta para <code>PS C:\Users\ana\guia-ps-teste&gt;</code>. Um ponto sozinho, <code>.</code>, é a pasta atual; os dois pontos, <code>..</code>, são a de cima. Você vai ver os dois de novo na aula de <a href="caminhos.html">Caminhos</a>.</p>
+
+<hr>
+
+<h2>3. Nome com espaço: use aspas</h2>
+<p>A outra subpasta se chama <code>minhas notas</code>, com um espaço. Sem aspas, o PowerShell acharia que <code>minhas</code> é um parâmetro e <code>notas</code> é outro. Por isso o nome vai entre aspas (simples, aqui, porque não há variável no meio):</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; cd 'minhas notas'; Get-Location
+
+Path
+----
+C:\Users\ana\guia-ps-teste\minhas notas</pre>
+<p>O caminho termina em <code>\minhas notas</code>, com o espaço, e o prompt também: <code>PS C:\Users\ana\guia-ps-teste\minhas notas&gt;</code>. O apelido <code>cd</code> faz a mesma coisa que o <code>Set-Location</code>; nos scripts, prefira o nome completo.</p>
+
+<hr>
+
+<h2>4. Indo para casa: <code>~</code></h2>
+<p>O til <code>~</code> é um atalho para a pasta pessoal do usuário, a mesma do <code>$HOME</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste\minhas notas&gt; cd ~; Get-Location
+
+Path
+----
+C:\Users\ana</pre>
+<p>Você saiu da pasta de teste e foi para <code>C:\Users\ana</code>. No seu computador, no lugar de <code>ana</code> aparece o seu usuário. Para voltar à pasta de teste, use o caminho completo ou um <code>Set-Location</code> até ela. (Foi o que o laboratório fez, em silêncio, antes dos próximos exemplos.)</p>
+
+<hr>
+
+<h2>5. Um marcador na porta: <code>Push-Location</code> e <code>Pop-Location</code></h2>
+<p>Às vezes você quer entrar numa pasta, fazer uma coisa, e voltar exatamente para onde estava. A <strong>pilha</strong> de pastas serve para isso: <code>Push-Location</code> guarda o lugar atual e já entra no destino; <code>Pop-Location</code> desempilha e volta.</p>
+<p>Pense numa pilha de pratos: o último que você pôs em cima é o primeiro que tira. "Push" é pôr; "Pop" é tirar.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Push-Location fotos; Get-Location; Pop-Location; Get-Location
+
+Path
+----
+C:\Users\ana\guia-ps-teste\fotos
+C:\Users\ana\guia-ps-teste</pre>
+<p>Os dois caminhos saíram na mesma tabela: primeiro <code>\fotos</code> (depois do <code>Push-Location</code>), depois <code>\guia-ps-teste</code> (depois do <code>Pop-Location</code>). Você deu uma puladinha no quarto das fotos e voltou para o corredor, sem ter de digitar o caminho de volta.</p>
+
+<hr>
+
+<h2>6. Voltar à anterior: <code>cd -</code> <span class="versao">7.7</span></h2>
+<p>No PowerShell 7 existe um atalho no estilo do Linux: <code>cd -</code> volta para a pasta em que você estava <strong>antes</strong> do último <code>cd</code> (ou <code>Set-Location</code>).</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; cd fotos; cd -; Get-Location
+
+Path
+----
+C:\Users\ana\guia-ps-teste</pre>
+<p>O laboratório entrou em <code>fotos</code> e logo em seguida rodou <code>cd -</code>; o <code>Get-Location</code> confirmou que a pasta atual voltou a ser <code>C:\Users\ana\guia-ps-teste</code>.</p>
+<div class="note"><strong>No Windows PowerShell 5.1</strong> o <code>cd -</code> <strong>não existe</strong>. O 5.1 trata o hífen como o nome de uma pasta chamada <code>-</code>, dentro da pasta atual, e reclama que ela não existe:
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana\guia-ps-teste&gt; cd fotos; cd -
+cd : Não é possível localizar o caminho 'C:\Users\ana\guia-ps-teste\fotos\-' porque ele não existe.</pre>
+Para voltar no 5.1, use o <code>Pop-Location</code> (se você entrou com <code>Push-Location</code>) ou digite o caminho de destino.
+</div>
+
+<div class="tryps" data-goal="src:Push-Location;;src:Pop-Location;;arquivo:fotos;;semerro">
+<p class="try-task"><strong>Missão:</strong> crie a pasta <code>fotos</code>, entre nela com <code>Push-Location</code> e volte com <code>Pop-Location</code>.</p>
+<pre class="script" data-file="main.ps1">New-Item -ItemType Directory -Name fotos -Force | Out-Null
+Set-Location fotos
+</pre>
+<pre class="solucao" data-file="main.ps1">New-Item -ItemType Directory -Name fotos -Force | Out-Null
+Push-Location fotos
+Pop-Location
+</pre>
+</div>
+
+<hr>
+
+<h2>Formas diferentes de mudar de pasta</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>Set-Location fotos</code></td><td>Nos scripts e neste guia: o nome completo.</td></tr>
+<tr><td><code>cd fotos</code></td><td>Atalho no terminal. É o mesmo comando.</td></tr>
+<tr><td><code>Set-Location ..</code></td><td>Subir um nível, para a pasta-mãe.</td></tr>
+<tr><td><code>Set-Location ~</code></td><td>Ir para a pasta pessoal, de qualquer lugar.</td></tr>
+<tr><td><code>Push-Location</code> / <code>Pop-Location</code></td><td>Quando você quer ir, fazer algo e voltar ao ponto de partida.</td></tr>
+<tr><td><code>cd -</code></td><td>No PowerShell 7, para voltar à pasta anterior. Não use no 5.1.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>A pasta não existe</strong>
+<p>Pedimos uma pasta que não estava em <code>guia-ps-teste</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Set-Location naoexiste
+Set-Location: Não é possível localizar o caminho 'C:\Users\ana\guia-ps-teste\naoexiste' porque ele não existe.</pre>
+<dl class="anatomy">
+  <dt>Set-Location:</dt><dd>Quem está reclamando.</dd>
+  <dt>Não é possível localizar o caminho '…\naoexiste' porque ele não existe.</dt><dd>O PowerShell juntou o destino com a pasta atual e não achou essa combinação no disco. O caminho completo na mensagem ajuda a ver <em>onde</em> ele procurou.</dd>
+</dl>
+<p><strong>Como resolver:</strong> confira o nome (maiúsculas não importam, mas um acento ou um espaço a mais importam) e se você já está na pasta certa. O erro não cria nem apaga nada; o prompt continua onde estava.</p>
+</div>
+
+<div class="cenario">
+<strong>Nome com espaço, sem aspas</strong>
+<p>E se a gente esquecer as aspas em <code>minhas notas</code>?</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; cd minhas notas
+Set-Location: Não foi possível encontrar um parâmetro posicional que aceite o argumento 'notas'.</pre>
+<dl class="anatomy">
+  <dt>Set-Location:</dt><dd>De novo o comando de verdade (o <code>cd</code> é só apelido).</dd>
+  <dt>Não foi possível encontrar um parâmetro posicional que aceite o argumento 'notas'.</dt><dd>O PowerShell leu <code>minhas</code> como o destino e <code>notas</code> como um segundo argumento solto, que o comando não aceita.</dd>
+</dl>
+<p><strong>Como resolver:</strong> ponha o nome entre aspas: <code>Set-Location 'minhas notas'</code>. Qualquer caminho com espaço, no Windows, precisa disso.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Set-Location fotos</code></td><td>Entra na subpasta <code>fotos</code>.</td></tr>
+<tr><td><code>Set-Location ..</code></td><td>Sobe um nível.</td></tr>
+<tr><td><code>Set-Location 'minhas notas'</code></td><td>Entra numa pasta cujo nome tem espaço.</td></tr>
+<tr><td><code>Set-Location ~</code></td><td>Vai para a pasta pessoal.</td></tr>
+<tr><td><code>Push-Location fotos</code></td><td>Guarda a pasta atual e entra em <code>fotos</code>.</td></tr>
+<tr><td><code>Pop-Location</code></td><td>Volta para a pasta guardada.</td></tr>
+<tr><td><code>cd -</code></td><td>No PowerShell 7, volta à pasta anterior.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete para entrar na subpasta <code>fotos</code>:</p>
+<div class="ex-code"><input data-answer="Set-Location|cd" aria-label="comando"> fotos</div>
+</div>
+
+<div class="exercise">
+<h3>2. Subir um nível</h3>
+<p>O que você escreve depois do <code>Set-Location</code> para ir à pasta de cima?</p>
+<div class="ex-code">Set-Location <input data-answer=".." aria-label="destino"></div>
+</div>
+
+<div class="exercise">
+<h3>3. A pasta pessoal</h3>
+<p>Qual símbolo é o atalho da pasta pessoal?</p>
+<div class="ex-code"><input data-answer="~" aria-label="símbolo"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Por que <code>cd minhas notas</code> (sem aspas) dá erro?</p>
+<label><input type="radio" name="q4"> Porque a pasta <code>minhas notas</code> não pode existir no Windows</label>
+<label><input type="radio" name="q4"> Porque o PowerShell lê <code>minhas</code> e <code>notas</code> como dois argumentos, e o segundo sobra</label>
+<label><input type="radio" name="q4"> Porque o apelido <code>cd</code> não aceita pastas</label>
+<label><input type="radio" name="q4"> Porque falta ser administrador</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Qual é a diferença entre <code>Push-Location fotos</code> e <code>Set-Location fotos</code>?</p>
+<label><input type="radio" name="q5"> Nenhuma: os dois só mostram a pasta, sem entrar</label>
+<label><input type="radio" name="q5"> O <code>Push-Location</code> apaga a pasta de origem</label>
+<label><input type="radio" name="q5"> O <code>Push-Location</code> guarda a pasta atual, para você voltar depois com <code>Pop-Location</code></label>
+<label><input type="radio" name="q5"> O <code>Set-Location</code> só funciona no Linux</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. O <code>cd -</code> funciona no Windows PowerShell 5.1?</p>
+<label><input type="radio" name="q6"> Não: o 5.1 procura uma pasta chamada <code>-</code> e dá erro. É recurso do PowerShell 7</label>
+<label><input type="radio" name="q6"> Sim, do mesmo jeito</label>
+<label><input type="radio" name="q6"> Só se a pasta se chamar <code>fotos</code></label>
+<label><input type="radio" name="q6"> Só como administrador</label>
+</div>
+
+<div class="tryps" data-goal="src:Set-Location\s+'minhas notas';;arquivo:minhas notas;;semerro">
+<p class="try-task"><strong>Missão final:</strong> crie a pasta <code>minhas notas</code> (com espaço) e entre nela com <code>Set-Location</code>, usando aspas.</p>
+<pre class="script" data-file="main.ps1">New-Item -ItemType Directory -Name 'minhas notas' -Force | Out-Null
+</pre>
+<pre class="solucao" data-file="main.ps1">New-Item -ItemType Directory -Name 'minhas notas' -Force | Out-Null
+Set-Location 'minhas notas'
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Set-Location</code> (apelido <code>cd</code>) muda a pasta atual; o prompt acompanha.</li>
+  <li><code>..</code> sobe um nível; <code>~</code> vai para a pasta pessoal.</li>
+  <li>Nome com espaço vai entre aspas: <code>Set-Location 'minhas notas'</code>.</li>
+  <li><code>Push-Location</code> guarda o lugar e entra; <code>Pop-Location</code> volta.</li>
+  <li><code>cd -</code> volta à pasta anterior no PowerShell 7. No 5.1 isso dá erro.</li>
+  <li>Pasta inexistente ou espaço sem aspas geram erro vermelho, mas não alteram o disco: confira o nome e tente de novo.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
