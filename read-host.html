@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Read-Host — perguntar e ler respostas | Guia PowerShell</title>
+<meta name="description" content="Read-Host para quem nunca usou terminal: fazer uma pergunta, guardar a resposta, por que ela é texto, converter com [int], esconder senhas e o erro real de conversão, explicado em português.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Read-Host</span>: Perguntando ao Usuário</h1>
+
+<p class="intro">Até aqui, os scripts só falavam. Agora a Ana quer um script que <strong>pergunte</strong>: o nome de quem está usando, a idade, a quantidade de um produto da lojinha. O <code>Read-Host</code> mostra uma pergunta, espera a pessoa digitar e entrega a resposta para o script. Nesta aula você vai fazer perguntas, guardar as respostas e entender por que "30" + 1 pode dar 301.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A fazer uma pergunta com <code>Read-Host</code> e guardar a resposta numa variável.</li>
+  <li>Que a resposta chega sempre como <strong>texto</strong>, mesmo quando a pessoa digita um número.</li>
+  <li>A transformar a resposta em número com <code>[int]</code>.</li>
+  <li>A esconder o que é digitado (<code>-MaskInput</code> e <code>-AsSecureString</code>).</li>
+  <li>A ler o erro real de quando a resposta não é um número.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português. O <code>Read-Host</code> precisa de uma pessoa digitando na janela, e isso o nosso laboratório não fez. Por isso, a parte da pergunta na tela está <strong>descrita em texto</strong>, não copiada do terminal. Para ver de verdade, use os "Experimente": neles o editor responde por você, como se alguém tivesse digitado.</p>
+
+<hr>
+
+<h2>A ideia: o balcão de atendimento</h2>
+<p>Pense no balcão de uma loja. A atendente pergunta "Qual é o seu nome?", espera você responder e anota na ficha. O <code>Read-Host</code> é essa atendente: faz a pergunta, espera o <kbd>Enter</kbd> e entrega o que foi dito. A ficha é a variável onde você guarda a resposta.</p>
+
+<hr>
+
+<h2>1. Fazendo uma pergunta</h2>
+<pre class="file" data-file="ola.ps1">$nome = Read-Host 'Qual é o seu nome?'
+"Olá, $nome!"
+</pre>
+<dl class="anatomy">
+  <dt>Read-Host</dt><dd>"Ler do anfitrião". <em>Read</em> é "ler", e o <em>Host</em> é a janela do terminal: ele lê o que a pessoa digita ali.</dd>
+  <dt>'Qual é o seu nome?'</dt><dd>A pergunta. É o parâmetro <code>-Prompt</code> ("aviso"), que pode ir sem o nome.</dd>
+  <dt>$nome = …</dt><dd>Guarda a resposta na variável <code>$nome</code> (aula <a href="variaveis.html">Variáveis</a>). Sem isso, a resposta só aparece e se perde.</dd>
+</dl>
+<p><strong>O que acontece na tela</strong> (descrito, não colhido no laboratório): o PowerShell mostra a pergunta seguida de dois-pontos, <code>Qual é o seu nome?:</code>, e o cursor fica piscando. O script para e espera. Quando a pessoa digita <code>Ana</code> e aperta <kbd>Enter</kbd>, o texto <code>Ana</code> vai para <code>$nome</code> e a linha seguinte mostra <code>Olá, Ana!</code>. Repare: o <code>Read-Host</code> coloca os dois-pontos sozinho, então não escreva <code>:</code> no fim da pergunta.</p>
+
+<div class="tryps" data-stdin="Ana" data-goal="out:Olá, Ana!;;src:\$nome;;semerro">
+<p class="try-task"><strong>Experimente:</strong> o editor vai responder <code>Ana</code> à pergunta. Troque "visitante" pela variável <code>$nome</code> para o script cumprimentar quem respondeu.</p>
+<pre class="script" data-file="main.ps1">$nome = Read-Host 'Qual é o seu nome?'
+"Olá, visitante!"
+</pre>
+<pre class="solucao" data-file="main.ps1">$nome = Read-Host 'Qual é o seu nome?'
+"Olá, $nome!"
+</pre>
+</div>
+
+<hr>
+
+<h2>2. A resposta é sempre texto</h2>
+<p>Se a pessoa digita <code>30</code>, o <code>Read-Host</code> entrega o <strong>texto</strong> "30", não o número 30. Isso muda as contas. Veja o que o PowerShell faz com o texto "30" e o número 1:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; "30" + 1
+301
+PS C:\Users\ana&gt; 1 + "30"
+31
+</pre>
+<dl class="anatomy">
+  <dt>"30" + 1 → 301</dt><dd>Quem está à <strong>esquerda</strong> manda. Como é um texto, o <code>+</code> <strong>gruda</strong> os dois: "30" com "1" vira "301".</dd>
+  <dt>1 + "30" → 31</dt><dd>Agora a esquerda é um número, então o <code>+</code> <strong>soma</strong>, e o PowerShell converte o "30" em número.</dd>
+</dl>
+<p>Com o <code>Read-Host</code>, a resposta está quase sempre à esquerda (<code>$idade + 1</code>). Para fazer conta, transforme a resposta em número com <code>[int]</code> ("inteiro"):</p>
+<pre class="file" data-file="idade.ps1">$idade = Read-Host 'Quantos anos você tem'
+$proximo = [int]$idade + 1
+"No ano que vem você terá $proximo anos."
+</pre>
+<dl class="anatomy">
+  <dt>[int]$idade</dt><dd>"Trate <code>$idade</code> como número inteiro." O texto "30" vira o número 30, e aí <code>+ 1</code> dá 31. Mais sobre isso na aula <a href="conversao.html">Conversão de Tipos</a>.</dd>
+</dl>
+
+<hr>
+
+<h2>3. Escondendo o que é digitado</h2>
+<p>Para uma senha, não é bom que o texto apareça na tela. O <code>Read-Host</code> tem dois parâmetros para isso. Esta é a lista real de parâmetros dele no PowerShell 7.7:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; (Get-Command Read-Host).Parameters.Keys -join ", "
+Prompt, AsSecureString, MaskInput, Verbose, Debug, ErrorAction, WarningAction, InformationAction, ProgressAction, ErrorVariable, WarningVariable, InformationVariable, OutVariable, OutBuffer, PipelineVariable
+</pre>
+<dl class="anatomy">
+  <dt>Prompt</dt><dd>A pergunta, que você já usou.</dd>
+  <dt>MaskInput</dt><dd>"Mascarar a entrada": cada letra digitada aparece como <code>*</code>, mas a resposta continua sendo um texto comum. Bom para algo que não deve aparecer na tela, mas que o script vai usar como texto.</dd>
+  <dt>AsSecureString</dt><dd>"Como texto seguro": também mostra <code>*</code>, e a resposta vem trancada num <code>SecureString</code>, que não dá para imprimir direto. É o jeito certo para senhas (aula <a href="credenciais.html">Credenciais</a>).</dd>
+  <dt>Verbose, Debug, ErrorAction…</dt><dd>Os parâmetros comuns, que todo cmdlet tem (aula <a href="parametros-cmdlet.html">Parâmetros</a>).</dd>
+</dl>
+<div class="note"><strong>Windows PowerShell 5.1:</strong> o <code>-MaskInput</code> não existe lá: ele não aparece na documentação do <code>Read-Host</code> do 5.1, só na do PowerShell 7. No 5.1, use <code>-AsSecureString</code>.</div>
+<p>O uso fica assim (código para ler; a tela com os asteriscos não foi colhida no laboratório):</p>
+<pre class="file" data-file="senha.ps1">$senha = Read-Host 'Senha' -AsSecureString
+</pre>
+
+<hr>
+
+<h2>Formas diferentes de receber dados</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>Read-Host 'Pergunta'</code></td><td>Scripts que conversam com uma pessoa na frente do computador.</td></tr>
+<tr><td><code>[int](Read-Host 'Quantos?')</code></td><td>Quando a resposta precisa ser um número.</td></tr>
+<tr><td><code>Read-Host 'Senha' -AsSecureString</code></td><td>Senhas e segredos.</td></tr>
+<tr><td><code>Read-Host 'Código' -MaskInput</code></td><td>Algo que não deve aparecer na tela, mas que você usa como texto (só no 7).</td></tr>
+<tr><td>Parâmetros do script (<code>param()</code>)</td><td>Quando o script deve rodar sozinho, sem ninguém para responder (aula <a href="parametros-script.html">Parâmetros de Script</a>).</td></tr>
+</table>
+</div>
+<div class="tip">Um script com <code>Read-Host</code> <strong>para e espera</strong>. Se ele for rodar sozinho (uma tarefa agendada, por exemplo), ninguém vai responder. Nesses casos, prefira parâmetros.</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>A pessoa digitou uma palavra no lugar do número</strong>
+<p>Se a resposta for "trinta", o <code>[int]</code> não consegue converter. Este é o erro real, colhido com o texto direto, sem a pergunta:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; [int]"trinta"
+InvalidArgument: Cannot convert value "trinta" to type "System.Int32". Error: "The input string 'trinta' was not in a correct format."
+</pre>
+<dl class="anatomy">
+  <dt>InvalidArgument:</dt><dd>"Argumento inválido": o valor não serve para o que você pediu.</dd>
+  <dt>Cannot convert value "trinta" to type "System.Int32"</dt><dd>"Não dá para converter 'trinta' em número inteiro." <code>System.Int32</code> é o nome completo do <code>[int]</code>.</dd>
+  <dt>was not in a correct format</dt><dd>"Não estava num formato correto": só algarismos viram número.</dd>
+</dl>
+<p><strong>Como resolver:</strong> peça para digitar com algarismos (<code>30</code>). Mais à frente, na aula <a href="try-catch.html">Try/Catch</a>, você aprende a perguntar de novo quando a resposta vem errada.</p>
+</div>
+
+<div class="cenario">
+<strong>A conta deu um número estranho</strong>
+<p>A pessoa digitou <code>30</code> e o script mostrou <code>301</code> em vez de <code>31</code>. É o caso da seção 2: a resposta é texto e o <code>+</code> grudou.</p>
+<p><strong>Como resolver:</strong> converta antes da conta: <code>[int]$idade + 1</code>.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>$x = Read-Host 'Pergunta'</code></td><td>Pergunta e guarda a resposta (texto) em <code>$x</code>.</td></tr>
+<tr><td><code>[int]$x</code></td><td>Transforma a resposta em número inteiro.</td></tr>
+<tr><td><code>-AsSecureString</code></td><td>Esconde a digitação e devolve um <code>SecureString</code>.</td></tr>
+<tr><td><code>-MaskInput</code></td><td>Esconde a digitação e devolve texto comum (só no 7).</td></tr>
+<tr><td><code>"30" + 1</code></td><td><code>301</code>: texto à esquerda gruda.</td></tr>
+<tr><td><code>1 + "30"</code></td><td><code>31</code>: número à esquerda soma.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Pergunte a cidade e guarde em <code>$cidade</code>:</p>
+<div class="ex-code">$cidade = <input data-answer="Read-Host" aria-label="comando"> 'Qual é a sua cidade?'</div>
+</div>
+
+<div class="exercise">
+<h3>2. Virando número</h3>
+<p>Complete para que a resposta vire número antes da conta:</p>
+<div class="ex-code">$total = <input data-answer="[int]" aria-label="tipo">$quantidade * 2</div>
+</div>
+
+<div class="exercise">
+<h3>3. Senha escondida</h3>
+<p>Complete para que a senha venha trancada:</p>
+<div class="ex-code">$senha = Read-Host 'Senha' <input data-answer="-AsSecureString" aria-label="parâmetro"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. A pessoa digitou <code>5</code>. O que o <code>Read-Host</code> entregou?</p>
+<label><input type="radio" name="q4"> O número 5</label>
+<label><input type="radio" name="q4"> O texto "5"</label>
+<label><input type="radio" name="q4"> Um erro</label>
+<label><input type="radio" name="q4"> Nada, até você usar <code>[int]</code></label>
+</div>
+
+<div class="mc" data-answer="4">
+<p class="mc-q">5. Quanto dá <code>"30" + 1</code>?</p>
+<label><input type="radio" name="q5"> 31</label>
+<label><input type="radio" name="q5"> Um erro</label>
+<label><input type="radio" name="q5"> 30</label>
+<label><input type="radio" name="q5"> 301</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. Por que não escrever <code>:</code> no fim da pergunta do <code>Read-Host</code>?</p>
+<label><input type="radio" name="q6"> Porque ele já coloca os dois-pontos sozinho</label>
+<label><input type="radio" name="q6"> Porque dá erro de sintaxe</label>
+<label><input type="radio" name="q6"> Porque esconde a resposta</label>
+<label><input type="radio" name="q6"> Porque transforma a resposta em número</label>
+</div>
+
+<div class="tryps" data-stdin="30" data-goal="out:Ano que vem: 31;;src:\[int\];;semerro">
+<p class="try-task"><strong>Missão final:</strong> o editor vai responder <code>30</code>. O script mostra <code>Ano que vem: 301</code>. Conserte a conta com <code>[int]</code> para aparecer <code>Ano que vem: 31</code>.</p>
+<pre class="script" data-file="main.ps1">$idade = Read-Host 'Idade'
+$proximo = $idade + 1
+"Ano que vem: $proximo"
+</pre>
+<pre class="solucao" data-file="main.ps1">$idade = Read-Host 'Idade'
+$proximo = [int]$idade + 1
+"Ano que vem: $proximo"
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>$x = Read-Host 'Pergunta'</code> mostra a pergunta, espera o <kbd>Enter</kbd> e guarda a resposta.</li>
+  <li>A resposta é sempre <strong>texto</strong>: use <code>[int]</code> antes de fazer conta.</li>
+  <li>Texto à esquerda do <code>+</code> gruda (<code>"30" + 1</code> = 301); número à esquerda soma.</li>
+  <li>Para senhas, use <code>-AsSecureString</code>. O <code>-MaskInput</code> só esconde a digitação e existe só no 7.</li>
+  <li>"Cannot convert value … to type System.Int32" quer dizer que a resposta não era um número.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
