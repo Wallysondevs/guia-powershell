@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Get-ChildItem — Listando Pastas e Arquivos | Guia PowerShell</title>
+<meta name="description" content="Como listar pastas e arquivos no PowerShell 7 com Get-ChildItem: colunas Mode, LastWriteTime, Length e Name, parâmetros -Name, -Force, -File, -Directory, -Filter, -Recurse e -Include, ordenação e o erro real de um caminho que não existe, tudo na pasta de teste guia-ps-teste.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+
+<h1>Listando (<span class="hl">Get-ChildItem</span>)</h1>
+
+<p class="intro">A pasta atual já é conhecida. Agora você vai <strong>abrir a gaveta</strong> e ver o que tem dentro: pastas, arquivos, os escondidos, só os <code>.txt</code>, ou tudo o que está nas subpastas. O comando é o <code>Get-ChildItem</code> ("obter os itens filhos"). Os apelidos <code>ls</code>, <code>dir</code> e <code>gci</code> apontam para ele; neste guia a gente usa o nome completo.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O <code>Get-ChildItem</code>, que lista o conteúdo da pasta atual.</li>
+  <li>A ler as colunas <code>Mode</code>, <code>LastWriteTime</code>, <code>Length</code> e <code>Name</code>.</li>
+  <li>Os parâmetros <code>-Name</code>, <code>-Force</code>, <code>-File</code>, <code>-Directory</code>, <code>-Filter</code> e <code>-Recurse</code>.</li>
+  <li>A filtrar mais de uma extensão com <code>-Include</code> (sempre com <code>-Recurse</code>).</li>
+  <li>A ordenar e a escolher colunas, com <code>Sort-Object</code> e <code>Select-Object</code>.</li>
+  <li>O erro real de uma pasta ou arquivo que não existe.</li>
+</ul>
+</div>
+
+<p>Todas as saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, dentro da pasta de teste <code>C:\Users\ana\guia-ps-teste</code>. Nela havia duas subpastas (<code>docs</code> e <code>fotos</code>), dois arquivos à vista (<code>dados.csv</code> e <code>nota.txt</code>), um arquivo escondido (<code>.escondido</code>) e, dentro das subpastas, <code>docs\relatorio.txt</code> e <code>fotos\praia.jpg</code>.</p>
+<div class="warning">Os exemplos desta aula listam <strong>somente</strong> a pasta de teste. Não liste a pasta pessoal (o atalho <code>~</code>) com <code>-Force</code>: no Windows isso pode mostrar arquivos internos da sua conta. Fique na pasta de teste.</div>
+
+<hr>
+
+<h2>A ideia: abrir a gaveta</h2>
+<p>Uma gaveta de arquivos tem pastas penduradas e folhas soltas. Você pode pedir "me mostra tudo o que está nesta gaveta", "só as pastas", "só as folhas", "também o que está no fundo, escondido" ou "revira as pastas de dentro". O <code>Get-ChildItem</code> é esse pedido. Ele <strong>não abre</strong> o conteúdo do arquivo (isso é o <code>Get-Content</code>, mais à frente): só lista o que existe.</p>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Na gaveta</th><th>No PowerShell</th></tr>
+<tr><td>Olhar o que está no primeiro nível</td><td><code>Get-ChildItem</code></td></tr>
+<tr><td>Só os nomes, sem ficha</td><td><code>Get-ChildItem -Name</code></td></tr>
+<tr><td>Incluir o que estava escondido</td><td><code>Get-ChildItem -Force</code></td></tr>
+<tr><td>Só folhas, ou só pastas</td><td><code>-File</code> ou <code>-Directory</code></td></tr>
+<tr><td>Revirar as pastas de dentro</td><td><code>Get-ChildItem -Recurse</code></td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>1. A lista padrão</h2>
+<p>De dentro de <code>guia-ps-teste</code>, sem parâmetro nenhum:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem
+
+    Diretório: C:\Users\ana\guia-ps-teste
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----          20/11/2026    17:13                docs
+d----          20/11/2026    17:13                fotos
+-a---          20/11/2026    17:13              5 dados.csv
+-a---          20/11/2026    17:13              4 nota.txt</pre>
+<dl class="anatomy">
+  <dt>Diretório: C:\Users\ana\guia-ps-teste</dt><dd>O cabeçalho diz <strong>qual</strong> pasta está sendo listada.</dd>
+  <dt>Mode</dt><dd>Um código de cinco letras com o tipo e os atributos do item. A gente lê ele com calma mais abaixo.</dd>
+  <dt>LastWriteTime</dt><dd>A data e a hora da última alteração. Aqui, 20/11/2026 às 17:13, no formato brasileiro.</dd>
+  <dt>Length</dt><dd>O tamanho, em <strong>bytes</strong>. Pastas deixam essa coluna em branco. <code>dados.csv</code> tem 5 bytes; <code>nota.txt</code>, 4.</dd>
+  <dt>Name</dt><dd>O nome do item. Pastas vêm primeiro, depois os arquivos, em ordem alfabética.</dd>
+</dl>
+<p>O arquivo escondido <code>.escondido</code> <strong>não apareceu</strong>. A lista padrão omite o que está marcado como oculto.</p>
+
+<div class="tryps" data-goal="out:nota.txt;;src:Get-ChildItem;;semerro">
+<p class="try-task"><strong>Experimente:</strong> o arquivo <code>nota.txt</code> já é criado. Acrescente um <code>Get-ChildItem -Name</code> para listar o que existe.</p>
+<pre class="script" data-file="main.ps1">'oi' | Set-Content nota.txt
+</pre>
+<pre class="solucao" data-file="main.ps1">'oi' | Set-Content nota.txt
+Get-ChildItem -Name
+</pre>
+</div>
+
+<hr>
+
+<h2>2. Só os nomes: <code>-Name</code></h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem -Name
+docs
+fotos
+dados.csv
+nota.txt</pre>
+<p>Sem tabela, sem data, sem tamanho: uma linha por nome. Útil quando você quer só a lista, por exemplo para contar ou para passar adiante numa esteira.</p>
+
+<hr>
+
+<h2>3. Mostrando o escondido: <code>-Force</code></h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem -Force
+
+    Diretório: C:\Users\ana\guia-ps-teste
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----          20/11/2026    17:13                docs
+d----          20/11/2026    17:13                fotos
+-a-h-          20/11/2026    17:13              0 .escondido
+-a---          20/11/2026    17:13              5 dados.csv
+-a---          20/11/2026    17:13              4 nota.txt</pre>
+<p>Agora aparece o <code>.escondido</code>, com tamanho 0 e o <code>h</code> no <code>Mode</code> (de <em>hidden</em>, "oculto"). O <code>-Force</code> aqui quer dizer "não omita os ocultos"; ele não apaga nem altera nada. Use-o na pasta de teste, não na pasta pessoal.</p>
+
+<hr>
+
+<h2>4. Só arquivos, ou só pastas</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem -File
+
+    Diretório: C:\Users\ana\guia-ps-teste
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          20/11/2026    17:13              5 dados.csv
+-a---          20/11/2026    17:13              4 nota.txt</pre>
+<p>O <code>-File</code> deixou de fora as pastas <code>docs</code> e <code>fotos</code>.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem -Directory
+
+    Diretório: C:\Users\ana\guia-ps-teste
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----          20/11/2026    17:13                docs
+d----          20/11/2026    17:13                fotos</pre>
+<p>O <code>-Directory</code> fez o contrário: só as pastas. ("Directory" é o nome técnico de pasta.)</p>
+
+<hr>
+
+<h2>5. Filtrando pelo nome: <code>-Filter</code></h2>
+<p>O asterisco de novo: <code>*.txt</code> é "qualquer nome que termine em <code>.txt</code>".</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem -Filter *.txt
+
+    Diretório: C:\Users\ana\guia-ps-teste
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          20/11/2026    17:13              4 nota.txt</pre>
+<p>Só o <code>nota.txt</code> da pasta atual. O <code>docs\relatorio.txt</code> não entrou, porque o <code>-Filter</code> sozinho não desce nas subpastas. Para isso falta o <code>-Recurse</code>.</p>
+
+<div class="tryps" data-goal="out:nota.txt;;src:-Filter;;semerro">
+<p class="try-task"><strong>Missão:</strong> há um <code>.txt</code> e um <code>.csv</code>. Liste só o <code>.txt</code>, com <code>-Filter</code> e <code>-Name</code>.</p>
+<pre class="script" data-file="main.ps1">'a' | Set-Content nota.txt
+'b' | Set-Content dados.csv
+Get-ChildItem -Name
+</pre>
+<pre class="solucao" data-file="main.ps1">'a' | Set-Content nota.txt
+'b' | Set-Content dados.csv
+Get-ChildItem -Filter *.txt -Name
+</pre>
+</div>
+
+<hr>
+
+<h2>6. Descendo nas subpastas: <code>-Recurse</code></h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem -Recurse
+
+    Diretório: C:\Users\ana\guia-ps-teste
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----          20/11/2026    17:13                docs
+d----          20/11/2026    17:13                fotos
+-a---          20/11/2026    17:13              5 dados.csv
+-a---          20/11/2026    17:13              4 nota.txt
+
+    Diretório: C:\Users\ana\guia-ps-teste\docs
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          20/11/2026    17:13              3 relatorio.txt
+
+    Diretório: C:\Users\ana\guia-ps-teste\fotos
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          20/11/2026    17:13              3 praia.jpg</pre>
+<p>A saída vem em blocos, um por pasta: primeiro o conteúdo de <code>guia-ps-teste</code>, depois o de <code>docs</code> (com <code>relatorio.txt</code>, 3 bytes) e o de <code>fotos</code> (com <code>praia.jpg</code>, 3 bytes). "Recurse" quer dizer "repete o mesmo pedido lá dentro".</p>
+<p>Juntando o filtro com o "revira tudo", e pedindo só os nomes:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem -Recurse -Filter *.txt -Name
+nota.txt
+docs\relatorio.txt</pre>
+<p>Agora sim: <code>nota.txt</code> e <code>docs\relatorio.txt</code>. A barra invertida no segundo nome mostra que ele está dentro de <code>docs</code>.</p>
+
+<hr>
+
+<h2>7. Mais de uma extensão: <code>-Include</code></h2>
+<p>O <code>-Include</code> aceita vários padrões, separados por vírgula. Ele só funciona de verdade quando vai junto com o <code>-Recurse</code> (ou com um caminho que já termine em <code>*</code>):</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem -Include *.txt, *.csv -Recurse
+
+    Diretório: C:\Users\ana\guia-ps-teste\docs
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          20/11/2026    17:13              3 relatorio.txt
+
+    Diretório: C:\Users\ana\guia-ps-teste
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          20/11/2026    17:13              5 dados.csv
+-a---          20/11/2026    17:13              4 nota.txt</pre>
+<p>Vieram o <code>relatorio.txt</code> (de dentro de <code>docs</code>), o <code>dados.csv</code> e o <code>nota.txt</code>. O <code>praia.jpg</code> ficou de fora, como combinado.</p>
+
+<hr>
+
+<h2>8. Ordenando e escolhendo colunas</h2>
+<p>A esteira <code>|</code> de novo, agora para arrumar a lista. O <code>Sort-Object Length -Descending</code> ordena pelo tamanho, do maior para o menor:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem | Sort-Object Length -Descending
+
+    Diretório: C:\Users\ana\guia-ps-teste
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          20/11/2026    17:13              5 dados.csv
+-a---          20/11/2026    17:13              4 nota.txt
+d----          20/11/2026    17:13                docs
+d----          20/11/2026    17:13                fotos</pre>
+<p>Os arquivos vêm primeiro (<code>dados.csv</code> com 5 bytes, <code>nota.txt</code> com 4); as pastas, sem tamanho, ficam no fim. O <code>Select-Object</code> pega só as colunas que você quer:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem | Select-Object Name, Length, LastWriteTime
+
+Name      Length LastWriteTime
+----      ------ -------------
+docs             20/11/2026 17:13:00
+fotos            20/11/2026 17:13:00
+dados.csv 5      20/11/2026 17:13:00
+nota.txt  4      20/11/2026 17:13:00</pre>
+<p>Aqui a hora aparece com os segundos (<code>17:13:00</code>). Pastas não têm <code>Length</code>, então essa coluna fica vazia na linha delas. Os dois cmdlets — ordenar e escolher colunas — voltam com calma no Nível 2.</p>
+
+<hr>
+
+<h2>9. Lendo a coluna <code>Mode</code></h2>
+<p>Cada letra (ou hífen) da coluna <code>Mode</code> é um atributo. Pedimos só <code>Mode</code> e <code>Name</code>, incluindo o escondido:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem -Force | Format-Table Mode, Name
+
+Mode  Name
+----  ----
+d---- docs
+d---- fotos
+-a-h- .escondido
+-a--- dados.csv
+-a--- nota.txt</pre>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Símbolo</th><th>Quer dizer</th></tr>
+<tr><td><code>d</code> no começo</td><td>É uma <strong>pasta</strong> (<em>directory</em>). Sem o <code>d</code> (um hífen no lugar), é arquivo.</td></tr>
+<tr><td><code>a</code></td><td><em>Archive</em>: o arquivo foi alterado desde o último backup. É comum em arquivos comuns do Windows; você não precisa se preocupar com ele agora.</td></tr>
+<tr><td><code>h</code></td><td><em>Hidden</em>: o item está <strong>oculto</strong>. Só aparece com <code>-Force</code>.</td></tr>
+<tr><td><code>-</code></td><td>Aquele atributo está desligado.</td></tr>
+</table>
+</div>
+<p>Então <code>d----</code> é pasta, <code>-a---</code> é um arquivo comum e <code>-a-h-</code> é um arquivo oculto. Existem outras letras (<code>r</code> de somente leitura, <code>s</code> de sistema); quando aparecerem, a lógica é a mesma.</p>
+
+<hr>
+
+<h2>Formas diferentes de listar</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>Get-ChildItem</code></td><td>A lista padrão da pasta atual, com data e tamanho.</td></tr>
+<tr><td><code>Get-ChildItem -Name</code></td><td>Quando você só quer os nomes.</td></tr>
+<tr><td><code>Get-ChildItem -Force</code></td><td>Quando também quer os ocultos (na pasta de teste).</td></tr>
+<tr><td><code>-File</code> ou <code>-Directory</code></td><td>Para ficar só com arquivos ou só com pastas.</td></tr>
+<tr><td><code>-Filter *.txt</code></td><td>Para um padrão de nome na pasta atual.</td></tr>
+<tr><td><code>-Recurse</code></td><td>Para incluir o que está nas subpastas.</td></tr>
+<tr><td><code>ls</code> / <code>dir</code> / <code>gci</code></td><td>Apelidos, só no terminal. Nos scripts, o nome completo.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>O caminho não existe</strong>
+<p>Pedimos para listar uma pasta que não estava em <code>guia-ps-teste</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem naoexiste
+Get-ChildItem: Não é possível localizar o caminho 'C:\Users\ana\guia-ps-teste\naoexiste' porque ele não existe.</pre>
+<dl class="anatomy">
+  <dt>Get-ChildItem:</dt><dd>Quem está reclamando.</dd>
+  <dt>Não é possível localizar o caminho '…\naoexiste' porque ele não existe.</dt><dd>O PowerShell juntou o nome <code>naoexiste</code> com a pasta atual e não achou esse caminho no disco.</dd>
+</dl>
+<p><strong>Como resolver:</strong> confira o nome e se você já está na pasta certa (use o <code>Get-Location</code>). O erro não apaga nada. Se a dúvida for "será que existe?", o comando certo mais à frente é o <code>Test-Path</code>.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Get-ChildItem</code></td><td>Lista pastas e arquivos da pasta atual (sem os ocultos).</td></tr>
+<tr><td><code>Get-ChildItem -Name</code></td><td>Lista só os nomes.</td></tr>
+<tr><td><code>Get-ChildItem -Force</code></td><td>Inclui os itens ocultos.</td></tr>
+<tr><td><code>Get-ChildItem -File</code></td><td>Lista só arquivos.</td></tr>
+<tr><td><code>Get-ChildItem -Directory</code></td><td>Lista só pastas.</td></tr>
+<tr><td><code>Get-ChildItem -Filter *.txt</code></td><td>Lista o que encaixa no padrão, na pasta atual.</td></tr>
+<tr><td><code>Get-ChildItem -Recurse</code></td><td>Desce nas subpastas.</td></tr>
+<tr><td><code>Get-ChildItem -Recurse -Filter *.txt -Name</code></td><td>Nomes dos <code>.txt</code> em todas as subpastas.</td></tr>
+<tr><td><code>Get-ChildItem -Include *.txt, *.csv -Recurse</code></td><td>Vários padrões, nas subpastas.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete para listar o conteúdo da pasta atual:</p>
+<div class="ex-code"><input data-answer="Get-ChildItem|ls|dir|gci" aria-label="comando"></div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual parâmetro mostra os ocultos?</h3>
+<p>Complete para incluir os itens escondidos:</p>
+<div class="ex-code">Get-ChildItem -<input data-answer="Force" aria-label="parâmetro"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Qual parâmetro desce nas subpastas?</h3>
+<p>Complete para listar também o que está dentro das pastas:</p>
+<div class="ex-code">Get-ChildItem -<input data-answer="Recurse" aria-label="parâmetro"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Na coluna <code>Mode</code>, o que quer dizer <code>d----</code>?</p>
+<label><input type="radio" name="q4"> Que o item está oculto</label>
+<label><input type="radio" name="q4"> Que o item é uma pasta</label>
+<label><input type="radio" name="q4"> Que o item tem 5 bytes</label>
+<label><input type="radio" name="q4"> Que o item vai ser apagado</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Por que o <code>.escondido</code> não aparece no <code>Get-ChildItem</code> sem parâmetros?</p>
+<label><input type="radio" name="q5"> Porque o arquivo não existe</label>
+<label><input type="radio" name="q5"> Porque ele está em outra pasta</label>
+<label><input type="radio" name="q5"> Porque ele está oculto; para vê-lo, use <code>-Force</code></label>
+<label><input type="radio" name="q5"> Porque falta o parâmetro <code>-Recurse</code></label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. Qual combinação lista os nomes de todos os <code>.txt</code>, inclusive nas subpastas?</p>
+<label><input type="radio" name="q6"> <code>Get-ChildItem -Recurse -Filter *.txt -Name</code></label>
+<label><input type="radio" name="q6"> <code>Get-ChildItem -File</code></label>
+<label><input type="radio" name="q6"> <code>Get-Location</code></label>
+<label><input type="radio" name="q6"> <code>Get-ChildItem -Directory</code></label>
+</div>
+
+<div class="tryps" data-goal="out:praia.txt;;src:-Recurse;;semerro">
+<p class="try-task"><strong>Missão final:</strong> crie a pasta <code>fotos</code> com um arquivo <code>praia.txt</code> dentro e liste os nomes em todas as subpastas, com <code>-Recurse</code>.</p>
+<pre class="script" data-file="main.ps1">New-Item -ItemType Directory -Name fotos -Force | Out-Null
+'x' | Set-Content (Join-Path fotos 'praia.txt')
+Get-ChildItem -Name
+</pre>
+<pre class="solucao" data-file="main.ps1">New-Item -ItemType Directory -Name fotos -Force | Out-Null
+'x' | Set-Content (Join-Path fotos 'praia.txt')
+Get-ChildItem -Recurse -Name
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Get-ChildItem</code> lista o que há na pasta atual: pastas primeiro, depois arquivos, sem os ocultos.</li>
+  <li>A coluna <code>Mode</code> diz o tipo (<code>d</code> = pasta, <code>h</code> = oculto); <code>Length</code> é o tamanho em bytes.</li>
+  <li><code>-Name</code>, <code>-Force</code>, <code>-File</code>, <code>-Directory</code>, <code>-Filter</code> e <code>-Recurse</code> apertam ou alargam a lista.</li>
+  <li><code>-Include</code> aceita vários padrões, mas vai junto com o <code>-Recurse</code>.</li>
+  <li>Se o caminho não existe, a mensagem é "não é possível localizar o caminho". Nada é apagado.</li>
+  <li>Pratique na pasta de teste. Não liste a pasta pessoal com <code>-Force</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
