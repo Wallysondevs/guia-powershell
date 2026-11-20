@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Números — contas, decimais e [math] | Guia PowerShell</title>
+<meta name="description" content="Números no PowerShell: as quatro operações, resto, inteiro e decimal, KB/MB/GB, hexadecimal, [math], diferenças do 5.1 e o erro real da divisão por zero.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">Números</span></h1>
+
+<p class="intro">Somar as vendas do dia, calcular a média da turma, ver quantos megabytes ocupa a pasta de fotos: tudo isso é conta. O PowerShell faz contas direto no prompt, sem precisar de nenhum comando.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>As quatro operações, o resto da divisão (<code>%</code>) e a ordem das contas.</li>
+  <li>Inteiro (<code>Int32</code>) × decimal (<code>Double</code>), e por que <code>10 / 4</code> dá <code>2,5</code> na tela.</li>
+  <li>Números especiais: hexadecimal, científico e as unidades <code>KB</code>, <code>MB</code>, <code>GB</code>.</li>
+  <li>A classe <code>[math]</code>: raiz, potência, arredondar.</li>
+  <li>O que muda no Windows PowerShell 5.1, e o erro real da divisão por zero.</li>
+</ul>
+</div>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português.</p>
+<hr>
+<h2>A ideia: uma calculadora que já vem pronta</h2>
+<p>O PowerShell é também uma calculadora. Você digita a conta e ele responde, sem precisar de nenhum comando. A diferença para a calculadora do celular é que o resultado pode ir para uma variável, para um relatório ou para uma decisão do script.</p>
+<hr>
+<h2>1. As quatro operações e o resto</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 2 + 3
+5
+PS C:\Users\ana&gt; 10 - 4
+6
+PS C:\Users\ana&gt; 3 * 4
+12
+PS C:\Users\ana&gt; 10 / 4
+2,5
+PS C:\Users\ana&gt; 10 % 3
+1
+</pre>
+<dl class="anatomy">
+  <dt>*</dt><dd>Multiplicação (o asterisco faz o papel do "x").</dd>
+  <dt>/</dt><dd>Divisão.</dd>
+  <dt>%</dt><dd>O <strong>resto</strong> da divisão: 10 dividido por 3 dá 3 e sobra 1. Serve para saber se um número é par (<code>$n % 2</code> dá 0).</dd>
+</dl>
+<div class="note"><strong>Vírgula ou ponto?</strong> No código, o decimal se escreve com <strong>ponto</strong> (<code>2.5</code>). Na tela, o PowerShell mostra com <strong>vírgula</strong> (<code>2,5</code>), porque o Windows está em português. É o mesmo número.</div>
+<h2>2. Ordem e parênteses</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 2 + 3 * 4
+14
+PS C:\Users\ana&gt; (2 + 3) * 4
+20
+</pre>
+<p>Como na escola: multiplicação e divisão vêm antes de soma e subtração. Os parênteses mudam a ordem. Mais detalhes em <a href="operadores-aritmeticos.html">Operadores Aritméticos</a>.</p>
+<div class="tryps" data-goal="out:Total: 35;;semerro">
+<p class="try-task"><strong>Experimente:</strong> 3 cadernos de 10 reais e 1 caneta de 5. A conta está errada; coloque parênteses ou reorganize para dar 35.</p>
+<pre class="script" data-file="main.ps1">"Total: $(3 + 1 * 10 + 5)"
+</pre>
+<pre class="solucao" data-file="main.ps1">"Total: $(3 * 10 + 5)"
+</pre>
+</div>
+<h2>3. Inteiro × decimal</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; (10 / 4).GetType().Name
+Double
+PS C:\Users\ana&gt; (10 / 2).GetType().Name
+Int32
+PS C:\Users\ana&gt; [int](10 / 4)
+2
+</pre>
+<p>Quando a divisão é exata, o resultado continua inteiro (<code>Int32</code>). Quando sobra, vira decimal (<code>Double</code>). Já o <code>[int]</code> força um inteiro, arredondando: <code>2,5</code> virou <strong>2</strong>, e não 3. Nos empates (,5), o PowerShell arredonda para o número <strong>par</strong> mais próximo. Mais na aula <a href="conversao.html">Conversão de Tipos</a>.</p>
+<h2>4. Hexadecimal, científico e unidades</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 0xFF
+255
+PS C:\Users\ana&gt; 2e3
+2000
+PS C:\Users\ana&gt; 1KB
+1024
+PS C:\Users\ana&gt; 1MB
+1048576
+PS C:\Users\ana&gt; 1GB
+1073741824
+PS C:\Users\ana&gt; 1KB + 200
+1224
+</pre>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Escrita</th><th>O que é</th></tr>
+<tr><td><code>0xFF</code></td><td>Hexadecimal (base 16), comum em cores e códigos.</td></tr>
+<tr><td><code>2e3</code></td><td>Notação científica: 2 × 10³ = 2000.</td></tr>
+<tr><td><code>1KB</code>, <code>1MB</code>, <code>1GB</code></td><td>Tamanhos de arquivo em bytes. Ótimo para filtrar arquivos grandes.</td></tr>
+</table>
+</div>
+<h2>5. A classe [math]</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; [math]::PI
+3,14159265358979
+PS C:\Users\ana&gt; [math]::Sqrt(9)
+3
+PS C:\Users\ana&gt; [math]::Round(10 / 3, 2)
+3,33
+PS C:\Users\ana&gt; [math]::Pow(2, 8)
+256
+</pre>
+<p><code>[math]</code> é uma caixa de ferramentas de matemática. Os <code>::</code> pegam uma ferramenta dela: <code>Sqrt</code> (raiz quadrada), <code>Round</code> (arredondar, aqui com 2 casas), <code>Pow</code> (potência: 2⁸).</p>
+<h2>6. Binário e o separador de milhar</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 0b1010
+10
+PS C:\Users\ana&gt; 1_000_000
+1_000_000: O termo "1_000_000" não é reconhecido como um nome de um cmdlet, função, arquivo de script ou programa executável.
+Verifique a ortografia do nome ou, se um caminho foi incluído, verifique se o caminho está correto e tente novamente.
+</pre>
+<p><code>0b</code> escreve um número em binário (base 2): <code>1010</code> é 10. Já o sublinhado como separador de milhar (<code>1_000_000</code>), que existe em outras linguagens, <strong>não funciona</strong> no PowerShell: ele achou que era o nome de um comando. Escreva <code>1000000</code>.</p>
+<div class="note"><strong>Windows PowerShell 5.1:</strong> o binário <code>0b</code> não existe lá. Ele também acha que é um comando (o <code>#ERRO</code> é só um comentário que estava na linha):
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; 0b1010   #ERRO
+0b1010 : O termo '0b1010' não é reconhecido como nome de cmdlet, função, arquivo de script ou programa operável. 
+Verifique a grafia do nome ou, se um caminho tiver sido incluído, veja se o caminho está correto e tente novamente.
+No linha:1 caractere:1
++ 0b1010   #ERRO
++ ~~~~~~
+    + CategoryInfo          : ObjectNotFound: (0b1010:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+</pre>
+O resto desta aula funciona igual nos dois.</div>
+<hr>
+<h2>Quando dá errado</h2>
+<div class="cenario">
+<strong>Dividiu por zero</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 1 / 0
+RuntimeException: Attempted to divide by zero.
+</pre>
+<p>"Tentou dividir por zero." Na matemática não existe, e o PowerShell para com erro. Acontece quando o divisor vem de uma variável vazia ou zerada (por exemplo, a média de uma turma sem alunas).</p>
+<p><strong>Como resolver:</strong> confira antes: <code>if ($quantidade -ne 0) { $total / $quantidade }</code>.</p>
+</div>
+<div class="cenario">
+<strong>Escreveu decimal com vírgula</strong>
+<p>No código, <code>2,5</code> não é "dois e meio": a vírgula cria uma <strong>lista</strong> com 2 e 5. Use <code>2.5</code>.</p>
+</div>
+<hr>
+<h2>Exercícios</h2>
+<div class="exercise">
+<h3>1. O resto</h3>
+<p>Complete para ver o resto de 17 dividido por 5:</p>
+<div class="ex-code">17 <input data-answer="%" aria-label="operador"> 5</div>
+</div>
+<div class="exercise">
+<h3>2. Potência</h3>
+<p>Complete para calcular 3 elevado a 4:</p>
+<div class="ex-code">[math]::<input data-answer="Pow" aria-label="resposta">(3, 4)</div>
+</div>
+<div class="mc" data-answer="2">
+<p class="mc-q">3. Quanto dá <code>2 + 3 * 4</code>?</p>
+<label><input type="radio" name="q3"> 20</label>
+<label><input type="radio" name="q3"> 14</label>
+<label><input type="radio" name="q3"> 24</label>
+<label><input type="radio" name="q3"> 9</label>
+</div>
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Como se escreve dois e meio no código?</p>
+<label><input type="radio" name="q4"> <code>2,5</code></label>
+<label><input type="radio" name="q4"> <code>2.5</code></label>
+<label><input type="radio" name="q4"> <code>"2,5"</code></label>
+<label><input type="radio" name="q4"> <code>2_5</code></label>
+</div>
+<div class="tryps" data-goal="outre:3[,.]33;;src:Round;;semerro">
+<p class="try-task"><strong>Missão final:</strong> mostre a média de <code>$soma</code> por <code>$alunas</code>, arredondada com 2 casas, usando <code>[math]::Round</code>.</p>
+<pre class="script" data-file="main.ps1">$soma = 10
+$alunas = 3
+$soma / $alunas
+</pre>
+<pre class="solucao" data-file="main.ps1">$soma = 10
+$alunas = 3
+[math]::Round($soma / $alunas, 2)
+</pre>
+</div>
+<hr>
+<h2>Resumo</h2>
+<ul>
+  <li><code>+ - * /</code> e <code>%</code> (resto); parênteses mudam a ordem.</li>
+  <li>No código, decimal com ponto; na tela, com vírgula (Windows em português).</li>
+  <li><code>1KB</code>, <code>1MB</code>, <code>1GB</code> são tamanhos em bytes.</li>
+  <li><code>[math]</code> tem <code>Round</code>, <code>Sqrt</code>, <code>Pow</code>, <code>PI</code>.</li>
+  <li><code>0b</code> (binário) só no 7; <code>1_000_000</code> não funciona em nenhum.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
