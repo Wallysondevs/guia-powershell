@@ -140,7 +140,7 @@
 
     var w = el("div", { "class": "psf ts" });
     w.innerHTML =
-      '<p class="psf-aviso">Este guia ainda não roda PowerShell no navegador. Copie o código, rode no seu PowerShell 7 (<code>pwsh</code>) e cole a saída abaixo. (Onde a missão diz “clique em Rodar”, rode no seu terminal.)</p>' +
+      '<p class="psf-aviso">Este guia ainda não roda PowerShell no navegador. Copie o código, rode no seu PowerShell 7 (<code>pwsh</code>) e cole a saída abaixo.</p>' +
       '<div class="ts-bar"><span class="ts-arq">' + esc(arq) + '</span><span class="ts-sp"></span>' +
       '<button type="button" class="sim-btn psf-copiar">Copiar código</button>' +
       '<button type="button" class="sim-btn psf-reset">Voltar ao original</button></div>' +
