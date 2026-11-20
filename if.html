@@ -152,23 +152,32 @@ nota agora vale 10
 
 <div class="cenario">
 <strong>Esqueceu as chaves</strong>
-<p>Os erros de sintaxe abaixo foram colhidos com <code>Invoke-Expression</code>, que roda um texto como comando. Digitado direto no console, o mesmo engano aparece como <code>ParserError</code>, com outra moldura em volta, mas a explicação é a mesma.</p>
-<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Invoke-Expression 'if ($nota -ge 7) "Aprovada"'
-Invoke-Expression: Missing statement block after if ( condition ).
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; if ($nota -ge 7) "Aprovada"
+ParserError:
+Line |
+   1 |  if ($nota -ge 7) "Aprovada"
+     |                 ~
+     | Missing statement block after if ( condition ).
 </pre>
 <dl class="anatomy">
-  <dt>Missing statement block</dt><dd>"Falta o bloco de comandos."</dd>
-  <dt>after if ( condition )</dt><dd>"Depois do if (condição)." O <code>"Aprovada"</code> precisa estar entre <code>{ }</code>, mesmo sendo uma linha só.</dd>
+  <dt>ParserError</dt><dd>Erro de leitura do código: o PowerShell recusou a linha antes de rodar qualquer coisa. Esses erros saem em inglês no PowerShell 7.7, mesmo num Windows em português.</dd>
+  <dt>Line | 1</dt><dd>A linha com o problema, repetida ao lado.</dd>
+  <dt>~</dt><dd>O tracinho aponta logo depois do <code>)</code>, onde o PowerShell esperava a chave <code>{</code>.</dd>
+  <dt>Missing statement block after if ( condition )</dt><dd>Quer dizer que falta o bloco de comandos depois da condição do <code>if</code>. O <code>"Aprovada"</code> precisa estar entre <code>{ }</code>, mesmo sendo uma linha só.</dd>
 </dl>
 <p><strong>Como resolver:</strong> <code>if ($nota -ge 7) { "Aprovada" }</code>.</p>
 </div>
 
 <div class="cenario">
 <strong>Esqueceu os parênteses</strong>
-<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Invoke-Expression 'if $nota -ge 7 { "Aprovada" }'
-Invoke-Expression: Missing '(' after 'if' in if statement.
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; if $nota -ge 7 { "Aprovada" }
+ParserError:
+Line |
+   1 |  if $nota -ge 7 { "Aprovada" }
+     |    ~
+     | Missing '(' after 'if' in if statement.
 </pre>
-<p>"Falta o <code>(</code> depois do <code>if</code>." Em outras linguagens a condição pode ir solta; no PowerShell, os parênteses são obrigatórios.</p>
+<p>O tracinho aponta logo depois do <code>if</code>: a mensagem quer dizer que faltou abrir parênteses ali. Em outras linguagens a condição pode ir solta; no PowerShell, os parênteses são obrigatórios.</p>
 <p><strong>Como resolver:</strong> <code>if ($nota -ge 7) { "Aprovada" }</code>.</p>
 </div>
 
