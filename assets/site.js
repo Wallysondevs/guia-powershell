@@ -582,7 +582,8 @@ var NIVEIS = [
     });
   }
   // o editor (assets/pssim.js): o PowerShell 7 de verdade (em WebAssembly), carregado no primeiro Rodar
-  if (document.querySelector(".tryps")) body.appendChild(el("script", { src: "assets/pssim.js" }));
+  // sem o pssim.js (ou sem o global dele), entra o modo "Rode no seu PowerShell" (assets/rode-local.js)
+  if (document.querySelector(".tryps")) { var pss = el("script", { src: "assets/pssim.js" }); pss.onload = pss.onerror = function () { if (!window.PSSim && !window.pssim) body.appendChild(el("script", { src: "assets/rode-local.js" })); }; body.appendChild(pss); }
 
   /* ---------- Exercícios de completar ----------
      <div class="exercise"><div class="ex-code">ls <input data-answer="-a|-A"> ~</div></div> */

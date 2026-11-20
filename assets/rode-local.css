@@ -1,0 +1,43 @@
+/* Guia PowerShell: modo "Rode no seu PowerShell" (assets/rode-local.js) */
+.tryps {
+  margin: 22px 0;
+  padding: 4px 18px 14px;
+  border: 2px dashed var(--accent);
+  border-radius: 10px;
+  min-width: 0;
+}
+.psf-aviso {
+  margin: 6px 0 10px;
+  padding: 8px 12px;
+  border-left: 4px solid var(--note-border);
+  background: var(--note-bg);
+  font-size: 14.5px;
+}
+.psf .ts-editor { border-radius: 0 0 8px 8px; }
+.psf .ts-code { overflow-x: auto; }
+.psf-rot { display: block; margin: 12px 0 4px; font-weight: 600; }
+.psf-out {
+  display: block; width: 100%; box-sizing: border-box;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--out-bg);
+  color: var(--out-text);
+  font: 14px/1.5 "Ubuntu Mono", ui-monospace, Menlo, Consolas, monospace;
+  white-space: pre;
+  resize: vertical;
+}
+.psf-out:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.psf-acoes { margin-top: 10px; }
+.psf-acoes button:disabled { opacity: .55; cursor: not-allowed; }
+.psf-res .ex-result { margin: 6px 0; }
+.psf-metas { margin: 8px 0 4px; padding-left: 0; list-style: none; }
+.psf-metas li { margin: 2px 0; }
+.psf-metas li.ok .psf-sinal { color: var(--ok); font-weight: 700; }
+.psf-metas li.bad .psf-sinal { color: var(--bad); font-weight: 700; }
+.psf-metas li.manual { color: var(--muted); }
+.psf-falha { color: var(--bad); }
+.psf .sim-sol { margin: 10px 0 4px; }
+.psf-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (max-width: 600px) { .tryps { padding: 4px 10px 12px; } }
+@media print { .psf-acoes, .psf-out, .psf-rot, .ts-bar { display: none !important; } }
