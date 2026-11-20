@@ -98,7 +98,7 @@ PS C:\Users\ana&gt; "a b a" -replace "a", "X"
 X b X
 </pre>
 <p>Troca <strong>todas</strong> as ocorrências. O primeiro valor também é uma expressão regular.</p>
-<h2>Qual usar</h2>
+<h2>Formas diferentes</h2>
 <div class="table-wrap">
 <table class="ref">
 <tr><th>Operador</th><th>Quando</th></tr>
@@ -121,6 +121,20 @@ OperationStopped: Invalid pattern '[' at offset 1. Unterminated [] set.
 <p><code>"arquivo.txt" -like ".txt"</code> dá False: sem <code>*</code>, o <code>-like</code> compara o texto inteiro. Use <code>"*.txt"</code>.</p>
 </div>
 <hr>
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>-like "*.txt"</code></td><td>Combina com curingas.</td></tr>
+<tr><td><code>-notlike</code></td><td>Não combina.</td></tr>
+<tr><td><code>*</code>, <code>?</code></td><td>Qualquer coisa; uma letra.</td></tr>
+<tr><td><code>-match "\d+"</code></td><td>Combina com expressão regular.</td></tr>
+<tr><td><code>$Matches</code></td><td>O que o último <code>-match</code> achou.</td></tr>
+<tr><td><code>-replace "a", "b"</code></td><td>Troca todas as ocorrências.</td></tr>
+<tr><td><code>-clike</code>, <code>-cmatch</code></td><td>Diferenciam maiúsculas.</td></tr>
+</table>
+</div>
+<hr>
 <h2>Exercícios</h2>
 <div class="exercise">
 <h3>1. Termina com</h3>
@@ -132,19 +146,25 @@ OperationStopped: Invalid pattern '[' at offset 1. Unterminated [] set.
 <p>Complete para trocar "rua" por "Rua":</p>
 <div class="ex-code">$endereco <input data-answer="-replace" aria-label="operador"> "rua", "Rua"</div>
 </div>
+<div class="exercise">
+<h3>3. Começa com</h3>
+<p>Complete o símbolo de regex que quer dizer "começo do texto":</p>
+<div class="ex-code">"PowerShell" -match "<input data-answer="^" aria-label="símbolo">Power"</div>
+</div>
+
 <div class="mc" data-answer="2">
-<p class="mc-q">3. Onde fica o pedaço encontrado depois de um <code>-match</code>?</p>
-<label><input type="radio" name="q3"> <code>$_</code></label>
-<label><input type="radio" name="q3"> <code>$Matches</code></label>
-<label><input type="radio" name="q3"> <code>$?</code></label>
-<label><input type="radio" name="q3"> <code>$Match</code></label>
+<p class="mc-q">4. Onde fica o pedaço encontrado depois de um <code>-match</code>?</p>
+<label><input type="radio" name="q4"> <code>$_</code></label>
+<label><input type="radio" name="q4"> <code>$Matches</code></label>
+<label><input type="radio" name="q4"> <code>$?</code></label>
+<label><input type="radio" name="q4"> <code>$Match</code></label>
 </div>
 <div class="mc" data-answer="1">
-<p class="mc-q">4. O que <code>"PowerShell" -like "power*"</code> mostra?</p>
-<label><input type="radio" name="q4"> True</label>
-<label><input type="radio" name="q4"> False</label>
-<label><input type="radio" name="q4"> PowerShell</label>
-<label><input type="radio" name="q4"> Erro</label>
+<p class="mc-q">5. O que <code>"PowerShell" -like "power*"</code> mostra?</p>
+<label><input type="radio" name="q5"> True</label>
+<label><input type="radio" name="q5"> False</label>
+<label><input type="radio" name="q5"> PowerShell</label>
+<label><input type="radio" name="q5"> Erro</label>
 </div>
 <div class="tryps" data-goal="out:Tem número;;src:-match;;semerro">
 <p class="try-task"><strong>Missão final:</strong> com <code>-match</code> e <code>\d</code>, mostre <code>Tem número</code> se <code>$senha</code> tiver algum dígito.</p>
