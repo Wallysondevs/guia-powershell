@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Usuários e Grupos Locais — Get-LocalUser, New-LocalUser e o grupo Usuários | Guia PowerShell</title>
+<meta name="description" content="Usuários e grupos locais no PowerShell: criar, consultar pelo nome, alterar, desativar, renomear e apagar o usuário descartável guia-teste, colocá-lo só no grupo Usuários, e os erros reais em português, colhidos no PowerShell 7.7.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Usuários e <span class="hl">Grupos Locais</span></h1>
+
+<p class="intro">Até aqui a Ana mexia em arquivos, pastas e texto. Agora o assunto muda de tamanho: vamos falar das <strong>contas</strong> que existem neste computador — quem pode entrar, se a conta está ligada e em que grupo ela está. Os cmdlets desta aula <strong>alteram o Windows</strong> e pedem uma sessão de <strong>administrador</strong>. Por isso a prática usa um usuário descartável, criado e apagado no mesmo roteiro, e nunca toca nas contas reais.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A família de cmdlets do módulo <code>Microsoft.PowerShell.LocalAccounts</code> <span class="versao">só Windows</span>.</li>
+  <li>A criar o usuário descartável <code>guia-teste</code> com <code>New-LocalUser</code> e consultá-lo <strong>só pelo nome</strong> com <code>Get-LocalUser</code>.</li>
+  <li>A alterar a descrição (<code>Set-LocalUser</code>), desativar e ativar (<code>Disable-LocalUser</code> / <code>Enable-LocalUser</code>) e renomear (<code>Rename-LocalUser</code>).</li>
+  <li>A colocar a conta só no grupo <code>Usuários</code> — nunca em <code>Administradores</code> — e a consultar o membro pelo nome.</li>
+  <li>A apagar a conta no fim e conferir que ela sumiu.</li>
+  <li>Os erros reais em português: conta que já existe, nome que não existe e nome inválido.</li>
+</ul>
+</div>
+
+<p>Todas as saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta pessoal da usuária fictícia <code>ana</code>, no computador <code>NOTEBOOK</code>, em uma sessão de administrador. O editor do guia é um PowerShell 7 de Linux: esses cmdlets <strong>não existem</strong> lá. As missões desta aula pedem que você <strong>escreva</strong> o comando certo, sem tentá-lo no editor.</p>
+
+<div class="warning">
+<strong>Esses comandos pedem administrador e mudam o sistema.</strong> Pratique somente com um usuário descartável, com um nome combinado — nesta aula, <code>guia-teste</code>. Antes de criar, confira se esse nome ainda não existe. Nunca rode <code>Get-LocalUser</code> ou <code>Get-LocalGroup</code> sem <code>-Name</code>, nem <code>Get-LocalGroupMember</code> sem <code>-Member</code>: isso lista as contas reais do computador. Nunca adicione ninguém ao grupo <code>Administradores</code>. No fim, apague o que criou e confira que sumiu.
+</div>
+
+<hr>
+
+<h2>A ideia: um crachá de visitante</h2>
+<p>Pense na portaria de um prédio. Cada pessoa ganha um <strong>crachá</strong> com nome, se está válido e a que grupo pertence: moradores, visitantes, administração. Você não imprime um crachá de administrador para treinar, nem pede a lista de todos os moradores. Você faz um crachá temporário de visitante, confere só esse nome, e no fim devolve e rasga o crachá.</p>
+<p>No PowerShell é igual. O crachá é a <strong>conta local</strong>. O grupo permitido nesta aula é <code>Usuários</code>. O crachá temporário se chama <code>guia-teste</code>.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Na portaria</th><th>No PowerShell</th></tr>
+<tr><td>O crachá de uma pessoa</td><td>A conta local (<code>Get-LocalUser -Name</code>)</td></tr>
+<tr><td>Imprimir um crachá novo</td><td><code>New-LocalUser</code></td></tr>
+<tr><td>Corrigir um dado do crachá</td><td><code>Set-LocalUser</code>, <code>Rename-LocalUser</code></td></tr>
+<tr><td>Invalidar ou revalidar o crachá</td><td><code>Disable-LocalUser</code> / <code>Enable-LocalUser</code></td></tr>
+<tr><td>O grupo "visitantes", nunca "administração"</td><td>O grupo <code>Usuários</code>, nunca <code>Administradores</code></td></tr>
+<tr><td>Rasgar o crachá no fim do dia</td><td><code>Remove-LocalUser</code></td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>1. A família de comandos</h2>
+<p>Esses cmdlets vêm do módulo <code>Microsoft.PowerShell.LocalAccounts</code>, que existe <strong>só no Windows</strong>. Pedimos só os nomes:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Command -Module Microsoft.PowerShell.LocalAccounts | Select-Object -ExpandProperty Name
+Add-LocalGroupMember
+Disable-LocalUser
+Enable-LocalUser
+Get-LocalGroup
+Get-LocalGroupMember
+Get-LocalUser
+New-LocalGroup
+New-LocalUser
+Remove-LocalGroup
+Remove-LocalGroupMember
+Remove-LocalUser
+Rename-LocalGroup
+Rename-LocalUser
+Set-LocalGroup
+Set-LocalUser
+</pre>
+<p>A regra de sempre: <strong>Verbo-Substantivo</strong>. <code>Get</code> consulta, <code>New</code> cria, <code>Set</code> altera, <code>Remove</code> apaga, <code>Rename</code> troca o nome, <code>Enable</code> / <code>Disable</code> ligam e desligam a conta, <code>Add</code> coloca no grupo. Nesta aula a gente usa só o usuário <code>guia-teste</code> e o grupo <code>Usuários</code>. Os cmdlets de criar ou apagar <strong>grupo</strong> ficam de fora de propósito.</p>
+
+<hr>
+
+<h2>2. Criar o usuário descartável</h2>
+<p>O <code>New-LocalUser</code> cria a conta. No laboratório ela nasceu com o nome <code>guia-teste</code>, sem senha, com uma descrição e um nome completo:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; New-LocalUser -Name "guia-teste" -NoPassword -Description "Usuário de teste do guia" -FullName "Guia Teste"
+
+Name       Enabled Description
+----       ------- -----------
+guia-teste True    Usuário de teste do guia
+
+</pre>
+<dl class="anatomy">
+  <dt>New-LocalUser</dt><dd>"Novo usuário local." Só existe no Windows e pede administrador.</dd>
+  <dt>-Name "guia-teste"</dt><dd>O nome da conta, entre aspas. Use um nome combinado, que ninguém mais use neste computador.</dd>
+  <dt>-NoPassword</dt><dd>"Sem senha." Serve só para uma conta de teste que você vai apagar no mesmo roteiro. Não é prática para uma conta de verdade.</dd>
+  <dt>-Description</dt><dd>Um recado curto, para você reconhecer a conta depois.</dd>
+  <dt>-FullName</dt><dd>O nome completo que aparece em algumas telas do Windows. Aqui: <code>Guia Teste</code>.</dd>
+  <dt>Enabled True</dt><dd>A conta nasceu <strong>ativada</strong>. Sem senha e ativada é arriscado: no laboratório ela foi desativada mais abaixo, ainda no mesmo roteiro. Não deixe uma conta de teste assim no seu computador.</dd>
+</dl>
+
+<hr>
+
+<h2>3. Consultar só pelo nome</h2>
+<p>O <code>Get-LocalUser -Name</code> devolve <strong>uma</strong> conta. Sem <code>-Name</code>, ele listaria todas as contas locais — inclusive as reais. Esta aula nunca faz isso.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-LocalUser -Name "guia-teste"
+
+Name       Enabled Description
+----       ------- -----------
+guia-teste True    Usuário de teste do guia
+
+</pre>
+<p>A tabelinha padrão mostra só nome, se está ativada e a descrição. Para ver mais campos, peça pelo nome com <code>Select-Object</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-LocalUser -Name "guia-teste" | Select-Object Name, Enabled, Description, FullName, PasswordRequired, LastLogon
+
+Name             : guia-teste
+Enabled          : True
+Description      : Usuário de teste do guia
+FullName         : Guia Teste
+PasswordRequired : False
+LastLogon        : 
+</pre>
+<dl class="anatomy">
+  <dt>PasswordRequired : False</dt><dd>Não há senha obrigatória, por causa do <code>-NoPassword</code>.</dd>
+  <dt>LastLogon</dt><dd>Veio vazio: essa conta ainda não fez logon.</dd>
+</dl>
+<p>Nenhum identificador interno da conta (o SID) aparece aqui, e não deve aparecer na sua prática também: não peça essa propriedade.</p>
+
+<div class="tryps" data-goal="src:Get-LocalUser;;src:-Name;;src:guia-teste;;semerro">
+<p class="try-task"><strong>Experimente:</strong> o editor do guia não tem contas do Windows, então <strong>não rode</strong> o cmdlet. Escreva, numa string, o comando que consulta <strong>somente</strong> o usuário <code>guia-teste</code> pelo nome, e deixe o <code>Write-Output</code> mostrar a string.</p>
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'Get-LocalUser -Name "guia-teste"'
+Write-Output $comando
+</pre>
+</div>
+
+<hr>
+
+<h2>4. Alterar, desativar e renomear</h2>
+<p>O <code>Set-LocalUser</code> muda um dado da conta. A descrição foi trocada, e a consulta seguinte (só o campo <code>Description</code>) confirma:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Set-LocalUser -Name "guia-teste" -Description "Descrição alterada"
+PS C:\Users\ana&gt; (Get-LocalUser -Name "guia-teste").Description
+Descrição alterada
+</pre>
+<p>Os parênteses pegam o objeto daquela conta; o ponto <code>.Description</code> lê só a descrição. O <code>Set-LocalUser</code> em si não escreve nada na tela quando dá certo.</p>
+<p>Desativar a conta é o jeito de invalidar o crachá sem apagá-lo. Ativar recoloca. O campo <code>Enabled</code> vira <code>False</code> ou <code>True</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Disable-LocalUser -Name "guia-teste"
+PS C:\Users\ana&gt; (Get-LocalUser -Name "guia-teste").Enabled
+False
+PS C:\Users\ana&gt; Enable-LocalUser -Name "guia-teste"
+PS C:\Users\ana&gt; (Get-LocalUser -Name "guia-teste").Enabled
+True
+PS C:\Users\ana&gt; Disable-LocalUser -Name "guia-teste"
+</pre>
+<p>No fim desse bloco a conta voltou a ficar desativada, que é o estado mais seguro enquanto o teste continua.</p>
+<p>O <code>Rename-LocalUser</code> troca o nome. No laboratório o nome virou <code>guia-teste2</code> e, na hora seguinte, voltou a ser <code>guia-teste</code> — para o resto da aula usar o nome combinado:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Rename-LocalUser -Name "guia-teste" -NewName "guia-teste2"
+PS C:\Users\ana&gt; Get-LocalUser -Name "guia-teste2" | Select-Object Name
+
+Name
+----
+guia-teste2
+
+PS C:\Users\ana&gt; Rename-LocalUser -Name "guia-teste2" -NewName "guia-teste"
+</pre>
+
+<hr>
+
+<h2>5. Só o grupo Usuários</h2>
+<p>Um grupo é um conjunto de contas com a mesma permissão. Nesta aula a conta de teste entra <strong>somente</strong> no grupo <code>Usuários</code>. Nunca use <code>Administradores</code>: isso daria à conta o mesmo poder de quem administra o computador.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Add-LocalGroupMember -Group 'Usuários' -Member 'guia-teste'
+PS C:\Users\ana&gt; Get-LocalGroupMember -Group 'Usuários' -Member 'guia-teste'
+
+ObjectClass Name                       PrincipalSource
+----------- ----                       ---------------
+Usuário     NOTEBOOK\guia-teste Local
+
+PS C:\Users\ana&gt; Remove-LocalGroupMember -Group 'Usuários' -Member 'guia-teste'
+</pre>
+<dl class="anatomy">
+  <dt>Add-LocalGroupMember</dt><dd>"Adicionar membro ao grupo local." <code>-Group</code> é o grupo; <code>-Member</code> é a conta. Os dois vêm pelo nome, literal.</dd>
+  <dt>Get-LocalGroupMember -Member</dt><dd>Consulta <strong>só aquele membro</strong>. Sem <code>-Member</code>, o comando listaria o grupo inteiro — e aí apareceriam contas reais. Não faça isso.</dd>
+  <dt>NOTEBOOK\guia-teste</dt><dd>O computador do laboratório se chama <code>NOTEBOOK</code>; a conta é <code>guia-teste</code>. A origem <code>Local</code> quer dizer que a conta mora neste computador, não num domínio.</dd>
+  <dt>Remove-LocalGroupMember</dt><dd>Tira a conta do grupo, ainda pelo nome literal. Também não escreve nada quando dá certo.</dd>
+</dl>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>A conta já existe</strong>
+<p>Tentamos criar de novo o <code>guia-teste</code>, que ainda estava no computador:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; New-LocalUser -Name "guia-teste" -NoPassword
+New-LocalUser: O usuário guia-teste já existe.
+</pre>
+<dl class="anatomy">
+  <dt>New-LocalUser:</dt><dd>Qual comando reclamou.</dd>
+  <dt>O usuário guia-teste já existe.</dt><dd>A mensagem veio em <strong>português</strong>. Nada foi sobrescrito: a conta antiga continuou lá.</dd>
+</dl>
+<p><strong>Como resolver:</strong> use outro nome, ou trabalhe com a conta que já existe — e, se ela for a de teste, apague-a no fim. Antes de criar, consulte com <code>Get-LocalUser -Name "guia-teste"</code>.</p>
+</div>
+
+<div class="cenario">
+<strong>O nome não existe</strong>
+<p>Pedimos uma conta que nunca foi criada, e depois tentamos apagá-la:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-LocalUser -Name "nao-existe"
+Get-LocalUser: Usuário nao-existe não encontrado.
+PS C:\Users\ana&gt; Remove-LocalUser -Name "nao-existe"
+Remove-LocalUser: Usuário nao-existe não encontrado.
+</pre>
+<p>A grafia é a mesma nos dois: <code>Usuário &lt;nome&gt; não encontrado.</code> Confira se o nome está certo (incluindo hífen) antes de criar ou de apagar.</p>
+</div>
+
+<div class="cenario">
+<strong>O nome é inválido</strong>
+<p>Uma barra não pode entrar no nome de uma conta:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; New-LocalUser -Name "nome/invalido" -NoPassword
+New-LocalUser: O nome nome/invalido é inválido.
+</pre>
+<p>O Windows recusou o nome e não criou conta nenhuma. Evite caracteres como <code>/</code>, <code>\</code>, colchetes e espaços no começo ou no fim. Um nome simples, com letras, números e hífen, como <code>guia-teste</code>, funciona.</p>
+</div>
+
+<hr>
+
+<h2>6. Apagar no fim e conferir</h2>
+<p>O <code>Remove-LocalUser</code> apaga a conta. No laboratório, depois de tirar a conta do grupo, ela foi removida pelo nome literal, sem curinga:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Remove-LocalUser -Name "guia-teste"
+</pre>
+<p>Quando dá certo, não aparece mensagem. O próximo passo é conferir que a conta sumiu, com o mesmo <code>Get-LocalUser -Name "guia-teste"</code>.</p>
+<div class="note">
+<strong>Saída ilustrativa.</strong> Essa conferência final <strong>foi rodada</strong> no laboratório, mas a mensagem <strong>não foi capturada</strong> nesta rodada. O bloco abaixo <strong>não é uma saída colhida</strong>. O texto segue o padrão real já colhido nesta aula, no erro com o nome <code>nao-existe</code>: <code>Get-LocalUser: Usuário &lt;nome&gt; não encontrado.</code>
+</div>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-LocalUser -Name "guia-teste"
+Get-LocalUser: Usuário guia-teste não encontrado. « ilustrativo
+</pre>
+<div class="tip">
+<strong>Ensaiar antes de apagar: <code>-WhatIf</code>.</strong> Quase todo cmdlet que muda o sistema aceita <code>-WhatIf</code> ("e se?"): ele conta o que faria e não faz. É um hábito seguro, principalmente com <code>Remove-LocalUser</code>. Nesta aula não há uma saída colhida desse ensaio, então pratique o parâmetro no seu Windows, só com a conta de teste, e veja a frase "What If" antes de apagar de verdade.
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Get-LocalUser -Name "guia-teste"</code></td><td>Consulta só essa conta, pelo nome.</td></tr>
+<tr><td><code>New-LocalUser -Name "guia-teste" -NoPassword -Description "…"</code></td><td>Cria a conta de teste (administrador; apague no fim).</td></tr>
+<tr><td><code>Set-LocalUser -Name "guia-teste" -Description "…"</code></td><td>Altera a descrição.</td></tr>
+<tr><td><code>Disable-LocalUser -Name "guia-teste"</code></td><td>Desativa a conta, sem apagá-la.</td></tr>
+<tr><td><code>Enable-LocalUser -Name "guia-teste"</code></td><td>Ativa de novo.</td></tr>
+<tr><td><code>Rename-LocalUser -Name "guia-teste" -NewName "guia-teste2"</code></td><td>Troca o nome da conta.</td></tr>
+<tr><td><code>Add-LocalGroupMember -Group 'Usuários' -Member 'guia-teste'</code></td><td>Coloca a conta só no grupo <code>Usuários</code>.</td></tr>
+<tr><td><code>Get-LocalGroupMember -Group 'Usuários' -Member 'guia-teste'</code></td><td>Consulta só esse membro, nunca o grupo inteiro.</td></tr>
+<tr><td><code>Remove-LocalGroupMember -Group 'Usuários' -Member 'guia-teste'</code></td><td>Tira a conta do grupo.</td></tr>
+<tr><td><code>Remove-LocalUser -Name "guia-teste"</code></td><td>Apaga a conta de teste.</td></tr>
+<tr><td><code>Remove-LocalUser -Name "guia-teste" -WhatIf</code></td><td>Ensaia a remoção, sem apagar.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete para consultar <strong>somente</strong> a conta de teste, pelo nome:</p>
+<div class="ex-code">Get-LocalUser -<input data-answer="Name" aria-label="parâmetro"> "guia-teste"</div>
+</div>
+
+<div class="exercise">
+<h3>2. Complete o grupo</h3>
+<p>Complete para colocar <code>guia-teste</code> só no grupo permitido nesta aula:</p>
+<div class="ex-code">Add-LocalGroupMember -Group '<input data-answer="Usuários" aria-label="grupo">' -Member 'guia-teste'</div>
+</div>
+
+<div class="exercise">
+<h3>3. Qual é a mensagem?</h3>
+<p>Você rodou <code>Get-LocalUser -Name "nao-existe"</code>. Qual texto o PowerShell 7 mostrou (sem o nome do comando)?</p>
+<div class="ex-code">Mensagem: <input data-answer="Usuário nao-existe não encontrado." aria-label="mensagem"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Por que esta aula nunca usa <code>Get-LocalUser</code> sem <code>-Name</code>?</p>
+<label><input type="radio" name="q4"> Porque o comando não existe sem parâmetro</label>
+<label><input type="radio" name="q4"> Porque, sem o nome, ele lista todas as contas locais, inclusive as reais</label>
+<label><input type="radio" name="q4"> Porque isso apaga o usuário <code>guia-teste</code></label>
+<label><input type="radio" name="q4"> Porque o Windows recusa o comando</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Em que grupo a conta de teste pode entrar, nesta aula?</p>
+<label><input type="radio" name="q5"> <code>Administradores</code></label>
+<label><input type="radio" name="q5"> Qualquer grupo, desde que com <code>-WhatIf</code></label>
+<label><input type="radio" name="q5"> Só o grupo <code>Usuários</code></label>
+<label><input type="radio" name="q5"> O grupo com o mesmo nome do computador</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. Você rodou <code>New-LocalUser -Name "guia-teste" -NoPassword</code> e apareceu <code>O usuário guia-teste já existe.</code> O que aconteceu?</p>
+<label><input type="radio" name="q6"> A conta antiga continuou lá; nada foi sobrescrito</label>
+<label><input type="radio" name="q6"> A conta antiga foi apagada e recriada</label>
+<label><input type="radio" name="q6"> A conta foi para o grupo <code>Administradores</code></label>
+<label><input type="radio" name="q6"> É preciso reiniciar o computador</label>
+</div>
+
+<div class="tryps" data-goal="src:Add-LocalGroupMember;;src:-Group;;src:Usuários;;src:-Member;;src:guia-teste;;semerro">
+<p class="try-task"><strong>Missão final:</strong> ainda numa string, escreva o comando que coloca <code>guia-teste</code> <strong>somente</strong> no grupo <code>Usuários</code>. Não chame o cmdlet: o editor não deve criar nem alterar conta nenhuma.</p>
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = "Add-LocalGroupMember -Group 'Usuários' -Member 'guia-teste'"
+Write-Output $comando
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Os cmdlets de contas locais são <span class="versao">só Windows</span>, pedem administrador e mudam o sistema. Pratique só com um usuário descartável, como <code>guia-teste</code>, e apague-o no fim.</li>
+  <li>Consulte sempre pelo nome: <code>Get-LocalUser -Name</code>. Sem <code>-Name</code>, a lista mostra as contas reais.</li>
+  <li><code>New-LocalUser</code> cria, <code>Set-LocalUser</code> altera, <code>Disable-LocalUser</code> / <code>Enable-LocalUser</code> desativam e ativam, <code>Rename-LocalUser</code> troca o nome, <code>Remove-LocalUser</code> apaga.</li>
+  <li>A conta de teste entra só no grupo <code>Usuários</code>. Nunca use <code>Administradores</code>. <code>Get-LocalGroupMember</code> também vai com <code>-Member</code>, para não listar o grupo inteiro.</li>
+  <li>Os erros desta aula saíram em português: conta que já existe, nome não encontrado e nome inválido.</li>
+  <li><code>-WhatIf</code> ensaia uma remoção sem apagar. É um hábito seguro antes de qualquer <code>Remove</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
