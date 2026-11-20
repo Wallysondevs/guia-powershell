@@ -120,3 +120,17 @@ NIVEIS tem **51** páginas no Nível 1; as 51 existem (`simulador.html` em 4238f
 **Pendências da próxima sessão:**
 1. `pssim.js` (ainda não existe; o fallback é o rode-local).
 2. Textos das missões ainda dizem "clique em Rodar".
+
+
+## Fechamento do Nível 1 (20/11/2026, 18:50)
+
+**Resumo final:** **51** páginas prontas (Nível 1, incluindo `simulador.html`) e **89** marcadas "em breve" (`{pronta: false}`: Nível 2, restante do Nível 3, projetos e referência).
+
+**Hashes:** conferido. As linhas das aulas prontas (③④ marcados) têm hash no Obs, ou estão sem Obs por terem sido feitas em lote. As 18 linhas do Nível 1 com ③④ pendentes (hub, aulas conceituais e as de coleta ainda não feita) seguem sem hash e não contam como fechadas.
+
+**Varredura final da Mira (18:42):** o checador deu OK nas 131 versões do histórico e nas páginas, sem resto do coletor; as saídas brutas, a lista proibida e os documentos internos ficaram fora do git; o JS passou no `node --check`.
+
+**Pendências da próxima sessão:**
+1. `pssim.js` (não existe; fallback é o rode-local).
+2. Textos das missões que ainda dizem "clique em Rodar".
+3. Cerca de 10 páginas ainda dizem que o editor do guia é um PowerShell de Linux (ex.: `variaveis-automaticas`, que diz que lá o `$IsLinux` dá True, `get-location`, `abrir-terminal`, `versoes-powershell`). Reescrever junto com o pssim.js; não têm dado do Wallyson.
