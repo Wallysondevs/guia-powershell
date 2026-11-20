@@ -1,7 +1,8 @@
 # abrir-terminal — comandos para colher no Windows (só leitura/demonstração)
+# ATENÇÃO 20/11: no Windows só existe o 5.1 (sem pwsh). Blocos que comparam com o 7 ficam ilustrativos ou vêm de outra fonte.
 # Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
 # Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
-# shell: pwsh
+# shell: powershell
 ## quem está me hospedando
 $Host.Name
 $Host.Version

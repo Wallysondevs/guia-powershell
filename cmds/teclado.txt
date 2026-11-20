@@ -1,12 +1,12 @@
 # teclado — comandos para colher no Windows (só leitura/demonstração)
+# ATENÇÃO 20/11: no Windows só existe o 5.1 (sem pwsh). Blocos que comparam com o 7 ficam ilustrativos ou vêm de outra fonte.
 # Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
 # Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
-# shell: pwsh
+# shell: powershell
 ## PSReadLine (só leitura)
 Get-Module PSReadLine | Select-Object Name, Version
-Get-PSReadLineOption | Select-Object EditMode, HistoryNoDuplicates, PredictionSource, PredictionViewStyle, MaximumHistoryCount
+Get-PSReadLineOption | Select-Object EditMode, HistoryNoDuplicates, MaximumHistoryCount
 Get-PSReadLineKeyHandler -Bound | Where-Object Key -in 'Tab','UpArrow','Ctrl+r','F8','Ctrl+c','Ctrl+l','Ctrl+Spacebar' | Format-Table Key, Function, Description -AutoSize
 ## histórico da sessão
 Get-Date | Out-Null
 Get-History
-(Get-PSReadLineOption).HistorySavePath   # anonimizar o caminho

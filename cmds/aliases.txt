@@ -1,7 +1,8 @@
 # aliases — comandos para colher no Windows (só leitura/demonstração)
+# ATENÇÃO 20/11: no Windows só existe o 5.1 (sem pwsh). Blocos que comparam com o 7 ficam ilustrativos ou vêm de outra fonte.
 # Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
 # Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
-# shell: pwsh
+# shell: powershell
 ## apelidos
 Get-Alias ls, dir, cd, cat, rm, cp, mv, pwd, echo, cls
 Get-Alias -Definition Get-ChildItem
@@ -11,7 +12,7 @@ Get-Command ls
 ## no 5.1 tem curl e wget como apelido?
 Get-Alias curl, wget -ErrorAction SilentlyContinue
 (Get-Alias).Count
-# shell: pwsh
+# shell: powershell
 Get-Alias curl, wget   #ERRO
 ## apelido que não aceita a opção do Linux
 ls -la   #ERRO

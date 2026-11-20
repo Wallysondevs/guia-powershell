@@ -1,12 +1,13 @@
 # caminhos — comandos para colher no Windows (só leitura/demonstração)
+# ATENÇÃO 20/11: no Windows só existe o 5.1 (sem pwsh). Blocos que comparam com o 7 ficam ilustrativos ou vêm de outra fonte.
 # Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
 # Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
-# shell: pwsh
+# shell: powershell
 ## preparar pasta de teste
 $T = Join-Path $HOME 'guia-ps-teste'
 New-Item -ItemType Directory -Path $T -Force | Out-Null
 Set-Location $T
-# shell: pwsh
+# shell: powershell
 New-Item -ItemType Directory docs | Out-Null
 'x' | Set-Content docs\a.txt
 ## absoluto x relativo
@@ -14,10 +15,11 @@ Resolve-Path docs\a.txt
 Resolve-Path .\docs\..\docs\a.txt
 Get-Item docs/a.txt | Select-Object FullName
 ## montar caminhos
-Join-Path $HOME 'docs' 'a.txt'
+Join-Path $HOME 'docs' 'a.txt'   #ERRO no 5.1 (3 partes só no 7)
+Join-Path (Join-Path $HOME 'docs') 'a.txt'
 Split-Path "$T\docs\a.txt" -Leaf
 Split-Path "$T\docs\a.txt" -Parent
-Split-Path "$T\docs\a.txt" -Extension
+Split-Path "$T\docs\a.txt" -Extension   #ERRO no 5.1 (parâmetro só no 7)
 [System.IO.Path]::DirectorySeparatorChar
 $HOME
 $env:USERPROFILE
