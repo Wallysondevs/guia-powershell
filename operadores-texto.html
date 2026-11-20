@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Comparando Textos — -like, -match e -replace | Guia PowerShell</title>
+<meta name="description" content="Comparar textos no PowerShell: -like com curingas, -match com expressões regulares e $Matches, -replace e o erro real de regex inválida.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">Comparando Textos</span> (-like, -match)</h1>
+
+<p class="intro">Quais arquivos da pasta Downloads são PDFs? Esse e-mail tem arroba? A senha tem número? Para perguntas sobre o <strong>formato</strong> de um texto, o <code>-eq</code> não basta: entram o <code>-like</code> e o <code>-match</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A comparar textos por padrão com <code>-like</code> e os curingas <code>*</code> e <code>?</code>.</li>
+  <li>A procurar padrões com <code>-match</code> (expressões regulares) e ler o resultado em <code>$Matches</code>.</li>
+  <li>A trocar pedaços do texto com <code>-replace</code>.</li>
+  <li>O erro real de uma expressão regular mal escrita.</li>
+</ul>
+</div>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português.</p>
+<hr>
+<h2>A ideia: procurar com coringa</h2>
+<p>No baralho, o coringa vale qualquer carta. No <code>-like</code>, o <code>*</code> vale "qualquer coisa" e o <code>?</code> vale "uma letra qualquer". Com eles, a Ana pergunta "esse arquivo termina com <code>.txt</code>?" sem saber o nome inteiro.</p>
+<hr>
+<h2>1. -like e curingas</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; "arquivo.txt" -like "*.txt"
+True
+PS C:\Users\ana&gt; "arquivo.log" -like "*.txt"
+False
+PS C:\Users\ana&gt; "PowerShell" -like "power*"
+True
+PS C:\Users\ana&gt; "PowerShell" -clike "power*"
+False
+PS C:\Users\ana&gt; "a" -notlike "b*"
+True
+</pre>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Parte</th><th>O que faz</th></tr>
+<tr><td><code>*</code></td><td>Qualquer coisa (até nada).</td></tr>
+<tr><td><code>?</code></td><td>Exatamente uma letra qualquer.</td></tr>
+<tr><td><code>-clike</code></td><td>Diferencia maiúsculas.</td></tr>
+<tr><td><code>-notlike</code></td><td>O contrário: True quando <strong>não</strong> combina.</td></tr>
+</table>
+</div>
+<div class="tryps" data-goal="out:É foto;;src:-like;;semerro">
+<p class="try-task"><strong>Experimente:</strong> o arquivo é uma foto <code>.jpg</code>. Corrija o padrão do <code>-like</code>.</p>
+<pre class="script" data-file="main.ps1">$arquivo = "praia.jpg"
+if ($arquivo -like "*.png") { "É foto" }
+</pre>
+<pre class="solucao" data-file="main.ps1">$arquivo = "praia.jpg"
+if ($arquivo -like "*.jpg") { "É foto" }
+</pre>
+</div>
+<h2>2. -match e expressões regulares</h2>
+<p>O <code>-match</code> usa <strong>expressões regulares</strong> (<em>regex</em>): uma mini-linguagem de padrões, mais poderosa que os curingas. Alguns símbolos: <code>\d</code> = um dígito, <code>+</code> = "um ou mais", <code>^</code> = começo do texto, <code>$</code> = fim.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; "abc123" -match "\d+"
+True
+PS C:\Users\ana&gt; $Matches
+
+Name                           Value
+----                           -----
+0                              123
+
+PS C:\Users\ana&gt; "PowerShell" -match "^Power"
+True
+PS C:\Users\ana&gt; "ana@exemplo.com" -match "@"
+True
+</pre>
+<p>Depois de um <code>-match</code> que deu True, a variável automática <code>$Matches</code> guarda o pedaço encontrado (no item <code>0</code>). Dá até para dar nome aos pedaços:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; "abc123" -match "^(?&lt;letras&gt;\D+)(?&lt;nums&gt;\d+)$"
+True
+PS C:\Users\ana&gt; $Matches
+
+Name                           Value
+----                           -----
+letras                         abc
+nums                           123
+0                              abc123
+</pre>
+<p><code>(?&lt;letras&gt;\D+)</code> quer dizer "um grupo chamado letras, com um ou mais não-dígitos". Depois, <code>$Matches.letras</code> devolve <code>abc</code>.</p>
+<h2>3. -replace</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; "olá mundo" -replace "mundo", "Ana"
+olá Ana
+PS C:\Users\ana&gt; "a b a" -replace "a", "X"
+X b X
+</pre>
+<p>Troca <strong>todas</strong> as ocorrências. O primeiro valor também é uma expressão regular.</p>
+<h2>Qual usar</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Operador</th><th>Quando</th></tr>
+<tr><td><code>-like</code></td><td>Padrões simples, como nomes de arquivo (<code>*.txt</code>).</td></tr>
+<tr><td><code>-match</code></td><td>Padrões mais complexos: números, e-mails, começo/fim.</td></tr>
+<tr><td><code>-replace</code></td><td>Trocar pedaços de texto.</td></tr>
+</table>
+</div>
+<hr>
+<h2>Quando dá errado</h2>
+<div class="cenario">
+<strong>Expressão regular inválida</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; "abc" -match "["
+OperationStopped: Invalid pattern '[' at offset 1. Unterminated [] set.
+</pre>
+<p>"Padrão inválido <code>[</code> na posição 1. Conjunto <code>[]</code> não terminado." Na regex, <code>[</code> abre um conjunto de letras e precisa de um <code>]</code>. Para procurar o colchete de verdade, escreva <code>\[</code>.</p>
+</div>
+<div class="cenario">
+<strong>Usou <code>-like</code> sem curinga</strong>
+<p><code>"arquivo.txt" -like ".txt"</code> dá False: sem <code>*</code>, o <code>-like</code> compara o texto inteiro. Use <code>"*.txt"</code>.</p>
+</div>
+<hr>
+<h2>Exercícios</h2>
+<div class="exercise">
+<h3>1. Termina com</h3>
+<p>Complete o padrão para textos que terminam com .pdf:</p>
+<div class="ex-code">$arquivo -like "<input data-answer="*.pdf" aria-label="padrão">"</div>
+</div>
+<div class="exercise">
+<h3>2. Trocar</h3>
+<p>Complete para trocar "rua" por "Rua":</p>
+<div class="ex-code">$endereco <input data-answer="-replace" aria-label="operador"> "rua", "Rua"</div>
+</div>
+<div class="mc" data-answer="2">
+<p class="mc-q">3. Onde fica o pedaço encontrado depois de um <code>-match</code>?</p>
+<label><input type="radio" name="q3"> <code>$_</code></label>
+<label><input type="radio" name="q3"> <code>$Matches</code></label>
+<label><input type="radio" name="q3"> <code>$?</code></label>
+<label><input type="radio" name="q3"> <code>$Match</code></label>
+</div>
+<div class="mc" data-answer="1">
+<p class="mc-q">4. O que <code>"PowerShell" -like "power*"</code> mostra?</p>
+<label><input type="radio" name="q4"> True</label>
+<label><input type="radio" name="q4"> False</label>
+<label><input type="radio" name="q4"> PowerShell</label>
+<label><input type="radio" name="q4"> Erro</label>
+</div>
+<div class="tryps" data-goal="out:Tem número;;src:-match;;semerro">
+<p class="try-task"><strong>Missão final:</strong> com <code>-match</code> e <code>\d</code>, mostre <code>Tem número</code> se <code>$senha</code> tiver algum dígito.</p>
+<pre class="script" data-file="main.ps1">$senha = "gato2026"
+</pre>
+<pre class="solucao" data-file="main.ps1">$senha = "gato2026"
+if ($senha -match "\d") { "Tem número" }
+</pre>
+</div>
+<hr>
+<h2>Resumo</h2>
+<ul>
+  <li><code>-like</code> usa curingas: <code>*</code> e <code>?</code>.</li>
+  <li><code>-match</code> usa expressões regulares e preenche <code>$Matches</code>.</li>
+  <li><code>-replace</code> troca todas as ocorrências.</li>
+  <li>Prefixo <code>c</code> (<code>-clike</code>, <code>-cmatch</code>) diferencia maiúsculas.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
