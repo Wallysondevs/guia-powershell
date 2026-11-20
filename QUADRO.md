@@ -31,12 +31,12 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 | `caminhos.html` Caminhos no Windows e no Linux | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
 | `new-item.html` Criando Arquivos e Pastas (New-Item) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
 | `copy-move.html` Copiando e Movendo (Copy-Item e Move-Item) | Zeca | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `rename-item.html` Renomeando (Rename-Item) | Tito | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `remove-item.html` Apagando (Remove-Item) | Tito | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `get-content.html` Lendo Arquivos (Get-Content) | Tito | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `set-content.html` Escrevendo Arquivos (Set-Content e Add-Content) | Tito | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `test-path.html` Existe? (Test-Path) | Tito | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
-| `provedores.html` Drives e Provedores (Env:, HKCU:) | Tito | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `rename-item.html` Renomeando (Rename-Item) | Tito | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] |  |
+| `remove-item.html` Apagando (Remove-Item) | Tito | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] | confirmação de pasta cheia só descrita (não coletável em -NonInteractive) |
+| `get-content.html` Lendo Arquivos (Get-Content) | Tito | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] |  |
+| `set-content.html` Escrevendo Arquivos (Set-Content e Add-Content) | Tito | [x] | [x] 7.7 (+5.1) | [x] | [x] | [x] |  |
+| `test-path.html` Existe? (Test-Path) | Zeca (rascunho dele, combinado 17:36) | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
+| `provedores.html` Drives e Provedores (Env:, HKCU:) | Zeca (rascunho dele, combinado 17:36) | [x] | [x] 7.7 (+5.1) | [x] | [ ] | [ ] |  |
 
 ## Variáveis e Tipos
 
