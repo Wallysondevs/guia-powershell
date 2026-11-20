@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Apelidos — ls, dir, cd, Get-Alias e Set-Alias | Guia PowerShell</title>
+<meta name="description" content="Apelidos (aliases) no PowerShell 7: ls, dir, cd, cat, rm, pwd, echo e cls, Get-Alias, Set-Alias só nesta sessão, por que ls -la não funciona, e a diferença do curl e do wget no Windows PowerShell 5.1.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+
+<h1>Apelidos <span class="hl">(ls, dir, cd)</span></h1>
+
+<p class="intro">Se você já usou o Prompt de Comando do Windows ou o terminal do Linux, vai tropeçar em nomes curtos como <code>ls</code>, <code>dir</code> e <code>cd</code>. No PowerShell eles funcionam, mas não são os comandos de verdade: são <strong>apelidos</strong> (em inglês, <em>aliases</em>). Nesta aula você vai ver o que está por trás de cada um, por que <code>ls -la</code> não funciona, e como criar um apelido só para esta janela.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é um apelido e como o <code>Get-Alias</code> mostra o comando verdadeiro.</li>
+  <li>Os apelidos mais comuns: <code>ls</code>, <code>dir</code>, <code>cd</code>, <code>cat</code>, <code>rm</code>, <code>cp</code>, <code>mv</code>, <code>pwd</code>, <code>echo</code> e <code>cls</code>.</li>
+  <li>A listar todos os apelidos de um comando com <code>-Definition</code>.</li>
+  <li>Por que, nos scripts, o guia usa o <strong>nome completo</strong> e deixa o apelido para o dia a dia no terminal.</li>
+  <li>Que as opções do Linux (como <code>-la</code>) <strong>não</strong> valem nos apelidos do PowerShell.</li>
+  <li>A criar um apelido só desta sessão com <code>Set-Alias</code>.</li>
+  <li>A diferença do <code>curl</code> e do <code>wget</code> entre o PowerShell 7 e o 5.1.</li>
+</ul>
+</div>
+
+<p>Todas as saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta pessoal da usuária fictícia <code>ana</code>. Quando o 5.1 se comporta diferente, a aula avisa.</p>
+
+<hr>
+
+<h2>A ideia: o apelido da escola</h2>
+<p>Na escola, "Zé" é José. Quem chama "Zé" está falando com a mesma pessoa; o nome na lista de chamada continua sendo José. Se a professora pede o nome completo num trabalho oficial, você escreve José, não Zé.</p>
+<p>No PowerShell é igual. <code>ls</code> é o apelido; <code>Get-ChildItem</code> é o nome na lista. Os dois fazem a mesma coisa. Nos scripts deste guia, a gente usa o nome completo: fica claro para quem está começando e não depende de o apelido existir.</p>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Na escola</th><th>No PowerShell</th></tr>
+<tr><td>"Zé"</td><td>O apelido, como <code>ls</code> ou <code>cd</code></td></tr>
+<tr><td>José, no diário de classe</td><td>O cmdlet de verdade, como <code>Get-ChildItem</code></td></tr>
+<tr><td>A lista de apelidos da turma</td><td>O <code>Get-Alias</code></td></tr>
+<tr><td>Trabalho oficial com nome completo</td><td>O script, escrito com o nome do cmdlet</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>1. Os apelidos mais comuns</h2>
+<p>O <code>Get-Alias</code> ("obter apelido") mostra, para cada nome curto, qual comando ele aponta:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Alias ls, dir, cd, cat, rm, cp, mv, pwd, echo, cls
+
+CommandType     Name                                               Version    Source
+-----------     ----                                               -------    ------
+Alias           ls -&gt; Get-ChildItem                                           
+Alias           dir -&gt; Get-ChildItem                                          
+Alias           cd -&gt; Set-Location                                            
+Alias           cat -&gt; Get-Content                                            
+Alias           rm -&gt; Remove-Item                                             
+Alias           cp -&gt; Copy-Item                                               
+Alias           mv -&gt; Move-Item                                               
+Alias           pwd -&gt; Get-Location                                           
+Alias           echo -&gt; Write-Output                                          
+Alias           cls -&gt; Clear-Host                                             </pre>
+<dl class="anatomy">
+  <dt>Get-Alias</dt><dd>O catálogo dos apelidos. Aqui pedimos dez nomes de uma vez, separados por vírgula.</dd>
+  <dt>ls -&gt; Get-ChildItem</dt><dd>A seta quer dizer "aponta para": quando você digita <code>ls</code>, roda o <code>Get-ChildItem</code> (listar pastas e arquivos).</dd>
+  <dt>dir</dt><dd>O mesmo <code>Get-ChildItem</code>, no nome que o <code>cmd</code> antigo usava.</dd>
+  <dt>cd</dt><dd>Apelido de <code>Set-Location</code>, que muda de pasta (aula <a href="set-location.html">Mudando de Pasta</a>).</dd>
+  <dt>cat</dt><dd>Apelido de <code>Get-Content</code>: lê o conteúdo de um arquivo.</dd>
+  <dt>rm, cp, mv</dt><dd>Apagar (<code>Remove-Item</code>), copiar (<code>Copy-Item</code>) e mover (<code>Move-Item</code>).</dd>
+  <dt>pwd</dt><dd>"Print working directory": apelido de <code>Get-Location</code>, que mostra a pasta atual.</dd>
+  <dt>echo</dt><dd>Apelido de <code>Write-Output</code>, que escreve um texto.</dd>
+  <dt>cls</dt><dd>Apelido de <code>Clear-Host</code>: limpa a tela do terminal.</dd>
+</dl>
+<p>Quem vem do Linux reconhece <code>ls</code>, <code>cat</code>, <code>rm</code>, <code>cp</code>, <code>mv</code> e <code>pwd</code>. Quem vem do <code>cmd</code> reconhece <code>dir</code>, <code>cd</code>, <code>echo</code> e <code>cls</code>. O PowerShell aceita os dois sotaques, mas por baixo é sempre o mesmo cmdlet.</p>
+
+<div class="tryps" data-goal="out:Get-ChildItem;;src:Get-Alias;;semerro">
+<p class="try-task"><strong>Experimente:</strong> troque <code>pwd</code> por <code>ls</code> e veja para qual comando o apelido aponta.</p>
+<pre class="script" data-file="main.ps1">Get-Alias pwd
+</pre>
+<pre class="solucao" data-file="main.ps1">Get-Alias ls
+</pre>
+</div>
+
+<hr>
+
+<h2>2. Todos os apelidos de um comando</h2>
+<p>O parâmetro <code>-Definition</code> inverte a pergunta: em vez de "para que aponta este apelido?", você pergunta "quais apelidos este comando tem?":</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Alias -Definition Get-ChildItem
+
+CommandType     Name                                               Version    Source
+-----------     ----                                               -------    ------
+Alias           dir -&gt; Get-ChildItem                                          
+Alias           gci -&gt; Get-ChildItem                                          
+Alias           ls -&gt; Get-ChildItem                                           </pre>
+<p><code>Get-ChildItem</code> tem três: <code>dir</code> (do <code>cmd</code>), <code>ls</code> (do Linux) e <code>gci</code> (a sigla de Get-ChildItem). Os três fazem exatamente a mesma coisa.</p>
+
+<hr>
+
+<h2>3. Quantos apelidos existem? E como confirmar um</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; (Get-Alias).Count
+140</pre>
+<p>Neste computador, no PowerShell 7.7, são <strong>140</strong> apelidos. O número pode mudar conforme os módulos instalados.</p>
+<p>O <code>Get-Command</code>, da aula anterior, também denuncia o apelido: o tipo vem como <code>Alias</code> e a seta mostra o destino.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Command ls
+
+CommandType     Name                                               Version    Source
+-----------     ----                                               -------    ------
+Alias           ls -&gt; Get-ChildItem                                           </pre>
+
+<hr>
+
+<h2>4. Um apelido só desta janela: <code>Set-Alias</code></h2>
+<p>Você pode inventar um apelido com <code>Set-Alias</code> ("definir apelido"). Ele vale <strong>só nesta sessão</strong>: quando a janela fecha, some. Não grava no Windows.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Set-Alias -Name hoje -Value Get-Date</pre>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; hoje
+
+sexta-feira, 20 de novembro de 2026 17:12:59</pre>
+<dl class="anatomy">
+  <dt>Set-Alias</dt><dd>O comando que cria (ou troca) um apelido.</dd>
+  <dt>-Name hoje</dt><dd>O nome curto que você vai digitar.</dd>
+  <dt>-Value Get-Date</dt><dd>O comando de verdade por trás do apelido.</dd>
+  <dt>hoje</dt><dd>Na linha seguinte, o apelido já funciona: a data aparece com a mesma linha em branco de antes e depois que o <code>Get-Date</code> costuma ter.</dd>
+</dl>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Alias hoje
+
+CommandType     Name                                               Version    Source
+-----------     ----                                               -------    ------
+Alias           hoje -&gt; Get-Date                                              </pre>
+<p>O <code>Get-Alias hoje</code> confirma: <code>hoje -&gt; Get-Date</code>.</p>
+<div class="note">Em script, prefira <code>Get-Date</code> direto. Apelido é atalho de quem está digitando no terminal, não de quem vai ler o código daqui a seis meses.</div>
+
+<div class="tryps" data-goal="out:Olá, Ana!;;src:\becho\b;;semerro">
+<p class="try-task"><strong>Missão:</strong> troque <code>Write-Output</code> pelo apelido <code>echo</code>, sem mudar o texto.</p>
+<pre class="script" data-file="main.ps1">Write-Output "Olá, Ana!"
+</pre>
+<pre class="solucao" data-file="main.ps1">echo "Olá, Ana!"
+</pre>
+</div>
+
+<hr>
+
+<h2>Formas diferentes de chamar o mesmo comando</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>Get-ChildItem</code></td><td>Nos scripts e neste guia: o nome completo, sempre.</td></tr>
+<tr><td><code>ls</code> ou <code>dir</code></td><td>No terminal, se você já está acostumado com Linux ou com o <code>cmd</code>.</td></tr>
+<tr><td><code>gci</code></td><td>Atalho curto, também só no terminal.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>As opções do Linux não vêm junto com o apelido</strong>
+<p>No Linux, <code>ls -la</code> lista tudo, inclusive os arquivos escondidos, num formato longo. No PowerShell, <code>ls</code> é só um apelido do <code>Get-ChildItem</code>, e o <code>-la</code> não existe:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; ls -la
+Get-ChildItem: Não foi possível encontrar um parâmetro correspondente ao nome de parâmetro 'la'.</pre>
+<p>Linha por linha:</p>
+<dl class="anatomy">
+  <dt>Get-ChildItem:</dt><dd>Quem reclamou foi o comando de verdade, não o <code>ls</code>. Isso confirma que o apelido só trocou o nome.</dd>
+  <dt>Não foi possível encontrar um parâmetro… 'la'</dt><dd>O PowerShell leu <code>-la</code> como um parâmetro chamado <code>la</code>, e o <code>Get-ChildItem</code> não tem esse parâmetro.</dd>
+</dl>
+<p><strong>Como resolver:</strong> use os parâmetros do próprio <code>Get-ChildItem</code>. Para ver arquivos escondidos, é <code>Get-ChildItem -Force</code> (aula <a href="get-childitem.html">Listando</a>), não <code>ls -la</code>.</p>
+</div>
+
+<div class="cenario">
+<strong><code>curl</code> e <code>wget</code> não são apelidos no PowerShell 7</strong>
+<p>No PowerShell 7, se você pede esses dois apelidos, a mensagem vem em <strong>inglês</strong> (é assim que esse erro saiu neste laboratório):</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Alias curl, wget
+Get-Alias: This command cannot find a matching alias because an alias with the name 'curl' does not exist.
+Get-Alias: This command cannot find a matching alias because an alias with the name 'wget' does not exist.</pre>
+<p>O PowerShell 7 não cria mais esses apelidos de propósito: no 7, <code>curl</code> pode ser o programa de verdade, e um apelido só atrapalharia. A mensagem diz, duas vezes, que não existe apelido com esse nome.</p>
+<div class="note"><strong>No Windows PowerShell 5.1</strong> a história é outra: <code>curl</code> e <code>wget</code> <strong>existem</strong> e os dois apontam para o <code>Invoke-WebRequest</code>, que não é o <code>curl</code> de verdade. Quem vinha do Linux se assustava. Neste computador o 5.1 tinha 158 apelidos, contra 140 no 7.7.
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; Get-Alias curl, wget -ErrorAction SilentlyContinue
+
+CommandType     Name                                               Version    Source                                    
+-----------     ----                                               -------    ------                                    
+Alias           curl -&gt; Invoke-WebRequest                                                                               
+Alias           wget -&gt; Invoke-WebRequest                                                                               </pre>
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; (Get-Alias).Count
+158</pre>
+</div>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Get-Alias ls</code></td><td>Mostra para qual comando o apelido <code>ls</code> aponta.</td></tr>
+<tr><td><code>Get-Alias -Definition Get-ChildItem</code></td><td>Lista todos os apelidos daquele comando.</td></tr>
+<tr><td><code>(Get-Alias).Count</code></td><td>Conta quantos apelidos existem nesta sessão.</td></tr>
+<tr><td><code>Get-Command ls</code></td><td>Confirma que <code>ls</code> é um apelido e mostra o destino.</td></tr>
+<tr><td><code>Set-Alias -Name hoje -Value Get-Date</code></td><td>Cria um apelido só desta janela.</td></tr>
+<tr><td><code>ls</code>, <code>dir</code>, <code>cd</code>, <code>pwd</code>, <code>echo</code>, <code>cls</code></td><td>Atalhos do dia a dia (evite em scripts).</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Para que aponta?</h3>
+<p>O apelido <code>ls</code> aponta para qual comando?</p>
+<div class="ex-code"><input data-answer="Get-ChildItem" aria-label="comando"></div>
+</div>
+
+<div class="exercise">
+<h3>2. Complete o comando</h3>
+<p>Complete para listar todos os apelidos do <code>Get-ChildItem</code>:</p>
+<div class="ex-code">Get-Alias -<input data-answer="Definition" aria-label="parâmetro"> Get-ChildItem</div>
+</div>
+
+<div class="exercise">
+<h3>3. Qual é o destino?</h3>
+<p>O apelido <code>cd</code> aponta para:</p>
+<div class="ex-code"><input data-answer="Set-Location" aria-label="comando"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Por que este guia usa <code>Get-ChildItem</code> nos scripts, e não <code>ls</code>?</p>
+<label><input type="radio" name="q4"> Porque <code>ls</code> não funciona no PowerShell</label>
+<label><input type="radio" name="q4"> Porque o nome completo fica mais claro e não depende do apelido existir</label>
+<label><input type="radio" name="q4"> Porque <code>ls</code> apaga arquivos</label>
+<label><input type="radio" name="q4"> Porque o <code>Get-ChildItem</code> é mais rápido</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Você digitou <code>ls -la</code> e apareceu um erro sobre o parâmetro <code>la</code>. O que aconteceu?</p>
+<label><input type="radio" name="q5"> O PowerShell não tem o comando <code>ls</code></label>
+<label><input type="radio" name="q5"> O apelido <code>ls</code> quebrou e precisa ser reinstalado</label>
+<label><input type="radio" name="q5"> O <code>ls</code> é o <code>Get-ChildItem</code>, que não tem o parâmetro <code>-la</code> do Linux</label>
+<label><input type="radio" name="q5"> Faltou abrir o terminal como administrador</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. No PowerShell 7, o que o <code>Get-Alias curl, wget</code> responde?</p>
+<label><input type="radio" name="q6"> Que esses apelidos não existem (no 5.1, eles apontam para <code>Invoke-WebRequest</code>)</label>
+<label><input type="radio" name="q6"> Que os dois apontam para <code>Get-Date</code></label>
+<label><input type="radio" name="q6"> Que você precisa instalar o Linux</label>
+<label><input type="radio" name="q6"> A data e a hora de agora</label>
+</div>
+
+<div class="tryps" data-goal="out:Get-Location;;src:Get-Alias;;semerro">
+<p class="try-task"><strong>Missão final:</strong> use <code>Get-Alias</code> para descobrir para qual comando aponta o apelido <code>pwd</code>.</p>
+<pre class="script" data-file="main.ps1">Get-Alias echo
+</pre>
+<pre class="solucao" data-file="main.ps1">Get-Alias pwd
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Apelido (<em>alias</em>) é um nome curto que aponta para um cmdlet. <code>ls</code> e <code>dir</code> são o <code>Get-ChildItem</code>; <code>cd</code> é o <code>Set-Location</code>.</li>
+  <li><code>Get-Alias ls</code> mostra o destino; <code>Get-Alias -Definition Get-ChildItem</code> lista todos os apelidos daquele comando.</li>
+  <li>Nos scripts, use o nome completo. Apelido é atalho do terminal.</li>
+  <li><code>ls -la</code> não funciona: o apelido não traz as opções do Linux. Use os parâmetros do cmdlet.</li>
+  <li><code>Set-Alias</code> cria um apelido só desta janela; quando ela fecha, some.</li>
+  <li>No PowerShell 7, <code>curl</code> e <code>wget</code> não são apelidos. No 5.1, os dois apontam para <code>Invoke-WebRequest</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
