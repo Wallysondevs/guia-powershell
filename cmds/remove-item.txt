@@ -1,0 +1,31 @@
+# remove-item — comandos para colher no Windows (só leitura/demonstração)
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
+# shell: pwsh
+## preparar pasta de teste
+$T = Join-Path $HOME 'guia-ps-teste'
+New-Item -ItemType Directory -Path $T -Force | Out-Null
+Set-Location $T
+# shell: pwsh
+New-Item -ItemType Directory vazia, cheia | Out-Null
+'x' | Set-Content cheia\a.txt
+'oi' | Set-Content nota.txt
+1..3 | ForEach-Object { New-Item "log$_.tmp" | Out-Null }
+## apagar (tudo dentro da pasta de teste)
+Remove-Item nota.txt -WhatIf
+Remove-Item nota.txt
+Get-ChildItem -Name
+Remove-Item *.tmp
+Remove-Item vazia
+## pasta com coisa dentro (pede confirmação: responder N)
+Remove-Item cheia   #ERRO  (pede confirmação; em lote não interativo vira erro — colher interativo ou marcar ilustrativo)
+Remove-Item cheia -Recurse -Confirm:$false
+Get-ChildItem -Name
+## erros
+Remove-Item naoexiste.txt   #ERRO
+## não vai para a Lixeira
+Test-Path nota.txt
+## limpar (sempre no fim)
+Set-Location $HOME
+Remove-Item -Recurse -Force (Join-Path $HOME 'guia-ps-teste')
+Test-Path (Join-Path $HOME 'guia-ps-teste')

@@ -1,0 +1,13 @@
+# cmdlets — comandos para colher no Windows (só leitura/demonstração)
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
+# shell: pwsh
+## verbo-substantivo
+Get-Verb | Select-Object -First 10
+(Get-Verb).Count
+Get-Verb -Verb Get, Set, New, Remove | Format-Table Verb, Group, Description
+Get-Command -Verb Get | Measure-Object
+Get-Command -Noun Item | Format-Table Name, CommandType
+Get-Command Get-Process | Format-List Name, CommandType, Source, Version
+## cmdlet que não existe
+Pegar-Data   #ERRO

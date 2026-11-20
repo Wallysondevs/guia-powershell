@@ -1,0 +1,27 @@
+# new-item — comandos para colher no Windows (só leitura/demonstração)
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
+# shell: pwsh
+## preparar pasta de teste
+$T = Join-Path $HOME 'guia-ps-teste'
+New-Item -ItemType Directory -Path $T -Force | Out-Null
+Set-Location $T
+# shell: pwsh
+## criar
+New-Item nota.txt
+New-Item -ItemType Directory fotos
+New-Item -Path relatorio.txt -Value "Primeira linha"
+Get-Content relatorio.txt
+New-Item -ItemType Directory a\b\c
+New-Item -ItemType File um.txt, dois.txt
+mkdir docs
+Get-Command mkdir | Select-Object Name, CommandType
+## já existe
+New-Item nota.txt   #ERRO
+New-Item nota.txt -Force
+## WhatIf
+New-Item teste.txt -WhatIf
+## limpar (sempre no fim)
+Set-Location $HOME
+Remove-Item -Recurse -Force (Join-Path $HOME 'guia-ps-teste')
+Test-Path (Join-Path $HOME 'guia-ps-teste')

@@ -1,0 +1,11 @@
+# instalar — comandos para colher no Windows (só leitura/demonstração)
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
+# shell: pwsh
+## só consulta — NÃO instalar nada
+winget --version
+winget search --id Microsoft.PowerShell --exact --accept-source-agreements
+winget list --id Microsoft.PowerShell --accept-source-agreements
+## onde o 7 ficou instalado
+(Get-Command pwsh).Source
+Get-Item (Get-Command pwsh).Source | Select-Object Name, Length, LastWriteTime

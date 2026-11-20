@@ -1,0 +1,29 @@
+# caminhos — comandos para colher no Windows (só leitura/demonstração)
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
+# shell: pwsh
+## preparar pasta de teste
+$T = Join-Path $HOME 'guia-ps-teste'
+New-Item -ItemType Directory -Path $T -Force | Out-Null
+Set-Location $T
+# shell: pwsh
+New-Item -ItemType Directory docs | Out-Null
+'x' | Set-Content docs\a.txt
+## absoluto x relativo
+Resolve-Path docs\a.txt
+Resolve-Path .\docs\..\docs\a.txt
+Get-Item docs/a.txt | Select-Object FullName
+## montar caminhos
+Join-Path $HOME 'docs' 'a.txt'
+Split-Path "$T\docs\a.txt" -Leaf
+Split-Path "$T\docs\a.txt" -Parent
+Split-Path "$T\docs\a.txt" -Extension
+[System.IO.Path]::DirectorySeparatorChar
+$HOME
+$env:USERPROFILE
+## erro
+Resolve-Path docs\b.txt   #ERRO
+## limpar (sempre no fim)
+Set-Location $HOME
+Remove-Item -Recurse -Force (Join-Path $HOME 'guia-ps-teste')
+Test-Path (Join-Path $HOME 'guia-ps-teste')

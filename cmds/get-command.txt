@@ -1,0 +1,13 @@
+# get-command — comandos para colher no Windows (só leitura/demonstração)
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
+# shell: pwsh
+## achando comandos
+Get-Command *-Date
+Get-Command -Noun Service
+Get-Command -Verb Remove | Select-Object -First 8
+Get-Command ping, notepad
+Get-Command ls, dir, cd
+Get-Command -CommandType Cmdlet | Measure-Object
+Get-Command -Module Microsoft.PowerShell.Management | Measure-Object
+Get-Command NaoExiste   #ERRO

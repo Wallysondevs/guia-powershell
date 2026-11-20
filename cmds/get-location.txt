@@ -1,0 +1,20 @@
+# get-location — comandos para colher no Windows (só leitura/demonstração)
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
+# shell: pwsh
+## preparar pasta de teste
+$T = Join-Path $HOME 'guia-ps-teste'
+New-Item -ItemType Directory -Path $T -Force | Out-Null
+Set-Location $T
+# shell: pwsh
+## onde estou
+Get-Location
+pwd
+$PWD
+$PWD.Path
+(Get-Location).Drive
+Get-Location | Format-List *
+## limpar (sempre no fim)
+Set-Location $HOME
+Remove-Item -Recurse -Force (Join-Path $HOME 'guia-ps-teste')
+Test-Path (Join-Path $HOME 'guia-ps-teste')

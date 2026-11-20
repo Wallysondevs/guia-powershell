@@ -1,0 +1,27 @@
+# parametros-cmdlet — comandos para colher no Windows (só leitura/demonstração)
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
+# shell: pwsh
+## preparar pasta de teste
+$T = Join-Path $HOME 'guia-ps-teste'
+New-Item -ItemType Directory -Path $T -Force | Out-Null
+Set-Location $T
+# shell: pwsh
+## parâmetros nomeados, posicionais e switches
+New-Item a.txt, b.log, c.txt -ItemType File | Out-Null
+Get-ChildItem -Path . -Filter *.txt
+Get-ChildItem . *.txt
+Get-ChildItem -Name
+Get-ChildItem -Pa . -Fi *.txt
+## valores com espaço
+Get-ChildItem -Path "C:\Program Files" -Name | Select-Object -First 3
+## erros comuns
+Get-ChildItem -Filtro *.txt   #ERRO
+Get-ChildItem -P .   #ERRO
+Get-Date -Year abc   #ERRO
+## ver os parâmetros
+(Get-Command Get-ChildItem).Parameters.Keys | Select-Object -First 15
+## limpar (sempre no fim)
+Set-Location $HOME
+Remove-Item -Recurse -Force (Join-Path $HOME 'guia-ps-teste')
+Test-Path (Join-Path $HOME 'guia-ps-teste')

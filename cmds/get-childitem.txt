@@ -1,0 +1,37 @@
+# get-childitem — comandos para colher no Windows (só leitura/demonstração)
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
+# shell: pwsh
+## preparar pasta de teste
+$T = Join-Path $HOME 'guia-ps-teste'
+New-Item -ItemType Directory -Path $T -Force | Out-Null
+Set-Location $T
+# shell: pwsh
+## montar pasta de exemplo (NUNCA listar ~ com -Force: vaza NTUSER.DAT)
+New-Item -ItemType Directory fotos, docs | Out-Null
+'oi' | Set-Content nota.txt
+'a,b' | Set-Content dados.csv
+'x' | Set-Content docs\relatorio.txt
+'y' | Set-Content fotos\praia.jpg
+New-Item -ItemType File .escondido | Out-Null
+(Get-Item .escondido -Force).Attributes += 'Hidden'
+## listar
+Get-ChildItem
+Get-ChildItem -Name
+Get-ChildItem -Force
+Get-ChildItem -File
+Get-ChildItem -Directory
+Get-ChildItem -Filter *.txt
+Get-ChildItem -Recurse
+Get-ChildItem -Recurse -Filter *.txt -Name
+Get-ChildItem -Include *.txt, *.csv -Recurse
+Get-ChildItem | Sort-Object Length -Descending
+Get-ChildItem | Select-Object Name, Length, LastWriteTime
+## o que é a coluna Mode
+Get-ChildItem -Force | Format-Table Mode, Name
+## erro
+Get-ChildItem naoexiste   #ERRO
+## limpar (sempre no fim)
+Set-Location $HOME
+Remove-Item -Recurse -Force (Join-Path $HOME 'guia-ps-teste')
+Test-Path (Join-Path $HOME 'guia-ps-teste')

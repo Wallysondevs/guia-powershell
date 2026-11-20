@@ -1,0 +1,14 @@
+# primeiro-comando — comandos para colher no Windows (só leitura/demonstração)
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
+# shell: pwsh
+## primeiros comandos
+Get-Date
+Get-Date -Format "dd/MM/yyyy"
+Write-Output "Olá, mundo!"
+2 + 3
+## erro de digitação
+Get-Dat   #ERRO
+## código de saída / sucesso
+$?
+Get-Dat 2>$null; $?   #ERRO
