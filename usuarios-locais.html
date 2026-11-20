@@ -128,6 +128,7 @@ LastLogon        :
 
 <div class="tryps" data-goal="src:Get-LocalUser;;src:-Name;;src:guia-teste;;semerro">
 <p class="try-task"><strong>Experimente:</strong> o editor do guia não tem contas do Windows, então <strong>não rode</strong> o cmdlet. Escreva, numa string, o comando que consulta <strong>somente</strong> o usuário <code>guia-teste</code> pelo nome, e deixe o <code>Write-Output</code> mostrar a string.</p>
+<p class="note"><strong>Atenção:</strong> rodar este script no seu PowerShell só imprime um texto: ele não cria, não altera e não apaga conta nenhuma. <strong>Não copie o texto da string para executar.</strong> Para praticar de verdade, use o roteiro completo da aula (cria, usa, apaga e confere, com <code>finally</code>), num PowerShell de administrador.</p>
 <pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
 $comando = ''
 Write-Output $comando
@@ -310,6 +311,7 @@ Get-LocalUser: Usuário guia-teste não encontrado. « ilustrativo
 
 <div class="tryps" data-goal="src:Add-LocalGroupMember;;src:-Group;;src:Usuários;;src:-Member;;src:guia-teste;;semerro">
 <p class="try-task"><strong>Missão final:</strong> ainda numa string, escreva o comando que coloca <code>guia-teste</code> <strong>somente</strong> no grupo <code>Usuários</code>. Não chame o cmdlet: o editor não deve criar nem alterar conta nenhuma.</p>
+<p class="note"><strong>Atenção:</strong> rodar este script no seu PowerShell só imprime um texto: ele não cria, não altera e não apaga conta nenhuma. <strong>Não copie o texto da string para executar.</strong> Para praticar de verdade, use o roteiro completo da aula (cria, usa, apaga e confere, com <code>finally</code>), num PowerShell de administrador.</p>
 <pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
 $comando = ''
 Write-Output $comando
