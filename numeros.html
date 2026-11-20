@@ -129,6 +129,18 @@ No linha:1 caractere:1
 </pre>
 O resto desta aula funciona igual nos dois.</div>
 <hr>
+<h2>Formas diferentes de arredondar</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>[math]::Round($x, 2)</code></td><td>Arredonda com casas decimais. O mais comum.</td></tr>
+<tr><td><code>[int]$x</code></td><td>Vira inteiro, arredondando (empate vai para o par).</td></tr>
+<tr><td><code>[math]::Ceiling($x)</code></td><td>Sempre para cima (aula <a href="operadores-aritmeticos.html">Operadores Aritméticos</a>).</td></tr>
+<tr><td><code>[math]::Floor($x)</code></td><td>Sempre para baixo.</td></tr>
+<tr><td><code>"{0:N2}" -f $x</code></td><td>Não muda o número: só o <strong>mostra</strong> com 2 casas (aula <a href="operador-formato.html">Formatando Textos</a>).</td></tr>
+</table>
+</div>
+<hr>
 <h2>Quando dá errado</h2>
 <div class="cenario">
 <strong>Dividiu por zero</strong>
@@ -143,6 +155,21 @@ RuntimeException: Attempted to divide by zero.
 <p>No código, <code>2,5</code> não é "dois e meio": a vírgula cria uma <strong>lista</strong> com 2 e 5. Use <code>2.5</code>.</p>
 </div>
 <hr>
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>+ - * /</code></td><td>Soma, subtração, multiplicação, divisão.</td></tr>
+<tr><td><code>%</code></td><td>Resto da divisão.</td></tr>
+<tr><td><code>( )</code></td><td>Muda a ordem das contas.</td></tr>
+<tr><td><code>2.5</code></td><td>Decimal (com ponto, no código).</td></tr>
+<tr><td><code>1KB</code>, <code>1MB</code>, <code>1GB</code></td><td>Tamanhos em bytes.</td></tr>
+<tr><td><code>0xFF</code>, <code>0b1010</code></td><td>Hexadecimal; binário (só no 7).</td></tr>
+<tr><td><code>[math]::Round(x, 2)</code></td><td>Arredonda com 2 casas.</td></tr>
+<tr><td><code>[math]::Sqrt(x)</code>, <code>[math]::Pow(x, y)</code></td><td>Raiz quadrada; potência.</td></tr>
+</table>
+</div>
+<hr>
 <h2>Exercícios</h2>
 <div class="exercise">
 <h3>1. O resto</h3>
@@ -154,19 +181,25 @@ RuntimeException: Attempted to divide by zero.
 <p>Complete para calcular 3 elevado a 4:</p>
 <div class="ex-code">[math]::<input data-answer="Pow" aria-label="resposta">(3, 4)</div>
 </div>
+<div class="exercise">
+<h3>3. Megabytes</h3>
+<p>Complete para escrever 5 megabytes:</p>
+<div class="ex-code">5<input data-answer="MB" aria-label="unidade"></div>
+</div>
+
 <div class="mc" data-answer="2">
-<p class="mc-q">3. Quanto dá <code>2 + 3 * 4</code>?</p>
-<label><input type="radio" name="q3"> 20</label>
-<label><input type="radio" name="q3"> 14</label>
-<label><input type="radio" name="q3"> 24</label>
-<label><input type="radio" name="q3"> 9</label>
+<p class="mc-q">4. Quanto dá <code>2 + 3 * 4</code>?</p>
+<label><input type="radio" name="q4"> 20</label>
+<label><input type="radio" name="q4"> 14</label>
+<label><input type="radio" name="q4"> 24</label>
+<label><input type="radio" name="q4"> 9</label>
 </div>
 <div class="mc" data-answer="2">
-<p class="mc-q">4. Como se escreve dois e meio no código?</p>
-<label><input type="radio" name="q4"> <code>2,5</code></label>
-<label><input type="radio" name="q4"> <code>2.5</code></label>
-<label><input type="radio" name="q4"> <code>"2,5"</code></label>
-<label><input type="radio" name="q4"> <code>2_5</code></label>
+<p class="mc-q">5. Como se escreve dois e meio no código?</p>
+<label><input type="radio" name="q5"> <code>2,5</code></label>
+<label><input type="radio" name="q5"> <code>2.5</code></label>
+<label><input type="radio" name="q5"> <code>"2,5"</code></label>
+<label><input type="radio" name="q5"> <code>2_5</code></label>
 </div>
 <div class="tryps" data-goal="outre:3[,.]33;;src:Round;;semerro">
 <p class="try-task"><strong>Missão final:</strong> mostre a média de <code>$soma</code> por <code>$alunas</code>, arredondada com 2 casas, usando <code>[math]::Round</code>.</p>
