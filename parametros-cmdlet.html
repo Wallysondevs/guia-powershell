@@ -203,6 +203,20 @@ Get-Date: Não é possível associar o parâmetro 'Year'. Cannot convert value "
 
 <hr>
 
+<h2>Formas diferentes de passar um parâmetro</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>Get-ChildItem -Path . -Filter *.txt</code></td><td>O jeito deste guia nos scripts: cada valor com o nome do parâmetro.</td></tr>
+<tr><td><code>Get-ChildItem . *.txt</code></td><td>A mesma listagem, pelos posicionais (caminho, depois filtro). Curto no terminal.</td></tr>
+<tr><td><code>Get-ChildItem -Pa . -Fi *.txt</code></td><td>Os nomes abreviados, desde que não fiquem ambíguos.</td></tr>
+<tr><td><code>Get-ChildItem -Name</code></td><td>Um switch: o parâmetro está ligado, sem valor do lado.</td></tr>
+<tr><td><code>Get-ChildItem -Path ".\pasta com espaço"</code></td><td>Valor com espaço vai entre aspas, de preferência com o parâmetro nomeado.</td></tr>
+</table>
+</div>
+
+<hr>
+
 <h2>Referência rápida</h2>
 <div class="table-wrap">
 <table class="ref">
