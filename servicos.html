@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Serviços — Get-Service Spooler, Status, StartType e dependências | Guia PowerShell</title>
+<meta name="description" content="Serviços no PowerShell: consultar o Spooler pelo nome com Get-Service, ler Status e StartType, ver as dependências e o erro real em português de um nome que não existe, colhidos no PowerShell 7.7. Sem listar todos os serviços e sem iniciar nem parar nada.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Serviços</span> (Get-Service)</h1>
+
+<p class="intro">Alguns programas do Windows não são uma janela que você abre e fecha. Eles ficam nos bastidores, ligados ou desligados, e o sistema chama isso de <strong>serviço</strong>. O spooler de impressão, por exemplo, é o que segura a fila de páginas que vão para a impressora. Nesta aula você vai <strong>consultar</strong> um serviço pelo nome. Não vamos ligar, desligar nem reiniciar nada: esses comandos mudam o computador e, se forem usados no serviço errado, podem parar uma função que o Windows precisa.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é um serviço e como consultá-lo <strong>pelo nome</strong> com <code>Get-Service</code> <span class="versao">só Windows</span>.</li>
+  <li>A ler a tabelinha padrão: <code>Status</code>, <code>Name</code> e <code>DisplayName</code>.</li>
+  <li>A pedir também o <code>StartType</code> com <code>Select-Object</code>.</li>
+  <li>A ver de quais outros serviços o Spooler depende, com <code>-RequiredServices</code>.</li>
+  <li>Que o resultado é um objeto, com propriedades que o <code>Get-Member</code> lista.</li>
+  <li>O erro real em português de um nome de serviço que não existe.</li>
+</ul>
+</div>
+
+<p>Todas as saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta pessoal da usuária fictícia <code>ana</code>. O editor do guia é um PowerShell 7 de Linux: não conte com o serviço <code>Spooler</code> lá. As missões pedem que você <strong>escreva</strong> o comando certo, sem tentá-lo no editor.</p>
+
+<div class="warning">
+<strong>Nunca use <code>Get-Service</code> sem um nome nos exemplos desta aula.</strong> Sem <code>-Name</code>, o comando lista <strong>todos</strong> os serviços do computador — uma lista longa, que inclui o que está instalado aí. Sempre consulte pelo nome, como <code>Get-Service -Name Spooler</code>. Ligar, parar ou reiniciar um serviço (<code>Start-Service</code>, <code>Stop-Service</code>, <code>Restart-Service</code>) muda o sistema e em geral pede administrador: nesta aula eles aparecem só como explicação, sem saída colhida. Se um dia precisar realmente usá-los, ensaie antes com <code>-WhatIf</code>.
+</div>
+
+<hr>
+
+<h2>A ideia: a equipe dos bastidores</h2>
+<p>Pense num prédio. Além das pessoas que você vê, existe uma equipe nos bastidores: o elevador, a calefação, a gráfica que imprime os avisos. Você pode perguntar "a gráfica está funcionando?" e receber um sim ou um não. Você não pede a lista de todos os funcionários do prédio, e nesta aula você também não manda ninguém ir embora nem começar o expediente.</p>
+<p>No Windows, cada um desses "funcionários invisíveis" é um <strong>serviço</strong>. O da gráfica, nesta aula, se chama <code>Spooler</code> — o Spooler de Impressão.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>No prédio</th><th>No PowerShell</th></tr>
+<tr><td>"A gráfica está funcionando?"</td><td><code>Get-Service -Name Spooler</code></td></tr>
+<tr><td>O apelido interno e o nome na placa</td><td><code>Name</code> e <code>DisplayName</code></td></tr>
+<tr><td>Se está no expediente agora</td><td><code>Status</code> (<code>Running</code>, <code>Stopped</code>…)</td></tr>
+<tr><td>Se começa automaticamente de manhã</td><td><code>StartType</code> (<code>Automatic</code>, <code>Manual</code>…)</td></tr>
+<tr><td>De quem a gráfica depende para trabalhar</td><td><code>-RequiredServices</code></td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>1. Consultar pelo nome: o Spooler</h2>
+<p>O <code>Get-Service -Name</code> devolve <strong>um</strong> serviço. No laboratório, o da impressão:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Service -Name Spooler
+
+Status   Name               DisplayName
+------   ----               -----------
+Running  Spooler            Spooler de Impressão
+
+</pre>
+<dl class="anatomy">
+  <dt>Get-Service</dt><dd>"Obter serviço." <span class="versao">só Windows</span> Consulta o estado de um serviço. Com <code>-Name</code>, só aquele.</dd>
+  <dt>Status Running</dt><dd>Está em execução agora. Outros valores comuns são <code>Stopped</code> (parado) e <code>Paused</code> (pausado). No seu computador, o Spooler pode estar parado — a consulta continua válida.</dd>
+  <dt>Name Spooler</dt><dd>O nome curto, o que você usa no comando.</dd>
+  <dt>DisplayName Spooler de Impressão</dt><dd>O nome em português que o Windows mostra nas telas. É o mesmo serviço, com um nome mais legível.</dd>
+</dl>
+
+<div class="tryps" data-goal="src:Get-Service;;src:-Name;;src:Spooler;;semerro">
+<p class="try-task"><strong>Experimente:</strong> o editor do guia não tem o Spooler do Windows, então <strong>não rode</strong> o cmdlet. Escreva, numa string, o comando que consulta o serviço <code>Spooler</code> pelo nome, e deixe o <code>Write-Output</code> mostrar a string.</p>
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'Get-Service -Name Spooler'
+Write-Output $comando
+</pre>
+</div>
+
+<hr>
+
+<h2>2. Mais um campo: <code>StartType</code></h2>
+<p>A tabelinha padrão não mostra como o serviço nasce com o Windows. Para ver isso, peça o campo <code>StartType</code> com <code>Select-Object</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Service -Name Spooler | Select-Object Name, DisplayName, Status, StartType
+
+Name    DisplayName           Status StartType
+----    -----------           ------ ---------
+Spooler Spooler de Impressão Running Automatic
+
+</pre>
+<dl class="anatomy">
+  <dt>StartType Automatic</dt><dd>O serviço começa sozinho quando o Windows inicia. Outros valores comuns são <code>Manual</code> (só quando alguém pede) e <code>Disabled</code> (não deve iniciar).</dd>
+</dl>
+<p>A linha de dados veio com um espaço entre cada coluna, não alinhada como o cabeçalho: é a saída real do laboratório, copiada assim.</p>
+
+<hr>
+
+<h2>3. De quem o Spooler depende</h2>
+<p>Alguns serviços só funcionam se outros já estiverem no ar — como a gráfica, que precisa da energia e do corredor. O parâmetro <code>-RequiredServices</code> lista essas dependências do <code>Spooler</code>, ainda pelo nome:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Service -Name Spooler -RequiredServices
+
+Status   Name               DisplayName
+------   ----               -----------
+Running  RPCSS              RPC (Chamada de Procedimento Remoto)
+Running  http               Serviço HTTP
+
+</pre>
+<p>No laboratório, o Spooler precisava de dois serviços, os dois em execução: <code>RPCSS</code> (chamada de procedimento remoto) e <code>http</code> (o serviço HTTP). São nomes padrão do Windows, não uma lista de tudo o que está instalado. Se um deles estiver parado, o Spooler pode não iniciar — mais um motivo para, nesta aula, só consultar.</p>
+
+<hr>
+
+<h2>4. O serviço é um objeto</h2>
+<p>O <code>Get-Service</code> não devolve um texto solto: devolve um <strong>objeto</strong>, com propriedades. O <code>Get-Member</code> lista essas propriedades. Pedimos só as oito primeiras, do tipo <code>Property</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Service -Name Spooler | Get-Member -MemberType Property | Select-Object -First 8
+
+   TypeName: System.Service.ServiceController#StartupType
+
+Name                MemberType Definition
+----                ---------- ----------
+CanPauseAndContinue Property   bool CanPauseAndContinue {get;}
+CanShutdown         Property   bool CanShutdown {get;}
+CanStop             Property   bool CanStop {get;}
+Container           Property   System.ComponentModel.IContainer Container {get;}
+DependentServices   Property   System.ServiceProcess.ServiceController[] DependentServices {get;}
+DisplayName         Property   string DisplayName {get;set;}
+MachineName         Property   string MachineName {get;set;}
+ServiceHandle       Property   System.Runtime.InteropServices.SafeHandle ServiceHandle {get;}
+
+</pre>
+<p>A lista continua depois dessas oito: <code>Status</code> e <code>StartType</code>, que já usamos, também são propriedades do mesmo objeto. Três avisos práticos:</p>
+<ul>
+  <li><code>CanStop</code> diz se aquele serviço aceita ser parado — é uma consulta, não um pedido para parar.</li>
+  <li><code>DependentServices</code> são os serviços que <strong>dependem deste</strong> (o inverso de <code>-RequiredServices</code>). Não peça o valor sem necessidade: a lista pode ser grande.</li>
+  <li><code>MachineName</code> é o nome do computador. Não leia esse valor na prática do guia: fique com a ficha das propriedades, sem exibir o nome da máquina.</li>
+</ul>
+
+<hr>
+
+<h2>5. Ligar, parar e reiniciar: só a ideia</h2>
+<p>Existem cmdlets que mudam o estado de um serviço:</p>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Cmdlet</th><th>O que faria</th></tr>
+<tr><td><code>Start-Service</code></td><td>Ligar (iniciar) o serviço.</td></tr>
+<tr><td><code>Stop-Service</code></td><td>Parar o serviço.</td></tr>
+<tr><td><code>Restart-Service</code></td><td>Parar e ligar de novo.</td></tr>
+</table>
+</div>
+<div class="warning">
+<strong>Esta aula não roda esses três comandos, nem mostra saída deles.</strong> Parar o Spooler, por exemplo, interrompe a impressão. Parar o serviço errado pode derrubar rede, áudio ou atualização. Em geral eles pedem administrador. Se um dia você realmente precisar usá-los, comece com <code>-WhatIf</code>: o parâmetro conta o que o comando faria e <strong>não faz</strong>. É o mesmo hábito seguro da aula de <a href="new-item.html">criar arquivos</a> e da aula do <a href="registro.html">Registro</a>. Não invente o texto do ensaio: rode o <code>-WhatIf</code> no seu Windows, só no serviço que você realmente pretende tratar, e leia a frase "What If" antes de tirar o parâmetro.
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>O nome do serviço não existe</strong>
+<p>Pedimos um nome que não é serviço nenhum neste Windows:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Service -Name 'NaoExisteGuia'
+Get-Service: Não é possível localizar nenhum serviço com o nome de serviço 'NaoExisteGuia'.
+</pre>
+<dl class="anatomy">
+  <dt>Get-Service:</dt><dd>Qual comando reclamou.</dd>
+  <dt>Não é possível localizar nenhum serviço com o nome de serviço 'NaoExisteGuia'.</dt><dd>A mensagem veio em <strong>português</strong>. Não existe serviço com esse nome. Nada foi ligado nem parado.</dd>
+</dl>
+<p><strong>Como resolver:</strong> confira a grafia. O nome curto do spooler é <code>Spooler</code>, não "Spooler de Impressão" (esse é o <code>DisplayName</code>). Não saia listando todos os serviços para "descobrir" o nome: se você não tem certeza, use a interface do Windows (Serviços) ou peça um nome que você já conheça.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Get-Service -Name Spooler</code></td><td>Consulta só esse serviço: status, nome e nome de exibição.</td></tr>
+<tr><td><code>Get-Service -Name Spooler | Select-Object Name, DisplayName, Status, StartType</code></td><td>Inclui também como o serviço inicia com o Windows.</td></tr>
+<tr><td><code>Get-Service -Name Spooler -RequiredServices</code></td><td>Lista os serviços de que o Spooler depende.</td></tr>
+<tr><td><code>Get-Service -Name Spooler | Get-Member -MemberType Property</code></td><td>Lista as propriedades do objeto (sem ligar nem parar nada).</td></tr>
+<tr><td><code>Start-Service</code> / <code>Stop-Service</code> / <code>Restart-Service</code></td><td>Mudam o sistema. Fora dos exemplos desta aula; se for usar, comece com <code>-WhatIf</code>.</td></tr>
+</table>
+</div>
+<p>Não aparece <code>Get-Service</code> sozinho na tabela de propósito: sem <code>-Name</code>, ele lista todos os serviços.</p>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete para consultar <strong>somente</strong> o Spooler, pelo nome:</p>
+<div class="ex-code">Get-Service -<input data-answer="Name" aria-label="parâmetro"> Spooler</div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual é o nome de exibição?</h3>
+<p>No laboratório, qual foi o <code>DisplayName</code> do serviço <code>Spooler</code>?</p>
+<div class="ex-code">DisplayName: <input data-answer="Spooler de Impressão" aria-label="nome de exibição"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Complete o parâmetro</h3>
+<p>Complete para ver de quais serviços o Spooler depende:</p>
+<div class="ex-code">Get-Service -Name Spooler -<input data-answer="RequiredServices" aria-label="parâmetro"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Por que esta aula nunca usa <code>Get-Service</code> sem <code>-Name</code>?</p>
+<label><input type="radio" name="q4"> Porque o comando não existe sem parâmetro</label>
+<label><input type="radio" name="q4"> Porque, sem o nome, ele lista todos os serviços do computador</label>
+<label><input type="radio" name="q4"> Porque isso para o Spooler</label>
+<label><input type="radio" name="q4"> Porque o Windows recusa o comando</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">5. No laboratório, o <code>Status</code> do Spooler veio <code>Running</code> e o <code>StartType</code> veio <code>Automatic</code>. O que isso quer dizer?</p>
+<label><input type="radio" name="q5"> O serviço estava em execução e começa sozinho com o Windows</label>
+<label><input type="radio" name="q5"> O serviço estava parado e só inicia na mão</label>
+<label><input type="radio" name="q5"> O serviço foi recém-instalado</label>
+<label><input type="radio" name="q5"> O serviço não existe neste Windows</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">6. Você precisa parar um serviço no seu computador. Qual é o hábito seguro <strong>antes</strong> de rodar o <code>Stop-Service</code> de verdade?</p>
+<label><input type="radio" name="q6"> Rodar <code>Get-Service</code> sem nome, para ver a lista inteira</label>
+<label><input type="radio" name="q6"> Rodar <code>Restart-Service</code> primeiro, para testar</label>
+<label><input type="radio" name="q6"> Ensaiar com <code>-WhatIf</code>, que conta o que faria e não para o serviço</label>
+<label><input type="radio" name="q6"> Desligar o computador e ligar de novo</label>
+</div>
+
+<div class="tryps" data-goal="src:Get-Service;;src:Spooler;;src:Select-Object;;src:StartType;;semerro">
+<p class="try-task"><strong>Missão final:</strong> ainda numa string, escreva o comando que consulta o <code>Spooler</code> e seleciona <code>Name</code>, <code>DisplayName</code>, <code>Status</code> e <code>StartType</code>. Não chame o cmdlet: o editor não deve consultar serviços do Windows.</p>
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'Get-Service -Name Spooler | Select-Object Name, DisplayName, Status, StartType'
+Write-Output $comando
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Um serviço é um programa dos bastidores do Windows. <code>Get-Service -Name Spooler</code> consulta só esse, <span class="versao">só Windows</span>.</li>
+  <li>Sem <code>-Name</code>, o <code>Get-Service</code> lista todos os serviços. Esta aula nunca faz isso.</li>
+  <li>A tabelinha padrão traz <code>Status</code>, <code>Name</code> e <code>DisplayName</code>. Com <code>Select-Object</code> você pede também o <code>StartType</code>.</li>
+  <li><code>-RequiredServices</code> mostra de quem o Spooler depende. O resultado do <code>Get-Service</code> é um objeto: o <code>Get-Member</code> lista as propriedades.</li>
+  <li><code>Start-Service</code>, <code>Stop-Service</code> e <code>Restart-Service</code> mudam o sistema e ficam fora dos exemplos. Se um dia for usar, comece com <code>-WhatIf</code>.</li>
+  <li>O erro de um nome inexistente saiu em português: <code>Não é possível localizar nenhum serviço com o nome de serviço 'NaoExisteGuia'.</code></li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
