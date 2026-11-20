@@ -1,12 +1,11 @@
 # provedores — comandos para colher no Windows (só leitura/demonstração)
-# ATENÇÃO 20/11: no Windows só existe o 5.1 (sem pwsh). Blocos que comparam com o 7 ficam ilustrativos ou vêm de outra fonte.
 # Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
 # Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
-# shell: powershell
+# shell: pwsh
 ## drives e provedores (só leitura)
 Get-PSProvider
 Get-PSDrive | Format-Table Name, Provider, Root -AutoSize   # anonimizar tamanhos/rede se aparecer
-Get-ChildItem Env: | Select-Object -First 5
+Get-Item Env:OS, Env:USERNAME, Env:windir   # NUNCA listar Env: aberto
 $env:OS
 Get-Item Env:COMPUTERNAME   # vira NOTEBOOK
 Get-ChildItem HKCU:\ -Name

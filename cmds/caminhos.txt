@@ -1,14 +1,13 @@
 # caminhos — comandos para colher no Windows (só leitura/demonstração)
-# ATENÇÃO 20/11: no Windows só existe o 5.1 (sem pwsh). Blocos que comparam com o 7 ficam ilustrativos ou vêm de outra fonte.
 # Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
 # Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
-# shell: powershell
+# shell: pwsh
 ## preparar pasta de teste
 $T = Join-Path $HOME 'guia-ps-teste'
 if (Test-Path $T) { throw 'guia-ps-teste já existe: abortar a coleta' }   # [guarda]
 New-Item -ItemType Directory -Path $T -ErrorAction Stop | Out-Null
 Set-Location $T
-# shell: powershell
+# shell: pwsh
 $T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 New-Item -ItemType Directory docs | Out-Null
 'x' | Set-Content docs\a.txt
@@ -19,11 +18,11 @@ Resolve-Path .\docs\..\docs\a.txt
 Get-Item docs/a.txt | Select-Object FullName
 ## montar caminhos
 $T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
-Join-Path $HOME 'docs' 'a.txt'   #ERRO no 5.1 (3 partes só no 7)
+Join-Path $HOME 'docs' 'a.txt'
 Join-Path (Join-Path $HOME 'docs') 'a.txt'
 Split-Path "$T\docs\a.txt" -Leaf
 Split-Path "$T\docs\a.txt" -Parent
-Split-Path "$T\docs\a.txt" -Extension   #ERRO no 5.1 (parâmetro só no 7)
+Split-Path "$T\docs\a.txt" -Extension
 [System.IO.Path]::DirectorySeparatorChar
 $HOME
 $env:USERPROFILE

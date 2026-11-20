@@ -1,14 +1,13 @@
 # get-location — comandos para colher no Windows (só leitura/demonstração)
-# ATENÇÃO 20/11: no Windows só existe o 5.1 (sem pwsh). Blocos que comparam com o 7 ficam ilustrativos ou vêm de outra fonte.
 # Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
 # Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
-# shell: powershell
+# shell: pwsh
 ## preparar pasta de teste
 $T = Join-Path $HOME 'guia-ps-teste'
 if (Test-Path $T) { throw 'guia-ps-teste já existe: abortar a coleta' }   # [guarda]
 New-Item -ItemType Directory -Path $T -ErrorAction Stop | Out-Null
 Set-Location $T
-# shell: powershell
+# shell: pwsh
 $T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
 ## onde estou
 $T = Join-Path $HOME 'guia-ps-teste'; Set-Location $T -ErrorAction Stop; if ((Get-Location).Path -ne $T) { throw 'fora da pasta de teste' }   # [guarda] não entra na aula
