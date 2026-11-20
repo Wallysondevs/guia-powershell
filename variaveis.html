@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Variáveis — guardar valores com $ | Guia PowerShell</title>
+<meta name="description" content="Variáveis no PowerShell para quem nunca programou: criar com $ e =, trocar o valor, usar no texto, Get-Variable, Remove-Variable e os erros reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">Variáveis</span> ($)</h1>
+
+<p class="intro">A Ana anota o nome de cada aluna, a nota da prova, o preço de cada produto da lojinha. Num script, essas informações ficam guardadas em <strong>variáveis</strong>: caixinhas com nome, que você enche uma vez e usa quantas vezes quiser.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A criar uma variável com <code>$</code> e <code>=</code>.</li>
+  <li>A trocar o valor e usar a variável em textos e contas.</li>
+  <li>A ver e apagar variáveis com <code>Get-Variable</code> e <code>Remove-Variable</code>.</li>
+  <li>A reconhecer os erros reais de quem esquece o <code>$</code>.</li>
+</ul>
+</div>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português.</p>
+<hr>
+<h2>A ideia: uma caixa com etiqueta</h2>
+<p>Imagine uma caixa de papelão com uma etiqueta escrita "nome". Dentro, você guarda um papel com "Ana". Quando precisar do nome, não precisa lembrar o que estava escrito: basta pedir "a caixa nome". A <strong>variável</strong> é essa caixa. A etiqueta é o nome da variável, e no PowerShell ela sempre começa com <code>$</code> (cifrão).</p>
+<hr>
+<h2>1. Criar e ver</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $nome = "Ana"
+PS C:\Users\ana&gt; $nome
+Ana
+PS C:\Users\ana&gt; $idade = 30
+PS C:\Users\ana&gt; $idade
+30
+</pre>
+<dl class="anatomy">
+  <dt>$nome</dt><dd>O nome da variável. O <code>$</code> avisa: "isto é uma caixa, não um comando".</dd>
+  <dt>=</dt><dd>"Guarde dentro". Aqui o <code>=</code> não compara: ele <strong>coloca</strong> o valor da direita na caixa da esquerda.</dd>
+  <dt>"Ana"</dt><dd>O valor guardado. Texto vai entre aspas; número (<code>30</code>) vai sem aspas.</dd>
+</dl>
+<p>Digitar só <code>$nome</code> mostra o que está guardado. Criar a variável não mostra nada: o PowerShell só guarda e volta ao prompt.</p>
+<div class="tip"><strong>Nomes:</strong> use nomes em português e sem acento, que dizem o que guardam: <code>$preco</code>, <code>$totalGeral</code>, <code>$nomeAluna</code>. Acentos funcionam, mas não são o costume. Maiúsculas não importam: <code>$Nome</code> e <code>$nome</code> são a mesma caixa.</div>
+<h2>2. Trocar o valor</h2>
+<p>Guardar de novo na mesma caixa joga fora o valor antigo:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $nome = "Beto"
+PS C:\Users\ana&gt; $nome
+Beto
+</pre>
+<h2>3. Usar no texto e em conta</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; "$nome tem $idade anos"
+Beto tem 30 anos
+PS C:\Users\ana&gt; $idade + 1
+31
+</pre>
+<p>Dentro de aspas duplas, o PowerShell troca cada variável pelo valor dela (detalhes na aula <a href="interpolacao.html">Variáveis Dentro do Texto</a>). E a variável entra em contas como se fosse o próprio número. Repare que <code>$idade + 1</code> mostra 31, mas <strong>não muda</strong> a caixa: <code>$idade</code> continua 30.</p>
+<div class="tryps" data-goal="out:Olá, Ana!;;semerro">
+<p class="try-task"><strong>Experimente:</strong> guarde <code>"Ana"</code> na variável <code>$nome</code> (troque o texto "mundo") e rode.</p>
+<pre class="script" data-file="main.ps1">$nome = "mundo"
+"Olá, $nome!"
+</pre>
+<pre class="solucao" data-file="main.ps1">$nome = "Ana"
+"Olá, $nome!"
+</pre>
+</div>
+<h2>4. Nome entre chaves e Get-Variable</h2>
+<p>O nome pode ir entre chaves: <code>${cidade}</code> é o mesmo que <code>$cidade</code>. Isso vai ser útil quando o nome estiver colado em outro texto. E o cmdlet <code>Get-Variable</code> ("obter variável") mostra várias de uma vez:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; ${cidade} = "Recife"
+PS C:\Users\ana&gt; ${cidade}
+Recife
+PS C:\Users\ana&gt; Get-Variable nome, idade, cidade | Format-Table Name, Value -AutoSize
+
+Name   Value
+----   -----
+nome   Beto
+idade  30
+cidade Recife
+</pre>
+<h2>5. Apagar</h2>
+<p><code>Remove-Variable</code> ("remover variável") joga a caixa fora. O nome vai <strong>sem</strong> o <code>$</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Remove-Variable idade
+PS C:\Users\ana&gt; Get-Variable idade
+Get-Variable: Cannot find a variable with the name 'idade'.
+</pre>
+<p>"Não encontrei uma variável com o nome 'idade'." Ela foi apagada mesmo.</p>
+<hr>
+<h2>Quando dá errado</h2>
+<div class="cenario">
+<strong>Esqueceu o cifrão</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; nome = "Ana"
+nome: O termo "nome" não é reconhecido como um nome de um cmdlet, função, arquivo de script ou programa executável.
+Verifique a ortografia do nome ou, se um caminho foi incluído, verifique se o caminho está correto e tente novamente.
+</pre>
+<dl class="anatomy">
+  <dt>nome:</dt><dd>A palavra que causou o problema.</dd>
+  <dt>não é reconhecido como … cmdlet, função…</dt><dd>Sem o <code>$</code>, o PowerShell achou que <code>nome</code> era um <strong>comando</strong> e foi procurar um comando com esse nome. Não achou.</dd>
+</dl>
+<p><strong>Como resolver:</strong> <code>$nome = "Ana"</code>.</p>
+</div>
+<div class="cenario">
+<strong>Usou uma variável que nunca existiu</strong>
+<p>Normalmente, uma variável que não existe vale <code>$null</code> (nada) e o PowerShell não reclama: um erro de digitação no nome passa em silêncio. Com o modo estrito ligado (<code>Set-StrictMode</code>), ele avisa:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Set-StrictMode -Version 1; try { $nuncaDefinida } finally { Set-StrictMode -Off }
+InvalidOperation: The variable '$nuncaDefinida' cannot be retrieved because it has not been set.
+</pre>
+<p>"A variável <code>$nuncaDefinida</code> não pode ser lida porque nunca recebeu valor." O <code>try … finally</code> só desliga o modo estrito de novo no fim.</p>
+<p><strong>Como resolver:</strong> confira o nome. Em scripts maiores, <code>Set-StrictMode -Version Latest</code> no começo ajuda a pegar esses enganos.</p>
+</div>
+<hr>
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>$x = valor</code></td><td>Cria a variável (ou troca o valor).</td></tr>
+<tr><td><code>$x</code></td><td>Mostra o valor.</td></tr>
+<tr><td><code>${x}</code></td><td>O mesmo, com o nome entre chaves.</td></tr>
+<tr><td><code>Get-Variable x</code></td><td>Mostra a variável (nome sem <code>$</code>).</td></tr>
+<tr><td><code>Remove-Variable x</code></td><td>Apaga a variável (nome sem <code>$</code>).</td></tr>
+</table>
+</div>
+<hr>
+<h2>Exercícios</h2>
+<div class="exercise">
+<h3>1. Crie a variável</h3>
+<p>Guarde 25 na variável <code>preco</code>:</p>
+<div class="ex-code"><input data-answer="$preco" aria-label="resposta"> = 25</div>
+</div>
+<div class="exercise">
+<h3>2. Apague</h3>
+<p>Complete para apagar a variável <code>$preco</code>:</p>
+<div class="ex-code"><input data-answer="Remove-Variable" aria-label="resposta"> preco</div>
+</div>
+<div class="exercise">
+<h3>3. O sinal</h3>
+<p>Qual sinal guarda um valor na variável?</p>
+<div class="ex-code">$total <input data-answer="=" aria-label="resposta"> 100</div>
+</div>
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Depois de <code>$n = 5</code> e <code>$n = 8</code>, quanto vale <code>$n</code>?</p>
+<label><input type="radio" name="q4"> 5</label>
+<label><input type="radio" name="q4"> 8</label>
+<label><input type="radio" name="q4"> 13</label>
+<label><input type="radio" name="q4"> Dá erro</label>
+</div>
+<div class="mc" data-answer="2">
+<p class="mc-q">5. O que acontece com <code>nome = "Ana"</code> (sem <code>$</code>)?</p>
+<label><input type="radio" name="q5"> Cria a variável normalmente</label>
+<label><input type="radio" name="q5"> Erro: <code>nome</code> não é reconhecido como cmdlet</label>
+<label><input type="radio" name="q5"> Mostra Ana</label>
+<label><input type="radio" name="q5"> Nada</label>
+</div>
+<div class="tryps" data-goal="out:Total: 30;;src:\$total;;semerro">
+<p class="try-task"><strong>Missão final:</strong> crie <code>$total</code> com a soma de <code>$a</code> e <code>$b</code>, e mostre <code>Total: 30</code>.</p>
+<pre class="script" data-file="main.ps1">$a = 10
+$b = 20
+</pre>
+<pre class="solucao" data-file="main.ps1">$a = 10
+$b = 20
+$total = $a + $b
+"Total: $total"
+</pre>
+</div>
+<hr>
+<h2>Resumo</h2>
+<ul>
+  <li>Variável é uma caixa com nome; o nome começa com <code>$</code>.</li>
+  <li><code>=</code> guarda; guardar de novo troca o valor.</li>
+  <li>Dentro de aspas duplas, a variável vira o valor.</li>
+  <li><code>Get-Variable</code> e <code>Remove-Variable</code> usam o nome sem <code>$</code>.</li>
+  <li>Sem o <code>$</code>, o PowerShell procura um comando e dá erro.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
