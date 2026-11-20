@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell switch — escolhendo entre vários casos | Guia PowerShell</title>
+<meta name="description" content="O switch do PowerShell: vários casos, default, break, maiúsculas, -Wildcard, -Regex e lista na entrada, com saídas reais do 7.7 e os erros de sintaxe em inglês.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">switch</span></h1>
+
+<p class="intro">Com <a href="if.html">if</a> e <a href="elseif-else.html">elseif e else</a>, a Ana já consegue decidir entre caminhos. Quando as opções se acumulam — sábado ou domingo, <code>.jpg</code> ou <code>.txt</code>, um, dois ou três — a cadeia de <code>elseif</code> fica longa. O <code>switch</code> (“chaveiro”, “seletor”) lista os casos num bloco só. Nesta aula você vai montar esse chaveiro e ver um detalhe importante: no PowerShell, <strong>todos</strong> os casos que combinam podem rodar, a menos que você peça para parar.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A forma básica do <code>switch</code>, com <code>default</code> para o que não combinou.</li>
+  <li>Que, sem <code>break</code>, todos os casos que combinam rodam — e como o <code>break</code> para no primeiro.</li>
+  <li>Que o <code>switch</code> não diferencia maiúsculas por padrão, e o <code>-CaseSensitive</code> que diferencia.</li>
+  <li>Os parâmetros <code>-Wildcard</code> (curinga, como <code>*.jpg</code>) e <code>-Regex</code> (expressão regular).</li>
+  <li>A passar uma lista na entrada: o <code>switch</code> olha item por item.</li>
+  <li>Os erros de sintaxe reais: bloco de ação faltando e parênteses faltando.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta pessoal da usuária fictícia <code>ana</code>.</p>
+
+<hr>
+
+<h2>A ideia: as gavetas do correio</h2>
+<p>Imagine o escaninho dos Correios. Cada carta é olhada e vai para a gaveta certa: “sábado”, “domingo”, ou a gaveta “outros” (o <code>default</code>). A diferença para uma bifurcação de estrada (<code>if</code> / <code>elseif</code>) é esta: no <code>switch</code> do PowerShell, uma carta pode combinar com <strong>mais de uma gaveta</strong>, e as duas recebem o recado, a menos que você diga “pode parar” com <code>break</code>.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>No correio</th><th>No PowerShell</th></tr>
+<tr><td>A carta da vez</td><td>O valor entre parênteses: <code>switch ($dia)</code></td></tr>
+<tr><td>A etiqueta de uma gaveta</td><td>Um <strong>caso</strong>: <code>"sab" { ... }</code></td></tr>
+<tr><td>O que fazer nessa gaveta</td><td>O bloco entre chaves</td></tr>
+<tr><td>A gaveta “outros”</td><td><code>default { ... }</code></td></tr>
+<tr><td>“Pode parar, já achou”</td><td><code>break</code> (aula <a href="break-continue.html">break e continue</a>)</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>1. O básico: casos e <code>default</code></h2>
+<p>A Ana quer saber se o dia é fim de semana. No terminal, um bloco que ainda não fechou a chave <code>{</code> ganha linhas de continuação com <code>&gt;&gt;</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $dia = "sab"
+PS C:\Users\ana&gt; switch ($dia) {
+&gt;&gt;     "sab" { "Fim de semana" }
+&gt;&gt;     "dom" { "Fim de semana" }
+&gt;&gt;     default { "Dia útil" }
+&gt;&gt; }
+Fim de semana
+</pre>
+<dl class="anatomy">
+  <dt>$dia = "sab"</dt><dd>A variável com o valor da vez. Aqui, sábado abreviado.</dd>
+  <dt>switch ($dia)</dt><dd>O seletor. O valor a comparar vai <strong>entre parênteses</strong>.</dd>
+  <dt>"sab" { "Fim de semana" }</dt><dd>Se o valor for <code>sab</code>, mostra <code>Fim de semana</code>. Cada caso é um valor (ou um teste) seguido de um bloco <code>{ }</code>.</dd>
+  <dt>"dom" { "Fim de semana" }</dt><dd>O mesmo texto para domingo. Dois casos podem fazer a mesma coisa.</dd>
+  <dt>default { "Dia útil" }</dt><dd>A gaveta “outros”: só roda se <strong>nenhum</strong> caso combinou. Como “sab” combinou, este bloco não rodou.</dd>
+  <dt>&gt;&gt;</dt><dd>A continuação do console: o PowerShell espera o <code>}</code> que fecha o <code>switch</code>. Não faça parte do comando; some quando o bloco está num arquivo.</dd>
+</dl>
+
+<div class="tryps" data-goal="out:Dia útil;;src:\bswitch\b;;semerro">
+<p class="try-task"><strong>Experimente:</strong> troque o valor de <code>$dia</code> para um dia útil (por exemplo <code>seg</code>) e confira se o <code>default</code> mostra <code>Dia útil</code>.</p>
+<pre class="script" data-file="main.ps1">$dia = "sab"
+switch ($dia) {
+    "sab" { "Fim de semana" }
+    "dom" { "Fim de semana" }
+    default { "Dia útil" }
+}
+</pre>
+<pre class="solucao" data-file="main.ps1">$dia = "seg"
+switch ($dia) {
+    "sab" { "Fim de semana" }
+    "dom" { "Fim de semana" }
+    default { "Dia útil" }
+}
+</pre>
+</div>
+
+<hr>
+
+<h2>2. Sem <code>break</code>, todos os que combinam rodam</h2>
+<p>Aqui está a diferença mais importante para quem vem de outras linguagens. O valor é <code>5</code>. Há um caso literal <code>5</code> e um teste <code>{ $_ -gt 3 }</code> (“o item da vez é maior que 3”). Os dois combinam, e os dois rodam. O <code>default</code> não roda, porque alguém já combinou.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; switch (5) { 5 { "cinco" } { $_ -gt 3 } { "maior que 3" } default { "outro" } }
+cinco
+maior que 3
+PS C:\Users\ana&gt; switch (5) { 5 { "cinco"; break } { $_ -gt 3 } { "maior que 3" } }
+cinco
+</pre>
+<dl class="anatomy">
+  <dt>switch (5)</dt><dd>O valor da vez é o número 5. Também pode ser uma variável, como <code>$dia</code>.</dd>
+  <dt>5 { "cinco" }</dt><dd>Caso literal: combina porque o valor é 5.</dd>
+  <dt>{ $_ -gt 3 }</dt><dd>Caso em forma de <strong>teste</strong>: um bloco entre chaves no lugar do valor. O <code>$_</code> é o item da vez (aula <a href="variaveis-automaticas.html">Variáveis Automáticas</a>). Se o teste for verdadeiro, o bloco seguinte roda.</dd>
+  <dt>{ "cinco"; break }</dt><dd>Depois de mostrar <code>cinco</code>, o <code>break</code> (“pare”) encerra o <code>switch</code>. O teste <code>$_ -gt 3</code> nem é olhado, e <code>maior que 3</code> não aparece.</dd>
+</dl>
+<div class="warning">Se você esperava “só o primeiro caso”, coloque <code>break</code> no fim do bloco. Sem ele, o PowerShell continua testando os próximos.</div>
+
+<hr>
+
+<h2>3. Maiúsculas: o padrão e o <code>-CaseSensitive</code></h2>
+<p>Por padrão, o <code>switch</code> <strong>não diferencia</strong> maiúsculas de minúsculas: <code>"SAB"</code> combina com <code>"sab"</code>. Para diferenciar, use o parâmetro <code>-CaseSensitive</code> (“sensível a maiúsculas”).</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; switch ("SAB") { "sab" { "casou sem diferenciar" } }
+casou sem diferenciar
+PS C:\Users\ana&gt; switch -CaseSensitive ("SAB") { "sab" { "casou" } default { "não casou" } }
+não casou
+</pre>
+<p>No segundo comando, <code>"SAB"</code> e <code>"sab"</code> já não são a mesma coisa, então o <code>default</code> mostrou <code>não casou</code>.</p>
+
+<hr>
+
+<h2>4. Curinga e expressão regular: <code>-Wildcard</code> e <code>-Regex</code></h2>
+<p>Com <code>-Wildcard</code>, cada caso é um padrão com curingas, no estilo do <code>-like</code> (aula <a href="operadores-texto.html">Comparando Textos</a>): <code>*</code> é “qualquer sequência”. Assim a Ana classifica um arquivo pelo final do nome.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; switch -Wildcard ("foto.jpg") { "*.jpg" { "imagem" } "*.txt" { "texto" } }
+imagem
+</pre>
+<p>Com <code>-Regex</code>, cada caso é uma expressão regular. No pedido <code>pedido-2026-123</code>, o padrão <code>^\w+-(\d{4})</code> pega as quatro letras do ano, e <code>$Matches[1]</code> devolve o que ficou entre parênteses:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; switch -Regex ("pedido-2026-123") { '^\w+-(\d{4})' { "ano: $($Matches[1])" } }
+ano: 2026
+</pre>
+<dl class="anatomy">
+  <dt>-Regex</dt><dd>Pede para tratar cada caso como expressão regular, não como texto exato.</dd>
+  <dt>'^\w+-(\d{4})'</dt><dd>O padrão, em aspas simples (para a barra invertida não ser interpretada antes). <code>^</code> é o começo, <code>\w+</code> é uma palavra, <code>-</code> é o hífen, e <code>(\d{4})</code> captura quatro dígitos — o ano.</dd>
+  <dt>$($Matches[1])</dt><dd>O primeiro grupo capturado. Aqui, <code>2026</code>. A variável automática <code>$Matches</code> é preenchida quando o padrão combina.</dd>
+</dl>
+
+<div class="tryps" data-goal="out:imagem;;src:-Wildcard;;semerro">
+<p class="try-task"><strong>Missão:</strong> o <code>switch</code> abaixo compara o nome com o texto literal <code>*.jpg</code>, então não combina. Acrescente <code>-Wildcard</code> para <code>foto.jpg</code> ser classificado como <code>imagem</code>.</p>
+<pre class="script" data-file="main.ps1">switch ("foto.jpg") { "*.jpg" { "imagem" } "*.txt" { "texto" } }
+</pre>
+<pre class="solucao" data-file="main.ps1">switch -Wildcard ("foto.jpg") { "*.jpg" { "imagem" } "*.txt" { "texto" } }
+</pre>
+</div>
+
+<hr>
+
+<h2>5. Uma lista na entrada</h2>
+<p>Se você passa vários valores, o <code>switch</code> percorre <strong>cada um</strong>, como um <code>foreach</code> embutido. O <code>$_</code> é o item da vez. O 1 e o 2 têm caso próprio; o 3 cai no <code>default</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; switch (1, 2, 3) { 1 { "um" } 2 { "dois" } default { "outro: $_" } }
+um
+dois
+outro: 3
+</pre>
+
+<hr>
+
+<h2>Formas diferentes de decidir</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>if</code> / <code>elseif</code> / <code>else</code></td><td>Poucos caminhos, ou condições bem diferentes umas das outras. Roda <strong>um bloco só</strong>.</td></tr>
+<tr><td><code>switch ($valor) { ... }</code></td><td>Vários casos sobre o mesmo valor. Lembre do <code>break</code> se quiser parar no primeiro que combinar.</td></tr>
+<tr><td><code>switch -Wildcard</code></td><td>Padrões de nome de arquivo, como <code>*.jpg</code>.</td></tr>
+<tr><td><code>switch -Regex</code></td><td>Quando você precisa extrair um pedaço (um ano, um código) com um padrão.</td></tr>
+<tr><td><code>switch (1, 2, 3) { ... }</code></td><td>A mesma tabela de casos, aplicada a cada item de uma lista.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+<p>Os dois erros abaixo são <code>ParserError</code>: erros de leitura do código. O PowerShell recusa a linha antes de rodar qualquer coisa, mostra a linha (<code>Line | 1</code>) e aponta o problema com um tracinho <code>~</code>. Esses erros saem em inglês no PowerShell 7.7, mesmo num Windows em português.</p>
+
+<div class="cenario">
+<strong>Faltou o bloco de ação</strong>
+<p>O caso <code>"sab"</code> veio seguido de um texto, e não de um <code>{ ... }</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; switch ($dia) { "sab" "Fim de semana" }
+ParserError:
+Line |
+   1 |  switch ($dia) { "sab" "Fim de semana" }
+     |                       ~
+     | Missing statement block in switch statement clause.
+</pre>
+<dl class="anatomy">
+  <dt>ParserError</dt><dd>Erro de leitura do código: o PowerShell recusou a linha antes de rodar qualquer coisa.</dd>
+  <dt>Line | 1</dt><dd>A linha com o problema, repetida ao lado.</dd>
+  <dt>~</dt><dd>O tracinho aponta logo depois de <code>"sab"</code>, onde o PowerShell esperava o bloco <code>{ }</code>.</dd>
+  <dt>Missing statement block in switch statement clause</dt><dd>Quer dizer que falta um bloco de comandos na cláusula do <code>switch</code>. Cada caso precisa de um bloco entre chaves: <code>"sab" { "Fim de semana" }</code>, não <code>"sab" "Fim de semana"</code>.</dd>
+</dl>
+<p><strong>Como resolver:</strong> coloque a ação entre <code>{ }</code>.</p>
+</div>
+
+<div class="cenario">
+<strong>Faltaram os parênteses do valor</strong>
+<p>O valor foi escrito sem <code>( )</code>, como <code>switch $dia { ... }</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; switch $dia { "sab" { "x" } }
+ParserError:
+Line |
+   1 |  switch $dia { "sab" { "x" } }
+     |        ~
+     | A switch statement must have one of the following:  '-file file_name' or '( expression )'.
+</pre>
+<dl class="anatomy">
+  <dt>~</dt><dd>O tracinho aponta logo depois da palavra <code>switch</code>, onde deveriam começar os parênteses.</dd>
+  <dt>A switch statement must have one of the following:  '-file file_name' or '( expression )'</dt><dd>Quer dizer que um <code>switch</code> precisa de uma destas formas: <code>-file</code> e o nome de um arquivo, ou <code>( expressão )</code>. O valor a comparar vai entre parênteses: <code>switch ($dia) { ... }</code>.</dd>
+</dl>
+<p><strong>Como resolver:</strong> escreva <code>switch ($dia)</code>, com parênteses. (O <code>-file</code> lê os casos de um arquivo; não foi coletado nesta aula.)</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>switch ($dia) { "sab" { ... } default { ... } }</code></td><td>Compara <code>$dia</code> com cada caso; o <code>default</code> pega o que não combinou.</td></tr>
+<tr><td><code>break</code> dentro de um caso</td><td>Para o <code>switch</code> naquele caso, e não testa os seguintes.</td></tr>
+<tr><td><code>switch -CaseSensitive ("SAB") { "sab" { ... } }</code></td><td>Diferencia maiúsculas. Sem o parâmetro, <code>"SAB"</code> combina com <code>"sab"</code>.</td></tr>
+<tr><td><code>switch -Wildcard ("foto.jpg") { "*.jpg" { ... } }</code></td><td>Compara com curingas.</td></tr>
+<tr><td><code>switch -Regex ("pedido-2026-123") { '^\w+-(\d{4})' { ... } }</code></td><td>Compara com expressão regular; o grupo capturado fica em <code>$Matches[1]</code>.</td></tr>
+<tr><td><code>switch (1, 2, 3) { ... }</code></td><td>Aplica os mesmos casos a cada item da lista.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete a palavra que começa o seletor:</p>
+<div class="ex-code"><input data-answer="switch" aria-label="palavra"> ($dia) { "sab" { "Fim de semana" } }</div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual é a saída?</h3>
+<p>O que o laboratório mostrou com <code>switch ("SAB") { "sab" { "casou sem diferenciar" } }</code>?</p>
+<div class="ex-code"><input data-answer="casou sem diferenciar" aria-label="saída"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Complete o parâmetro</h3>
+<p>Complete para classificar <code>foto.jpg</code> com o curinga <code>*.jpg</code>:</p>
+<div class="ex-code">switch <input data-answer="-Wildcard" aria-label="parâmetro"> ("foto.jpg") { "*.jpg" { "imagem" } }</div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. No <code>switch (5) { 5 { "cinco" } { $_ -gt 3 } { "maior que 3" } }</code>, sem <code>break</code>, o que aparece?</p>
+<label><input type="radio" name="q4"> Só <code>cinco</code></label>
+<label><input type="radio" name="q4"> <code>cinco</code> e <code>maior que 3</code>, porque os dois casos combinam e o <code>switch</code> não para sozinho</label>
+<label><input type="radio" name="q4"> Só <code>maior que 3</code></label>
+<label><input type="radio" name="q4"> Um erro de sintaxe</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Por padrão, <code>switch ("SAB") { "sab" { "ok" } }</code> combina?</p>
+<label><input type="radio" name="q5"> Não, porque o PowerShell sempre diferencia maiúsculas</label>
+<label><input type="radio" name="q5"> Não, falta o <code>-Wildcard</code></label>
+<label><input type="radio" name="q5"> Sim: o <code>switch</code> não diferencia maiúsculas, a menos que você use <code>-CaseSensitive</code></label>
+<label><input type="radio" name="q5"> Só combina se <code>$dia</code> existir</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. A mensagem <code>Missing statement block in switch statement clause</code> quer dizer o quê?</p>
+<label><input type="radio" name="q6"> Faltou o bloco <code>{ }</code> depois do caso: a ação precisa ir entre chaves</label>
+<label><input type="radio" name="q6"> O valor <code>$dia</code> está vazio</label>
+<label><input type="radio" name="q6"> O <code>switch</code> não existe no PowerShell 7</label>
+<label><input type="radio" name="q6"> É preciso usar <code>-Regex</code></label>
+</div>
+
+<div class="tryps" data-goal="out:Fim de semana;;out:Dia útil;;src:\bswitch\b;;src:\bdefault\b;;semerro">
+<p class="try-task"><strong>Missão final:</strong> percorra <code>sab</code> e <code>seg</code> com um <code>switch</code> que mostre <code>Fim de semana</code> para sábado e domingo, e <code>Dia útil</code> no <code>default</code>.</p>
+<pre class="script" data-file="main.ps1">foreach ($dia in "sab", "seg") {
+    # complete com switch
+}
+</pre>
+<pre class="solucao" data-file="main.ps1">foreach ($dia in "sab", "seg") {
+    switch ($dia) {
+        "sab" { "Fim de semana" }
+        "dom" { "Fim de semana" }
+        default { "Dia útil" }
+    }
+}
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>switch ($valor) { "caso" { ... } default { ... } }</code> compara o valor com cada caso. O valor vai entre parênteses; a ação, entre chaves.</li>
+  <li>Sem <code>break</code>, todos os casos que combinam rodam. Com <code>break</code>, para no primeiro.</li>
+  <li>Por padrão não diferencia maiúsculas. Use <code>-CaseSensitive</code> quando importar a diferença.</li>
+  <li><code>-Wildcard</code> aceita curingas (<code>*.jpg</code>); <code>-Regex</code> aceita expressão regular e preenche <code>$Matches</code>.</li>
+  <li>Uma lista na entrada (<code>switch (1, 2, 3)</code>) aplica os mesmos casos a cada item.</li>
+  <li>Erros de sintaxe no 7.7 saem em inglês: bloco de ação faltando, ou parênteses faltando em volta do valor.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
