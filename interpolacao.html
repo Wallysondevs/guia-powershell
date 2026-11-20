@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Variáveis Dentro do Texto — interpolação | Guia PowerShell</title>
+<meta name="description" content="Interpolação no PowerShell: variáveis dentro de aspas duplas, a armadilha do ponto, a subexpressão $( ) e ${nome}, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">Variáveis Dentro do Texto</span></h1>
+
+<p class="intro">A Ana quer mandar o mesmo recado para cada aluna, só trocando o nome e a nota. Em vez de juntar pedaços, ela escreve o texto uma vez e deixa o PowerShell encaixar as variáveis no lugar certo.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A colocar variáveis no meio de um texto (interpolação).</li>
+  <li>A armadilha do ponto: <code>"$nome.Length"</code> não funciona como parece.</li>
+  <li>A subexpressão <code>$( )</code> para contas e propriedades dentro do texto.</li>
+  <li>A usar <code>${nome}</code> quando a variável está colada em outra palavra.</li>
+</ul>
+</div>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português.</p>
+<hr>
+<h2>A ideia: a carta com lacunas</h2>
+<p>Pense numa carta modelo: "Prezada ____, seu pedido chegou". Você escreve uma vez e preenche a lacuna para cada cliente. <strong>Interpolar</strong> é isso: o PowerShell preenche as lacunas de um texto entre aspas duplas com os valores das variáveis.</p>
+<hr>
+<h2>1. Variável no meio do texto</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $nome = "Ana"
+PS C:\Users\ana&gt; $idade = 30
+PS C:\Users\ana&gt; "Olá, $nome"
+Olá, Ana
+PS C:\Users\ana&gt; "$nome tem $idade anos"
+Ana tem 30 anos
+</pre>
+<p>Só funciona com <strong>aspas duplas</strong> (aula <a href="strings.html">Textos: Aspas Simples × Duplas</a>).</p>
+<h2>2. A armadilha do ponto</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; "O nome $nome.Length parece uma propriedade, mas não é"
+O nome Ana.Length parece uma propriedade, mas não é
+PS C:\Users\ana&gt; "O tamanho de $nome é $($nome.Length)"
+O tamanho de Ana é 3
+</pre>
+<p>Dentro do texto, o PowerShell troca só o <code>$nome</code>. O <code>.Length</code> ("comprimento") ficou como texto comum. Para usar uma propriedade, ponha tudo dentro de <code>$( )</code>.</p>
+<h2>3. A subexpressão $( )</h2>
+<p>O <code>$( )</code> roda o que está dentro e põe o resultado no texto. Serve para contas, propriedades e métodos:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; "2 + 3 = $(2 + 3)"
+2 + 3 = 5
+PS C:\Users\ana&gt; "em maiúsculas: $($nome.ToUpper())"
+em maiúsculas: ANA
+</pre>
+<div class="tryps" data-goal="out:Total: 30;;src:\$\(;;semerro">
+<p class="try-task"><strong>Experimente:</strong> o texto mostra a conta em vez do resultado. Coloque a conta dentro de <code>$( )</code>.</p>
+<pre class="script" data-file="main.ps1">$a = 10
+$b = 20
+"Total: $a + $b"
+</pre>
+<pre class="solucao" data-file="main.ps1">$a = 10
+$b = 20
+"Total: $($a + $b)"
+</pre>
+</div>
+<h2>4. Variável colada em outra palavra</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; "${nome}zinha"
+Anazinha
+PS C:\Users\ana&gt; "$nomezinha"
+</pre>
+<p>Em <code>"$nomezinha"</code>, o PowerShell procurou uma variável chamada <code>$nomezinha</code>, que não existe, e mostrou nada (uma linha vazia). As chaves em <code>${nome}</code> dizem onde o nome termina.</p>
+<h2>5. Aspas simples não interpolam</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 'Olá, $nome — $($nome.Length) letras'
+Olá, $nome — $($nome.Length) letras
+</pre>
+<h2>Qual usar</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando</th></tr>
+<tr><td><code>"Olá, $nome"</code></td><td>Variável sozinha.</td></tr>
+<tr><td><code>"$($nome.Length)"</code></td><td>Propriedade, método ou conta.</td></tr>
+<tr><td><code>"${nome}zinha"</code></td><td>Variável colada em letras.</td></tr>
+<tr><td><code>'$nome'</code></td><td>Quando você quer o texto <code>$nome</code> literal.</td></tr>
+</table>
+</div>
+<hr>
+<h2>Quando dá errado</h2>
+<div class="cenario">
+<strong>Saiu "Ana.Length" em vez do número</strong>
+<p>Veja a seção 2: propriedade dentro do texto precisa de <code>$( )</code>. <strong>Como resolver:</strong> <code>"$($nome.Length)"</code>.</p>
+</div>
+<div class="cenario">
+<strong>A variável sumiu do texto</strong>
+<p>Em <code>"$nomezinha"</code>, o nome da variável "engoliu" as letras seguintes. Não aparece erro, só um vazio. <strong>Como resolver:</strong> <code>"${nome}zinha"</code>.</p>
+</div>
+<div class="cenario">
+<strong>Dois-pontos depois da variável</strong>
+<p>Em <code>"$nota: Excelente"</code>, o <code>:</code> faz o PowerShell ler <code>$nota:</code> como um nome especial, e dá erro de verdade (você vê a mensagem na aula <a href="elseif-else.html">elseif e else</a>). <strong>Como resolver:</strong> <code>"${nota}: Excelente"</code>.</p>
+</div>
+<hr>
+<h2>Exercícios</h2>
+<div class="exercise">
+<h3>1. Subexpressão</h3>
+<p>Complete para mostrar o tamanho do nome dentro do texto:</p>
+<div class="ex-code">"Letras: <input data-answer="$($nome.Length)" aria-label="resposta">"</div>
+</div>
+<div class="exercise">
+<h3>2. Chaves</h3>
+<p>Complete para mostrar <code>Anazinha</code>:</p>
+<div class="ex-code">"<input data-answer="${nome}" aria-label="resposta">zinha"</div>
+</div>
+<div class="mc" data-answer="2">
+<p class="mc-q">3. Com <code>$nome = "Ana"</code>, o que <code>"$nome.Length"</code> mostra?</p>
+<label><input type="radio" name="q3"> 3</label>
+<label><input type="radio" name="q3"> Ana.Length</label>
+<label><input type="radio" name="q3"> $nome.Length</label>
+<label><input type="radio" name="q3"> Erro</label>
+</div>
+<div class="mc" data-answer="2">
+<p class="mc-q">4. O que <code>"2 + 3 = $(2 + 3)"</code> mostra?</p>
+<label><input type="radio" name="q4"> 2 + 3 = 2 + 3</label>
+<label><input type="radio" name="q4"> 2 + 3 = 5</label>
+<label><input type="radio" name="q4"> 5</label>
+<label><input type="radio" name="q4"> 2 + 3 = $(2 + 3)</label>
+</div>
+<div class="tryps" data-goal="out:Ana tem 3 letras;;semerro">
+<p class="try-task"><strong>Missão final:</strong> mostre <code>Ana tem 3 letras</code> usando <code>$nome</code> e a propriedade <code>.Length</code>.</p>
+<pre class="script" data-file="main.ps1">$nome = "Ana"
+"$nome tem $nome.Length letras"
+</pre>
+<pre class="solucao" data-file="main.ps1">$nome = "Ana"
+"$nome tem $($nome.Length) letras"
+</pre>
+</div>
+<hr>
+<h2>Resumo</h2>
+<ul>
+  <li>Entre aspas duplas, <code>$variavel</code> vira o valor.</li>
+  <li>Propriedades, métodos e contas vão dentro de <code>$( )</code>.</li>
+  <li><code>${nome}</code> separa o nome do texto colado.</li>
+  <li>Aspas simples nunca interpolam.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
