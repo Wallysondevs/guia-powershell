@@ -93,6 +93,17 @@ System.String
 </pre>
 <p><code>System.String</code> é o nome "de registro" do tipo texto no .NET, a plataforma em que o PowerShell foi construído.</p>
 <hr>
+<h2>Formas diferentes de descobrir o tipo</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>$x.GetType().Name</code></td><td>Nome curto (<code>Int32</code>). O mais usado.</td></tr>
+<tr><td><code>$x.GetType().FullName</code></td><td>Nome completo (<code>System.Int32</code>).</td></tr>
+<tr><td><code>$x -is [int]</code></td><td>Pergunta direta: é desse tipo? (aula <a href="conversao.html">Conversão de Tipos</a>).</td></tr>
+<tr><td><code>$x | Get-Member</code></td><td>Mostra o tipo e tudo o que o valor sabe fazer.</td></tr>
+</table>
+</div>
+<hr>
 <h2>Quando dá errado</h2>
 <div class="cenario">
 <strong>Escreveu o nome do método errado</strong>
@@ -106,6 +117,21 @@ InvalidOperation: Method invocation failed because [System.Int32] does not conta
 <p><strong>Como resolver:</strong> <code>(30).GetType()</code>. Os parênteses em volta do 30 também são necessários: sem eles, o ponto seria lido como casa decimal.</p>
 </div>
 <hr>
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>.GetType().Name</code></td><td>Nome curto do tipo.</td></tr>
+<tr><td><code>.GetType().FullName</code></td><td>Nome completo do tipo.</td></tr>
+<tr><td><code>"texto"</code></td><td>String.</td></tr>
+<tr><td><code>30</code></td><td>Int32.</td></tr>
+<tr><td><code>3.14</code></td><td>Double (decimal com ponto).</td></tr>
+<tr><td><code>$true</code>, <code>$false</code></td><td>Boolean.</td></tr>
+<tr><td><code>1, 2, 3</code></td><td>Object[] (lista).</td></tr>
+<tr><td><code>@{ chave = valor }</code></td><td>Hashtable.</td></tr>
+</table>
+</div>
+<hr>
 <h2>Exercícios</h2>
 <div class="exercise">
 <h3>1. Descubra o tipo</h3>
@@ -117,19 +143,25 @@ InvalidOperation: Method invocation failed because [System.Int32] does not conta
 <p>Que tipo <code>(7).GetType().Name</code> mostra?</p>
 <div class="ex-code"><input data-answer="Int32" aria-label="resposta"></div>
 </div>
+<div class="exercise">
+<h3>3. Nome completo</h3>
+<p>Complete para ver o nome completo do tipo (<code>System.String</code>):</p>
+<div class="ex-code">"Ana".GetType().<input data-answer="FullName" aria-label="resposta"></div>
+</div>
+
 <div class="mc" data-answer="3">
-<p class="mc-q">3. Qual é o tipo de <code>"30"</code> (com aspas)?</p>
-<label><input type="radio" name="q3"> Int32</label>
-<label><input type="radio" name="q3"> Double</label>
-<label><input type="radio" name="q3"> String</label>
-<label><input type="radio" name="q3"> Boolean</label>
+<p class="mc-q">4. Qual é o tipo de <code>"30"</code> (com aspas)?</p>
+<label><input type="radio" name="q4"> Int32</label>
+<label><input type="radio" name="q4"> Double</label>
+<label><input type="radio" name="q4"> String</label>
+<label><input type="radio" name="q4"> Boolean</label>
 </div>
 <div class="mc" data-answer="2">
-<p class="mc-q">4. Qual destes é um número <strong>decimal</strong> escrito do jeito certo no código?</p>
-<label><input type="radio" name="q4"> <code>3,14</code></label>
-<label><input type="radio" name="q4"> <code>3.14</code></label>
-<label><input type="radio" name="q4"> <code>"3.14"</code></label>
-<label><input type="radio" name="q4"> <code>3 14</code></label>
+<p class="mc-q">5. Qual destes é um número <strong>decimal</strong> escrito do jeito certo no código?</p>
+<label><input type="radio" name="q5"> <code>3,14</code></label>
+<label><input type="radio" name="q5"> <code>3.14</code></label>
+<label><input type="radio" name="q5"> <code>"3.14"</code></label>
+<label><input type="radio" name="q5"> <code>3 14</code></label>
 </div>
 <div class="tryps" data-goal="out:Boolean;;semerro">
 <p class="try-task"><strong>Missão final:</strong> guarde <code>$true</code> em <code>$ativo</code> e mostre o nome do tipo.</p>
