@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell $true, $false e $null | Guia PowerShell</title>
+<meta name="description" content="Booleanos e $null no PowerShell: $true, $false, $null, o que conta como falso no if, $null à esquerda, o operador ?? e o erro real no Windows PowerShell 5.1.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">$true, $false e $null</span></h1>
+
+<p class="intro">Aprovada ou não? O produto está em estoque? A aluna informou o telefone? Muitas perguntas num script têm resposta sim ou não, e às vezes a resposta simplesmente não existe. Para isso servem <code>$true</code>, <code>$false</code> e <code>$null</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Os valores <code>$true</code> (verdadeiro), <code>$false</code> (falso) e <code>$null</code> (nada).</li>
+  <li>Por que o <code>$null</code> vai à <strong>esquerda</strong> na comparação.</li>
+  <li>O que o <code>if</code> considera falso.</li>
+  <li>O operador <code>??</code>, que dá um valor padrão, e por que ele não existe no Windows PowerShell 5.1.</li>
+</ul>
+</div>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português.</p>
+<hr>
+<h2>A ideia: sim, não e "em branco"</h2>
+<p>Num formulário, a pergunta "Tem filhos?" pode ter <strong>sim</strong>, <strong>não</strong> ou ficar <strong>em branco</strong>. No PowerShell é igual: <code>$true</code> é sim, <code>$false</code> é não e <code>$null</code> é o campo em branco, a ausência de valor.</p>
+<hr>
+<h2>1. Os três valores</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $true
+True
+PS C:\Users\ana&gt; $false
+False
+PS C:\Users\ana&gt; $null
+PS C:\Users\ana&gt; $true.GetType().Name
+Boolean
+</pre>
+<p>O <code>$null</code> não mostra nada: é o nada. <code>$true</code> e <code>$false</code> são do tipo <code>Boolean</code> (booleano, em homenagem ao matemático George Boole). São escritos com <code>$</code>, porque são variáveis especiais que o PowerShell já traz prontas.</p>
+<h2>2. Comparar com $null: ele vai à esquerda</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $a = $null
+PS C:\Users\ana&gt; $null -eq $a
+True
+PS C:\Users\ana&gt; $null -ne "Ana"
+True
+</pre>
+<p>Escreva sempre <code>$null -eq $x</code>, e não <code>$x -eq $null</code>. Quando <code>$x</code> é uma lista, o <code>-eq</code> com a lista à esquerda <strong>filtra</strong> a lista em vez de responder True ou False (veja <a href="operadores-comparacao.html">Comparações</a>). Com o <code>$null</code> à esquerda, a resposta é sempre um True ou False.</p>
+<h2>3. O que o if considera falso</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; if ($true) { "verdadeiro" } else { "falso" }
+verdadeiro
+PS C:\Users\ana&gt; if ($false) { "verdadeiro" } else { "falso" }
+falso
+PS C:\Users\ana&gt; if ($null) { "verdadeiro" } else { "falso" }
+falso
+PS C:\Users\ana&gt; if (0) { "verdadeiro" } else { "falso" }
+falso
+PS C:\Users\ana&gt; if ("") { "verdadeiro" } else { "falso" }
+falso
+PS C:\Users\ana&gt; if (@()) { "verdadeiro" } else { "falso" }
+falso
+PS C:\Users\ana&gt; if ("Ana") { "verdadeiro" } else { "falso" }
+verdadeiro
+</pre>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Valor</th><th>No if</th></tr>
+<tr><td><code>$false</code>, <code>$null</code>, <code>0</code>, <code>""</code>, <code>@()</code></td><td>Contam como falso.</td></tr>
+<tr><td>Qualquer outro número, texto não vazio, lista com itens</td><td>Contam como verdadeiro.</td></tr>
+</table>
+</div>
+<div class="tryps" data-goal="out:Sem nome;;semerro">
+<p class="try-task"><strong>Experimente:</strong> troque <code>"Ana"</code> por <code>$null</code> e veja o <code>if</code> ir para o <code>else</code>.</p>
+<pre class="script" data-file="main.ps1">$nome = "Ana"
+if ($nome) { "Nome: $nome" } else { "Sem nome" }
+</pre>
+<pre class="solucao" data-file="main.ps1">$nome = $null
+if ($nome) { "Nome: $nome" } else { "Sem nome" }
+</pre>
+</div>
+<h2>4. O operador ?? (valor padrão) <span class="versao">7</span></h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $a = $null
+PS C:\Users\ana&gt; $a ?? "padrão"
+padrão
+PS C:\Users\ana&gt; "já tem" ?? "padrão"
+já tem
+</pre>
+<p>O <code>??</code> lê assim: "use o da esquerda; se ele for <code>$null</code>, use o da direita". Ótimo para dar um valor padrão quando algo veio vazio.</p>
+<div class="note"><strong>Windows PowerShell 5.1:</strong> o <code>??</code> não existe lá, e o mesmo comando dá erro de sintaxe:
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; $a = $null
+PS C:\Users\ana&gt; $a ?? "padrão"
+No linha:1 caractere:4
++ $a ?? "padrão"
++    ~~
+Token '??' inesperado na expressão ou instrução.
+    + CategoryInfo          : ParserError: (:) [], ParentContainsErrorRecordException
+    + FullyQualifiedErrorId : UnexpectedToken
+</pre>
+"Token (pedaço) <code>??</code> inesperado." O 5.1 não conhece esse sinal. Lá, use um <code>if</code>: <code>if ($null -eq $a) { "padrão" } else { $a }</code>.</div>
+<hr>
+<h2>Quando dá errado</h2>
+<div class="cenario">
+<strong>Usou <code>??</code> no Windows PowerShell 5.1</strong>
+<p>A mensagem <code>Token '??' inesperado</code> (acima) quer dizer que você está no 5.1. Abra o PowerShell 7 (<code>pwsh</code>) ou troque por um <code>if</code>.</p>
+</div>
+<div class="cenario">
+<strong>Escreveu <code>true</code> sem o <code>$</code></strong>
+<p>Sem o cifrão, <code>true</code> é só uma palavra, e o PowerShell procura um comando com esse nome. Escreva sempre <code>$true</code> e <code>$false</code>.</p>
+</div>
+<hr>
+<h2>Exercícios</h2>
+<div class="exercise">
+<h3>1. O nada</h3>
+<p>Complete com o valor que significa "nada":</p>
+<div class="ex-code">$a = <input data-answer="$null" aria-label="resposta"></div>
+</div>
+<div class="exercise">
+<h3>2. Padrão</h3>
+<p>Complete para usar "visitante" quando <code>$nome</code> for nulo:</p>
+<div class="ex-code">$nome <input data-answer="??" aria-label="operador"> "visitante"</div>
+</div>
+<div class="mc" data-answer="3">
+<p class="mc-q">3. Qual destes conta como <strong>verdadeiro</strong> no <code>if</code>?</p>
+<label><input type="radio" name="q3"> <code>0</code></label>
+<label><input type="radio" name="q3"> <code>""</code></label>
+<label><input type="radio" name="q3"> <code>"Ana"</code></label>
+<label><input type="radio" name="q3"> <code>$null</code></label>
+</div>
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Qual é o jeito recomendado de testar se <code>$x</code> é nulo?</p>
+<label><input type="radio" name="q4"> <code>$x -eq $null</code></label>
+<label><input type="radio" name="q4"> <code>$null -eq $x</code></label>
+<label><input type="radio" name="q4"> <code>$x = $null</code></label>
+<label><input type="radio" name="q4"> <code>null -eq $x</code></label>
+</div>
+<div class="tryps" data-goal="out:Cidade: não informada;;src:\?\?;;semerro">
+<p class="try-task"><strong>Missão final:</strong> com <code>??</code>, mostre <code>Cidade: não informada</code> quando <code>$cidade</code> for nulo.</p>
+<pre class="script" data-file="main.ps1">$cidade = $null
+"Cidade: $cidade"
+</pre>
+<pre class="solucao" data-file="main.ps1">$cidade = $null
+"Cidade: $($cidade ?? 'não informada')"
+</pre>
+</div>
+<hr>
+<h2>Resumo</h2>
+<ul>
+  <li><code>$true</code>, <code>$false</code> e <code>$null</code> (nada).</li>
+  <li>Compare com o <code>$null</code> à esquerda: <code>$null -eq $x</code>.</li>
+  <li><code>$false</code>, <code>$null</code>, <code>0</code>, <code>""</code> e <code>@()</code> são falsos no <code>if</code>.</li>
+  <li><code>??</code> dá um valor padrão; só existe no PowerShell 7.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
