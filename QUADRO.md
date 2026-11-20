@@ -60,9 +60,9 @@ Versão-alvo: PowerShell 7.7 (`pwsh`). O lote do 5.1 serve de nota "no 5.1 isso 
 | `operadores-comparacao.html` Comparações (-eq, -ne, -gt, -lt) | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 | `operadores-texto.html` Comparando Textos (-like, -match) | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 | `operadores-colecao.html` -contains e -in | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `operadores-logicos.html` -and, -or e -not | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `operador-formato.html` Formatando Textos (-f) | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
-| `atribuicao.html` Atribuição (+=, ++) | Luna | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `operadores-logicos.html` -and, -or e -not | Tito (de Luna, 17:57) | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `operador-formato.html` Formatando Textos (-f) | Tito (de Luna, 17:57) | [ ] | [ ] | [ ] | [ ] | [ ] |  |
+| `atribuicao.html` Atribuição (+=, ++) | Tito (de Luna, 17:57) | [ ] | [ ] | [ ] | [ ] | [ ] |  |
 
 ## Saída e Entrada
 
