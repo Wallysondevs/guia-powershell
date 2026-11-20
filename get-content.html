@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Get-Content — ler arquivos de texto | Guia PowerShell</title>
+<meta name="description" content="Get-Content para quem nunca usou terminal: ler um arquivo inteiro, só o começo (-TotalCount) ou o fim (-Tail), contar linhas, pegar uma linha, -Raw e o erro real de arquivo que não existe, explicado em português.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Get-Content</span>: Lendo Arquivos</h1>
+
+<p class="intro">A Ana guarda um arquivo de texto com uma linha por tarefa e uma planilha simples em <code>.csv</code>. Para olhar o que tem dentro, ela não precisa abrir o Bloco de Notas: o <code>Get-Content</code> mostra o conteúdo direto no terminal. Nesta aula você vai ler um arquivo inteiro, só o começo, só o fim, uma linha específica, e contar linhas.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A mostrar o conteúdo de um arquivo com <code>Get-Content</code>.</li>
+  <li>A ler só as primeiras linhas (<code>-TotalCount</code>) ou só as últimas (<code>-Tail</code>).</li>
+  <li>Que o PowerShell entrega o arquivo como uma <strong>lista de linhas</strong>.</li>
+  <li>A contar linhas com <code>.Count</code> e pegar uma linha com <code>[0]</code>.</li>
+  <li>A ler o arquivo como um texto único com <code>-Raw</code>.</li>
+  <li>A procurar uma palavra dentro do arquivo.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, dentro de uma pasta de treino <code>guia-ps-teste</code>, com dois arquivos criados para isso: <code>linhas.txt</code> (doze linhas, de "Linha 1" a "Linha 12") e <code>pessoas.csv</code>.</p>
+
+<hr>
+
+<h2>A ideia: o caderno de linhas numeradas</h2>
+<p>Pense num caderno em que cada linha é numerada. Você pode ler o caderno todo, só a primeira página, só as últimas linhas, ou ir direto à linha 1. O <code>Get-Content</code> trata o arquivo assim: cada linha vira um item, e você escolhe quais quer ver.</p>
+
+<hr>
+
+<h2>1. Lendo o arquivo inteiro</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-Content linhas.txt
+Linha 1
+Linha 2
+Linha 3
+Linha 4
+Linha 5
+Linha 6
+Linha 7
+Linha 8
+Linha 9
+Linha 10
+Linha 11
+Linha 12
+</pre>
+<dl class="anatomy">
+  <dt>Get-Content</dt><dd>"Pegar conteúdo". <em>Get</em> é "pegar", e <em>Content</em> é "conteúdo".</dd>
+  <dt>linhas.txt</dt><dd>O arquivo a ler, na pasta atual. É o parâmetro <code>-Path</code>, que pode ir sem o nome.</dd>
+</dl>
+
+<div class="tryps" data-goal="out:Comprar pão;;out:Pagar a luz;;src:\bGet-Content\b;;semerro">
+<p class="try-task"><strong>Experimente:</strong> o script grava uma lista de tarefas em <code>tarefas.txt</code>. Acrescente a linha que mostra o conteúdo do arquivo.</p>
+<pre class="script" data-file="main.ps1">'Comprar pão', 'Pagar a luz', 'Ligar para a mãe' | Set-Content tarefas.txt
+
+</pre>
+<pre class="solucao" data-file="main.ps1">'Comprar pão', 'Pagar a luz', 'Ligar para a mãe' | Set-Content tarefas.txt
+Get-Content tarefas.txt
+</pre>
+</div>
+
+<hr>
+
+<h2>2. Só o começo ou só o fim</h2>
+<p>Arquivo grande demais para a tela? Peça só um pedaço:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-Content linhas.txt -TotalCount 3
+Linha 1
+Linha 2
+Linha 3
+PS C:\Users\ana\guia-ps-teste&gt; Get-Content linhas.txt -Tail 2
+Linha 11
+Linha 12
+</pre>
+<dl class="anatomy">
+  <dt>-TotalCount 3</dt><dd>"No total, 3": as 3 primeiras linhas. Também aceita o nome curto <code>-Head</code>.</dd>
+  <dt>-Tail 2</dt><dd>"Rabo": as 2 últimas linhas. Ótimo para olhar o final de um arquivo de registro (log), onde ficam as coisas mais recentes.</dd>
+</dl>
+
+<hr>
+
+<h2>3. O arquivo é uma lista de linhas</h2>
+<p>Coloque o comando entre parênteses e o resultado vira uma lista que você pode medir e consultar:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; (Get-Content linhas.txt).Count
+12
+PS C:\Users\ana\guia-ps-teste&gt; (Get-Content linhas.txt)[0]
+Linha 1
+</pre>
+<dl class="anatomy">
+  <dt>( … )</dt><dd>"Rode isto primeiro e me dê o resultado inteiro."</dd>
+  <dt>.Count</dt><dd>Quantos itens a lista tem: aqui, 12 linhas.</dd>
+  <dt>[0]</dt><dd>O primeiro item. A contagem começa do <strong>zero</strong>: <code>[0]</code> é a linha 1, <code>[1]</code> é a linha 2, e <code>[-1]</code> é a última.</dd>
+</dl>
+
+<div class="tryps" data-goal="out:3;;src:\.Count;;semerro">
+<p class="try-task"><strong>Experimente:</strong> mostre quantas linhas tem o <code>tarefas.txt</code>. A resposta deve ser <code>3</code>.</p>
+<pre class="script" data-file="main.ps1">'Comprar pão', 'Pagar a luz', 'Ligar para a mãe' | Set-Content tarefas.txt
+
+</pre>
+<pre class="solucao" data-file="main.ps1">'Comprar pão', 'Pagar a luz', 'Ligar para a mãe' | Set-Content tarefas.txt
+(Get-Content tarefas.txt).Count
+</pre>
+</div>
+
+<hr>
+
+<h2>4. Tudo de uma vez: <code>-Raw</code></h2>
+<p>Às vezes você quer o arquivo como <strong>um texto só</strong>, e não como lista. É para isso que serve o <code>-Raw</code> ("cru"). Aqui ele conta os caracteres do arquivo inteiro:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-Content linhas.txt -Raw | Measure-Object -Character
+
+Lines Words Characters Property
+----- ----- ---------- --------
+                   111 
+</pre>
+<p>São 111 caracteres: as letras e números das doze linhas (87) mais as quebras de linha. No Windows, cada quebra de linha conta como 2 caracteres invisíveis, e 12 linhas dão 24. O <code>-Raw</code> mantém as quebras dentro do texto.</p>
+
+<hr>
+
+<h2>5. Procurando uma palavra</h2>
+<p>O <code>cat</code> é um apelido do <code>Get-Content</code>. Com o <code>Select-String</code> (aula <a href="select-string.html">Select-String</a>) você filtra só as linhas que têm uma palavra:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; cat pessoas.csv
+nome,idade
+Ana,30
+Beto,25
+PS C:\Users\ana\guia-ps-teste&gt; Get-Content pessoas.csv | Select-String Ana
+
+Ana,30
+</pre>
+<div class="tip">Para um <code>.csv</code> de verdade, o <code>Import-Csv</code> (aula <a href="import-csv.html">CSV</a>) é melhor: ele entende as colunas. O <code>Get-Content</code> só enxerga linhas de texto.</div>
+
+<hr>
+
+<h2>Formas diferentes de ler</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>Get-Content -Path a.txt</code></td><td>Nos scripts: tudo escrito.</td></tr>
+<tr><td><code>Get-Content a.txt</code></td><td>No terminal, para olhar rápido.</td></tr>
+<tr><td><code>cat a.txt</code>, <code>type a.txt</code>, <code>gc a.txt</code></td><td>Apelidos (aula <a href="aliases.html">Apelidos</a>). Bons no terminal; evite em scripts.</td></tr>
+<tr><td><code>Get-Content a.txt -Raw</code></td><td>Quando você quer um texto único, não uma lista.</td></tr>
+<tr><td><code>Import-Csv a.csv</code></td><td>Planilhas <code>.csv</code>: lê por coluna.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>O arquivo não existe</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-Content naoexiste.txt
+Get-Content: Não é possível localizar o caminho 'C:\Users\ana\guia-ps-teste\naoexiste.txt' porque ele não existe.
+</pre>
+<dl class="anatomy">
+  <dt>Get-Content:</dt><dd>O comando que reclamou.</dd>
+  <dt>'C:\Users\ana\guia-ps-teste\naoexiste.txt'</dt><dd>Onde ele procurou: na pasta atual + o nome que você digitou.</dd>
+</dl>
+<p><strong>Como resolver:</strong> confira a pasta pelo prompt e o nome exato com <code>Get-ChildItem</code>. Erros comuns: esquecer a extensão (<code>notas</code> em vez de <code>notas.txt</code>) ou estar em outra pasta. Use a tecla <kbd>Tab</kbd> para completar o nome.</p>
+</div>
+
+<div class="cenario">
+<strong>Contou 1 linha num arquivo de várias</strong>
+<p>Se você usou <code>(Get-Content a.txt -Raw).Count</code>, o resultado é <code>1</code>: com <code>-Raw</code> o arquivo vira um texto único, e um texto é um item só.</p>
+<p><strong>Como resolver:</strong> para contar linhas, tire o <code>-Raw</code>.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Get-Content a.txt</code></td><td>Mostra o arquivo, linha por linha.</td></tr>
+<tr><td><code>-TotalCount 5</code></td><td>Só as 5 primeiras linhas.</td></tr>
+<tr><td><code>-Tail 5</code></td><td>Só as 5 últimas linhas.</td></tr>
+<tr><td><code>(Get-Content a.txt).Count</code></td><td>Quantas linhas o arquivo tem.</td></tr>
+<tr><td><code>(Get-Content a.txt)[0]</code></td><td>A primeira linha. <code>[-1]</code> é a última.</td></tr>
+<tr><td><code>-Raw</code></td><td>O arquivo inteiro como um texto só.</td></tr>
+<tr><td><code>Get-Content a.txt | Select-String palavra</code></td><td>Só as linhas com a palavra.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Mostre o conteúdo de <code>diario.txt</code>:</p>
+<div class="ex-code"><input data-answer="Get-Content|cat|gc|type" aria-label="comando"> diario.txt</div>
+</div>
+
+<div class="exercise">
+<h3>2. Só o fim</h3>
+<p>Complete para ver só as 10 últimas linhas de <code>registro.log</code>:</p>
+<div class="ex-code">Get-Content registro.log <input data-answer="-Tail" aria-label="parâmetro"> 10</div>
+</div>
+
+<div class="exercise">
+<h3>3. Contando</h3>
+<p>Complete para mostrar quantas linhas tem <code>lista.txt</code>:</p>
+<div class="ex-code">(Get-Content lista.txt).<input data-answer="Count|Length" aria-label="propriedade"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Qual linha do arquivo <code>(Get-Content a.txt)[0]</code> mostra?</p>
+<label><input type="radio" name="q4"> Nenhuma: a contagem começa em 1</label>
+<label><input type="radio" name="q4"> A primeira</label>
+<label><input type="radio" name="q4"> A última</label>
+<label><input type="radio" name="q4"> A linha número zero, que fica vazia</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. O que o <code>-TotalCount 3</code> faz?</p>
+<label><input type="radio" name="q5"> Conta quantas vezes aparece o número 3</label>
+<label><input type="radio" name="q5"> Mostra as 3 últimas linhas</label>
+<label><input type="radio" name="q5"> Mostra as 3 primeiras linhas</label>
+<label><input type="radio" name="q5"> Lê 3 arquivos</label>
+</div>
+
+<div class="mc" data-answer="4">
+<p class="mc-q">6. Para que serve o <code>-Raw</code>?</p>
+<label><input type="radio" name="q6"> Para ler arquivos protegidos</label>
+<label><input type="radio" name="q6"> Para tirar as quebras de linha</label>
+<label><input type="radio" name="q6"> Para ler só a primeira linha</label>
+<label><input type="radio" name="q6"> Para receber o arquivo inteiro como um texto só</label>
+</div>
+
+<div class="tryps" data-goal="out:Última: Ligar para a mãe;;src:\bGet-Content\b;;semerro">
+<p class="try-task"><strong>Missão final:</strong> complete a última linha para que ela mostre <code>Última: Ligar para a mãe</code>, pegando a última linha do arquivo com <code>Get-Content</code>.</p>
+<pre class="script" data-file="main.ps1">'Comprar pão', 'Pagar a luz', 'Ligar para a mãe' | Set-Content tarefas.txt
+"Última: " + 
+</pre>
+<pre class="solucao" data-file="main.ps1">'Comprar pão', 'Pagar a luz', 'Ligar para a mãe' | Set-Content tarefas.txt
+"Última: " + (Get-Content tarefas.txt)[-1]
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Get-Content arquivo</code> mostra o conteúdo, uma linha por vez.</li>
+  <li><code>-TotalCount</code> pega o começo e <code>-Tail</code> pega o fim.</li>
+  <li>O arquivo vira uma lista: <code>.Count</code> conta as linhas e <code>[0]</code> pega a primeira.</li>
+  <li><code>-Raw</code> devolve tudo como um texto só, com as quebras de linha.</li>
+  <li>"Não é possível localizar o caminho" quer dizer nome ou pasta errada.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
