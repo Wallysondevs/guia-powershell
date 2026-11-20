@@ -93,6 +93,17 @@ coluna1	coluna2
 </pre>
 <p><code>`t</code> é a tabulação (o "pulo" da tecla <kbd>Tab</kbd>), útil para alinhar colunas. Os mais usados: <code>`n</code> (nova linha), <code>`t</code> (tabulação), <code>`"</code> (aspas duplas), <code>`$</code> (um cifrão de verdade entre aspas duplas).</p>
 <hr>
+<h2>Formas diferentes de escrever um texto</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>'texto'</code></td><td>Texto fixo, sem variável. Prefira este.</td></tr>
+<tr><td><code>"Olá, $nome"</code></td><td>Texto com variável ou com <code>`n</code>, <code>`t</code>.</td></tr>
+<tr><td><code>@' … '@</code>, <code>@" … "@</code></td><td>Texto de várias linhas (aula <a href="here-strings.html">Here-Strings</a>).</td></tr>
+<tr><td><code>'Olá, ' + $nome</code></td><td>Juntar pedaços com <code>+</code>; funciona, mas <code>"Olá, $nome"</code> é mais fácil de ler.</td></tr>
+</table>
+</div>
+<hr>
 <h2>Quando dá errado</h2>
 <div class="cenario">
 <strong>Esqueceu de fechar as aspas</strong>
@@ -108,6 +119,19 @@ Invoke-Expression: The string is missing the terminator: ".
 <p>Não é erro do PowerShell: você usou aspas simples. Troque por duplas.</p>
 </div>
 <hr>
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>'…'</code></td><td>Texto exatamente como está.</td></tr>
+<tr><td><code>"…"</code></td><td>Troca <code>$variavel</code> pelo valor.</td></tr>
+<tr><td><code>`n</code></td><td>Nova linha (só em aspas duplas).</td></tr>
+<tr><td><code>`t</code></td><td>Tabulação (só em aspas duplas).</td></tr>
+<tr><td><code>`"</code></td><td>Aspas duplas dentro de aspas duplas.</td></tr>
+<tr><td><code>''</code></td><td>Aspas simples dentro de aspas simples.</td></tr>
+</table>
+</div>
+<hr>
 <h2>Exercícios</h2>
 <div class="exercise">
 <h3>1. Aspas certas</h3>
@@ -119,19 +143,25 @@ Invoke-Expression: The string is missing the terminator: ".
 <p>O que vai depois do acento grave para pular linha?</p>
 <div class="ex-code">"linha1`<input data-answer="n" aria-label="resposta">linha2"</div>
 </div>
+<div class="exercise">
+<h3>3. Tabulação</h3>
+<p>Complete o caractere especial que faz a tabulação (o <code>`</code> já está):</p>
+<div class="ex-code">"nome`<input data-answer="t" aria-label="resposta">idade"</div>
+</div>
+
 <div class="mc" data-answer="2">
-<p class="mc-q">3. Com <code>$nome = "Ana"</code>, o que <code>'Oi, $nome'</code> mostra?</p>
-<label><input type="radio" name="q3"> Oi, Ana</label>
-<label><input type="radio" name="q3"> Oi, $nome</label>
-<label><input type="radio" name="q3"> Oi,</label>
-<label><input type="radio" name="q3"> Erro</label>
+<p class="mc-q">4. Com <code>$nome = "Ana"</code>, o que <code>'Oi, $nome'</code> mostra?</p>
+<label><input type="radio" name="q4"> Oi, Ana</label>
+<label><input type="radio" name="q4"> Oi, $nome</label>
+<label><input type="radio" name="q4"> Oi,</label>
+<label><input type="radio" name="q4"> Erro</label>
 </div>
 <div class="mc" data-answer="2">
-<p class="mc-q">4. Como escrever <code>it's</code> entre aspas simples?</p>
-<label><input type="radio" name="q4"> <code>'it's'</code></label>
-<label><input type="radio" name="q4"> <code>'it''s'</code></label>
-<label><input type="radio" name="q4"> <code>'it`s'</code></label>
-<label><input type="radio" name="q4"> Não dá</label>
+<p class="mc-q">5. Como escrever <code>it's</code> entre aspas simples?</p>
+<label><input type="radio" name="q5"> <code>'it's'</code></label>
+<label><input type="radio" name="q5"> <code>'it''s'</code></label>
+<label><input type="radio" name="q5"> <code>'it`s'</code></label>
+<label><input type="radio" name="q5"> Não dá</label>
 </div>
 <div class="tryps" data-goal="out:A loja &quot;Bem-Estar&quot;;;semerro">
 <p class="try-task"><strong>Missão final:</strong> mostre exatamente <code>A loja "Bem-Estar" abriu</code>, com as aspas duplas no texto.</p>
