@@ -41,3 +41,6 @@
 .psf-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 @media (max-width: 600px) { .tryps { padding: 4px 10px 12px; } }
 @media print { .psf-acoes, .psf-out, .psf-rot, .ts-bar { display: none !important; } }
+
+.psf-passos{margin:.4rem 0 .6rem 1.2rem;padding:0;font-size:.95em}
+.psf-passos li{margin:.15rem 0}

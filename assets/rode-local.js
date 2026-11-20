@@ -145,8 +145,9 @@
       '<button type="button" class="sim-btn psf-reset">Voltar ao original</button></div>' +
       '<div class="ts-editor"><label class="psf-sr" for="' + id + '-cod">Código do script ' + esc(arq) + '</label>' +
       '<textarea class="ts-code psf-cod" id="' + id + '-cod" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea></div>' +
-      '<label class="psf-rot" for="' + id + '-out">Cole aqui a saída do terminal</label>' +
-      '<textarea class="psf-out" id="' + id + '-out" rows="5" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="PS C:\\Users\\voce&gt; …"></textarea>' +
+      '<ol class="psf-passos"><li>Clique em <strong>Copiar código</strong>.</li><li>Cole no seu PowerShell 7 e aperte Enter.</li><li>Copie o que o PowerShell <strong>respondeu</strong> (não o comando) e cole abaixo.</li></ol>' +
+      '<label class="psf-rot" for="' + id + '-out">Cole aqui a resposta do PowerShell (a saída, não o código)</label>' +
+      '<textarea class="psf-out" id="' + id + '-out" rows="5" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="Ex.: o texto que apareceu no terminal depois de você apertar Enter"></textarea>' +
       '<div class="ex-actions psf-acoes"><button type="button" class="psf-conferir">Conferir</button>' +
       '<button type="button" class="secondary psf-ver" disabled title="Liberado depois do primeiro Conferir">Ver solução</button></div>' +
       '<div class="psf-res" aria-live="polite"></div>';
@@ -171,6 +172,13 @@
 
     w.querySelector(".psf-conferir").addEventListener("click", function () {
       verBtn.disabled = false; verBtn.removeAttribute("title");
+      // Detecta quando a pessoa colou o código em vez da saída
+      var norm = function (t) { return t.replace(/\r\n?/g, "\n").replace(/^PS [^>\n]*>\s*/gm, "").replace(/\s+/g, " ").trim().toLowerCase(); };
+      var colado = norm(out.value);
+      if (colado && (colado === norm(cod.value) || colado === norm(inicial) || (sol && colado === norm(sol.textContent)))) {
+        resDiv.innerHTML = '<p class="ex-result bad">Parece que você colou o <strong>código</strong>, não a saída. Rode esse código no seu PowerShell 7 e cole aqui o que ele <strong>respondeu</strong>.</p>';
+        out.focus(); return;
+      }
       var metas;
       try { metas = psfAvaliar(goal, cod.value, out.value); }
       catch (e) { resDiv.innerHTML = '<p class="ex-result bad">Não consegui conferir esta missão (' + esc(e.message) + ').</p>'; return; }
