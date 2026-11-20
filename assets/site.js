@@ -316,7 +316,7 @@ var NIVEIS = [
   var content = document.querySelector(".content");
   if (content) {
     content.appendChild(el("footer", { "class": "site-footer" },
-      "Guia PowerShell · PowerShell 7.6 · Os exemplos rodam de verdade no seu navegador (o PowerShell 7 em WebAssembly) · Saídas conferidas no Windows e no Linux de verdade · Vale para Windows, Linux e macOS."));
+      "Guia PowerShell · PowerShell 7.7 · Os exemplos rodam de verdade no seu navegador (o PowerShell 7 em WebAssembly) · Saídas conferidas no Windows e no Linux de verdade · Vale para Windows, Linux e macOS."));
   }
 
   /* ---------- Tema ---------- */
