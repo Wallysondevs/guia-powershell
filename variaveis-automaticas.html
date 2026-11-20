@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Variáveis Automáticas — $HOME, $_, $? e mais | Guia PowerShell</title>
+<meta name="description" content="Variáveis automáticas do PowerShell: $HOME, $PWD, $PSVersionTable, $IsWindows, $?, $_, $Host e as diferenças do Windows PowerShell 5.1, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell <span class="hl">Variáveis Automáticas</span> ($_, $HOME…)</h1>
+
+<p class="intro">Algumas variáveis você nunca cria: o PowerShell já traz prontas, com a sua pasta, a versão instalada, o resultado do último comando. Conhecer essas variáveis evita trabalho e deixa os scripts mais espertos.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que são variáveis automáticas: as que o PowerShell cria e preenche sozinho.</li>
+  <li><code>$HOME</code> e <code>$PWD</code>: a sua pasta e a pasta atual.</li>
+  <li><code>$PSVersionTable</code>, <code>$PSEdition</code> e <code>$IsWindows</code>: qual PowerShell e qual sistema.</li>
+  <li><code>$?</code>: o último comando deu certo?</li>
+  <li><code>$_</code>: o item da vez na esteira.</li>
+  <li>O que muda no Windows PowerShell 5.1.</li>
+</ul>
+</div>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português.</p>
+<hr>
+<h2>A ideia: o painel do carro</h2>
+<p>Você não precisa medir a gasolina nem a velocidade: o painel do carro já mostra. As <strong>variáveis automáticas</strong> são o painel do PowerShell: ele mesmo cria e atualiza, e você só lê. Não guarde nada nelas: são de leitura.</p>
+<hr>
+<h2>1. Sua pasta e a pasta atual</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $HOME
+C:\Users\ana
+PS C:\Users\ana&gt; $PWD
+
+Path
+----
+C:\Users\ana
+</pre>
+<p><code>$HOME</code> ("casa") é a sua pasta de usuária. <code>$PWD</code> (<em>print working directory</em>) é a pasta onde você está agora, a mesma do <code>Get-Location</code> (aula <a href="get-location.html">Get-Location</a>).</p>
+<h2>2. Qual PowerShell é este?</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $PSVersionTable
+
+Name                           Value
+----                           -----
+PSVersion                      7.7.0
+PSEdition                      Core
+GitCommitId                    7.7.0
+OS                             Microsoft Windows 10.0.19045
+Platform                       Win32NT
+PSCompatibleVersions           {1.0, 2.0, 3.0, 4.0…}
+PSRemotingProtocolVersion      2.4
+SerializationVersion           1.1.0.1
+WSManStackVersion              3.0
+
+PS C:\Users\ana&gt; $PSEdition
+Core
+PS C:\Users\ana&gt; $PSVersionTable.PSVersion
+
+Major  Minor  Patch  PreReleaseLabel BuildLabel
+-----  -----  -----  --------------- ----------
+7      7      0
+</pre>
+<p><code>$PSVersionTable</code> é a "ficha técnica": a linha que importa é <code>PSVersion</code>. <code>Core</code> é a edição do PowerShell 7 (a que roda em Windows, Linux e macOS).</p>
+<h2>3. Windows, Linux ou macOS <span class="versao">7</span></h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $IsWindows
+True
+PS C:\Users\ana&gt; $IsLinux
+False
+PS C:\Users\ana&gt; $IsMacOS
+False
+</pre>
+<p>Úteis para um script que precisa agir diferente em cada sistema. No editor do guia, que é um PowerShell de Linux, <code>$IsLinux</code> dá <code>True</code>.</p>
+<div class="tryps" data-goal="out:Edição: Core;;src:\$PSEdition;;semerro">
+<p class="try-task"><strong>Experimente:</strong> troque o texto fixo pela variável <code>$PSEdition</code>.</p>
+<pre class="script" data-file="main.ps1">"Edição: ???"
+</pre>
+<pre class="solucao" data-file="main.ps1">"Edição: $PSEdition"
+</pre>
+</div>
+<h2>4. Deu certo? ($?)</h2>
+<p><code>$?</code> responde <code>True</code> se o último comando deu certo e <code>False</code> se deu erro:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Date | Out-Null
+PS C:\Users\ana&gt; $?
+True
+PS C:\Users\ana&gt; Get-Variavel
+Get-Variavel: O termo "Get-Variavel" não é reconhecido como um nome de um cmdlet, função, arquivo de script ou programa executável.
+Verifique a ortografia do nome ou, se um caminho foi incluído, verifique se o caminho está correto e tente novamente.
+PS C:\Users\ana&gt; $?
+False
+</pre>
+<p>O <code>Get-Date | Out-Null</code> funcionou (o <code>Out-Null</code> só esconde a data), então <code>$?</code> deu <code>True</code>. O <code>Get-Variavel</code> não existe, então deu <code>False</code>. Repare: <code>$?</code> muda depois de <strong>cada</strong> comando; leia logo em seguida.</p>
+<h2>5. O $_ da esteira</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; 1, 2, 3 | ForEach-Object { $_ * 10 }
+10
+20
+30
+</pre>
+<p>Na esteira (pipeline), <code>$_</code> é "o item da vez": primeiro 1, depois 2, depois 3. Você vai usar muito em <code>ForEach-Object</code> e <code>Where-Object</code>.</p>
+<h2>6. Outras úteis</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $Host.Name
+ConsoleHost
+</pre>
+<p><code>$Host.Name</code> diz onde o PowerShell está rodando (<code>ConsoleHost</code> = a janela de terminal). E <code>$PID</code> mostra o número do processo do PowerShell aberto agora; ele muda a cada vez que você abre uma janela nova.</p>
+<div class="note"><strong>Windows PowerShell 5.1:</strong> a edição é <code>Desktop</code>, e <code>$IsWindows</code>, <code>$IsLinux</code> e <code>$IsMacOS</code> não existem (o <code>Get-Variable</code> não achou nenhuma e não mostrou nada):
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; $PSVersionTable
+
+Name                           Value
+----                           -----
+PSVersion                      5.1.19041.6456
+PSEdition                      Desktop
+PSCompatibleVersions           {1.0, 2.0, 3.0, 4.0...}
+BuildVersion                   10.0.19041.6456
+CLRVersion                     4.0.30319.42000
+WSManStackVersion              3.0
+PSRemotingProtocolVersion      2.3
+SerializationVersion           1.1.0.1
+
+
+PS C:\Users\ana&gt; $PSEdition
+Desktop
+PS C:\Users\ana&gt; Get-Variable IsWindows, IsLinux, IsMacOS -ErrorAction SilentlyContinue
+</pre>
+</div>
+<hr>
+<h2>Quando dá errado</h2>
+<div class="cenario">
+<strong>Leu o <code>$?</code> tarde demais</strong>
+<p>Qualquer comando no meio (até um <code>$x</code> para ver um valor) atualiza o <code>$?</code>. Se ele deu <code>True</code> depois de um erro, confira se não rodou outro comando antes. Guarde logo: <code>$deuCerto = $?</code>.</p>
+</div>
+<div class="cenario">
+<strong>Comando inexistente</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Variavel
+Get-Variavel: O termo "Get-Variavel" não é reconhecido como um nome de um cmdlet, função, arquivo de script ou programa executável.
+Verifique a ortografia do nome ou, se um caminho foi incluído, verifique se o caminho está correto e tente novamente.
+</pre>
+<p>"O termo Get-Variavel não é reconhecido como cmdlet, função…" O certo é <code>Get-Variable</code>. Use <kbd>Tab</kbd> para completar nomes e evitar erros de digitação.</p>
+</div>
+<hr>
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Variável</th><th>O que guarda</th></tr>
+<tr><td><code>$HOME</code></td><td>Sua pasta de usuária.</td></tr>
+<tr><td><code>$PWD</code></td><td>A pasta atual.</td></tr>
+<tr><td><code>$PSVersionTable</code></td><td>Versão e edição do PowerShell.</td></tr>
+<tr><td><code>$IsWindows</code>, <code>$IsLinux</code>, <code>$IsMacOS</code></td><td>Qual sistema (só no 7).</td></tr>
+<tr><td><code>$?</code></td><td>O último comando deu certo?</td></tr>
+<tr><td><code>$_</code></td><td>O item da vez na esteira.</td></tr>
+<tr><td><code>$PID</code></td><td>Número do processo do PowerShell.</td></tr>
+</table>
+</div>
+<hr>
+<h2>Exercícios</h2>
+<div class="exercise">
+<h3>1. Sua pasta</h3>
+<p>Qual variável guarda a sua pasta de usuária?</p>
+<div class="ex-code"><input data-answer="$HOME" aria-label="resposta"></div>
+</div>
+<div class="exercise">
+<h3>2. Item da vez</h3>
+<p>Complete para multiplicar cada item por 2:</p>
+<div class="ex-code">1, 2, 3 | ForEach-Object { <input data-answer="$_" aria-label="resposta"> * 2 }</div>
+</div>
+<div class="mc" data-answer="2">
+<p class="mc-q">3. Depois de um comando que deu erro, quanto vale <code>$?</code>?</p>
+<label><input type="radio" name="q3"> True</label>
+<label><input type="radio" name="q3"> False</label>
+<label><input type="radio" name="q3"> $null</label>
+<label><input type="radio" name="q3"> 0</label>
+</div>
+<div class="mc" data-answer="2">
+<p class="mc-q">4. No Windows PowerShell 5.1, o que <code>$PSEdition</code> mostra?</p>
+<label><input type="radio" name="q4"> Core</label>
+<label><input type="radio" name="q4"> Desktop</label>
+<label><input type="radio" name="q4"> 5.1</label>
+<label><input type="radio" name="q4"> Windows</label>
+</div>
+<div class="tryps" data-goal="out:Linux? True;;semerro">
+<p class="try-task"><strong>Missão final:</strong> mostre <code>Linux? True</code> usando a variável automática certa (o editor é um PowerShell de Linux).</p>
+<pre class="script" data-file="main.ps1">"Linux? $IsWindows"
+</pre>
+<pre class="solucao" data-file="main.ps1">"Linux? $IsLinux"
+</pre>
+</div>
+<hr>
+<h2>Resumo</h2>
+<ul>
+  <li>Variáveis automáticas são criadas pelo PowerShell; você só lê.</li>
+  <li><code>$HOME</code>, <code>$PWD</code>, <code>$PSVersionTable</code>, <code>$PSEdition</code>.</li>
+  <li><code>$?</code> diz se o último comando deu certo.</li>
+  <li><code>$_</code> é o item da vez na esteira.</li>
+  <li>No 5.1: edição <code>Desktop</code> e sem <code>$IsWindows</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
