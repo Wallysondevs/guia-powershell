@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Set-Content e Add-Content — escrever em arquivos | Guia PowerShell</title>
+<meta name="description" content="Set-Content e Add-Content para quem nunca usou terminal: gravar e acrescentar texto, os atalhos > e >>, Out-File, acentos e codificação no 7 e no 5.1, e o erro real de pasta que não existe, explicado em português.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Set-Content</span>: Escrevendo em Arquivos</h1>
+
+<p class="intro">A Ana quer anotar coisas sem abrir o Bloco de Notas: uma lembrança, uma lista de compras, a data de hoje. Nesta aula você vai gravar texto num arquivo com <code>Set-Content</code>, acrescentar linhas com <code>Add-Content</code>, conhecer os atalhos <code>&gt;</code> e <code>&gt;&gt;</code>, e entender por que os acentos às vezes viram símbolos estranhos.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A gravar texto num arquivo com <code>Set-Content</code> (e que ele <strong>substitui</strong> o que havia).</li>
+  <li>A acrescentar linhas no fim com <code>Add-Content</code>.</li>
+  <li>A gravar várias linhas de uma vez pelo pipeline.</li>
+  <li>Os atalhos <code>&gt;</code> (substituir) e <code>&gt;&gt;</code> (acrescentar).</li>
+  <li>A gravar a saída de um comando com <code>Out-File</code>.</li>
+  <li>Por que os acentos podem quebrar no Windows PowerShell 5.1.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, dentro de uma pasta de treino <code>guia-ps-teste</code>. Na parte dos acentos aparece também o <strong>Windows PowerShell 5.1</strong>, para comparar.</p>
+
+<hr>
+
+<h2>A ideia: o quadro branco e o caderno</h2>
+<p>O <code>Set-Content</code> é um <strong>quadro branco</strong>: para escrever algo novo, você apaga tudo o que estava lá. O <code>Add-Content</code> é um <strong>caderno</strong>: cada anotação nova vai para a linha de baixo e as antigas ficam.</p>
+
+<hr>
+
+<h2>1. Gravando: <code>Set-Content</code></h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Set-Content nota.txt "Primeira linha"
+PS C:\Users\ana\guia-ps-teste&gt; Get-Content nota.txt
+Primeira linha
+</pre>
+<dl class="anatomy">
+  <dt>Set-Content</dt><dd>"Definir conteúdo". <em>Set</em> é "definir", e <em>Content</em> é "conteúdo".</dd>
+  <dt>nota.txt</dt><dd>O arquivo (parâmetro <code>-Path</code>). Se não existe, é criado.</dd>
+  <dt>"Primeira linha"</dt><dd>O texto a gravar (parâmetro <code>-Value</code>).</dd>
+</dl>
+<p>Nenhuma mensagem: deu certo. O <code>Get-Content</code> (aula <a href="get-content.html">Lendo Arquivos</a>) confirma o que foi gravado. Agora grave outra coisa no mesmo arquivo:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Set-Content nota.txt "Trocou tudo"
+PS C:\Users\ana\guia-ps-teste&gt; Get-Content nota.txt
+Trocou tudo
+</pre>
+<div class="warning">O "Primeira linha" sumiu, sem aviso. O <code>Set-Content</code> <strong>substitui</strong> o conteúdo inteiro do arquivo. Antes de gravar num arquivo que já existe, pense se não queria acrescentar.</div>
+
+<hr>
+
+<h2>2. Acrescentando: <code>Add-Content</code></h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Add-Content nota.txt "Mais uma linha"
+PS C:\Users\ana\guia-ps-teste&gt; Get-Content nota.txt
+Trocou tudo
+Mais uma linha
+</pre>
+<p>O <code>Add-Content</code> ("adicionar conteúdo") põe o texto numa linha nova no fim e mantém o que já havia.</p>
+
+<div class="tryps" data-goal="out:Arroz;;out:Feijão;;src:\bAdd-Content\b;;semerro">
+<p class="try-task"><strong>Experimente:</strong> o script cria a lista de compras com "Arroz". Acrescente "Feijão" sem apagar o arroz, usando <code>Add-Content</code>.</p>
+<pre class="script" data-file="main.ps1">Set-Content compras.txt "Arroz"
+
+Get-Content compras.txt
+</pre>
+<pre class="solucao" data-file="main.ps1">Set-Content compras.txt "Arroz"
+Add-Content compras.txt "Feijão"
+Get-Content compras.txt
+</pre>
+</div>
+
+<hr>
+
+<h2>3. Várias linhas de uma vez</h2>
+<p>Mande uma lista pelo pipeline (o <code>|</code>, aula <a href="pipeline.html">Pipeline</a>): cada item vira uma linha.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; "a", "b", "c" | Set-Content lista.txt
+PS C:\Users\ana\guia-ps-teste&gt; Get-Content lista.txt
+a
+b
+c
+</pre>
+
+<hr>
+
+<h2>4. Os atalhos <code>&gt;</code> e <code>&gt;&gt;</code></h2>
+<p>Quem vem do <code>cmd</code> ou do Linux conhece o redirecionamento: <code>&gt;</code> manda o resultado para um arquivo, substituindo, e <code>&gt;&gt;</code> acrescenta no fim.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; "via redirecionamento" &gt; redir.txt
+PS C:\Users\ana\guia-ps-teste&gt; "acrescenta" &gt;&gt; redir.txt
+PS C:\Users\ana\guia-ps-teste&gt; Get-Content redir.txt
+via redirecionamento
+acrescenta
+</pre>
+
+<h3>Gravando a saída de um comando: <code>Out-File</code></h3>
+<p>O <code>Out-File</code> grava exatamente o que apareceria na tela. Por isso aparecem as linhas em branco antes e depois da data:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-Date | Out-File data.txt
+PS C:\Users\ana\guia-ps-teste&gt; Get-Content data.txt
+
+sexta-feira, 20 de novembro de 2026 17:13:10
+
+</pre>
+<div class="tip">O <code>&gt;</code> é um atalho do <code>Out-File</code>. A diferença prática: <code>Set-Content</code> grava o <strong>valor</strong>, e <code>Out-File</code>/<code>&gt;</code> grava o <strong>texto formatado</strong> da tela. Para texto simples o resultado é o mesmo; para tabelas de objetos, o <code>Out-File</code> grava a tabela como você a vê.</div>
+
+<hr>
+
+<h2>5. Acentos e codificação</h2>
+<p>Um arquivo guarda <strong>bytes</strong>, não letras. A <strong>codificação</strong> é a tabela que diz qual byte é qual letra. Veja o que o PowerShell 7 grava para a palavra "ação", com o <code>Format-Hex</code>, que mostra os bytes:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Set-Content acento.txt "ação"
+PS C:\Users\ana\guia-ps-teste&gt; Format-Hex acento.txt
+
+   Label: C:\Users\ana\guia-ps-teste\acento.txt
+
+          Offset Bytes                                           Ascii
+                 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F
+          ------ ----------------------------------------------- -----
+0000000000000000 61 C3 A7 C3 A3 6F 0D 0A                         aÃ§Ã£o��
+</pre>
+<p>O PowerShell 7 usa <strong>UTF-8</strong>: o "ç" vira dois bytes (<code>C3 A7</code>) e o "ã" também (<code>C3 A3</code>). O <code>0D 0A</code> no fim é a quebra de linha do Windows. A coluna "Ascii" mostra <code>aÃ§Ã£o</code> porque ela tenta ler byte por byte, sem entender UTF-8. O arquivo está certo.</p>
+<p>No <strong>Windows PowerShell 5.1</strong>, o mesmo comando grava outra coisa, e o <code>&gt;</code> grava uma terceira:</p>
+<pre class="term" data-title="Windows PowerShell 5.1">PS C:\Users\ana\guia-ps-teste&gt; Set-Content acento51.txt "ação"
+PS C:\Users\ana\guia-ps-teste&gt; Format-Hex acento51.txt
+
+
+           Caminho: C:\Users\ana\guia-ps-teste\acento51.txt
+
+           00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F
+
+00000000   61 E7 E3 6F 0D 0A                                ação..          
+
+
+PS C:\Users\ana\guia-ps-teste&gt; "ação" &gt; acento51-redir.txt
+PS C:\Users\ana\guia-ps-teste&gt; Format-Hex acento51-redir.txt
+
+
+           Caminho: C:\Users\ana\guia-ps-teste\acento51-redir.txt
+
+           00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F
+
+00000000   FF FE 61 00 E7 00 E3 00 6F 00 0D 00 0A 00        .þa.ç.ã.o.....  
+</pre>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Quem grava</th><th>Codificação</th><th>"ação" em bytes</th></tr>
+<tr><td>PowerShell 7, qualquer forma</td><td>UTF-8 (sem marca no começo)</td><td><code>61 C3 A7 C3 A3 6F</code></td></tr>
+<tr><td>5.1 <code>Set-Content</code></td><td>ANSI (a tabela antiga do Windows)</td><td><code>61 E7 E3 6F</code>: um byte por letra</td></tr>
+<tr><td>5.1 <code>&gt;</code> e <code>Out-File</code></td><td>UTF-16 (dois bytes por letra, começa com <code>FF FE</code>)</td><td><code>61 00 E7 00 E3 00 6F 00</code></td></tr>
+</table>
+</div>
+<p>Na prática: se um arquivo gravado no 5.1 for aberto por um programa que espera UTF-8, o "ação" aparece como <code>a��o</code>. No 5.1, para evitar isso, diga a codificação: <code>Set-Content a.txt "ação" -Encoding UTF8</code>. No PowerShell 7 você não precisa se preocupar.</p>
+
+<hr>
+
+<h2>Formas diferentes de gravar</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>O que faz</th><th>Quando usar</th></tr>
+<tr><td><code>Set-Content a.txt "x"</code></td><td>Substitui tudo.</td><td>Gravar um texto ou valor.</td></tr>
+<tr><td><code>Add-Content a.txt "x"</code></td><td>Acrescenta no fim.</td><td>Registros, listas que crescem.</td></tr>
+<tr><td><code>"x" &gt; a.txt</code></td><td>Substitui tudo (é o <code>Out-File</code>).</td><td>Atalho rápido no terminal.</td></tr>
+<tr><td><code>"x" &gt;&gt; a.txt</code></td><td>Acrescenta no fim.</td><td>Atalho rápido no terminal.</td></tr>
+<tr><td><code>comando | Out-File a.txt</code></td><td>Grava o que apareceria na tela.</td><td>Guardar a saída de um comando, com a formatação.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>A pasta não existe</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Set-Content naoexiste\x.txt "oi"
+Set-Content: Could not find a part of the path 'C:\Users\ana\guia-ps-teste\naoexiste\x.txt'.
+</pre>
+<dl class="anatomy">
+  <dt>Could not find a part of the path</dt><dd>"Não foi possível encontrar uma parte do caminho." Esta mensagem vem em inglês mesmo num Windows em português, porque é do próprio .NET, a base do PowerShell.</dd>
+  <dt>a part of the path</dt><dd>O arquivo pode não existir, ele seria criado. O que falta é a <strong>pasta</strong> <code>naoexiste</code>. O <code>Set-Content</code> cria arquivos, mas não cria pastas.</dd>
+</dl>
+<p><strong>Como resolver:</strong> crie a pasta antes com <code>New-Item -ItemType Directory naoexiste</code> (aula <a href="new-item.html">Criando Arquivos e Pastas</a>) ou confira se o nome da pasta está certo.</p>
+</div>
+
+<div class="cenario">
+<strong>"Perdi o que estava no arquivo"</strong>
+<p>Não aparece erro: você usou <code>Set-Content</code> ou <code>&gt;</code> num arquivo que já tinha conteúdo, e ele foi substituído. Não há como desfazer.</p>
+<p><strong>Como evitar:</strong> para acrescentar, use <code>Add-Content</code> ou <code>&gt;&gt;</code>. Na dúvida, confira antes com <code>Test-Path</code> se o arquivo já existe.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Set-Content a.txt "texto"</code></td><td>Grava, substituindo tudo. Cria o arquivo se não existir.</td></tr>
+<tr><td><code>Add-Content a.txt "texto"</code></td><td>Acrescenta uma linha no fim.</td></tr>
+<tr><td><code>"a","b" | Set-Content a.txt</code></td><td>Uma linha para cada item.</td></tr>
+<tr><td><code>&gt;</code> / <code>&gt;&gt;</code></td><td>Atalhos: substituir / acrescentar.</td></tr>
+<tr><td><code>comando | Out-File a.txt</code></td><td>Grava a saída como aparece na tela.</td></tr>
+<tr><td><code>-Encoding UTF8</code></td><td>No 5.1, grava acentos em UTF-8.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Grave "Olá" no arquivo <code>oi.txt</code>, substituindo o que houver:</p>
+<div class="ex-code"><input data-answer="Set-Content" aria-label="comando"> oi.txt "Olá"</div>
+</div>
+
+<div class="exercise">
+<h3>2. Sem apagar</h3>
+<p>Acrescente "Leite" no fim de <code>compras.txt</code>:</p>
+<div class="ex-code"><input data-answer="Add-Content" aria-label="comando"> compras.txt "Leite"</div>
+</div>
+
+<div class="exercise">
+<h3>3. O atalho</h3>
+<p>Complete com o símbolo que acrescenta no fim do arquivo:</p>
+<div class="ex-code">"nova linha" <input data-answer="&gt;&gt;" aria-label="símbolo"> registro.txt</div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. O <code>nota.txt</code> tem "Bom dia". Você roda <code>Set-Content nota.txt "Boa noite"</code>. O que fica no arquivo?</p>
+<label><input type="radio" name="q4"> "Bom dia" e "Boa noite", em duas linhas</label>
+<label><input type="radio" name="q4"> Só "Boa noite"</label>
+<label><input type="radio" name="q4"> Só "Bom dia"</label>
+<label><input type="radio" name="q4"> Dá erro porque o arquivo já existe</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Por que <code>Set-Content pasta\a.txt "oi"</code> deu "Could not find a part of the path"?</p>
+<label><input type="radio" name="q5"> O arquivo <code>a.txt</code> não existia</label>
+<label><input type="radio" name="q5"> Faltou o <code>-Force</code></label>
+<label><input type="radio" name="q5"> A pasta <code>pasta</code> não existe</label>
+<label><input type="radio" name="q5"> O texto precisava de aspas simples</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. Em qual versão você precisa se preocupar com <code>-Encoding</code> para gravar acentos em UTF-8?</p>
+<label><input type="radio" name="q6"> No Windows PowerShell 5.1</label>
+<label><input type="radio" name="q6"> No PowerShell 7</label>
+<label><input type="radio" name="q6"> Nas duas</label>
+<label><input type="radio" name="q6"> Em nenhuma</label>
+</div>
+
+<div class="tryps" data-goal="out:Total: 3 linhas;;src:\bSet-Content\b;;src:\bAdd-Content\b;;semerro">
+<p class="try-task"><strong>Missão final:</strong> monte um diário com três linhas: grave "Segunda: academia" com <code>Set-Content</code>, depois acrescente "Terça: inglês" e "Quarta: folga" com <code>Add-Content</code>. A última linha do script deve mostrar <code>Total: 3 linhas</code>.</p>
+<pre class="script" data-file="main.ps1">
+
+"Total: " + (Get-Content diario.txt).Count + " linhas"
+</pre>
+<pre class="solucao" data-file="main.ps1">Set-Content diario.txt "Segunda: academia"
+Add-Content diario.txt "Terça: inglês"
+Add-Content diario.txt "Quarta: folga"
+"Total: " + (Get-Content diario.txt).Count + " linhas"
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Set-Content</code> grava e <strong>substitui</strong> tudo. Se o arquivo não existe, ele cria.</li>
+  <li><code>Add-Content</code> acrescenta no fim sem apagar.</li>
+  <li><code>&gt;</code> substitui e <code>&gt;&gt;</code> acrescenta. Os dois são atalhos do <code>Out-File</code>.</li>
+  <li>O PowerShell 7 grava em UTF-8. No 5.1, use <code>-Encoding UTF8</code> para os acentos não quebrarem.</li>
+  <li>"Could not find a part of the path" quer dizer que a pasta não existe.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
