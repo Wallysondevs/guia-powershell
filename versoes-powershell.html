@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell 5.1 × PowerShell 7 — edição, política de execução e o que só existe no 7 | Guia PowerShell</title>
+<meta name="description" content="Windows PowerShell 5.1 × PowerShell 7.7: a saída real de $PSVersionTable, Desktop × Core, a política de execução por escopo e o que só funciona no 7 (Join-Path com 3 pastas, Split-Path -Extension e cd -).">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Windows PowerShell 5.1 × <span class="hl">PowerShell 7</span></h1>
+
+<p class="intro">No Windows costumam existir <strong>dois</strong> PowerShell. O <strong>Windows PowerShell 5.1</strong> já vem instalado e abre com o comando <code>powershell</code>. O <strong>PowerShell 7</strong> (neste guia, a versão <strong>7.7</strong>) é o atual, abre com <code>pwsh</code> e é o que este guia ensina. Os dois se parecem; esta aula mostra onde eles se diferenciam, com as saídas reais dos dois.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A distinguir o 5.1 (<code>powershell</code>, edição Desktop) do 7 (<code>pwsh</code>, edição Core).</li>
+  <li>A ler a tabela <code>$PSVersionTable</code> e o campo <code>PSEdition</code>.</li>
+  <li>Que a <strong>política de execução</strong> pode ser diferente em cada escopo (CurrentUser × LocalMachine) nos dois programas.</li>
+  <li>Três novidades que <strong>só existem no 7</strong>: <code>Join-Path</code> com 3 pastas, <code>Split-Path -Extension</code> e o <code>cd -</code>.</li>
+  <li>O que acontece no 5.1 se o <code>pwsh</code> ainda não estiver instalado.</li>
+</ul>
+</div>
+
+<p>As saídas do 7.7 e as do 5.1.19041 foram colhidas no mesmo Windows em português, na pasta da usuária fictícia <code>ana</code>. Quando uma linha muda de um para o outro, a aula mostra os dois.</p>
+
+<hr>
+
+<h2>A ideia: dois programas, o mesmo ofício</h2>
+<p>Pense em duas edições de um mesmo aplicativo de mensagens no celular: a que já veio de fábrica e a versão nova, que você instala depois. As duas enviam recado, mas a nova tem atalhos que a antiga não tem, e os menus não são idênticos.</p>
+<p>Aqui é igual. O 5.1 é o que já veio no Windows. O 7 é a edição atual, feita para Windows, Linux e macOS. Este guia escreve para o 7. O 5.1 aparece nas notas, sempre que a resposta for diferente.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th></th><th>Windows PowerShell 5.1</th><th>PowerShell 7.7</th></tr>
+<tr><td>Como abrir</td><td><code>powershell</code></td><td><code>pwsh</code></td></tr>
+<tr><td>Edição (<code>PSEdition</code>)</td><td><code>Desktop</code></td><td><code>Core</code></td></tr>
+<tr><td>Onde roda</td><td>Só no Windows</td><td>Windows, Linux e macOS</td></tr>
+<tr><td>Neste guia</td><td>Nas notas, quando muda</td><td>É a versão ensinada</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>1. Quem está atendendo? <code>$PSVersionTable</code></h2>
+<p>A variável automática <code>$PSVersionTable</code> é a ficha de identidade de quem está na janela. No <strong>PowerShell 7.7</strong>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $PSVersionTable
+
+Name                           Value
+----                           -----
+PSVersion                      7.7.0
+PSEdition                      Core
+GitCommitId                    7.7.0
+OS                             Microsoft Windows 10.0.19045
+Platform                       Win32NT
+PSCompatibleVersions           {1.0, 2.0, 3.0, 4.0…}
+PSRemotingProtocolVersion      2.4
+SerializationVersion           1.1.0.1
+WSManStackVersion              3.0
+</pre>
+<p>Os campos que mais importam agora:</p>
+<dl class="anatomy">
+  <dt>PSVersion 7.7.0</dt><dd>A versão. Se aparecer 7.7 (ou outra 7.x), você está no PowerShell 7.</dd>
+  <dt>PSEdition Core</dt><dd>A edição “Core”: é o PowerShell 7. No 5.1 este campo diz <code>Desktop</code>.</dd>
+  <dt>OS e Platform</dt><dd>Só o 7 traz esses dois na tabela: aqui, Windows. No editor deste guia, que roda um PowerShell 7 de Linux, o sistema aparece diferente — e tudo bem.</dd>
+</dl>
+<p>Dá para pedir só a edição:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $PSVersionTable.PSEdition
+Core
+</pre>
+
+<p>A mesma ficha, no <strong>Windows PowerShell 5.1</strong> (versão 5.1.19041.6456):</p>
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; $PSVersionTable
+
+Name                           Value
+----                           -----
+PSVersion                      5.1.19041.6456
+PSEdition                      Desktop
+PSCompatibleVersions           {1.0, 2.0, 3.0, 4.0...}
+BuildVersion                   10.0.19041.6456
+CLRVersion                     4.0.30319.42000
+WSManStackVersion              3.0
+PSRemotingProtocolVersion      2.3
+SerializationVersion           1.1.0.1
+
+</pre>
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; $PSVersionTable.PSEdition
+Desktop
+</pre>
+<div class="note">Repare no que muda na tabela: o 5.1 tem <code>CLRVersion</code> e <code>BuildVersion</code>, e não tem <code>GitCommitId</code>, <code>OS</code> nem <code>Platform</code>. O número da versão começa com <code>5.1</code>, e a edição é <code>Desktop</code>. Se a sua janela mostrar isso, você não está no 7: feche e abra o <strong>PowerShell 7</strong> (comando <code>pwsh</code>). Como instalar está na aula <a href="instalar.html">Instalar o PowerShell 7</a>.</div>
+
+<p>O 5.1 mora neste caminho, no Windows:</p>
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; (Get-Command powershell).Source
+C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+</pre>
+<p>O 7 é o programa <code>pwsh</code>. O caminho exato depende de como ele foi instalado (Microsoft Store ou <code>winget</code>, por exemplo); o que importa é abrir pelo nome <code>pwsh</code> ou pelo atalho “PowerShell 7”.</p>
+
+<div class="tryps" data-goal="out:Core;;src:PSEdition;;semerro">
+<p class="try-task"><strong>Experimente:</strong> no editor (que é PowerShell 7), mostre só a edição, para conferir que é <code>Core</code>.</p>
+<pre class="script" data-file="main.ps1">Write-Output "Qual é a edição?"
+</pre>
+<pre class="solucao" data-file="main.ps1">$PSVersionTable.PSEdition
+</pre>
+</div>
+
+<hr>
+
+<h2>2. A política de execução, por escopo</h2>
+<p>A <strong>política de execução</strong> (execution policy) diz se o PowerShell aceita rodar scripts <code>.ps1</code> naquela máquina. Ela é definida em vários <strong>escopos</strong> (scope): da máquina, do seu usuário, só deste processo… O comando para ver todos é <code>Get-ExecutionPolicy -List</code>.</p>
+<p>No <strong>PowerShell 7.7</strong>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-ExecutionPolicy -List
+
+        Scope ExecutionPolicy
+        ----- ---------------
+MachinePolicy       Undefined
+   UserPolicy       Undefined
+      Process          Bypass
+  CurrentUser       Undefined
+ LocalMachine    RemoteSigned
+
+</pre>
+<p>No <strong>Windows PowerShell 5.1</strong>, no mesmo computador:</p>
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; Get-ExecutionPolicy -List
+
+        Scope ExecutionPolicy
+        ----- ---------------
+MachinePolicy       Undefined
+   UserPolicy       Undefined
+      Process          Bypass
+  CurrentUser    RemoteSigned
+ LocalMachine       Undefined
+
+</pre>
+<dl class="anatomy">
+  <dt>CurrentUser</dt><dd>A política da sua conta. No 7 desta máquina estava <code>Undefined</code> (“não definido”). No 5.1 estava <code>RemoteSigned</code> (scripts baixados da internet precisam ser assinados; os que você mesmo escreveu rodam).</dd>
+  <dt>LocalMachine</dt><dd>A política da máquina toda. Aqui é o contrário: no 7 estava <code>RemoteSigned</code>; no 5.1, <code>Undefined</code>. Os dois programas <strong>não compartilham</strong> essa configuração: mudar no 7 não muda no 5.1.</dd>
+  <dt>Process Bypass</dt><dd>Vale só para o processo que estava rodando a coleta, e veio do jeito como ela foi chamada. <strong>Não é o padrão</strong> de uma janela que você abre no menu Iniciar: nessa janela, o Process costuma aparecer como <code>Undefined</code>. Olhe sobretudo CurrentUser e LocalMachine.</dd>
+  <dt>MachinePolicy e UserPolicy</dt><dd>Reservados para políticas de grupo da empresa. <code>Undefined</code> quer dizer que não há uma regra nesse nível.</dd>
+</dl>
+<div class="note">Os valores acima são os desta máquina de laboratório. No seu computador os escopos podem estar diferentes, e tudo bem. O ponto da aula é: <strong>o 5.1 e o 7 têm listas próprias</strong>, e CurrentUser e LocalMachine podem não coincidir entre os dois.</div>
+
+<hr>
+
+<h2>3. Três coisas que só o 7 faz</h2>
+<p>A maior parte dos comandos desta escola funciona nos dois. Estas três, não: existem só no PowerShell 7. Por isso o guia ensina o 7.</p>
+
+<h3><code>Join-Path</code> com três partes <span class="versao">7.7</span></h3>
+<p><code>Join-Path</code> monta um caminho de pasta. No 5.1 ele aceita só duas partes (a base e um filho). No 7 você pode passar três ou mais de uma vez: a pasta, a subpasta e o arquivo, por exemplo. No editor deste guia (PowerShell 7 de Linux) o separador sai como <code>/</code>; no Windows sai como <code>\</code>. A ideia é a mesma.</p>
+
+<div class="tryps" data-goal="out:docs;;out:fotos;;out:capa.jpg;;src:Join-Path;;semerro">
+<p class="try-task"><strong>Experimente:</strong> junte três partes de uma vez, <code>docs</code>, <code>fotos</code> e <code>capa.jpg</code>, com um único <code>Join-Path</code>.</p>
+<pre class="script" data-file="main.ps1">Join-Path "docs" "fotos"
+</pre>
+<pre class="solucao" data-file="main.ps1">Join-Path "docs" "fotos" "capa.jpg"
+</pre>
+</div>
+
+<h3><code>Split-Path -Extension</code> <span class="versao">7.7</span></h3>
+<p><code>Split-Path</code> quebra um caminho e devolve um pedaço (o nome do arquivo, a pasta pai…). O parâmetro <code>-Extension</code>, que devolve só a extensão (<code>.txt</code>, <code>.jpg</code>…), <strong>existe só no 7</strong>. No 5.1 esse parâmetro não é aceito.</p>
+
+<div class="tryps" data-goal="out:.txt;;src:Split-Path;;src:-Extension;;semerro">
+<p class="try-task"><strong>Missão:</strong> use <code>Split-Path</code> com <code>-Extension</code> para mostrar a extensão de <code>nota.txt</code>.</p>
+<pre class="script" data-file="main.ps1">Split-Path "nota.txt"
+</pre>
+<pre class="solucao" data-file="main.ps1">Split-Path "nota.txt" -Extension
+</pre>
+</div>
+
+<h3><code>cd -</code> <span class="versao">7.7</span></h3>
+<p>No 7, <code>cd -</code> (o <code>cd</code> é apelido de <code>Set-Location</code>) volta para a <strong>pasta anterior</strong>, como no Linux. No 5.1 esse atalho não existe: o <code>-</code> não é entendido como “a pasta de onde eu vim”. Se você precisa desse vai-e-volta, use o 7.</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Você pediu o <code>pwsh</code> numa janela que só tem o 5.1</strong>
+<p>Se o PowerShell 7 ainda não está instalado (ou você abriu o 5.1 sem querer) e pede o caminho do <code>pwsh</code>, o 5.1 responde assim:</p>
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; (Get-Command pwsh).Source
+Get-Command : O termo 'pwsh' não é reconhecido como nome de cmdlet, função, arquivo de script ou programa operável.
+Verifique a grafia do nome ou, se um caminho tiver sido incluído, veja se o caminho está correto e tente novamente.
+No linha:1 caractere:2
++ (Get-Command pwsh).Source
++  ~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (pwsh:String) [Get-Command], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException,Microsoft.PowerShell.Commands.GetCommandCommand
+</pre>
+<dl class="anatomy">
+  <dt>O termo 'pwsh' não é reconhecido…</dt><dd>O 5.1 procurou um programa chamado <code>pwsh</code> e não achou. Ou o 7 não está instalado, ou esta janela não o enxerga.</dd>
+  <dt>No linha:1 caractere:2</dt><dd>Onde está o pedido: o <code>Get-Command pwsh</code> dentro dos parênteses. Os tils sublinham esse pedaço.</dd>
+  <dt>CommandNotFoundException</dt><dd>O nome técnico: “comando não encontrado”. Útil se você for pesquisar a mensagem.</dd>
+</dl>
+<p><strong>Como resolver:</strong> instale o PowerShell 7 (aula <a href="instalar.html">Instalar o PowerShell 7</a>), feche a janela e abra o atalho <strong>PowerShell 7</strong>. Confira com <code>$PSVersionTable.PSVersion</code>: tem que começar com <code>7</code>.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>$PSVersionTable</code></td><td>Mostra a ficha de identidade (versão, edição, sistema…).</td></tr>
+<tr><td><code>$PSVersionTable.PSEdition</code></td><td><code>Core</code> no 7, <code>Desktop</code> no 5.1.</td></tr>
+<tr><td><code>Get-ExecutionPolicy -List</code></td><td>Lista a política de execução de cada escopo. O 5.1 e o 7 têm listas próprias.</td></tr>
+<tr><td><code>Join-Path a b c</code></td><td>Monta um caminho com 3 (ou mais) partes. <span class="versao">só no 7</span></td></tr>
+<tr><td><code>Split-Path arquivo -Extension</code></td><td>Devolve só a extensão. <span class="versao">só no 7</span></td></tr>
+<tr><td><code>cd -</code></td><td>Volta para a pasta anterior. <span class="versao">só no 7</span></td></tr>
+<tr><td><code>pwsh</code> / <code>powershell</code></td><td>Abre o 7 e o 5.1, respectivamente.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete para ver a ficha de identidade do PowerShell:</p>
+<div class="ex-code"><input data-answer="$PSVersionTable" aria-label="comando"></div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual é a edição?</h3>
+<p>No PowerShell 7, o que aparece com <code>$PSVersionTable.PSEdition</code>?</p>
+<div class="ex-code">Saída: <input data-answer="Core" aria-label="edição"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Complete o comando do 7</h3>
+<p>Qual parâmetro de <code>Split-Path</code> (só no 7) devolve a extensão do arquivo?</p>
+<div class="ex-code">Split-Path "nota.txt" -<input data-answer="Extension" aria-label="parâmetro"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. Você abriu uma janela e <code>$PSVersionTable.PSEdition</code> mostrou <code>Desktop</code>. Em qual PowerShell você está?</p>
+<label><input type="radio" name="q4"> PowerShell 7</label>
+<label><input type="radio" name="q4"> Windows PowerShell 5.1</label>
+<label><input type="radio" name="q4"> No <code>cmd</code> antigo</label>
+<label><input type="radio" name="q4"> Em nenhum: isso é um erro</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. No laboratório desta aula, qual era a diferença de política entre o 7 e o 5.1?</p>
+<label><input type="radio" name="q5"> Os dois tinham exatamente os mesmos valores em todos os escopos</label>
+<label><input type="radio" name="q5"> Só o 5.1 tem política de execução</label>
+<label><input type="radio" name="q5"> No 7, LocalMachine era RemoteSigned e CurrentUser era Undefined; no 5.1 era o contrário</label>
+<label><input type="radio" name="q5"> A política do 7 vale automaticamente para o 5.1</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. Qual destas opções <strong>só funciona no PowerShell 7</strong>?</p>
+<label><input type="radio" name="q6"> <code>Join-Path "docs" "fotos" "capa.jpg"</code> (três partes de uma vez)</label>
+<label><input type="radio" name="q6"> <code>$PSVersionTable</code></label>
+<label><input type="radio" name="q6"> <code>Get-Date</code></label>
+<label><input type="radio" name="q6"> <code>Get-ExecutionPolicy -List</code></label>
+</div>
+
+<div class="tryps" data-goal="out:.jpg;;src:Split-Path;;src:-Extension;;semerro">
+<p class="try-task"><strong>Missão final:</strong> mostre só a extensão de <code>capa.jpg</code>, com <code>Split-Path -Extension</code>.</p>
+<pre class="script" data-file="main.ps1">Split-Path "capa.jpg"
+</pre>
+<pre class="solucao" data-file="main.ps1">Split-Path "capa.jpg" -Extension
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Existem dois programas: o <strong>Windows PowerShell 5.1</strong> (<code>powershell</code>, edição <code>Desktop</code>) e o <strong>PowerShell 7</strong> (<code>pwsh</code>, edição <code>Core</code>). Este guia ensina o 7.7.</li>
+  <li><code>$PSVersionTable</code> mostra a versão. Se <code>PSVersion</code> começa com <code>5.1</code>, você não está no 7.</li>
+  <li>A política de execução é por programa e por escopo: no laboratório, o 7 tinha LocalMachine = RemoteSigned e CurrentUser = Undefined; o 5.1 era o contrário. O Process = Bypass da coleta não é o padrão da sua janela.</li>
+  <li><code>Join-Path</code> com 3 partes, <code>Split-Path -Extension</code> e <code>cd -</code> existem só no 7.</li>
+  <li>Se o 5.1 diz que <code>pwsh</code> “não é reconhecido”, instale o 7 e abra a janela certa.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
