@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Seu Primeiro Comando — Get-Date, Write-Output e contas | Guia PowerShell</title>
+<meta name="description" content="O primeiro comando no PowerShell para quem nunca usou terminal: o prompt PS C:\Users\ana>, o Get-Date, o parâmetro -Format, o Write-Output, contas direto no terminal e o erro real de comando digitado errado, explicado linha por linha em português.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Seu <span class="hl">Primeiro Comando</span></h1>
+
+<p class="intro">A janela do PowerShell está aberta, o cursor está piscando e nada acontece. É normal: o PowerShell está <strong>esperando você</strong>. Nesta aula você vai digitar os primeiros comandos de verdade: perguntar a data ao computador, pedir que ele escreva uma frase, fazer uma conta e, de propósito, errar um nome para ver como é uma mensagem de erro (e perder o medo dela).</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é o <strong>prompt</strong> <code>PS C:\Users\ana&gt;</code> e o que cada pedaço dele quer dizer.</li>
+  <li>A rodar um comando: digitar e apertar <kbd>Enter</kbd>.</li>
+  <li>O <code>Get-Date</code>, que mostra a data e a hora, e o parâmetro <code>-Format</code>, que muda o jeito de mostrar.</li>
+  <li>O <code>Write-Output</code>, que escreve um texto na tela.</li>
+  <li>Que dá para fazer contas direto no terminal, como numa calculadora.</li>
+  <li>O <code>$?</code>, que diz se o último comando deu certo.</li>
+  <li>A ler, linha por linha, a mensagem de erro real de um comando digitado errado.</li>
+</ul>
+</div>
+
+<p>Todas as saídas desta aula foram colhidas no <strong>Windows PowerShell 5.1</strong> de um Windows em português, na pasta pessoal da usuária fictícia <code>ana</code>. No PowerShell 7 os comandos são os mesmos; quando a resposta muda, a aula avisa.</p>
+
+<hr>
+
+<h2>A ideia: um balcão de atendimento</h2>
+<p>Pense no balcão de uma repartição. O atendente fica parado, olhando para você, até você falar o que quer. Você faz o pedido, ele resolve, entrega a resposta e volta a olhar para você, pronto para o próximo pedido.</p>
+<p>O PowerShell funciona igual. A linha que termina em <code>&gt;</code> é o atendente esperando: o <strong>prompt</strong>. Você digita o pedido (o <strong>comando</strong>), aperta <kbd>Enter</kbd>, ele mostra a resposta (a <strong>saída</strong>) e o prompt aparece de novo.</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>No balcão</th><th>No PowerShell</th></tr>
+<tr><td>O atendente esperando</td><td>O prompt <code>PS C:\Users\ana&gt;</code></td></tr>
+<tr><td>O seu pedido</td><td>O comando que você digita</td></tr>
+<tr><td>"Pode falar"</td><td>A tecla <kbd>Enter</kbd>, que entrega o pedido</td></tr>
+<tr><td>A resposta no papel</td><td>A saída que aparece embaixo do comando</td></tr>
+</table>
+</div>
+
+<h3>Lendo o prompt</h3>
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; </pre>
+<dl class="anatomy">
+  <dt>PS</dt><dd>"PowerShell". Mostra que quem está atendendo é o PowerShell, e não o <code>cmd</code> antigo (o prompt do <code>cmd</code> não tem esse <code>PS</code>).</dd>
+  <dt>C:\Users\ana</dt><dd>A <strong>pasta onde você está</strong> agora: a pasta pessoal da Ana, no disco <code>C:</code>. Ela muda quando você muda de pasta (aula <a href="set-location.html">Mudando de Pasta</a>).</dd>
+  <dt>&gt;</dt><dd>O fim do prompt. Tudo o que você digitar aparece depois dele.</dd>
+</dl>
+<div class="note">No seu computador, no lugar de <code>ana</code> vai aparecer o <strong>seu</strong> nome de usuário do Windows. Isso é normal e não muda nada nos comandos.</div>
+
+<hr>
+
+<h2>1. Que dia é hoje? <code>Get-Date</code></h2>
+<p>Digite exatamente isto e aperte <kbd>Enter</kbd>:</p>
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; Get-Date
+
+sexta-feira, 20 de novembro de 2026 17:04:12
+
+
+</pre>
+<dl class="anatomy">
+  <dt>Get</dt><dd>O <strong>verbo</strong>: "pegar", "obter". Todo comando do PowerShell começa com um verbo dizendo o que ele faz.</dd>
+  <dt>-</dt><dd>O hífen junta o verbo ao substantivo, sem espaço.</dd>
+  <dt>Date</dt><dd>O <strong>substantivo</strong>: "data". Juntos: "obter a data". Essa regra Verbo-Substantivo tem uma aula só para ela: <a href="cmdlets.html">Cmdlets: Verbo-Substantivo</a>.</dd>
+</dl>
+<p>O PowerShell respondeu com o dia da semana, a data e a hora, em português, porque o Windows está em português. Repare nas <strong>linhas em branco</strong> antes e depois: é o jeito do PowerShell mostrar uma data inteira. Não é erro.</p>
+<div class="note">O PowerShell <strong>não liga para maiúsculas e minúsculas</strong> nos nomes dos comandos: <code>get-date</code> e <code>GET-DATE</code> fazem a mesma coisa. Neste guia escrevemos <code>Get-Date</code> porque é o jeito oficial e o mais fácil de ler.</div>
+
+<div class="tryps" data-goal="out:2026;;semerro">
+<p class="try-task"><strong>Experimente:</strong> clique em Rodar e veja a data de hoje no editor.</p>
+<pre class="script" data-file="main.ps1">Get-Date
+</pre>
+<pre class="solucao" data-file="main.ps1">Get-Date
+</pre>
+</div>
+
+<hr>
+
+<h2>2. Do seu jeito: <code>-Format</code></h2>
+<p>E se você só quiser a data, no formato que a gente escreve no Brasil? Muitos comandos aceitam <strong>parâmetros</strong>: palavras que começam com hífen e mudam o jeito do comando trabalhar.</p>
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; Get-Date -Format "dd/MM/yyyy"
+20/11/2026
+</pre>
+<dl class="anatomy">
+  <dt>Get-Date</dt><dd>O mesmo comando de antes.</dd>
+  <dt>-Format</dt><dd>O <strong>parâmetro</strong>: "use este formato". Repare no espaço antes do hífen: é ele que separa o comando do parâmetro.</dd>
+  <dt>"dd/MM/yyyy"</dt><dd>O <strong>valor</strong> do parâmetro, entre aspas: <code>dd</code> = dia com 2 dígitos, <code>MM</code> = mês com 2 dígitos (M <strong>maiúsculo</strong>; o <code>mm</code> minúsculo é minuto!), <code>yyyy</code> = ano com 4 dígitos. As barras saem como estão.</dd>
+</dl>
+<p>Agora a resposta veio numa linha só, sem linhas em branco. Os parâmetros têm a aula própria deles: <a href="parametros-cmdlet.html">Parâmetros dos Comandos</a>.</p>
+
+<hr>
+
+<h2>3. Escrevendo na tela: <code>Write-Output</code></h2>
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; Write-Output "Olá, mundo!"
+Olá, mundo!
+</pre>
+<dl class="anatomy">
+  <dt>Write-Output</dt><dd>Verbo <code>Write</code> ("escrever") + substantivo <code>Output</code> ("saída"): "escreva na saída".</dd>
+  <dt>"Olá, mundo!"</dt><dd>O <strong>texto</strong>. As aspas marcam onde ele começa e termina e <strong>não aparecem</strong> na resposta. Espaços, vírgulas e acentos saem iguaizinhos.</dd>
+</dl>
+<p>Por que "Olá, mundo!"? É uma tradição: desde os anos 1970, o primeiro programa de quem aprende uma linguagem nova costuma mostrar essa frase.</p>
+
+<div class="tryps" data-goal="out:Olá, Ana!">
+<p class="try-task"><strong>Missão:</strong> troque "mundo" por "Ana" e clique em Rodar.</p>
+<pre class="script" data-file="main.ps1">Write-Output "Olá, mundo!"
+</pre>
+<pre class="solucao" data-file="main.ps1">Write-Output "Olá, Ana!"
+</pre>
+</div>
+
+<hr>
+
+<h2>4. O terminal também é calculadora</h2>
+<p>Você não precisa de comando nenhum para fazer uma conta: digite a conta e aperte <kbd>Enter</kbd>.</p>
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; 2 + 3
+5
+</pre>
+<p>O PowerShell calculou e mostrou o resultado. Os outros sinais (<code>-</code>, <code>*</code> para vezes, <code>/</code> para dividir) e as pegadinhas das contas estão na aula <a href="operadores-aritmeticos.html">Operadores Aritméticos</a>.</p>
+<div class="note">Cuidado com as aspas: <code>2 + 3</code> é uma <strong>conta</strong>, mas <code>"2 + 3"</code> é um <strong>texto</strong>, e o PowerShell mostra o texto como está, sem calcular.</div>
+
+<hr>
+
+<h2>5. Deu certo? <code>$?</code></h2>
+<p>Depois de qualquer comando, o PowerShell guarda num lugar especial chamado <code>$?</code> se o último comando <strong>deu certo</strong>. Para ver, digite <code>$?</code> e aperte <kbd>Enter</kbd>:</p>
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; $?
+True
+</pre>
+<p><code>True</code> é "verdadeiro" em inglês: o comando anterior funcionou. Quando o último comando falha, o <code>$?</code> fica <code>False</code> ("falso"). Isso vai ser muito útil nos scripts; por enquanto, basta saber que ele existe. As variáveis que começam com <code>$</code> e já vêm prontas são assunto da aula <a href="variaveis-automaticas.html">Variáveis Automáticas</a>.</p>
+
+<hr>
+
+<h2>Formas diferentes de mostrar um texto</h2>
+<p>Você vai ver estas três formas por aí. Todas mostram <code>Olá, mundo!</code>:</p>
+<pre class="file" data-file="formas.ps1">Write-Output "Olá, mundo!"
+"Olá, mundo!"
+echo "Olá, mundo!"
+</pre>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>Write-Output "texto"</code></td><td>Nos scripts, quando você quer deixar claro que a linha <strong>mostra</strong> algo. É o jeito deste guia no começo.</td></tr>
+<tr><td><code>"texto"</code> sozinho</td><td>Atalho do dia a dia: um texto sozinho numa linha já vai para a saída. Muito usado por quem já tem prática.</td></tr>
+<tr><td><code>echo "texto"</code></td><td>Apelido do <code>Write-Output</code>, para quem vem do <code>cmd</code> ou do Linux (aula <a href="aliases.html">Apelidos</a>). Funciona, mas evite em scripts.</td></tr>
+</table>
+</div>
+<p>Existe ainda o <code>Write-Host</code>, que parece igual mas não é: a diferença tem aula própria, <a href="write-host-output.html">Write-Host × Write-Output</a>.</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Nome do comando digitado errado</strong>
+<p>Faltou o <code>e</code> no fim de <code>Get-Date</code>:</p>
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; Get-Dat
+Get-Dat : O termo 'Get-Dat' não é reconhecido como nome de cmdlet, função, arquivo de script ou programa operável.
+Verifique a grafia do nome ou, se um caminho tiver sido incluído, veja se o caminho está correto e tente novamente.
+No linha:1 caractere:1
++ Get-Dat
++ ~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (Get-Dat:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+</pre>
+<p>A mensagem aparece em <strong>vermelho</strong> e assusta, mas é só o PowerShell dizendo "não conheço esse nome". Linha por linha:</p>
+<dl class="anatomy">
+  <dt>Get-Dat : O termo 'Get-Dat' não é reconhecido…</dt><dd>O que aconteceu: ele procurou um comando chamado <code>Get-Dat</code> e não achou nenhum com esse nome.</dd>
+  <dt>Verifique a grafia do nome…</dt><dd>A dica: confira se você escreveu certo. É quase sempre isso.</dd>
+  <dt>No linha:1 caractere:1</dt><dd>Onde está o problema: na linha 1, a partir da letra 1. Num script com muitas linhas, isso ajuda a achar o erro.</dd>
+  <dt>+ ~~~~~~~</dt><dd>Os tils ficam embaixo do pedaço que deu problema, como um sublinhado.</dd>
+  <dt>CategoryInfo / FullyQualifiedErrorId</dt><dd>A "ficha técnica" do erro: <code>ObjectNotFound</code> ("objeto não encontrado") e <code>CommandNotFoundException</code> ("comando não encontrado"). Útil para pesquisar na internet; no começo, pode ignorar.</dd>
+</dl>
+<p><strong>Como resolver:</strong> confira a grafia (<code>Get-Date</code>) e rode de novo. Não precisa fechar a janela nem "limpar" nada: o erro não estragou coisa nenhuma.</p>
+<div class="note">No PowerShell 7 a mesma mensagem é mais curta, sem as linhas de <code>CategoryInfo</code>. A ideia é a mesma.</div>
+</div>
+
+<div class="cenario">
+<strong>Esqueceu o hífen ou pôs um espaço no meio</strong>
+<p><code>Get Date</code> ou <code>GetDate</code> também não são o nome do comando: o PowerShell vai dar o mesmo tipo de erro "não é reconhecido". O nome é sempre <strong>Verbo-Substantivo</strong>, colados pelo hífen.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Get-Date</code></td><td>Mostra a data e a hora de agora.</td></tr>
+<tr><td><code>Get-Date -Format "dd/MM/yyyy"</code></td><td>Mostra só a data, no formato dia/mês/ano.</td></tr>
+<tr><td><code>Write-Output "texto"</code></td><td>Escreve o texto na tela.</td></tr>
+<tr><td><code>2 + 3</code></td><td>Faz a conta e mostra o resultado.</td></tr>
+<tr><td><code>$?</code></td><td><code>True</code> se o último comando deu certo, <code>False</code> se falhou.</td></tr>
+<tr><td><kbd>Enter</kbd></td><td>Entrega o comando ao PowerShell.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete para mostrar a data e a hora de agora:</p>
+<div class="ex-code"><input data-answer="Get-Date" aria-label="comando"></div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual é a saída?</h3>
+<p>O que aparece na tela com <code>Write-Output "Bom dia"</code>?</p>
+<div class="ex-code">Saída: <input data-answer="Bom dia" aria-label="saída"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Complete o formato</h3>
+<p>Complete para mostrar a data como <code>20/11/2026</code>:</p>
+<div class="ex-code">Get-Date -Format "<input data-answer="dd/MM/yyyy" aria-label="formato">"</div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. No prompt <code>PS C:\Users\ana&gt;</code>, o que é <code>C:\Users\ana</code>?</p>
+<label><input type="radio" name="q4"> O nome do comando que vai rodar</label>
+<label><input type="radio" name="q4"> A pasta onde você está agora</label>
+<label><input type="radio" name="q4"> A versão do PowerShell</label>
+<label><input type="radio" name="q4"> Uma mensagem de erro</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Você digitou <code>Get-Dat</code> e apareceu "O termo 'Get-Dat' não é reconhecido". O que fazer?</p>
+<label><input type="radio" name="q5"> Fechar o PowerShell e abrir de novo</label>
+<label><input type="radio" name="q5"> Reiniciar o computador</label>
+<label><input type="radio" name="q5"> Conferir a grafia e digitar <code>Get-Date</code></label>
+<label><input type="radio" name="q5"> Instalar o comando <code>Get-Dat</code></label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. O que o PowerShell mostra com <code>"2 + 3"</code> (com aspas)?</p>
+<label><input type="radio" name="q6"> <code>2 + 3</code></label>
+<label><input type="radio" name="q6"> <code>5</code></label>
+<label><input type="radio" name="q6"> <code>True</code></label>
+<label><input type="radio" name="q6"> Um erro</label>
+</div>
+
+<div class="tryps" data-goal="out:Meu nome é Ana;;src:\bGet-Date\b;;semerro">
+<p class="try-task"><strong>Missão final:</strong> escreva duas linhas: uma que mostre <code>Meu nome é Ana</code> e outra que mostre a data no formato <code>dd/MM/yyyy</code>.</p>
+<pre class="script" data-file="main.ps1">
+</pre>
+<pre class="solucao" data-file="main.ps1">Write-Output "Meu nome é Ana"
+Get-Date -Format "dd/MM/yyyy"
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>O prompt <code>PS C:\Users\ana&gt;</code> é o PowerShell esperando um comando; o meio dele é a pasta onde você está.</li>
+  <li>Digite o comando e aperte <kbd>Enter</kbd>: a resposta aparece embaixo e o prompt volta.</li>
+  <li><code>Get-Date</code> mostra a data e a hora; com <code>-Format "dd/MM/yyyy"</code>, só a data (M maiúsculo é mês, m minúsculo é minuto).</li>
+  <li><code>Write-Output "texto"</code> escreve o texto; as aspas não aparecem.</li>
+  <li>Contas como <code>2 + 3</code> funcionam direto; com aspas, viram texto.</li>
+  <li><code>$?</code> diz se o último comando deu certo (<code>True</code>) ou não (<code>False</code>).</li>
+  <li>Erro de nome ("não é reconhecido") quase sempre é grafia: confira e rode de novo. Nada quebra.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
