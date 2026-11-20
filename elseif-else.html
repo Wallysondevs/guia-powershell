@@ -199,26 +199,25 @@ Line |
 
 <div class="cenario">
 <strong>Escrever <code>elsif</code> (como no Ruby ou no Perl)</strong>
-<p>Este erro foi colhido rodando o código errado como texto, com o <code>Invoke-Expression</code>; por isso a mensagem começa com <code>Invoke-Expression:</code>. Digitando direto, a moldura muda, mas a mensagem é a mesma.</p>
-<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Invoke-Expression 'if ($nota -ge 7) { "A" } elsif ($nota -ge 5) { "B" }'
-A
-Invoke-Expression: O termo "elsif" não é reconhecido como um nome de um cmdlet, função, arquivo de script ou programa executável.
+<p>Colhido num terminal novo, onde a <code>$nota</code> ainda não existia:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; if ($nota -ge 7) { "A" } elsif ($nota -ge 5) { "B" }
+elsif: O termo "elsif" não é reconhecido como um nome de um cmdlet, função, arquivo de script ou programa executável.
 Verifique a ortografia do nome ou, se um caminho foi incluído, verifique se o caminho está correto e tente novamente.
 </pre>
 <dl class="anatomy">
-  <dt>A</dt><dd>Este é mais traiçoeiro: o <code>if</code> rodou normalmente (a <code>$nota</code> ainda era 9.5) e mostrou "A".</dd>
-  <dt>O termo "elsif" não é reconhecido...</dt><dd>Este não é erro de leitura: o código foi aceito. O PowerShell não conhece <code>elsif</code>, então achou que era o nome de <strong>outro comando</strong>, escrito depois do <code>if</code>, e não encontrou nenhum comando com esse nome.</dd>
+  <dt>elsif:</dt><dd>Antes dos dois-pontos vem o nome do comando que o PowerShell tentou rodar: <code>elsif</code>.</dd>
+  <dt>O termo "elsif" não é reconhecido...</dt><dd>Este não é erro de leitura (por isso a mensagem sai em português): o código foi aceito e o <code>if</code> rodou. Como a <code>$nota</code> não existia, a condição foi falsa e o "A" não apareceu; se a nota fosse 7 ou mais, o "A" sairia antes do erro. Depois, o PowerShell não conhece <code>elsif</code>, então achou que era o nome de <strong>outro comando</strong>, escrito depois do <code>if</code>, e não encontrou nenhum comando com esse nome.</dd>
   <dt>Verifique a ortografia do nome</dt><dd>É exatamente isso: a grafia certa é <code>elseif</code>.</dd>
 </dl>
 </div>
 
 <div class="cenario">
 <strong><code>else</code> sozinho, sem <code>if</code> antes</strong>
-<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Invoke-Expression 'else { "sozinho" }'
-Invoke-Expression: O termo "else" não é reconhecido como um nome de um cmdlet, função, arquivo de script ou programa executável.
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; else { "sozinho" }
+else: O termo "else" não é reconhecido como um nome de um cmdlet, função, arquivo de script ou programa executável.
 Verifique a ortografia do nome ou, se um caminho foi incluído, verifique se o caminho está correto e tente novamente.
 </pre>
-<p>(Colhido também com o <code>Invoke-Expression</code>.) O <code>else</code> só existe grudado num <code>if</code>. Sozinho, o PowerShell acha que é o nome de um comando. Isso também acontece no terminal se você aperta Enter depois da <code>}</code> do <code>if</code> e digita o <code>else</code> na linha seguinte, porque o <code>if</code> já terminou. No terminal, escreva o <code>else</code> na mesma linha da <code>}</code>.</p>
+<p>O <code>else:</code> no começo é o nome do "comando" que o PowerShell procurou. O <code>else</code> só existe grudado num <code>if</code>. Sozinho, o PowerShell acha que é o nome de um comando. Isso também acontece no terminal se você aperta Enter depois da <code>}</code> do <code>if</code> e digita o <code>else</code> na linha seguinte, porque o <code>if</code> já terminou. No terminal, escreva o <code>else</code> na mesma linha da <code>}</code>.</p>
 </div>
 
 <hr>
