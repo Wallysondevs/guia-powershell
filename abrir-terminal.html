@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Abrindo o PowerShell — o prompt, o host e o Terminal do Windows | Guia PowerShell</title>
+<meta name="description" content="Como abrir o PowerShell 7 e o Terminal do Windows, ler o prompt PS C:\Users\ana>, conferir o host com $Host.Name e a pasta inicial com Get-Location.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Abrindo o <span class="hl">PowerShell</span></h1>
+
+<p class="intro">Antes de digitar o primeiro comando, você precisa da <strong>janela certa</strong>. Nesta aula você abre o PowerShell 7 pelo menu Iniciar, conhece o <strong>Terminal do Windows</strong> (o aplicativo de abas que pode hospedar o 7, o 5.1 e o <code>cmd</code>) e aprende a perguntar à própria sessão: quem está me atendendo, e em que pasta eu estou?</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A abrir o <strong>PowerShell 7</strong> pelo menu Iniciar (e a não confundir com o 5.1).</li>
+  <li>O que é o <strong>Terminal do Windows</strong> e quando ele entra na história.</li>
+  <li>A ler o prompt <code>PS C:\Users\ana&gt;</code>: o <code>PS</code> e a pasta inicial.</li>
+  <li>A perguntar o nome do host com <code>$Host.Name</code> e a versão com <code>$Host.Version</code>.</li>
+  <li>A ver a pasta em que a sessão começou, com <code>Get-Location</code>.</li>
+  <li>A variável <code>$env:WT_SESSION</code>, que diz se a sessão é do Terminal do Windows.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta da usuária fictícia <code>ana</code>. A coleta rodou no host clássico <code>ConsoleHost</code>, não dentro do Terminal do Windows: as respostas abaixo mostram exatamente isso, e a aula explica o que mudaria se você abrisse pelo Terminal.</p>
+
+<hr>
+
+<h2>A ideia: a janela é a recepção</h2>
+<p>O PowerShell é o atendente; a <strong>janela</strong> é a recepção onde ele trabalha. Pode ser a janela simples que abre com o atalho “PowerShell 7”, ou o <strong>Terminal do Windows</strong>, um aplicativo com abas, em que cada aba pode ser o 7, o 5.1 ou o <code>cmd</code>.</p>
+<p>Os comandos são os mesmos nos dois casos. O que muda é o “prédio”: cores, abas, atalhos. Por isso, no começo de uma sessão, vale perguntar <strong>quem está hospedando</strong> e <strong>em que pasta você está</strong>.</p>
+
+<hr>
+
+<h2>1. Abrindo pelo menu Iniciar</h2>
+<ol class="passo">
+  <li>Clique no menu <strong>Iniciar</strong> do Windows (ou aperte a tecla do Windows).</li>
+  <li>Digite <strong>PowerShell 7</strong> (escreva o “7”, para não abrir o 5.1 por engano).</li>
+  <li>Abra o aplicativo <strong>PowerShell 7</strong> (às vezes aparece como “pwsh”).</li>
+  <li>Espere o prompt: uma linha que começa com <code>PS</code> e termina em <code>&gt;</code>, com o cursor piscando.</li>
+</ol>
+<div class="note">Se aparecer “Windows PowerShell” <strong>sem o 7</strong>, é o 5.1. Feche e procure de novo por “PowerShell 7”. Se o 7 ainda não estiver instalado, volte à aula <a href="instalar.html">Instalar o PowerShell 7</a>.</div>
+
+<p>O prompt desta aula, no laboratório, era este (no seu computador, no lugar de <code>ana</code> vai o <strong>seu</strong> usuário):</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; </pre>
+<dl class="anatomy">
+  <dt>PS</dt><dd>Está no PowerShell, não no <code>cmd</code> (o prompt do <code>cmd</code> não tem esse <code>PS</code>).</dd>
+  <dt>C:\Users\ana</dt><dd>A pasta onde a sessão começou: a pasta pessoal da Ana. É o “você está aqui” do terminal. A aula <a href="get-location.html">Onde Estou</a> aprofunda isso.</dd>
+  <dt>&gt;</dt><dd>O fim do prompt. O que você digitar aparece depois dele.</dd>
+</dl>
+
+<hr>
+
+<h2>2. O Terminal do Windows</h2>
+<p>O <strong>Terminal do Windows</strong> é um aplicativo à parte (muitas instalações do Windows 10 e 11 já o trazem). Ele abre uma janela com <strong>abas</strong>: numa você pode ter o PowerShell 7, noutra o 5.1, noutra o <code>cmd</code>.</p>
+<ol class="passo">
+  <li>No menu Iniciar, digite <strong>Terminal</strong> e abra o <strong>Terminal</strong> (às vezes “Windows Terminal”).</li>
+  <li>Se a aba que abrir não for o PowerShell 7, clique na setinha ao lado do <code>+</code> e escolha <strong>PowerShell</strong> (ou “PowerShell 7”).</li>
+  <li>Confira o prompt: deve começar com <code>PS</code>. Depois, se quiser ter certeza da versão, rode <code>$PSVersionTable.PSVersion</code>.</li>
+</ol>
+<p>Como saber se <strong>esta</strong> sessão está dentro do Terminal? O Terminal preenche a variável de ambiente <code>WT_SESSION</code>. O pedido abaixo pergunta se ela existe:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $env:WT_SESSION -ne $null
+False
+</pre>
+<p><code>False</code> quer dizer: nesta coleta, a variável estava vazia — a sessão <strong>não</strong> estava no Terminal do Windows. Se você abrir pelo aplicativo Terminal, o mesmo pedido costuma responder <code>True</code>.</p>
+<div class="note">Nesta mesma sessão, o comando <code>Get-Command wt</code> (o executável do Terminal) não devolveu nenhum nome: o <code>wt</code> não estava à mão dali. Isso não significa que o Terminal não exista no seu Windows. Se o Iniciar achar o aplicativo “Terminal”, você pode abri-lo por lá.</div>
+
+<hr>
+
+<h2>3. Quem está me hospedando? <code>$Host</code></h2>
+<p>O objeto automático <code>$Host</code> descreve o anfitrião da sessão. O nome e a versão, no PowerShell 7.7 desta coleta:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $Host.Name
+ConsoleHost
+</pre>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $Host.Version
+
+Major  Minor  Build  Revision
+-----  -----  -----  --------
+7      7      0      -1
+
+</pre>
+<dl class="anatomy">
+  <dt>ConsoleHost</dt><dd>O host clássico do PowerShell: a janela simples de console. É o nome que apareceu nesta coleta. Outros anfitriões existem (o editor deste guia é um, o Terminal é outro ambiente), mas o nome <code>ConsoleHost</code> é o mais comum numa janela “PowerShell 7” do Iniciar.</dd>
+  <dt>7 7 0</dt><dd>A versão do host, aqui 7.7.0 — a mesma do PowerShell 7.7. O <code>Revision -1</code> faz parte da ficha; não é erro.</dd>
+</dl>
+<div class="note"><strong>No Windows PowerShell 5.1</strong>, o nome do host também foi <code>ConsoleHost</code>, mas a versão é a do 5.1:
+<pre class="term" data-title="Windows PowerShell">PS C:\Users\ana&gt; $Host.Version
+
+Major  Minor  Build  Revision
+-----  -----  -----  --------
+5      1      19041  6456
+
+</pre>
+Se aparecer 5 e 1 nessa tabela, você está no 5.1, não no 7.
+</div>
+
+<div class="tryps" data-goal="src:Host\.Name;;semerro">
+<p class="try-task"><strong>Experimente:</strong> no editor, pergunte o nome do host com <code>$Host.Name</code>. (Aqui o anfitrião é o do navegador, então o nome pode não ser <code>ConsoleHost</code> — o pedido é o que importa.)</p>
+<pre class="script" data-file="main.ps1">Write-Output "Quem está me hospedando?"
+</pre>
+<pre class="solucao" data-file="main.ps1">$Host.Name
+</pre>
+</div>
+
+<hr>
+
+<h2>4. A pasta inicial: <code>Get-Location</code></h2>
+<p>Quando a janela abre, você está em alguma pasta. No laboratório, era a pasta pessoal da Ana:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Location
+
+Path
+----
+C:\Users\ana
+
+</pre>
+<p>O caminho <code>C:\Users\ana</code> é o mesmo que aparece no meio do prompt. No seu computador será <code>C:\Users\</code> seguido do <strong>seu</strong> usuário. No editor deste guia, que é um PowerShell 7 de Linux, a pasta inicial é outra (<code>/home/ana</code>): o comando é o mesmo, só o caminho muda.</p>
+
+<div class="tryps" data-goal="src:Get-Location;;semerro">
+<p class="try-task"><strong>Missão:</strong> mostre a pasta atual com <code>Get-Location</code>.</p>
+<pre class="script" data-file="main.ps1">Write-Output "Onde estou?"
+</pre>
+<pre class="solucao" data-file="main.ps1">Get-Location
+</pre>
+</div>
+
+<div class="cenario">
+<strong>Você abriu a janela, mas o prompt não tem <code>PS</code></strong>
+<p>Se a linha termina em <code>&gt;</code> e <strong>não</strong> começa com <code>PS</code>, provavelmente é o <code>cmd</code> antigo, não o PowerShell. Feche, volte ao Iniciar e abra <strong>PowerShell 7</strong> (ou, no Terminal, uma aba de PowerShell). O prompt certo parece com <code>PS C:\Users\ana&gt;</code>.</p>
+<p>Se o prompt tem <code>PS</code> mas <code>$Host.Version</code> começa com 5 e 1, você está no 5.1: feche e abra o atalho com o “7” no nome. Nada disso apaga arquivo nenhum; é só fechar a janela errada e abrir a certa.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você faz / digita</th><th>O que acontece</th></tr>
+<tr><td>Iniciar → “PowerShell 7”</td><td>Abre o PowerShell 7 numa janela de console.</td></tr>
+<tr><td>Iniciar → “Terminal”</td><td>Abre o Terminal do Windows; escolha a aba PowerShell 7.</td></tr>
+<tr><td><code>$Host.Name</code></td><td>Mostra o anfitrião. Nesta coleta: <code>ConsoleHost</code>.</td></tr>
+<tr><td><code>$Host.Version</code></td><td>Mostra a versão do host (7.7.0 no 7; 5.1.19041 no 5.1).</td></tr>
+<tr><td><code>$env:WT_SESSION -ne $null</code></td><td><code>True</code> se a sessão é do Terminal; nesta coleta foi <code>False</code>.</td></tr>
+<tr><td><code>Get-Location</code></td><td>Mostra a pasta atual (no laboratório, <code>C:\Users\ana</code>).</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete para ver a pasta em que você está:</p>
+<div class="ex-code"><input data-answer="Get-Location" aria-label="comando"></div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual é a saída?</h3>
+<p>Nesta aula, o que apareceu com <code>$Host.Name</code> no laboratório?</p>
+<div class="ex-code">Saída: <input data-answer="ConsoleHost" aria-label="saída"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Complete o pedido</h3>
+<p>Complete para saber se a sessão é do Terminal do Windows:</p>
+<div class="ex-code">$env:<input data-answer="WT_SESSION" aria-label="variável"> -ne $null</div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. No prompt <code>PS C:\Users\ana&gt;</code>, o que o <code>PS</code> indica?</p>
+<label><input type="radio" name="q4"> Que você está no <code>cmd</code> antigo</label>
+<label><input type="radio" name="q4"> Que quem está atendendo é o PowerShell</label>
+<label><input type="radio" name="q4"> Que o computador vai desligar</label>
+<label><input type="radio" name="q4"> Que houve um erro</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Nesta coleta, <code>$env:WT_SESSION -ne $null</code> deu <code>False</code>. O que isso quer dizer?</p>
+<label><input type="radio" name="q5"> Que o Windows não existe</label>
+<label><input type="radio" name="q5"> Que o PowerShell 7 não está instalado</label>
+<label><input type="radio" name="q5"> Que aquela sessão não estava dentro do Terminal do Windows</label>
+<label><input type="radio" name="q5"> Que a pasta inicial está errada</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. Você quer o PowerShell 7 e o Iniciar mostrou só “Windows PowerShell”, sem o 7. O que fazer?</p>
+<label><input type="radio" name="q6"> Não usar esse atalho: procurar “PowerShell 7” (e instalar o 7, se ainda não tiver)</label>
+<label><input type="radio" name="q6"> Apagar o Windows</label>
+<label><input type="radio" name="q6"> Sempre usar o <code>cmd</code> no lugar</label>
+<label><input type="radio" name="q6"> Ignorar: o 5.1 e o 7 são o mesmo programa</label>
+</div>
+
+<div class="tryps" data-goal="src:Host\.Version;;semerro">
+<p class="try-task"><strong>Missão final:</strong> mostre a versão do host, com <code>$Host.Version</code>.</p>
+<pre class="script" data-file="main.ps1">Write-Output "Qual é a versão do host?"
+</pre>
+<pre class="solucao" data-file="main.ps1">$Host.Version
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Abra o <strong>PowerShell 7</strong> pelo Iniciar (escreva o “7”, para não cair no 5.1). O prompt começa com <code>PS</code> e mostra a pasta atual.</li>
+  <li>O <strong>Terminal do Windows</strong> é o aplicativo de abas; nele você escolhe uma aba de PowerShell 7. <code>$env:WT_SESSION -ne $null</code> fica <code>True</code> quando a sessão é dele. Nesta coleta deu <code>False</code>: era o console clássico.</li>
+  <li><code>$Host.Name</code> nesta coleta foi <code>ConsoleHost</code>; <code>$Host.Version</code> mostrou 7.7.0 (no 5.1, 5.1.19041).</li>
+  <li><code>Get-Location</code> mostra a pasta atual: no laboratório, <code>C:\Users\ana</code>, a mesma do prompt.</li>
+  <li>Se o prompt não tem <code>PS</code>, não é PowerShell. Se a versão do host começa com 5 e 1, não é o 7. Feche e abra o atalho certo.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
