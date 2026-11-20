@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Get-Command — Achando Comandos | Guia PowerShell</title>
+<meta name="description" content="Como achar comandos no PowerShell 7 com Get-Command: padrão com asterisco, -Noun, -Verb, tipos Cmdlet, Alias e Application, a contagem com Measure-Object e o erro real de um nome que não existe, em português.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+
+<h1><span class="hl">Get-Command</span>: Achando Comandos</h1>
+
+<p class="intro">Você já rodou uns comandos, mas o PowerShell tem <strong>centenas</strong> deles. Ninguém decora a lista toda. Nesta aula você vai aprender a <strong>procurar</strong> um comando pelo nome, pelo verbo ou pelo substantivo, a reconhecer se o que apareceu é um cmdlet, um apelido ou um programa, e a ler o erro de quando o nome não existe.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O <code>Get-Command</code>, que lista os comandos que o PowerShell conhece.</li>
+  <li>A procurar com um padrão, usando o asterisco <code>*</code> ("qualquer coisa").</li>
+  <li>Os parâmetros <code>-Noun</code> ("substantivo") e <code>-Verb</code> ("verbo").</li>
+  <li>A diferença entre <strong>Cmdlet</strong>, <strong>Alias</strong> (apelido) e <strong>Application</strong> (um programa <code>.exe</code>).</li>
+  <li>A contar quantos comandos existem, com <code>Measure-Object</code>.</li>
+  <li>A ler o erro real de um nome que o PowerShell não reconhece.</li>
+</ul>
+</div>
+
+<p>Todas as saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, na pasta pessoal da usuária fictícia <code>ana</code>. No Windows PowerShell 5.1 os comandos são os mesmos; quando a resposta muda, a aula avisa.</p>
+
+<hr>
+
+<h2>A ideia: o catálogo da biblioteca</h2>
+<p>Pense no catálogo de uma biblioteca. Você não precisa decorar todos os livros. Você pergunta: "tem algum livro com 'data' no título?", ou "me mostra os de cozinha", e o catálogo lista o que existe.</p>
+<p>O <code>Get-Command</code> é esse catálogo: ele <strong>não executa</strong> o comando que você está procurando. Ele só responde "existe, e é este aqui".</p>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Na biblioteca</th><th>No PowerShell</th></tr>
+<tr><td>O catálogo</td><td>O <code>Get-Command</code></td></tr>
+<tr><td>"Livros com 'data' no título"</td><td><code>Get-Command *-Date</code></td></tr>
+<tr><td>A ficha do livro (título, tipo, prateleira)</td><td>A tabela com Nome, Tipo e Origem</td></tr>
+<tr><td>Tirar o livro da prateleira</td><td>Rodar o comando de verdade (em outra linha)</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>1. Procurando por um pedaço do nome</h2>
+<p>O asterisco <code>*</code> quer dizer "qualquer coisa". <code>*-Date</code> é: "qualquer verbo, desde que o substantivo seja Date". Digite e aperte <kbd>Enter</kbd>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Command *-Date
+
+CommandType     Name                                               Version    Source
+-----------     ----                                               -------    ------
+Cmdlet          Get-Date                                           7.0.0.0    Microsoft.PowerShell.Utility
+Cmdlet          Set-Date                                           7.0.0.0    Microsoft.PowerShell.Utility</pre>
+<dl class="anatomy">
+  <dt>Get-Command</dt><dd>O catálogo: "me mostre os comandos".</dd>
+  <dt>*-Date</dt><dd>O <strong>padrão</strong> de nome. O <code>*</code> substitui qualquer texto no começo; o <code>-Date</code> tem de aparecer no fim.</dd>
+  <dt>CommandType</dt><dd>O <strong>tipo</strong>: aqui, <code>Cmdlet</code> (comando nativo do PowerShell, no formato Verbo-Substantivo — aula <a href="cmdlets.html">Cmdlets</a>).</dd>
+  <dt>Name</dt><dd>O nome oficial do comando.</dd>
+  <dt>Version e Source</dt><dd>A versão e o <strong>módulo</strong> de onde ele vem (uma caixa de comandos relacionados). Por enquanto, basta saber que existem.</dd>
+</dl>
+<p>Apareceram dois: <code>Get-Date</code>, que você já usou, e <code>Set-Date</code>, que <strong>muda</strong> a data do computador. Não rode o <code>Set-Date</code> nesta aula: ele altera o relógio do Windows e pede permissão de administrador.</p>
+
+<div class="tryps" data-goal="out:Get-Date;;src:Get-Command;;semerro">
+<p class="try-task"><strong>Experimente:</strong> troque o padrão para <code>*-Date</code> e clique em Rodar. Você deve ver o <code>Get-Date</code> na lista.</p>
+<pre class="script" data-file="main.ps1">Get-Command *-Time
+</pre>
+<pre class="solucao" data-file="main.ps1">Get-Command *-Date
+</pre>
+</div>
+
+<hr>
+
+<h2>2. Procurando pelo substantivo: <code>-Noun</code></h2>
+<p>Se você lembra do "assunto" do comando, mas não do verbo, use <code>-Noun</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Command -Noun Service
+
+CommandType     Name                                               Version    Source
+-----------     ----                                               -------    ------
+Cmdlet          Get-Service                                        7.0.0.0    Microsoft.PowerShell.Management
+Cmdlet          New-Service                                        7.0.0.0    Microsoft.PowerShell.Management
+Cmdlet          Remove-Service                                     7.0.0.0    Microsoft.PowerShell.Management
+Cmdlet          Restart-Service                                    7.0.0.0    Microsoft.PowerShell.Management
+Cmdlet          Resume-Service                                     7.0.0.0    Microsoft.PowerShell.Management
+Cmdlet          Set-Service                                        7.0.0.0    Microsoft.PowerShell.Management
+Cmdlet          Start-Service                                      7.0.0.0    Microsoft.PowerShell.Management
+Cmdlet          Stop-Service                                       7.0.0.0    Microsoft.PowerShell.Management
+Cmdlet          Suspend-Service                                    7.0.0.0    Microsoft.PowerShell.Management</pre>
+<dl class="anatomy">
+  <dt>-Noun</dt><dd>O parâmetro: "quero só comandos cujo substantivo é este".</dd>
+  <dt>Service</dt><dd>O valor: "serviço" (os programas que o Windows deixa rodando em segundo plano). A aula deles é bem mais à frente; aqui eles só servem de exemplo de busca.</dd>
+</dl>
+<p>A lista começa com <code>Get-Service</code>, <code>New-Service</code>, <code>Remove-Service</code>… todos falam do mesmo assunto, cada um com um verbo diferente. É a regra Verbo-Substantivo funcionando na prática.</p>
+
+<hr>
+
+<h2>3. Procurando pelo verbo: <code>-Verb</code></h2>
+<p>O contrário também vale: "me mostra os que <strong>apagam</strong>", ou seja, o verbo <code>Remove</code>. Como a lista é grande, pedimos só os <strong>oito primeiros</strong> com <code>Select-Object -First 8</code> (você vai estudar o <code>Select-Object</code> no Nível 2; por enquanto, leia como "me dê só os 8 primeiros"):</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Command -Verb Remove | Select-Object -First 8
+
+CommandType     Name                                               Version    Source
+-----------     ----                                               -------    ------
+Alias           Remove-AppPackage -&gt;                               2.0.1.0    Appx
+Alias           Remove-AppPackageVolume -&gt;                         2.0.1.0    Appx
+Alias           Remove-AppProvisionedPackage -&gt;                    3.0        Dism
+Alias           Remove-EtwTraceSession -&gt;                          1.0.0.0    EventTracingManagement
+Alias           Remove-ProvisionedAppPackage -&gt;                    3.0        Dism
+Alias           Remove-ProvisionedAppxPackage -&gt;                   3.0        Dism
+Alias           Remove-ProvisioningPackage -&gt;                      3.0        Provisioning
+Alias           Remove-TrustedProvisioningCertificate -&gt;           3.0        Provisioning</pre>
+<p>Repare: os oito primeiros são <code>Alias</code>, não <code>Cmdlet</code>. O PowerShell lista em ordem alfabética, e vários apelidos de outros módulos (Appx, Dism…) vêm antes do <code>Remove-Item</code>, que é o comando de apagar arquivo. O catálogo mostra o que existe; não é uma recomendação de uso. Apelidos têm uma aula só para eles: <a href="aliases.html">Apelidos</a>.</p>
+
+<hr>
+
+<h2>4. Também acha programas e apelidos</h2>
+<p><code>Get-Command</code> não olha só os cmdlets. Ele também encontra programas do Windows e apelidos:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Command ping, notepad
+
+CommandType     Name                                               Version    Source
+-----------     ----                                               -------    ------
+Application     PING.EXE                                           10.0.1904… C:\Windows\system32\PING.EXE
+Application     notepad.exe                                        10.0.1904… C:\Windows\system32\notepad.exe</pre>
+<dl class="anatomy">
+  <dt>Application</dt><dd>Um <strong>programa</strong> (<code>.exe</code>), não um cmdlet. O <code>ping</code> e o Bloco de Notas já vinham no Windows muito antes do PowerShell.</dd>
+  <dt>PING.EXE / notepad.exe</dt><dd>O nome do arquivo. O PowerShell não liga para maiúsculas: <code>ping</code> e <code>PING.EXE</code> são o mesmo programa.</dd>
+  <dt>C:\Windows\system32\…</dt><dd>O caminho de onde o programa está. A versão aparece truncada com reticências quando não cabe na coluna.</dd>
+</dl>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Command ls, dir, cd
+
+CommandType     Name                                               Version    Source
+-----------     ----                                               -------    ------
+Alias           ls -&gt; Get-ChildItem                                           
+Alias           dir -&gt; Get-ChildItem                                          
+Alias           cd -&gt; Set-Location                                            </pre>
+<p>Aqui o tipo é <code>Alias</code>: <code>ls</code> e <code>dir</code> são apelidos do <code>Get-ChildItem</code>, e <code>cd</code> é apelido do <code>Set-Location</code>. Quando alguém escreve <code>ls</code>, o PowerShell na verdade roda <code>Get-ChildItem</code>.</p>
+
+<div class="tryps" data-goal="out:Get-ChildItem;;src:Get-Command;;semerro">
+<p class="try-task"><strong>Missão:</strong> descubra qual comando está por trás do apelido <code>ls</code>.</p>
+<pre class="script" data-file="main.ps1">Get-Command pwd
+</pre>
+<pre class="solucao" data-file="main.ps1">Get-Command ls
+</pre>
+</div>
+
+<hr>
+
+<h2>5. Quantos comandos existem?</h2>
+<p>Para contar, em vez de rolar uma lista enorme, você encosta o <code>Measure-Object</code> ("medir o objeto") no final, com o cano <code>|</code>. O cano é o <strong>pipeline</strong>, a esteira que leva a saída de um comando para o próximo — assunto do Nível 2. Aqui ele só serve para contar:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Command -CommandType Cmdlet | Measure-Object
+
+Count             : 610
+Average           : 
+Sum               : 
+Maximum           : 
+Minimum           : 
+StandardDeviation : 
+Property          : </pre>
+<p>Neste computador, no PowerShell 7.7, são <strong>610</strong> cmdlets. O número muda de um PC para outro, conforme os módulos instalados: o valor da sua máquina pode ser outro, e isso é normal. As outras linhas (média, soma…) vêm vazias porque estamos só <strong>contando</strong>, não medindo números.</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Command -Module Microsoft.PowerShell.Management | Measure-Object
+
+Count             : 61
+Average           : 
+Sum               : 
+Maximum           : 
+Minimum           : 
+StandardDeviation : 
+Property          : </pre>
+<p>Só no módulo <code>Microsoft.PowerShell.Management</code> (pastas, processos, serviços, computador) são <strong>61</strong> comandos. É por isso que o catálogo existe: ninguém decora 61 nomes, quanto mais 610.</p>
+<div class="note"><strong>No Windows PowerShell 5.1</strong> a contagem é outra: neste mesmo computador havia 659 cmdlets no total e 89 no módulo Management. São listas diferentes, não um "erro de conta".</div>
+
+<hr>
+
+<h2>Formas diferentes de procurar</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>Get-Command *-Date</code></td><td>Quando você lembra de um <strong>pedaço</strong> do nome. O <code>*</code> preenche o resto.</td></tr>
+<tr><td><code>Get-Command -Noun Service</code></td><td>Quando você lembra do <strong>assunto</strong> (o substantivo) e quer todos os verbos dele.</td></tr>
+<tr><td><code>Get-Command -Verb Remove</code></td><td>Quando você lembra do <strong>verbo</strong> e quer ver o que dá para apagar, criar, obter…</td></tr>
+<tr><td><code>Get-Command ls</code></td><td>Quando você tem um nome exato e quer saber se é cmdlet, apelido ou programa.</td></tr>
+</table>
+</div>
+<p>Quando já sabe o nome e quer a <strong>explicação</strong> de como usar, o comando certo é o <code>Get-Help</code> (aula <a href="get-help.html">Get-Help: a Ajuda</a>).</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>O nome não existe</strong>
+<p>Pedimos um comando inventado, <code>NaoExiste</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; Get-Command NaoExiste
+Get-Command: O termo "NaoExiste" não é reconhecido como um nome de um cmdlet, função, arquivo de script ou programa executável.
+Verifique a ortografia do nome ou, se um caminho foi incluído, verifique se o caminho está correto e tente novamente.</pre>
+<p>A mensagem aparece em <strong>vermelho</strong>. Linha por linha:</p>
+<dl class="anatomy">
+  <dt>Get-Command:</dt><dd>Quem está reclamando: o próprio <code>Get-Command</code>.</dd>
+  <dt>O termo "NaoExiste" não é reconhecido…</dt><dd>Ele procurou um cmdlet, uma função, um script e um programa com esse nome, e não achou nenhum.</dd>
+  <dt>Verifique a ortografia do nome…</dt><dd>A dica: confira se você escreveu certo, ou se o caminho está correto.</dd>
+</dl>
+<p><strong>Como resolver:</strong> confira a grafia. Se o nome for um padrão (<code>*-Date</code>), use o asterisco. Se você não lembra do nome, procure pelo verbo ou pelo substantivo. O erro não estraga nada.</p>
+<div class="note"><strong>No Windows PowerShell 5.1</strong> a mesma mensagem é mais comprida: ela traz também o <code>No linha</code>, os tils sublinhando o pedaço e o <code>CommandNotFoundException</code>, no mesmo estilo da aula <a href="primeiro-comando.html">Seu Primeiro Comando</a>.</div>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Get-Command *-Date</code></td><td>Lista os comandos cujo nome termina em <code>-Date</code>.</td></tr>
+<tr><td><code>Get-Command -Noun Service</code></td><td>Lista os comandos do substantivo <code>Service</code>.</td></tr>
+<tr><td><code>Get-Command -Verb Remove</code></td><td>Lista os comandos do verbo <code>Remove</code>.</td></tr>
+<tr><td><code>Get-Command ping, notepad</code></td><td>Mostra o que são esses nomes (aqui, programas).</td></tr>
+<tr><td><code>Get-Command ls</code></td><td>Mostra se <code>ls</code> é cmdlet, apelido ou programa.</td></tr>
+<tr><td><code>Get-Command -CommandType Cmdlet | Measure-Object</code></td><td>Conta quantos cmdlets existem.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete para listar os comandos cujo nome termina em <code>-Date</code>:</p>
+<div class="ex-code"><input data-answer="Get-Command" aria-label="comando"> *-Date</div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual é o tipo?</h3>
+<p>No resultado de <code>Get-Command ls</code>, o <code>CommandType</code> é:</p>
+<div class="ex-code"><input data-answer="Alias" aria-label="tipo"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Complete o parâmetro</h3>
+<p>Complete para listar todos os comandos do substantivo <code>Service</code>:</p>
+<div class="ex-code">Get-Command -<input data-answer="Noun" aria-label="parâmetro"> Service</div>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">4. O que o <code>Get-Command</code> faz?</p>
+<label><input type="radio" name="q4"> Executa o comando que você passou</label>
+<label><input type="radio" name="q4"> Apaga o comando da memória</label>
+<label><input type="radio" name="q4"> Mostra se o comando existe e de que tipo ele é</label>
+<label><input type="radio" name="q4"> Instala o comando que estiver faltando</label>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">5. Em <code>Get-Command ping</code>, o tipo <code>Application</code> quer dizer o quê?</p>
+<label><input type="radio" name="q5"> Que <code>ping</code> é um apelido do <code>Get-Date</code></label>
+<label><input type="radio" name="q5"> Que <code>ping</code> é um programa (<code>.exe</code>) do Windows</label>
+<label><input type="radio" name="q5"> Que o comando não existe</label>
+<label><input type="radio" name="q5"> Que você precisa instalar o módulo Application</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. Você digitou <code>Get-Command NaoExiste</code> e apareceu "não é reconhecido". O que fazer?</p>
+<label><input type="radio" name="q6"> Conferir a grafia ou procurar por um pedaço do nome, com <code>*</code></label>
+<label><input type="radio" name="q6"> Reiniciar o computador</label>
+<label><input type="radio" name="q6"> Apagar o PowerShell e instalar de novo</label>
+<label><input type="radio" name="q6"> Ignorar: o comando rodou mesmo assim</label>
+</div>
+
+<div class="tryps" data-goal="out:Get-Service;;src:-Noun;;semerro">
+<p class="try-task"><strong>Missão final:</strong> use <code>-Noun</code> para listar os comandos do substantivo <code>Service</code>. Na lista deve aparecer o <code>Get-Service</code>.</p>
+<pre class="script" data-file="main.ps1">Get-Command -Verb Service
+</pre>
+<pre class="solucao" data-file="main.ps1">Get-Command -Noun Service
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Get-Command</code> é o catálogo: ele mostra o que existe, sem executar.</li>
+  <li><code>Get-Command *-Date</code> procura por um pedaço do nome; o <code>*</code> vale "qualquer coisa".</li>
+  <li><code>-Noun</code> filtra pelo substantivo e <code>-Verb</code> pelo verbo.</li>
+  <li>O tipo pode ser <code>Cmdlet</code>, <code>Alias</code> (apelido) ou <code>Application</code> (programa <code>.exe</code>).</li>
+  <li><code>Measure-Object</code> no fim da esteira conta quantos comandos vieram; o número muda de um computador para outro.</li>
+  <li>Se o nome não existe, a mensagem é "não é reconhecido": confira a grafia e tente de novo.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
