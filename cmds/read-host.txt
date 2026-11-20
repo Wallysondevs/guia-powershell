@@ -3,6 +3,7 @@
 # Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Erros de SINTAXE (#ERRO-PARSE) precisam rodar isolados (Invoke-Expression), senão derrubam o arquivo todo.
 # Só linguagem: nenhuma lista cria nem apaga arquivo, não precisa de pasta de teste.
 # shell: pwsh
+# interativo: Start-Transcript ou ilustrativo
 # ATENÇÃO: Read-Host precisa de janela aberta. Sem console interativo, colher só o erro/ajuda abaixo; o resto da aula fica ilustrativo ou entra no roteiro Start-Transcript do Zeca.
 ## ajuda e tipo de retorno
 (Get-Command Read-Host).Parameters.Keys -join ", "

@@ -1,0 +1,22 @@
+# operadores-texto — comandos para colher no Windows (só leitura/demonstração)
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
+# shell: pwsh
+## -like e curingas
+"arquivo.txt" -like "*.txt"
+"arquivo.log" -like "*.txt"
+"PowerShell" -like "power*"
+"PowerShell" -clike "power*"
+"a" -notlike "b*"
+## -match e expressões regulares
+"abc123" -match "\d+"
+$Matches
+"PowerShell" -match "^Power"
+"ana@exemplo.com" -match "@"
+"abc123" -match "^(?<letras>\D+)(?<nums>\d+)$"
+$Matches
+## -replace
+"olá mundo" -replace "mundo", "Ana"
+"a b a" -replace "a", "X"
+## erro: expressão regular inválida
+"abc" -match "["   #ERRO

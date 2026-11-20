@@ -1,0 +1,33 @@
+# atribuicao — comandos para colher no Windows (só leitura/demonstração)
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
+# shell: pwsh
+## começar com =
+$n = 10
+$n
+## somar, diminuir, multiplicar e dividir no mesmo lugar
+$n += 5
+$n
+$n -= 3
+$n
+$n *= 2
+$n
+$n /= 4
+$n
+$n %= 3
+$n
+## ++ e --
+$i = 1
+$i++
+$i
+++$i
+$i
+$i--
+$i
+## acrescentar na lista e no texto
+$lista = 1, 2, 3
+$lista += 4
+$lista
+$texto = "Oi"
+$texto += " mundo"
+$texto

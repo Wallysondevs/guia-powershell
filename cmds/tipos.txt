@@ -1,0 +1,22 @@
+# tipos — comandos para colher no Windows (só leitura/demonstração)
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
+# shell: pwsh
+## o tipo de cada valor
+"Ana".GetType().Name
+(30).GetType().Name
+(3.14).GetType().Name
+$true.GetType().Name
+(Get-Date).GetType().Name
+(1, 2, 3).GetType().Name
+@{ nome = "Ana"; idade = 30 }.GetType().Name
+## o tipo vai na variável
+$nome = "Ana"
+$nome.GetType().FullName
+$nome = 10
+$nome.GetType().FullName
+## ver só o nome curto
+$valores = "Ana", 30, 3.14, $true, $null, (1, 2)
+$valores | ForEach-Object { if ($null -eq $_) { "null" } else { $_.GetType().Name } }
+## erro
+(30).GetTyp()   #ERRO

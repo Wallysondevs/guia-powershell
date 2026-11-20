@@ -1,0 +1,17 @@
+# operador-formato — comandos para colher no Windows (só leitura/demonstração)
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
+# shell: pwsh
+## o -f coloca os valores nos {0}, {1}...
+"{0} tem {1} anos" -f "Ana", 30
+"{1} vem antes de {0}" -f "primeiro", "segundo"
+## alinhamento
+"{0,-10}|{1,8}" -f "nome", "idade"
+"{0,-10}|{1,8}" -f "Ana", 30
+## números e data (data fixa, sem fuso)
+"{0:N2}" -f 1234.5
+"{0:D4}" -f 42
+"{0:P0}" -f 0.25
+"{0:yyyy-MM-dd}" -f [datetime]"2026-11-20"
+## erro
+"{0:Z}" -f 42   #ERRO

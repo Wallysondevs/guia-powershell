@@ -1,0 +1,22 @@
+# operadores-logicos — comandos para colher no Windows (só leitura/demonstração)
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
+# shell: pwsh
+## -and, -or, -not e -xor
+$true -and $true
+$true -and $false
+$true -or $false
+$false -or $false
+-not $false
+-not $true
+!$false
+$true -xor $true
+$true -xor $false
+## juntando comparações
+(5 -gt 3) -and (2 -lt 10)
+(5 -gt 3) -and (2 -gt 10)
+$nome = "Ana"
+($null -eq $nome) -or ($nome -eq "Ana")
+## atalho: o lado direito só roda se precisar
+$false -and (1 / 0)
+$true -or (1 / 0)

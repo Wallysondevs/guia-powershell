@@ -1,0 +1,22 @@
+# strings — comandos para colher no Windows (só leitura/demonstração)
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
+# shell: pwsh
+## aspas simples e duplas
+'Olá, Ana'
+"Olá, Ana"
+## o que muda: o cifrão e o acento grave
+$nome = "Ana"
+'Olá, $nome'
+"Olá, $nome"
+'uma quebra:`nainda na mesma linha'
+"uma quebra:`nagora em duas"
+## aspas dentro do texto
+'ela disse "oi"'
+"ela disse 'oi'"
+"ela disse `"oi`""
+'it''s ok'
+## caracteres especiais
+"coluna1`tcoluna2"
+## erro
+Invoke-Expression '"texto sem fechar'   #ERRO

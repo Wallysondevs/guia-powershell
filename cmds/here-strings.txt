@@ -1,0 +1,25 @@
+# here-strings — comandos para colher no Windows (só leitura/demonstração)
+# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
+# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
+# shell: pwsh
+## texto de várias linhas (here-string: o fechamento vai no começo da linha; se a coleta for linha a linha, rodar este arquivo como script ou no Start-Transcript)
+$nome = "Ana"
+$curso = "PowerShell"
+## aspas duplas: interpola
+@"
+Olá, $nome!
+Bem-vinda ao curso de $curso.
+"@
+## aspas simples: texto puro
+@'
+Olá, $nome!
+O preço é $10.
+'@
+## guardar numa variável
+$carta = @"
+Prezada $nome,
+Seu cadastro foi aceito.
+"@
+$carta
+## erro: espaço antes do fechamento
+Invoke-Expression "@`" `nOlá`n `"@"   #ERRO
