@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Parâmetros dos Comandos — nomeados, posicionais, switches e abreviações | Guia PowerShell</title>
+<meta name="description" content="Parâmetros dos cmdlets no PowerShell: parâmetros nomeados (-Path, -Filter), posicionais, switches (-Name), abreviações (-Pa, -Fi), aspas em valores com espaço, a lista de parâmetros do Get-ChildItem, e os erros reais de nome errado, abreviação ambígua e tipo errado, em português.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Parâmetros dos <span class="hl">Comandos</span></h1>
+
+<p class="intro">Na primeira aula você já usou um parâmetro: o <code>-Format</code> do <code>Get-Date</code>. Parâmetro é o “ajuste fino” do comando: a mesma ferramenta, com um detalhe a mais. Nesta aula você vai ver os três jeitos de passar esses ajustes — pelo nome, pela posição e como interruptor — e o que o PowerShell responde quando o nome sai errado, curto demais ou com o tipo errado.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é um <strong>parâmetro</strong> e como ele se escreve: um hífen, um nome, às vezes um valor.</li>
+  <li>Parâmetros <strong>nomeados</strong>, como <code>-Path</code> e <code>-Filter</code>.</li>
+  <li>Parâmetros <strong>posicionais</strong>: o mesmo comando, sem o nome, na ordem certa.</li>
+  <li>O <strong>switch</strong> (“interruptor”): um parâmetro que não leva valor, como o <code>-Name</code>.</li>
+  <li>Que o PowerShell aceita <strong>abreviações</strong> (<code>-Pa</code>, <code>-Fi</code>), desde que não sejam ambíguas.</li>
+  <li>Por que valor com espaço vai entre aspas.</li>
+  <li>Como ver a lista de parâmetros de um cmdlet, e a ler três erros reais de parâmetro.</li>
+</ul>
+</div>
+
+<p>As listas desta aula foram colhidas no <strong>PowerShell 7.7</strong>, numa pasta de teste <code>C:\Users\ana\guia-ps-teste</code>, com três arquivos vazios: <code>a.txt</code>, <code>b.log</code> e <code>c.txt</code>. A pasta foi apagada no fim. Quando o Windows PowerShell 5.1 responde diferente, a aula avisa.</p>
+
+<hr>
+
+<h2>A ideia: um pedido no balcão, com os detalhes</h2>
+<p>Volte ao balcão da aula anterior. “Eu quero um café” já é um pedido. Mas quase sempre você completa: “médio, com leite, sem açúcar”. O café é o comando; médio, com leite e sem açúcar são os <strong>parâmetros</strong>.</p>
+<p>Alguns detalhes precisam de um valor (“médio”, “com leite”). Outros são só um sim ou não: “sem açúcar” — ou o açúcar vai, ou não vai. No PowerShell, esse sim-ou-não se chama <strong>switch</strong> (interruptor).</p>
+
+<div class="table-wrap">
+<table class="ref">
+<tr><th>No balcão</th><th>No PowerShell</th></tr>
+<tr><td>“Um café”</td><td>O cmdlet: <code>Get-ChildItem</code></td></tr>
+<tr><td>“Médio” (um detalhe com valor)</td><td>Parâmetro nomeado: <code>-Filter *.txt</code></td></tr>
+<tr><td>O primeiro detalhe dito sem rótulo, na ordem</td><td>Parâmetro posicional: <code>Get-ChildItem . *.txt</code></td></tr>
+<tr><td>“Sem açúcar” (só liga ou desliga)</td><td>Switch: <code>-Name</code></td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>1. Pelo nome: <code>-Path</code> e <code>-Filter</code></h2>
+<p>O <code>Get-ChildItem</code> lista o que tem numa pasta (aula completa em <a href="get-childitem.html">Listando (Get-ChildItem)</a>). Aqui ele serve de exemplo de parâmetros. Estamos na pasta de teste, que tem <code>a.txt</code>, <code>b.log</code> e <code>c.txt</code>. Pedimos só os <code>.txt</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem -Path . -Filter *.txt
+
+    Diretório: C:\Users\ana\guia-ps-teste
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          20/11/2026    17:13              0 a.txt
+-a---          20/11/2026    17:13              0 c.txt
+</pre><dl class="anatomy">
+  <dt>Get-ChildItem</dt><dd>O cmdlet: “obter os itens filhos”, ou seja, listar o conteúdo da pasta.</dd>
+  <dt>-Path .</dt><dd>O parâmetro <code>-Path</code> (“caminho”) e o valor <code>.</code>, que no PowerShell quer dizer <strong>a pasta onde você está agora</strong>.</dd>
+  <dt>-Filter *.txt</dt><dd>O parâmetro <code>-Filter</code> (“filtro”) e o valor <code>*.txt</code>: só os nomes que terminam com <code>.txt</code>. O <code>*</code> é o “qualquer coisa”.</dd>
+</dl>
+<p>Saíram <code>a.txt</code> e <code>c.txt</code>. O <code>b.log</code> existe na pasta, mas o filtro deixou ele de fora. A linha <code>Diretório: C:\Users\ana\guia-ps-teste</code> confirma onde a listagem foi feita. A hora <code>17:13</code> é a de quando os arquivos de teste foram criados; o <code>Length</code> 0 quer dizer que estão vazios.</p>
+
+<div class="tryps" data-goal="src:\bGet-ChildItem\b;;src:-Name;;out:a.txt;;out:b.log;;out:c.txt;;semerro">
+<p class="try-task"><strong>Experimente:</strong> os três arquivos já estão sendo criados. Complete a segunda linha para listar <strong>só os nomes</strong>, com o switch <code>-Name</code>.</p>
+<pre class="script" data-file="main.ps1">New-Item a.txt, b.log, c.txt -ItemType File | Out-Null
+Get-ChildItem
+</pre>
+<pre class="solucao" data-file="main.ps1">New-Item a.txt, b.log, c.txt -ItemType File | Out-Null
+Get-ChildItem -Name
+</pre>
+</div>
+
+<hr>
+
+<h2>2. Pela posição: o mesmo pedido, sem o rótulo</h2>
+<p>Muitos parâmetros aceitam ir <strong>sem o nome</strong>, desde que você respeite a ordem que o cmdlet espera. No <code>Get-ChildItem</code>, o primeiro valor é o caminho e o segundo é o filtro. As duas linhas abaixo pedem a mesma coisa:</p>
+<pre class="file" data-file="mesmo-pedido.ps1">Get-ChildItem -Path . -Filter *.txt
+Get-ChildItem . *.txt
+</pre>
+<p>A segunda é a forma <strong>posicional</strong>: o ponto entra como caminho, o <code>*.txt</code> entra como filtro. A saída, nesta pasta de teste, é igual à do comando nomeado:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem . *.txt
+
+    Diretório: C:\Users\ana\guia-ps-teste
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          20/11/2026    17:13              0 a.txt
+-a---          20/11/2026    17:13              0 c.txt
+</pre><p>Os dois jeitos são certos. Nos scripts deste guia preferimos os nomes (<code>-Path</code>, <code>-Filter</code>): daqui a três meses, você (ou outra pessoa) lê e entende na hora. No terminal do dia a dia, a forma curta é prática.</p>
+
+<hr>
+
+<h2>3. O interruptor: <code>-Name</code></h2>
+<p>Alguns parâmetros não levam valor. Só de aparecerem, ligam um modo. Isso é um <strong>switch</strong>. O <code>-Name</code> do <code>Get-ChildItem</code> pede “me dê só os nomes, sem a tabela”:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem -Name
+a.txt
+b.log
+c.txt
+</pre><p>Agora saíram os três arquivos, um por linha, inclusive o <code>b.log</code>: não havia filtro. Sem o <code>-Name</code>, viria aquela tabela com modo, data, tamanho e nome. Com o <code>-Name</code>, só o nome. Você não escreve <code>-Name $true</code> nem <code>-Name sim</code>: o nome do parâmetro, sozinho, já liga o interruptor.</p>
+
+<hr>
+
+<h2>4. Abreviando o nome</h2>
+<p>O PowerShell deixa cortar o nome do parâmetro, <strong>desde que o pedaço não se confunda com outro</strong>. <code>-Path</code> pode virar <code>-Pa</code>, <code>-Filter</code> pode virar <code>-Fi</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem -Pa . -Fi *.txt
+
+    Diretório: C:\Users\ana\guia-ps-teste
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          20/11/2026    17:13              0 a.txt
+-a---          20/11/2026    17:13              0 c.txt
+</pre><p>A saída é a mesma do comando com os nomes completos: só <code>a.txt</code> e <code>c.txt</code>. Nos scripts, escreva o nome inteiro. A abreviação é atalho de quem está digitando na hora — e, se for curta demais, o PowerShell reclama. Isso a gente vê daqui a pouco, no erro do <code>-P</code>.</p>
+
+<hr>
+
+<h2>5. Valor com espaço: use aspas</h2>
+<p>Se o valor de um parâmetro tem espaço, ponha-o entre aspas. Sem aspas, o PowerShell corta no espaço e entende como dois valores. O exemplo clássico no Windows é a pasta <code>C:\Program Files</code>:</p>
+<pre class="file" data-file="aspas.ps1">Get-ChildItem -Path "C:\Program Files"
+</pre>
+<dl class="anatomy">
+  <dt>-Path</dt><dd>O parâmetro do caminho, pelo nome — aqui é ainda mais importante, para não haver dúvida.</dd>
+  <dt>"C:\Program Files"</dt><dd>O valor, entre aspas, vira <strong>um</strong> caminho só. Sem aspas, o PowerShell leria <code>C:\Program</code> e ainda <code>Files</code> como outra coisa.</dd>
+</dl>
+<p>Nesta aula a gente não lista o conteúdo dessa pasta: o exemplo é só para o papel das aspas. Caminhos com espaço voltam com mais calma em <a href="caminhos.html">Caminhos no Windows e no Linux</a>.</p>
+
+<hr>
+
+<h2>6. Como ver os parâmetros de um cmdlet</h2>
+<p>Você não precisa decorar a lista. Dá para perguntar quais parâmetros um comando aceita. A linha abaixo pede as chaves (os nomes) dos parâmetros do <code>Get-ChildItem</code> e mostra os 15 primeiros:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; (Get-Command Get-ChildItem).Parameters.Keys | Select-Object -First 15
+Path
+LiteralPath
+Filter
+Include
+Exclude
+Recurse
+Depth
+Force
+Name
+Verbose
+Debug
+ErrorAction
+WarningAction
+InformationAction
+ProgressAction
+</pre><p>Nessa lista aparecem os que você já usou (<code>Path</code>, <code>Filter</code>, <code>Name</code>) e outros que virão depois (<code>Recurse</code>, <code>Force</code>, <code>LiteralPath</code>…). Os últimos (<code>Verbose</code>, <code>Debug</code>, <code>ErrorAction</code>…) são parâmetros <strong>comuns</strong>: quase todo cmdlet os tem. O jeito mais amigável de ler a ficha de um parâmetro é o <code>Get-Help</code> da próxima aula, com <code>-Parameter</code>.</p>
+<div class="note"><strong>No Windows PowerShell 5.1</strong> os 14 primeiros nomes desta lista são os mesmos, mas o 15º é <code>ErrorVariable</code>. O <code>ProgressAction</code> é parâmetro comum do PowerShell 7 e não existe no 5.1. Por isso ele também entra na briga do erro <code>-P</code>, logo abaixo.</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>O nome do parâmetro em português</strong>
+<p>O filtro se chama <code>-Filter</code>, em inglês. Se sair <code>-Filtro</code>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem -Filtro *.txt
+Get-ChildItem: Não foi possível encontrar um parâmetro correspondente ao nome de parâmetro 'Filtro'.
+</pre><dl class="anatomy">
+  <dt>Get-ChildItem:</dt><dd>Qual comando está reclamando.</dd>
+  <dt>Não foi possível encontrar um parâmetro correspondente ao nome de parâmetro 'Filtro'.</dt><dd>Não existe parâmetro chamado <code>Filtro</code> neste cmdlet. O nome oficial é <code>-Filter</code>.</dd>
+</dl>
+<p><strong>Como resolver:</strong> use o nome em inglês, ou confira a lista com <code>(Get-Command Get-ChildItem).Parameters.Keys</code> ou com o <code>Get-Help</code>. Como no erro do cmdlet inventado, nada quebrou: é só corrigir e rodar de novo.</p>
+<div class="note"><strong>No Windows PowerShell 5.1</strong> a mensagem é a mesma ideia, com outra frase (“Não é possível localizar um parâmetro que coincida com o nome de parâmetro 'Filtro'.”) e a ficha técnica comprida, com “No linha:1” e os tils embaixo do <code>-Filtro</code>.</div>
+</div>
+
+<div class="cenario">
+<strong>Abreviação ambígua</strong>
+<p>Cortar demais também atrapalha. O <code>-P</code> sozinho serve para mais de um parâmetro:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem -P .
+Get-ChildItem: O parâmetro não pode ser processado porque o nome do parâmetro 'P' é ambíguo. As possíveis correspondências incluem: -Path -ProgressAction -PipelineVariable -LiteralPath.
+</pre><dl class="anatomy">
+  <dt>O parâmetro não pode ser processado porque o nome do parâmetro 'P' é ambíguo.</dt><dd>“Ambíguo” quer dizer “pode ser mais de uma coisa”. O PowerShell não arrisca adivinhar.</dd>
+  <dt>As possíveis correspondências incluem: -Path -ProgressAction -PipelineVariable -LiteralPath.</dt><dd>Os quatro parâmetros que começam com <code>P</code>. Qualquer um poderia ser o <code>-P</code>. Por isso <code>-Pa</code> funciona para <code>-Path</code>: já não há empate.</dd>
+</dl>
+<p><strong>Como resolver:</strong> escreva mais algumas letras (<code>-Pa</code> ou, melhor, <code>-Path</code>) até o nome ficar único.</p>
+<div class="note"><strong>No Windows PowerShell 5.1</strong> a lista do mesmo erro é menor: <code>-Path -PipelineVariable -LiteralPath</code>. Não aparece o <code>-ProgressAction</code>, que é do PowerShell 7.</div>
+</div>
+
+<div class="cenario">
+<strong>O valor do tipo errado</strong>
+<p>Alguns parâmetros só aceitam um tipo de valor. O <code>-Year</code> do <code>Get-Date</code> quer um número (o ano). Se vier um texto:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-Date -Year abc
+Get-Date: Não é possível associar o parâmetro 'Year'. Cannot convert value "abc" to type "System.Int32". Error: "The input string 'abc' was not in a correct format."
+</pre><dl class="anatomy">
+  <dt>Não é possível associar o parâmetro 'Year'.</dt><dd>O PowerShell entendeu o nome do parâmetro, mas não conseguiu usar o valor que você passou.</dd>
+  <dt>Cannot convert value "abc" to type "System.Int32".</dt><dd>Em inglês: não deu para converter <code>abc</code> para número inteiro (<code>Int32</code>). No PowerShell 7, este pedaço da mensagem veio em inglês, mesmo no Windows em português.</dd>
+  <dt>The input string 'abc' was not in a correct format.</dt><dd>A confirmação: <code>abc</code> não está num formato de número.</dd>
+</dl>
+<p><strong>Como resolver:</strong> passe um ano de verdade, por exemplo <code>Get-Date -Year 2026</code>. O parâmetro estava certo; o valor é que não servia.</p>
+<div class="note"><strong>No Windows PowerShell 5.1</strong> a mesma reclamação sai toda em português: “Não é possível converter o valor "abc" para o tipo "System.Int32". Erro: "A cadeia de caracteres de entrada não estava em um formato correto."”</div>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Get-ChildItem -Path . -Filter *.txt</code></td><td>Lista, na pasta atual, só os arquivos <code>.txt</code> (parâmetros nomeados).</td></tr>
+<tr><td><code>Get-ChildItem . *.txt</code></td><td>A mesma coisa, pelos parâmetros posicionais (caminho, depois filtro).</td></tr>
+<tr><td><code>Get-ChildItem -Name</code></td><td>Lista só os nomes (switch, sem valor).</td></tr>
+<tr><td><code>Get-ChildItem -Pa . -Fi *.txt</code></td><td>A mesma listagem, com os nomes abreviados e sem ambiguidade.</td></tr>
+<tr><td><code>-Path "C:\Program Files"</code></td><td>Valor com espaço vai entre aspas, para não ser cortado ao meio.</td></tr>
+<tr><td><code>(Get-Command Get-ChildItem).Parameters.Keys</code></td><td>Mostra os nomes dos parâmetros daquele cmdlet.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o parâmetro</h3>
+<p>Complete para listar só os arquivos <code>.txt</code> da pasta atual, com o parâmetro nomeado:</p>
+<div class="ex-code">Get-ChildItem -Path . -<input data-answer="Filter" aria-label="parâmetro"> *.txt</div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual é a saída?</h3>
+<p>Na pasta de teste, com <code>a.txt</code>, <code>b.log</code> e <code>c.txt</code>, o que aparece (um nome por linha) com <code>Get-ChildItem -Name</code>? Escreva os três nomes, na ordem, separados por vírgula.</p>
+<div class="ex-code"><input data-answer="a.txt, b.log, c.txt" aria-label="saída"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Complete as aspas</h3>
+<p>Complete o valor do caminho que tem espaço:</p>
+<div class="ex-code">Get-ChildItem -Path "<input data-answer="C:\Program Files" aria-label="caminho">"</div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. O que é um parâmetro <em>switch</em>, como o <code>-Name</code>?</p>
+<label><input type="radio" name="q4"> Um parâmetro que só aceita números</label>
+<label><input type="radio" name="q4"> Um parâmetro que não leva valor: só de aparecer, liga um modo</label>
+<label><input type="radio" name="q4"> Um apelido do <code>Get-ChildItem</code></label>
+<label><input type="radio" name="q4"> Um erro de grafia de <code>-Path</code></label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">5. Por que <code>Get-ChildItem -Filtro *.txt</code> dá erro?</p>
+<label><input type="radio" name="q5"> Porque a pasta está vazia</label>
+<label><input type="radio" name="q5"> Porque faltaram as aspas no <code>*.txt</code></label>
+<label><input type="radio" name="q5"> Porque o parâmetro se chama <code>-Filter</code>, em inglês, e não <code>-Filtro</code></label>
+<label><input type="radio" name="q5"> Porque <code>-Filtro</code> é ambíguo</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. Por que <code>Get-ChildItem -P .</code> é ambíguo no PowerShell 7?</p>
+<label><input type="radio" name="q6"> Porque <code>-P</code> pode ser <code>-Path</code>, <code>-ProgressAction</code>, <code>-PipelineVariable</code> ou <code>-LiteralPath</code></label>
+<label><input type="radio" name="q6"> Porque o ponto <code>.</code> não é um caminho válido</label>
+<label><input type="radio" name="q6"> Porque <code>Get-ChildItem</code> não aceita parâmetros</label>
+<label><input type="radio" name="q6"> Porque é preciso reiniciar o PowerShell</label>
+</div>
+
+<div class="tryps" data-goal="src:\bGet-ChildItem\b;;src:-Filter;;out:a.txt;;out:c.txt;;semerro">
+<p class="try-task"><strong>Missão:</strong> os três arquivos já estão sendo criados. Liste só os <code>.txt</code>, usando o parâmetro <code>-Filter</code>, e mostre apenas os nomes.</p>
+<pre class="script" data-file="main.ps1">New-Item a.txt, b.log, c.txt -ItemType File | Out-Null
+Get-ChildItem -Name
+</pre>
+<pre class="solucao" data-file="main.ps1">New-Item a.txt, b.log, c.txt -ItemType File | Out-Null
+Get-ChildItem -Filter *.txt -Name
+</pre>
+</div>
+
+<div class="tryps" data-goal="src:\bGet-Date\b;;src:-Format;;outre:\d{2}/\d{2}/\d{4};;semerro">
+<p class="try-task"><strong>Missão final:</strong> mostre a data de hoje no formato <code>dd/MM/yyyy</code>, com o parâmetro <code>-Format</code>.</p>
+<pre class="script" data-file="main.ps1">Get-Date
+</pre>
+<pre class="solucao" data-file="main.ps1">Get-Date -Format "dd/MM/yyyy"
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Parâmetro é o ajuste fino do cmdlet: um hífen, um nome e, na maior parte das vezes, um valor.</li>
+  <li>Na forma <strong>nomeada</strong>, o nome vai junto: <code>Get-ChildItem -Path . -Filter *.txt</code>.</li>
+  <li>Na forma <strong>posicional</strong>, o valor entra na ordem que o cmdlet espera: <code>Get-ChildItem . *.txt</code>. Nos scripts, prefira o nome completo.</li>
+  <li>Um <strong>switch</strong> (como o <code>-Name</code>) não leva valor: só de aparecer, liga um modo.</li>
+  <li>Dá para abreviar (<code>-Pa</code>, <code>-Fi</code>) enquanto o pedaço for único. <code>-P</code> é ambíguo.</li>
+  <li>Valor com espaço vai entre aspas: <code>-Path "C:\Program Files"</code>.</li>
+  <li>Três erros comuns: nome inventado (<code>-Filtro</code>), abreviação ambígua (<code>-P</code>) e valor do tipo errado (<code>-Year abc</code>). Os três se resolvem corrigindo e rodando de novo.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
