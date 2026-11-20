@@ -92,6 +92,10 @@ PS C:\Users\ana&gt; $nome.GetType().FullName
 System.String
 </pre>
 <p><code>System.String</code> é o nome "de registro" do tipo texto no .NET, a plataforma em que o PowerShell foi construído.</p>
+<p>Guarde um número na mesma variável e o tipo muda junto:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana&gt; $nome = 10; $nome.GetType().FullName
+System.Int32
+</pre>
 <hr>
 <h2>Formas diferentes de descobrir o tipo</h2>
 <div class="table-wrap">
