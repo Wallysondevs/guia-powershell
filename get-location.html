@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Get-Location — Onde Estou | Guia PowerShell</title>
+<meta name="description" content="Como ver a pasta atual no PowerShell 7 com Get-Location, o apelido pwd, a variável $PWD, o texto em $PWD.Path e a ficha completa com Format-List, a partir da pasta de teste guia-ps-teste.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+
+<h1>Onde Estou (<span class="hl">Get-Location</span>)</h1>
+
+<p class="intro">Toda janela do PowerShell está "parada" em alguma pasta. É essa pasta que aparece no meio do prompt, e é nela que os comandos procuram um arquivo quando você não diz o caminho inteiro. Nesta aula você vai perguntar ao PowerShell <strong>onde você está</strong>, de três jeitos diferentes, e vai ver o que mais existe por trás dessa resposta.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O <code>Get-Location</code>, que mostra a pasta atual.</li>
+  <li>O apelido <code>pwd</code> e a variável automática <code>$PWD</code>, que fazem a mesma pergunta.</li>
+  <li>O <code>$PWD.Path</code>, que devolve só o caminho, como texto.</li>
+  <li>A ficha completa da pasta, com <code>Format-List *</code>: disco, provedor e caminho.</li>
+  <li>A ler o caminho no próprio prompt <code>PS C:\Users\ana\guia-ps-teste&gt;</code>.</li>
+</ul>
+</div>
+
+<p>Todas as saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, dentro de uma <strong>pasta de teste</strong> chamada <code>guia-ps-teste</code>, na pasta pessoal da usuária fictícia <code>ana</code>. Os exemplos abaixo já partem de dentro dessa pasta. No seu computador, no lugar de <code>ana</code> vai aparecer o seu nome de usuário.</p>
+
+<hr>
+
+<h2>A ideia: a plaquinha "você está aqui"</h2>
+<p>No mapa de um shopping, uma plaquinha vermelha diz "você está aqui". Ela não te leva a lugar nenhum: só informa o andar e a loja do lado. Se você quiser ir à praça de alimentação, aí sim precisa andar (isso é a próxima aula, o <code>Set-Location</code>).</p>
+<p>O <code>Get-Location</code> é essa plaquinha. Ele <strong>mostra</strong> a pasta atual; não muda nada.</p>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>No shopping</th><th>No PowerShell</th></tr>
+<tr><td>A plaquinha "você está aqui"</td><td>O <code>Get-Location</code></td></tr>
+<tr><td>O nome do andar e da loja</td><td>O caminho, como <code>C:\Users\ana\guia-ps-teste</code></td></tr>
+<tr><td>Olhar o letreiro no alto do corredor</td><td>Ler a pasta no meio do prompt</td></tr>
+<tr><td>Andar até outra loja</td><td>O <code>Set-Location</code> (próxima aula)</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>1. Perguntando a pasta: <code>Get-Location</code></h2>
+<p>Digite e aperte <kbd>Enter</kbd>:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-Location
+
+Path
+----
+C:\Users\ana\guia-ps-teste</pre>
+<dl class="anatomy">
+  <dt>Get-Location</dt><dd>Verbo <code>Get</code> ("obter") + substantivo <code>Location</code> ("local"): "onde eu estou?".</dd>
+  <dt>Path</dt><dd>O nome da coluna: "caminho". É o endereço completo da pasta atual.</dd>
+  <dt>C:\Users\ana\guia-ps-teste</dt><dd>O valor: disco <code>C:</code>, pasta dos usuários, pasta da Ana, e dentro dela a pasta de teste desta aula.</dd>
+</dl>
+<p>Repare que o prompt já dizia a mesma coisa, antes do <code>&gt;</code>: <code>PS C:\Users\ana\guia-ps-teste&gt;</code>. O comando só confirma, numa tabelinha.</p>
+
+<div class="tryps" data-goal="src:\bGet-Location\b;;semerro">
+<p class="try-task"><strong>Experimente:</strong> use o <code>Get-Location</code> para ver a pasta atual do editor. (O caminho no editor é o do Linux, não o do Windows; o comando é o mesmo.)</p>
+<pre class="script" data-file="main.ps1">
+</pre>
+<pre class="solucao" data-file="main.ps1">Get-Location
+</pre>
+</div>
+
+<hr>
+
+<h2>2. Dois atalhos: <code>pwd</code> e <code>$PWD</code></h2>
+<p>O mesmo resultado aparece de outras duas formas. A primeira é o apelido <code>pwd</code> ("print working directory", "imprima a pasta de trabalho"), herdado do Linux:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; pwd
+
+Path
+----
+C:\Users\ana\guia-ps-teste</pre>
+<p>A segunda é a variável automática <code>$PWD</code> (de <em>present working directory</em>). Variáveis começam com <code>$</code> e já vêm prontas; a aula delas é <a href="variaveis-automaticas.html">Variáveis Automáticas</a>. Por enquanto, pense nela como um papelzinho em que o PowerShell já anotou a pasta atual:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; $PWD
+
+Path
+----
+C:\Users\ana\guia-ps-teste</pre>
+<p>As três respostas são a mesma tabelinha com a coluna <code>Path</code>. Use o nome completo <code>Get-Location</code> nos scripts; <code>pwd</code> é atalho de terminal.</p>
+
+<hr>
+
+<h2>3. Só o texto do caminho: <code>$PWD.Path</code></h2>
+<p>Às vezes você não quer a tabela, quer só o endereço, como um texto que dá para juntar com um nome de arquivo. Peça a propriedade <code>Path</code> depois de um ponto:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; $PWD.Path
+C:\Users\ana\guia-ps-teste</pre>
+<dl class="anatomy">
+  <dt>$PWD</dt><dd>O objeto "pasta atual", com várias informações dentro.</dd>
+  <dt>.</dt><dd>O ponto pede <strong>uma propriedade</strong> daquele objeto: um campo da ficha.</dd>
+  <dt>Path</dt><dd>O campo do caminho. Sai só a linha <code>C:\Users\ana\guia-ps-teste</code>, sem cabeçalho e sem linha em branco.</dd>
+</dl>
+<p>Isso vai ser muito útil quando você montar caminhos (aula <a href="caminhos.html">Caminhos</a>). <code>(Get-Location).Path</code> devolve o mesmo texto.</p>
+
+<div class="tryps" data-goal="src:\$PWD\.Path;;semerro">
+<p class="try-task"><strong>Missão:</strong> mostre só o texto do caminho atual, com <code>$PWD.Path</code>.</p>
+<pre class="script" data-file="main.ps1">$PWD
+</pre>
+<pre class="solucao" data-file="main.ps1">$PWD.Path
+</pre>
+</div>
+
+<hr>
+
+<h2>4. A ficha completa: <code>Format-List *</code></h2>
+<p>A tabelinha padrão esconde alguns campos. Para ver a ficha inteira, mande o resultado para o <code>Format-List *</code> ("formate como lista, todos os campos"):</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Get-Location | Format-List *
+
+Drive        : C
+Provider     : Microsoft.PowerShell.Core\FileSystem
+ProviderPath : C:\Users\ana\guia-ps-teste
+Path         : C:\Users\ana\guia-ps-teste</pre>
+<dl class="anatomy">
+  <dt>Drive</dt><dd>A letra do disco, aqui <code>C</code>. Sem os dois pontos.</dd>
+  <dt>Provider</dt><dd>O <strong>provedor</strong>: o tipo de lugar em que você está. <code>FileSystem</code> é o disco de arquivos. O PowerShell também tem outros, como o <code>Env:</code> e o Registro; isso é a aula <a href="provedores.html">Drives e Provedores</a>.</dd>
+  <dt>ProviderPath</dt><dd>O caminho do jeito que o provedor entende. Em pastas de arquivo, em geral é igual ao <code>Path</code>.</dd>
+  <dt>Path</dt><dd>O caminho que você já conhece, o mesmo do prompt.</dd>
+</dl>
+
+<hr>
+
+<h2>Formas diferentes de perguntar onde você está</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>Get-Location</code></td><td>Nos scripts e neste guia: o nome completo, claro.</td></tr>
+<tr><td><code>pwd</code></td><td>Atalho no terminal, se você vem do Linux.</td></tr>
+<tr><td><code>$PWD</code></td><td>Quando você já está falando de variáveis e quer o objeto inteiro.</td></tr>
+<tr><td><code>$PWD.Path</code></td><td>Quando precisa só do texto do caminho, para juntar com outra coisa.</td></tr>
+<tr><td>Olhar o prompt</td><td>O jeito mais rápido no dia a dia: a pasta já está ali, antes do <code>&gt;</code>.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Achar que o <code>Get-Location</code> muda de pasta</strong>
+<p>Este é o tropeço mais comum, e quase nunca vem com uma mensagem vermelha. O <code>Get-Location</code> <strong>só mostra</strong> o lugar; ele não aceita um destino para "ir até lá". Quem muda de pasta é o <code>Set-Location</code> (próxima aula).</p>
+<p>Se você olhar o prompt e ele continuar <code>PS C:\Users\ana\guia-ps-teste&gt;</code> depois de um <code>Get-Location</code>, está certo: você perguntou onde estava, e continuou no mesmo lugar.</p>
+</div>
+
+<div class="cenario">
+<strong>O caminho no prompt não é o que você esperava</strong>
+<p>A pasta atual é por sessão: cada janela do PowerShell tem a sua. Se você abriu uma janela nova, em geral ela começa na sua pasta pessoal (<code>C:\Users\ana</code>), não na pasta em que a janela anterior estava. Não é um erro, e não muda nada no seu disco. Use <code>Get-Location</code> para confirmar, e o <code>Set-Location</code> para ir até a pasta de trabalho.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Get-Location</code></td><td>Mostra a pasta atual, numa tabela com a coluna <code>Path</code>.</td></tr>
+<tr><td><code>pwd</code></td><td>O mesmo, pelo apelido.</td></tr>
+<tr><td><code>$PWD</code></td><td>O mesmo, pela variável automática.</td></tr>
+<tr><td><code>$PWD.Path</code></td><td>Mostra só o texto do caminho, sem tabela.</td></tr>
+<tr><td><code>Get-Location | Format-List *</code></td><td>Mostra a ficha completa: disco, provedor e caminho.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Complete para mostrar a pasta atual:</p>
+<div class="ex-code"><input data-answer="Get-Location" aria-label="comando"></div>
+</div>
+
+<div class="exercise">
+<h3>2. Qual é o apelido?</h3>
+<p>Qual é o apelido do <code>Get-Location</code>, herdado do Linux?</p>
+<div class="ex-code"><input data-answer="pwd" aria-label="apelido"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Só o texto</h3>
+<p>Complete para mostrar só o caminho, como texto:</p>
+<div class="ex-code">$PWD.<input data-answer="Path" aria-label="propriedade"></div>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">4. O que o <code>Get-Location</code> faz?</p>
+<label><input type="radio" name="q4"> Muda para a pasta que você passar na frente</label>
+<label><input type="radio" name="q4"> Mostra a pasta em que a janela está agora, sem mudar nada</label>
+<label><input type="radio" name="q4"> Apaga a pasta atual</label>
+<label><input type="radio" name="q4"> Cria a pasta <code>guia-ps-teste</code></label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">5. No prompt <code>PS C:\Users\ana\guia-ps-teste&gt;</code>, onde você está?</p>
+<label><input type="radio" name="q5"> Na pasta de teste <code>guia-ps-teste</code>, dentro da pasta da Ana</label>
+<label><input type="radio" name="q5"> Na raiz do disco <code>C:</code></label>
+<label><input type="radio" name="q5"> No Linux</label>
+<label><input type="radio" name="q5"> Em nenhum lugar: o prompt está vazio</label>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">6. Qual forma devolve só o texto do caminho, sem a tabela?</p>
+<label><input type="radio" name="q6"> <code>Get-Location</code></label>
+<label><input type="radio" name="q6"> <code>pwd</code></label>
+<label><input type="radio" name="q6"> <code>$PWD.Path</code></label>
+<label><input type="radio" name="q6"> <code>Get-Date</code></label>
+</div>
+
+<div class="tryps" data-goal="src:Format-List;;src:Get-Location;;semerro">
+<p class="try-task"><strong>Missão final:</strong> mostre a ficha completa da pasta atual, com <code>Get-Location | Format-List *</code>.</p>
+<pre class="script" data-file="main.ps1">Get-Location
+</pre>
+<pre class="solucao" data-file="main.ps1">Get-Location | Format-List *
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Toda janela do PowerShell está em uma pasta; ela aparece no meio do prompt.</li>
+  <li><code>Get-Location</code> mostra essa pasta e <strong>não</strong> muda de lugar. Quem muda é o <code>Set-Location</code>.</li>
+  <li><code>pwd</code> e <code>$PWD</code> dão o mesmo resultado; <code>$PWD.Path</code> devolve só o texto do caminho.</li>
+  <li><code>Get-Location | Format-List *</code> mostra a ficha: disco, provedor e caminho.</li>
+  <li>Cada janela tem a sua própria pasta atual.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
