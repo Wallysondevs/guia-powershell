@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Remove-Item — apagar arquivos e pastas | Guia PowerShell</title>
+<meta name="description" content="Remove-Item para quem nunca usou terminal: apagar arquivo, curingas, pastas vazias e cheias com -Recurse, o ensaio com -WhatIf, por que não existe Lixeira e o erro real de arquivo que não existe, explicado em português.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Remove-Item</span>: Apagando</h1>
+
+<p class="intro">A pasta de downloads da Ana está cheia de arquivos <code>.tmp</code> esquecidos e de pastas vazias. Nesta aula você vai apagar um arquivo, vários de uma vez, uma pasta vazia e uma pasta com coisas dentro. Antes de tudo, um aviso que vale para a aula inteira: <strong>o <code>Remove-Item</code> não manda nada para a Lixeira</strong>. Apagou, sumiu.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A apagar um arquivo com <code>Remove-Item</code>.</li>
+  <li>A ensaiar com <code>-WhatIf</code> antes de apagar de verdade.</li>
+  <li>A apagar vários arquivos com curinga (<code>*.tmp</code>).</li>
+  <li>A apagar pastas vazias e pastas com conteúdo (<code>-Recurse</code>).</li>
+  <li>Por que o arquivo não vai para a Lixeira.</li>
+  <li>A ler o erro de arquivo que não existe.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7</strong> de um Windows em português, dentro de uma pasta de treino chamada <code>guia-ps-teste</code>, criada só para isso e apagada no fim. Por isso o prompt aparece como <code>PS C:\Users\ana\guia-ps-teste&gt;</code>.</p>
+
+<div class="warning"><strong>Treine sempre numa pasta de teste.</strong> Crie uma pasta só para praticar (aula <a href="new-item.html">Criando Arquivos e Pastas</a>), entre nela com <code>Set-Location</code> e confira o prompt antes de apagar qualquer coisa. Um <code>Remove-Item *</code> rodado na pasta errada apaga arquivos de verdade.</div>
+
+<hr>
+
+<h2>A ideia: o picador de papel</h2>
+<p>A Lixeira do Windows é uma caixa ao lado da mesa: o papel jogado lá ainda pode ser recuperado. O <code>Remove-Item</code> é um <strong>picador de papel</strong>: o documento não passa pela caixa. Por isso, o PowerShell oferece duas proteções: o <strong>ensaio</strong> (<code>-WhatIf</code>) e a <strong>pergunta de confirmação</strong> quando a pasta tem coisas dentro.</p>
+
+<hr>
+
+<h2>1. Ensaiar antes: <code>-WhatIf</code></h2>
+<p>A pasta de treino tem uma <code>nota.txt</code>. Primeiro, o ensaio:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Remove-Item nota.txt -WhatIf
+What If: Executando a operação "Remover Arquivo" no destino "C:\Users\ana\guia-ps-teste\nota.txt".
+</pre>
+<p>O <code>-WhatIf</code> ("e se?") mostrou <strong>o que faria</strong> ("Remover Arquivo") e <strong>em quem</strong> (o caminho completo), sem apagar nada. Conferido o caminho, rode sem o <code>-WhatIf</code>.</p>
+
+<h2>2. Apagando um arquivo</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Remove-Item nota.txt
+PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem -Name
+cheia
+vazia
+log1.tmp
+log2.tmp
+log3.tmp
+</pre>
+<dl class="anatomy">
+  <dt>Remove-Item</dt><dd>"Remover item". <em>Remove</em> é "remover", e <em>Item</em> é arquivo ou pasta.</dd>
+  <dt>nota.txt</dt><dd>Quem vai ser apagado. É o parâmetro <code>-Path</code>, que pode ir sem o nome.</dd>
+</dl>
+<p>Nenhuma mensagem: deu certo. A listagem confirma que a <code>nota.txt</code> sumiu. Sobraram duas pastas (<code>cheia</code> e <code>vazia</code>) e três arquivos <code>.tmp</code>.</p>
+
+<div class="tryps" data-goal="out:False;;semerro">
+<p class="try-task"><strong>Experimente:</strong> o script cria <code>velho.txt</code> e no fim pergunta se ele ainda existe. Acrescente, no meio, a linha que apaga o arquivo. A resposta tem de ser <code>False</code>.</p>
+<pre class="script" data-file="main.ps1">'conteúdo antigo' | Set-Content velho.txt
+
+Test-Path velho.txt
+</pre>
+<pre class="solucao" data-file="main.ps1">'conteúdo antigo' | Set-Content velho.txt
+Remove-Item velho.txt
+Test-Path velho.txt
+</pre>
+</div>
+
+<hr>
+
+<h2>3. Vários de uma vez: curingas</h2>
+<p>Os três <code>.tmp</code> saem com um comando só. O <code>*</code> quer dizer "qualquer nome" (aula <a href="get-childitem.html">Listando</a>):</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Remove-Item *.tmp
+</pre>
+<div class="tip">Com curinga, o ensaio vale ouro: <code>Remove-Item *.tmp -WhatIf</code> lista um por um os arquivos que seriam apagados. Se aparecer algum que você queria manter, ajuste o curinga antes.</div>
+
+<hr>
+
+<h2>4. Apagando pastas</h2>
+<h3>Pasta vazia</h3>
+<p>Pasta vazia sai como um arquivo, sem pergunta:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Remove-Item vazia
+</pre>
+
+<h3>Pasta com coisas dentro: <code>-Recurse</code></h3>
+<p>A pasta <code>cheia</code> tem um arquivo <code>a.txt</code>. Se você rodar só <code>Remove-Item cheia</code> numa janela do PowerShell, ele <strong>não apaga direto</strong>: ele para e pergunta se você quer apagar a pasta e tudo o que tem dentro, com as opções de responder sim ou não. Responder <code>N</code> cancela sem perder nada. Essa pergunta é a segunda proteção.</p>
+<div class="note">Esta pergunta só aparece numa janela aberta, com alguém para responder, então não deu para colher a tela dela no laboratório automático. Abra o PowerShell, crie uma pasta de teste com um arquivo dentro e veja a pergunta por conta própria: responda <code>N</code>.</div>
+<p>Quando você <strong>tem certeza</strong>, o <code>-Recurse</code> ("recursivo", ou seja, a pasta e tudo o que estiver dentro dela, em todos os níveis) diz isso de antemão:</p>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Remove-Item cheia -Recurse -Confirm:$false
+PS C:\Users\ana\guia-ps-teste&gt; Get-ChildItem -Name
+PS C:\Users\ana\guia-ps-teste&gt; 
+</pre>
+<dl class="anatomy">
+  <dt>-Recurse</dt><dd>Apaga a pasta com tudo o que está dentro.</dd>
+  <dt>-Confirm:$false</dt><dd>"Não pergunte." Use só quando já conferiu o caminho. No dia a dia, <code>Remove-Item cheia -Recurse</code> já basta.</dd>
+</dl>
+<p>A listagem vazia mostra que a pasta de treino ficou limpa.</p>
+
+<hr>
+
+<h2>5. Não tem Lixeira</h2>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Test-Path nota.txt
+False
+</pre>
+<p>O <code>Test-Path</code> (aula <a href="test-path.html">Existe?</a>) confirma: a <code>nota.txt</code> não existe mais, e ela também não está na Lixeira do Windows. Se o arquivo era importante, só uma cópia de segurança salva.</p>
+
+<hr>
+
+<h2>Formas diferentes de apagar</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Forma</th><th>Quando usar</th></tr>
+<tr><td><code>Remove-Item -Path nota.txt</code></td><td>Nos scripts: tudo escrito.</td></tr>
+<tr><td><code>Remove-Item nota.txt</code></td><td>No terminal, um arquivo ou uma pasta vazia.</td></tr>
+<tr><td><code>Remove-Item *.tmp -WhatIf</code>, depois sem <code>-WhatIf</code></td><td>Vários arquivos: ensaie primeiro.</td></tr>
+<tr><td><code>Remove-Item pasta -Recurse</code></td><td>Pasta com conteúdo, quando você tem certeza.</td></tr>
+<tr><td><code>Remove-Item pasta -Recurse -Confirm</code></td><td>Quer que ele pergunte item por item.</td></tr>
+<tr><td><code>del</code>, <code>rm</code>, <code>rmdir</code></td><td>Apelidos de quem vem do <code>cmd</code> ou do Linux (aula <a href="aliases.html">Apelidos</a>). Todos chamam o <code>Remove-Item</code>. Evite em scripts.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>O arquivo não existe</strong>
+<pre class="term" data-title="PowerShell 7">PS C:\Users\ana\guia-ps-teste&gt; Remove-Item naoexiste.txt
+Remove-Item: Não é possível localizar o caminho 'C:\Users\ana\guia-ps-teste\naoexiste.txt' porque ele não existe.
+</pre>
+<dl class="anatomy">
+  <dt>Remove-Item:</dt><dd>O comando que reclamou.</dd>
+  <dt>Não é possível localizar o caminho '…'</dt><dd>Ele procurou na <strong>pasta atual</strong>. O caminho completo mostra onde ele olhou.</dd>
+</dl>
+<p><strong>Como resolver:</strong> confira a pasta em que você está (o prompt mostra) e o nome exato com <code>Get-ChildItem</code>. Num script em que o arquivo pode não existir, pergunte antes com <code>Test-Path</code>.</p>
+</div>
+
+<div class="cenario">
+<strong>Apagou o arquivo errado</strong>
+<p>Não tem mensagem de erro para isso: o PowerShell fez exatamente o que você pediu. Como não existe Lixeira, a única saída é uma cópia de segurança.</p>
+<p><strong>Como evitar:</strong> treine numa pasta de teste, olhe o prompt antes de apertar <kbd>Enter</kbd> e use <code>-WhatIf</code> sempre que tiver curinga ou <code>-Recurse</code>.</p>
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+<div class="table-wrap">
+<table class="ref">
+<tr><th>Você digita</th><th>O que faz</th></tr>
+<tr><td><code>Remove-Item a.txt</code></td><td>Apaga o arquivo (sem Lixeira).</td></tr>
+<tr><td><code>Remove-Item *.tmp</code></td><td>Apaga todos os <code>.tmp</code> da pasta atual.</td></tr>
+<tr><td><code>Remove-Item pasta</code></td><td>Apaga a pasta se estiver vazia. Com conteúdo, pergunta antes.</td></tr>
+<tr><td><code>-Recurse</code></td><td>Apaga a pasta e tudo o que tem dentro.</td></tr>
+<tr><td><code>-WhatIf</code></td><td>Ensaia: mostra o que apagaria.</td></tr>
+<tr><td><code>-Confirm</code></td><td>Pergunta antes de cada item.</td></tr>
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Complete o comando</h3>
+<p>Apague o arquivo <code>rascunho.txt</code>:</p>
+<div class="ex-code"><input data-answer="Remove-Item|del|rm" aria-label="comando"> rascunho.txt</div>
+</div>
+
+<div class="exercise">
+<h3>2. Só ensaiar</h3>
+<p>Complete para ver quais <code>.log</code> seriam apagados, sem apagar:</p>
+<div class="ex-code">Remove-Item *.log <input data-answer="-WhatIf" aria-label="parâmetro"></div>
+</div>
+
+<div class="exercise">
+<h3>3. Pasta com conteúdo</h3>
+<p>Complete para apagar a pasta <code>antigos</code> com tudo o que tem dentro:</p>
+<div class="ex-code">Remove-Item antigos <input data-answer="-Recurse" aria-label="parâmetro"></div>
+</div>
+
+<div class="mc" data-answer="3">
+<p class="mc-q">4. Para onde vai um arquivo apagado com <code>Remove-Item</code>?</p>
+<label><input type="radio" name="q4"> Para a Lixeira</label>
+<label><input type="radio" name="q4"> Para a pasta Documentos</label>
+<label><input type="radio" name="q4"> Para lugar nenhum: some de vez</label>
+<label><input type="radio" name="q4"> Para a nuvem</label>
+</div>
+
+<div class="mc" data-answer="2">
+<p class="mc-q">5. O que acontece com <code>Remove-Item fotos</code> se a pasta <code>fotos</code> tiver arquivos dentro, numa janela do PowerShell?</p>
+<label><input type="radio" name="q5"> Apaga tudo sem avisar</label>
+<label><input type="radio" name="q5"> Pergunta antes de apagar a pasta e o que está dentro</label>
+<label><input type="radio" name="q5"> Apaga só os arquivos e deixa a pasta</label>
+<label><input type="radio" name="q5"> Dá erro e nunca deixa apagar</label>
+</div>
+
+<div class="mc" data-answer="1">
+<p class="mc-q">6. Qual é o jeito mais seguro antes de rodar <code>Remove-Item *.jpg</code>?</p>
+<label><input type="radio" name="q6"> Rodar antes <code>Remove-Item *.jpg -WhatIf</code></label>
+<label><input type="radio" name="q6"> Acrescentar <code>-Confirm:$false</code></label>
+<label><input type="radio" name="q6"> Acrescentar <code>-Recurse</code></label>
+<label><input type="radio" name="q6"> Fechar os outros programas</label>
+</div>
+
+<div class="tryps" data-goal="out:Sobrou: importante.txt;;src:\bRemove-Item\b;;semerro">
+<p class="try-task"><strong>Missão final:</strong> o script cria três arquivos <code>.tmp</code> e um <code>importante.txt</code>. Apague <strong>só</strong> os <code>.tmp</code>, com um único <code>Remove-Item</code> e curinga, para que a última linha mostre <code>Sobrou: importante.txt</code>.</p>
+<pre class="script" data-file="main.ps1">New-Item a.tmp, b.tmp, c.tmp, importante.txt | Out-Null
+
+"Sobrou: " + ((Get-ChildItem -Name) -join ', ')
+</pre>
+<pre class="solucao" data-file="main.ps1">New-Item a.tmp, b.tmp, c.tmp, importante.txt | Out-Null
+Remove-Item *.tmp
+"Sobrou: " + ((Get-ChildItem -Name) -join ', ')
+</pre>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Remove-Item nome</code> apaga arquivo ou pasta vazia. <strong>Não existe Lixeira</strong>: apagou, sumiu.</li>
+  <li>Curinga apaga vários: <code>Remove-Item *.tmp</code>. Ensaie antes com <code>-WhatIf</code>.</li>
+  <li>Pasta com conteúdo: sem <code>-Recurse</code>, ele pergunta; com <code>-Recurse</code>, apaga tudo.</li>
+  <li>Sem mensagem = deu certo. "Não é possível localizar o caminho" = nome ou pasta errada.</li>
+  <li>Treine numa pasta de teste e confira o prompt antes de apagar.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
