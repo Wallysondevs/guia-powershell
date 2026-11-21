@@ -2,3 +2,6 @@ _saidas-brutas/
 tools/proibido.txt
 *.bak
 _saidas-anon/
+
+# quadro interno de trabalho, não publicar
+QUADRO.md

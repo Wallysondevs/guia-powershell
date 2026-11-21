@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-# Monta a base do Guia PowerShell em ~/guia-powershell a partir do Guia Lua (roda na VPS).
+# Monta a base do Guia PowerShell a partir de um Guia Lua local.
 import os, re, shutil
-H = "/workspace"
-SRC, DST = "/workspace/wallyson-guias/guia-lua", "/workspace/planos-trabalho/guia-powershell"
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+SRC = os.environ.get("GUIA_LUA", os.path.join(os.path.dirname(ROOT), "guia-lua"))
+DST = ROOT
 os.makedirs(DST + "/assets", exist_ok=True)
 os.makedirs(DST + "/tools", exist_ok=True)
 shutil.copy(SRC + "/assets/style.css", DST + "/assets/style.css")
 
 js = open(SRC + "/assets/site.js").read()
-niveis = open("/workspace/planos-trabalho/_base-ps/niveis.js").read().strip()
+niveis = open(os.path.join(HERE, "niveis.js")).read().strip()
 a = js.index("var NIVEIS = ["); b = js.index("];", a) + 2
 js = js[:a] + niveis + js[b:]
 

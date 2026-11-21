@@ -7,7 +7,7 @@
 # ATENÇÃO: Read-Host precisa de janela aberta. Sem console interativo, colher só o erro/ajuda abaixo; o resto da aula fica ilustrativo ou entra no roteiro Start-Transcript do Zeca.
 ## ajuda e tipo de retorno
 (Get-Command Read-Host).Parameters.Keys -join ", "
-## roteiro interativo (só no Start-Transcript, janela aberta pelo Wallyson; digitar: Ana / 30 / segredo)
+## roteiro interativo (só no Start-Transcript, janela interativa; digitar: Ana / 30 / segredo)
 # $nome = Read-Host "Qual é o seu nome?"
 # "Olá, $nome!"
 # $idade = Read-Host "Idade"; $idade.GetType().Name
