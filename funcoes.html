@@ -31,7 +31,7 @@
 </ul>
 </div>
 
-<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional. Os quadros marcados <strong>Saída no Windows (PowerShell 7.7)</strong> foram colhidos num Windows 10 em português, com o nome do computador e o da usuária trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>).</p>
 
 <hr>
 
@@ -148,10 +148,13 @@ Obrigado pela compra!
 <div class="cenario">
 <strong>Chamar antes de criar</strong>
 
-<pre><code>Show-Aviso
-function Show-Aviso { "Atenção!" }
-Show-Aviso
-</code></pre>
+<pre class="term" data-title="Saída no Windows (PowerShell 7.7)">PS&gt; Show-Aviso
+Show-Aviso: O termo "Show-Aviso" não é reconhecido como um nome de um cmdlet, função, arquivo de script ou programa executável.
+Verifique a ortografia do nome ou, se um caminho foi incluído, verifique se o caminho está correto e tente novamente.
+PS&gt; function Show-Aviso { "Atenção!" }
+PS&gt; Show-Aviso
+Atenção!
+</pre>
 
 <p>O PowerShell lê e roda de cima para baixo. Na primeira chamada, a função ainda não existia, e aparece o mesmo erro de "termo não reconhecido" da aula <a href="primeiro-comando.html">Seu Primeiro Comando</a>. Na segunda, ela já existe e mostra <code>Atenção!</code>. Nos scripts, coloque as funções no começo.</p>
 

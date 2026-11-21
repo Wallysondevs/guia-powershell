@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell depuração — Set-PSBreakpoint, Write-Debug e Set-PSDebug (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a achar erros em scripts do PowerShell 7: mostrar valores com Write-Debug e -Debug, rastrear linha a linha com Set-PSDebug -Trace, parar a execução com Set-PSBreakpoint, os comandos do depurador e a depuração no VS Code.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Depurando (<span class="hl">Set-PSBreakpoint</span>)</h1>
+
+<p class="intro">O script roda, mas o resultado sai errado. Onde está o problema? <strong>Depurar</strong> é investigar o código enquanto ele roda: ver o valor das variáveis, seguir o caminho linha a linha e parar num ponto para olhar com calma.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A mostrar valores escondidos com <code>Write-Debug</code> e <code>-Debug</code>.</li>
+  <li>A rastrear cada linha com <code>Set-PSDebug -Trace 1</code>.</li>
+  <li>A criar pontos de parada com <code>Set-PSBreakpoint</code>.</li>
+  <li>Os comandos do depurador (<code>s</code>, <code>v</code>, <code>c</code>, <code>q</code>...).</li>
+  <li>A depurar com cliques no VS Code.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows.</p>
+
+<hr>
+
+<h2>A ideia: o detetive</h2>
+
+<p>O detetive não adivinha: ele segue pistas. Na depuração, as pistas são os valores das variáveis em cada momento. Em vez de olhar o script inteiro e chutar, você observa onde o valor começa a ficar errado.</p>
+
+<hr>
+
+<h2>1. O script com defeito</h2>
+
+<p>Este script deveria calcular a média das notas, mas está dando errado:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; New-Item -ItemType Directory depurar-teste -Force | Out-Null
+PS&gt; Set-Location depurar-teste
+PS&gt; Set-Content media.ps1 @'
+&gt;&gt; [CmdletBinding()]
+&gt;&gt; param([int[]]$Notas = @(8, 6, 10))
+&gt;&gt; $soma = 0
+&gt;&gt; foreach ($n in $Notas) {
+&gt;&gt;     $soma = $n
+&gt;&gt;     Write-Debug "n=$n soma=$soma"
+&gt;&gt; }
+&gt;&gt; $media = $soma / $Notas.Count
+&gt;&gt; "Média: $media"
+&gt;&gt; '@
+PS&gt; .\media.ps1
+Média: 3.33333333333333
+</pre>
+
+<p>A média de 8, 6 e 10 é 8, não 3,33...</p>
+
+<hr>
+
+<h2>2. Write-Debug e -Debug</h2>
+
+<p>As mensagens de <code>Write-Debug</code> ficam escondidas até você pedir com <code>-Debug</code> (o script precisa de <code>[CmdletBinding()]</code>):</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; .\media.ps1 -Debug
+DEPURAR: n=8 soma=8
+DEPURAR: n=6 soma=6
+DEPURAR: n=10 soma=10
+Média: 3.33333333333333
+</pre>
+
+<p>A pista aparece: a soma nunca acumula. A linha <code>$soma = $n</code> deveria ser <code>$soma += $n</code>.</p>
+
+<hr>
+
+<h2>3. Set-PSDebug -Trace: linha por linha</h2>
+
+<p>Sem mexer no script, peça para o PowerShell mostrar cada linha executada:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Set-PSDebug -Trace 1
+PS&gt; .\media.ps1
+DEPURAR:    1+  &gt;&gt;&gt;&gt; .\media.ps1
+DEPURAR:    2+ param([int[]]$Notas =  &gt;&gt;&gt;&gt; @(8, 6, 10))
+
+DEPURAR:    3+  &gt;&gt;&gt;&gt; $soma = 0
+
+DEPURAR:    4+ foreach ($n in  &gt;&gt;&gt;&gt; $Notas) {
+
+DEPURAR:    4+ foreach ( &gt;&gt;&gt;&gt; $n in $Notas) {
+
+DEPURAR:    5+      &gt;&gt;&gt;&gt; $soma = $n
+
+DEPURAR:    6+      &gt;&gt;&gt;&gt; Write-Debug "n=$n soma=$soma"
+
+DEPURAR:    4+ foreach ( &gt;&gt;&gt;&gt; $n in $Notas) {
+
+DEPURAR:    5+      &gt;&gt;&gt;&gt; $soma = $n
+
+DEPURAR:    6+      &gt;&gt;&gt;&gt; Write-Debug "n=$n soma=$soma"
+
+DEPURAR:    4+ foreach ( &gt;&gt;&gt;&gt; $n in $Notas) {
+
+DEPURAR:    5+      &gt;&gt;&gt;&gt; $soma = $n
+
+DEPURAR:    6+      &gt;&gt;&gt;&gt; Write-Debug "n=$n soma=$soma"
+
+DEPURAR:    4+ foreach ( &gt;&gt;&gt;&gt; $n in $Notas) {
+
+DEPURAR:    8+  &gt;&gt;&gt;&gt; $media = $soma / $Notas.Count
+
+DEPURAR:    9+  &gt;&gt;&gt;&gt; "Média: $media"
+
+Média: 3.33333333333333
+PS&gt; Set-PSDebug -Off
+DEPURAR:    1+  &gt;&gt;&gt;&gt; Set-PSDebug -Off
+</pre>
+
+<dl class="anatomy">
+
+  <dt>-Trace 1</dt><dd>Mostra cada linha antes de executá-la.</dd>
+
+  <dt>-Trace 2</dt><dd>Mostra também as atribuições de variáveis.</dd>
+
+  <dt>Set-PSDebug -Off</dt><dd>Desliga.</dd>
+
+</dl>
+
+<hr>
+
+<h2>4. Pontos de parada (breakpoints)</h2>
+
+<p>Um <strong>breakpoint</strong> faz o script pausar num ponto e abrir o depurador, onde você digita comandos:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Set-PSBreakpoint -Script .\media.ps1 -Line 8 | Select-Object Id, Line
+
+Id Line
+-- ----
+ 1    8
+PS&gt; Get-PSBreakpoint | Select-Object Id, Script, Line
+
+Id Script                                                                Line
+-- ------                                                                ----
+ 1 C:\Users\ana\AppData\Local\Temp\guia-ps\depuracao\depurar-teste\media.ps1    8
+PS&gt; Get-PSBreakpoint | Remove-PSBreakpoint
+</pre>
+
+<p>Ao rodar <code>.\media.ps1</code> com o breakpoint ativo, o prompt vira <code>[DBG]: PS&gt;</code> e você pode investigar:</p>
+
+<pre><code>[DBG]: PS&gt; $soma
+10
+[DBG]: PS&gt; $Notas
+8
+6
+10
+[DBG]: PS&gt; c
+</code></pre>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Comando</th><th>No depurador</th></tr>
+
+<tr><td><code>$variavel</code></td><td>Mostra o valor.</td></tr>
+
+<tr><td><code>s</code> (StepInto)</td><td>Executa a próxima linha (entra em funções).</td></tr>
+
+<tr><td><code>v</code> (StepOver)</td><td>Executa a próxima linha (sem entrar em funções).</td></tr>
+
+<tr><td><code>o</code> (StepOut)</td><td>Sai da função atual.</td></tr>
+
+<tr><td><code>c</code> (Continue)</td><td>Continua até o próximo breakpoint.</td></tr>
+
+<tr><td><code>l</code> (List)</td><td>Mostra o código em volta.</td></tr>
+
+<tr><td><code>k</code></td><td>Mostra a pilha de chamadas.</td></tr>
+
+<tr><td><code>q</code> (Quit)</td><td>Para o script.</td></tr>
+
+</table>
+</div>
+
+<p>Também dá para parar quando uma variável muda: <code>Set-PSBreakpoint -Script .\media.ps1 -Variable soma -Mode Write</code>.</p>
+
+<hr>
+
+<h2>5. Wait-Debugger e o VS Code</h2>
+
+<ul>
+  <li><code>Wait-Debugger</code> no meio do código pausa ali, como um breakpoint escrito no script.</li>
+  <li>No VS Code com a extensão PowerShell, clique à esquerda do número da linha para criar um breakpoint e aperte F5: as variáveis aparecem num painel.</li>
+</ul>
+
+<div class="tryps" data-goal="out:Média: 8;;src:\+=;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> corrija o cálculo da soma para a média dar <code>Média: 8</code>.</p>
+
+<pre class="script" data-file="main.ps1">$Notas = 8, 6, 10
+$soma = 0
+foreach ($n in $Notas) { $soma = $n }
+"Média: $($soma / $Notas.Count)"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$Notas = 8, 6, 10
+$soma = 0
+foreach ($n in $Notas) { $soma += $n }
+"Média: $($soma / $Notas.Count)"
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>-Debug não mostra nada</strong>
+
+<p>O script ou a função precisa de <code>[CmdletBinding()]</code> para aceitar <code>-Debug</code>. Sem ele, use <code>$DebugPreference = 'Continue'</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>O breakpoint não para</strong>
+
+<p>O <code>-Script</code> precisa apontar para o mesmo arquivo que você roda, e a linha precisa ter código executável (não pode ser vazia ou só comentário).</p>
+
+</div>
+
+<div class="cenario">
+<strong>Esqueci o Set-PSDebug ligado</strong>
+
+<p>Tudo fica cheio de linhas <code>DEPURAR:</code>. Rode <code>Set-PSDebug -Off</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Write-Debug "x=$x"</code></td><td>Pista que só aparece com <code>-Debug</code>.</td></tr>
+
+<tr><td><code>Set-PSDebug -Trace 1</code> / <code>-Off</code></td><td>Rastreia linha a linha.</td></tr>
+
+<tr><td><code>Set-PSBreakpoint -Script s.ps1 -Line 8</code></td><td>Para na linha 8.</td></tr>
+
+<tr><td><code>Set-PSBreakpoint -Variable x -Mode Write</code></td><td>Para quando <code>$x</code> muda.</td></tr>
+
+<tr><td><code>Get-PSBreakpoint | Remove-PSBreakpoint</code></td><td>Remove todos.</td></tr>
+
+<tr><td><code>Wait-Debugger</code></td><td>Breakpoint escrito no código.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Rastreando</h3>
+<p>Complete para ligar o rastreamento:</p>
+<div class="ex-code">Set-PSDebug <input data-answer="-Trace" aria-label="resposta"> 1</div>
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. No depurador, qual comando continua até o próximo breakpoint?</p>
+
+<label><input type="radio" name="q2"> s</label>
+
+<label><input type="radio" name="q2"> v</label>
+
+<label><input type="radio" name="q2"> c</label>
+
+<label><input type="radio" name="q2"> k</label>
+
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">3. O que o script precisa para aceitar -Debug?</p>
+
+<label><input type="radio" name="q3"> Ser executado como administrador</label>
+
+<label><input type="radio" name="q3"> [CmdletBinding()]</label>
+
+<label><input type="radio" name="q3"> Set-PSDebug -Trace 1</label>
+
+<label><input type="radio" name="q3"> Um breakpoint</label>
+
+</div>
+
+<div class="tryps" data-goal="out:soma=24;;src:Write-Debug;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> com <code>$DebugPreference = 'Continue'</code>, use <code>Write-Debug</code> para mostrar <code>soma=24</code> depois de somar 8, 6 e 10.</p>
+
+<pre class="script" data-file="main.ps1">$soma = 0
+8, 6, 10 | ForEach-Object { $soma += $_ }
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$DebugPreference = 'Continue'
+$soma = 0
+8, 6, 10 | ForEach-Object { $soma += $_ }
+Write-Debug "soma=$soma"
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Write-Debug</code> + <code>-Debug</code> mostram pistas sem poluir a saída normal.</li>
+  <li><code>Set-PSDebug -Trace 1</code> mostra cada linha executada.</li>
+  <li><code>Set-PSBreakpoint</code> pausa o script para você investigar.</li>
+  <li>No VS Code, breakpoints são um clique.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

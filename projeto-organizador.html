@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projeto PowerShell: organizador da pasta Downloads (passo a passo) | Guia PowerShell</title>
+<meta name="description" content="Projeto prático em PowerShell 7: organizar uma pasta bagunçada movendo cada arquivo para uma subpasta conforme a extensão (Imagens, Documentos, Compactados...), com teste seguro via -WhatIf, nomes repetidos e um resumo no fim.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Projeto: <span class="hl">Organizador de Downloads</span></h1>
+
+<p class="intro">A pasta Downloads de quase todo mundo é uma gaveta bagunçada: fotos, PDFs, instaladores e zips misturados. Neste projeto você escreve um script que separa cada arquivo na subpasta certa pela extensão, testando antes com <code>-WhatIf</code> para não estragar nada.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A agrupar arquivos por extensão.</li>
+  <li>A criar pastas só quando precisa.</li>
+  <li>A mover arquivos com <code>Move-Item</code>, testando com <code>-WhatIf</code>.</li>
+  <li>A tratar nomes repetidos.</li>
+  <li>A transformar tudo numa função com <code>SupportsShouldProcess</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows.</p>
+
+<hr>
+
+<h2>O plano</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Etapa</th><th>Ferramenta</th></tr>
+
+<tr><td>Listar os arquivos</td><td><code>Get-ChildItem -File</code></td></tr>
+
+<tr><td>Decidir a pasta</td><td>Uma hashtable extensão → pasta</td></tr>
+
+<tr><td>Criar a pasta</td><td><code>New-Item -ItemType Directory -Force</code></td></tr>
+
+<tr><td>Mover</td><td><code>Move-Item</code> (primeiro com <code>-WhatIf</code>)</td></tr>
+
+<tr><td>Resumo</td><td><code>Group-Object</code></td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>1. Uma pasta bagunçada de teste</h2>
+
+<p>Nunca teste um organizador na pasta de verdade. Crie uma cópia de mentira:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; New-Item -ItemType Directory organizar-teste -Force | Out-Null
+PS&gt; Set-Location organizar-teste
+PS&gt; "ferias.jpg", "praia.PNG", "boleto.pdf", "contrato.docx", "planilha.xlsx", "fotos.zip", "setup.exe", "musica.mp3", "sem-extensao" | ForEach-Object { Set-Content $_ "teste" }
+PS&gt; (Get-ChildItem -File).Name
+boleto.pdf
+contrato.docx
+ferias.jpg
+fotos.zip
+musica.mp3
+planilha.xlsx
+praia.PNG
+sem-extensao
+setup.exe
+</pre>
+
+<hr>
+
+<h2>2. Extensão → pasta</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $destinos = @{
+&gt;&gt;     '.jpg' = 'Imagens'; '.jpeg' = 'Imagens'; '.png' = 'Imagens'; '.gif' = 'Imagens'
+&gt;&gt;     '.pdf' = 'Documentos'; '.docx' = 'Documentos'; '.xlsx' = 'Documentos'; '.txt' = 'Documentos'
+&gt;&gt;     '.zip' = 'Compactados'; '.7z' = 'Compactados'
+&gt;&gt;     '.exe' = 'Instaladores'; '.msi' = 'Instaladores'
+&gt;&gt;     '.mp3' = 'Musicas'; '.mp4' = 'Videos'
+&gt;&gt; }
+PS&gt; $destinos['.PNG']
+Imagens
+</pre>
+
+<dl class="anatomy">
+
+  <dt>@{ '.jpg' = 'Imagens' }</dt><dd>A "tabela de decisão": para cada extensão, a pasta.</dd>
+
+  <dt>$destinos['.PNG']</dt><dd>As chaves da hashtable não diferenciam maiúsculas: <code>.PNG</code> acha <code>.png</code>.</dd>
+
+</dl>
+
+<hr>
+
+<h2>3. Simulando com -WhatIf</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-ChildItem -File | ForEach-Object {
+&gt;&gt;     $pasta = $destinos[$_.Extension]
+&gt;&gt;     if (-not $pasta) { $pasta = 'Outros' }
+&gt;&gt;     Move-Item $_.FullName -Destination (Join-Path $pasta $_.Name) -WhatIf
+&gt;&gt; }
+What If: Executando a operação "Mover Arquivo" no destino "Item: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-organizador\organizar-teste\boleto.pdf Destino: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-organizador\organizar-teste\Documentos\boleto.pdf".
+What If: Executando a operação "Mover Arquivo" no destino "Item: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-organizador\organizar-teste\contrato.docx Destino: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-organizador\organizar-teste\Documentos\contrato.docx".
+What If: Executando a operação "Mover Arquivo" no destino "Item: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-organizador\organizar-teste\ferias.jpg Destino: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-organizador\organizar-teste\Imagens\ferias.jpg".
+What If: Executando a operação "Mover Arquivo" no destino "Item: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-organizador\organizar-teste\fotos.zip Destino: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-organizador\organizar-teste\Compactados\fotos.zip".
+What If: Executando a operação "Mover Arquivo" no destino "Item: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-organizador\organizar-teste\musica.mp3 Destino: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-organizador\organizar-teste\Musicas\musica.mp3".
+What If: Executando a operação "Mover Arquivo" no destino "Item: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-organizador\organizar-teste\planilha.xlsx Destino: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-organizador\organizar-teste\Documentos\planilha.xlsx".
+What If: Executando a operação "Mover Arquivo" no destino "Item: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-organizador\organizar-teste\praia.PNG Destino: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-organizador\organizar-teste\Imagens\praia.PNG".
+What If: Executando a operação "Mover Arquivo" no destino "Item: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-organizador\organizar-teste\sem-extensao Destino: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-organizador\organizar-teste\Outros\sem-extensao".
+What If: Executando a operação "Mover Arquivo" no destino "Item: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-organizador\organizar-teste\setup.exe Destino: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-organizador\organizar-teste\Instaladores\setup.exe".
+</pre>
+
+<p>Nada foi movido: o <code>-WhatIf</code> só mostra o plano. Confira com calma antes de seguir.</p>
+
+<hr>
+
+<h2>4. Movendo de verdade</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-ChildItem -File | ForEach-Object {
+&gt;&gt;     $pasta = $destinos[$_.Extension]
+&gt;&gt;     if (-not $pasta) { $pasta = 'Outros' }
+&gt;&gt;     New-Item -ItemType Directory $pasta -Force | Out-Null
+&gt;&gt;     Move-Item $_.FullName -Destination $pasta
+&gt;&gt; }
+PS&gt; Get-ChildItem -Recurse -File | Select-Object @{ n = 'Pasta'; e = { $_.Directory.Name } }, Name | Sort-Object Pasta, Name
+
+Pasta        Name
+-----        ----
+Compactados  fotos.zip
+Documentos   boleto.pdf
+Documentos   contrato.docx
+Documentos   planilha.xlsx
+Imagens      ferias.jpg
+Imagens      praia.PNG
+Instaladores setup.exe
+Musicas      musica.mp3
+Outros       sem-extensao
+</pre>
+
+<hr>
+
+<h2>5. Nomes repetidos</h2>
+
+<p>Se <code>Imagens\ferias.jpg</code> já existe, o <code>Move-Item</code> dá erro. Uma função que acha um nome livre resolve:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Get-NomeLivre {
+&gt;&gt;     param([string]$Pasta, [string]$Nome)
+&gt;&gt;     $base = [IO.Path]::GetFileNameWithoutExtension($Nome); $ext = [IO.Path]::GetExtension($Nome)
+&gt;&gt;     $alvo = Join-Path $Pasta $Nome; $n = 1
+&gt;&gt;     while (Test-Path $alvo) { $alvo = Join-Path $Pasta "$base ($n)$ext"; $n++ }
+&gt;&gt;     $alvo
+&gt;&gt; }
+PS&gt; Set-Content ferias.jpg "outra"
+PS&gt; Split-Path -Leaf (Get-NomeLivre -Pasta Imagens -Nome ferias.jpg)
+ferias (1).jpg
+</pre>
+
+<hr>
+
+<h2>6. A função completa</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Invoke-Organizar {
+&gt;&gt;     [CmdletBinding(SupportsShouldProcess)]
+&gt;&gt;     param([string]$Caminho = '.')
+&gt;&gt;     foreach ($arq in Get-ChildItem $Caminho -File) {
+&gt;&gt;         $pasta = $destinos[$arq.Extension]; if (-not $pasta) { $pasta = 'Outros' }
+&gt;&gt;         $dir = Join-Path $Caminho $pasta
+&gt;&gt;         if ($PSCmdlet.ShouldProcess($arq.Name, "Mover para $pasta")) {
+&gt;&gt;             New-Item -ItemType Directory $dir -Force | Out-Null
+&gt;&gt;             Move-Item $arq.FullName (Get-NomeLivre -Pasta $dir -Nome $arq.Name)
+&gt;&gt;             [pscustomobject]@{ Arquivo = $arq.Name; Pasta = $pasta }
+&gt;&gt;         }
+&gt;&gt;     }
+&gt;&gt; }
+PS&gt; Invoke-Organizar
+
+Arquivo    Pasta
+-------    -----
+ferias.jpg Imagens
+PS&gt; (Get-ChildItem Imagens).Name
+ferias (1).jpg
+ferias.jpg
+praia.PNG
+</pre>
+
+<dl class="anatomy">
+
+  <dt>SupportsShouldProcess</dt><dd>Dá à função os parâmetros <code>-WhatIf</code> e <code>-Confirm</code> de graça.</dd>
+
+  <dt>$PSCmdlet.ShouldProcess</dt><dd>Pergunta "posso?"; com <code>-WhatIf</code>, responde não e mostra o plano.</dd>
+
+</dl>
+
+<div class="tryps" data-goal="out:Imagens;;src:-WhatIf;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> simule com <code>-WhatIf</code> a mudança de <code>foto.jpg</code> para a pasta <code>Imagens</code>.</p>
+
+<pre class="script" data-file="main.ps1">Set-Content foto.jpg "x"
+New-Item -ItemType Directory Imagens -Force | Out-Null
+</pre>
+
+<pre class="solucao" data-file="main.ps1">Set-Content foto.jpg "x"
+New-Item -ItemType Directory Imagens -Force | Out-Null
+Move-Item foto.jpg -Destination Imagens -WhatIf
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Desafios</h2>
+
+<ul>
+  <li>Mova só arquivos com mais de 30 dias (<code>LastWriteTime</code>).</li>
+  <li>Grave um log com o que foi movido (<code>Export-Csv -Append</code>).</li>
+  <li>Agende o script para rodar toda semana (<a href="tarefas-agendadas.html">Tarefas Agendadas</a>).</li>
+</ul>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">1. Por que rodar primeiro com -WhatIf?</p>
+
+<label><input type="radio" name="q1"> Para ficar mais rápido</label>
+
+<label><input type="radio" name="q1"> Para ver o plano sem mover nada</label>
+
+<label><input type="radio" name="q1"> Porque o Move-Item exige</label>
+
+<label><input type="radio" name="q1"> Para criar as pastas</label>
+
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">2. <code>$destinos['.PNG']</code> acha a chave <code>'.png'</code> porque:</p>
+
+<label><input type="radio" name="q2"> As hashtables do PowerShell não diferenciam maiúsculas nas chaves</label>
+
+<label><input type="radio" name="q2"> O PowerShell converte o nome do arquivo</label>
+
+<label><input type="radio" name="q2"> <code>.PNG</code> e <code>.png</code> são o mesmo arquivo</label>
+
+<label><input type="radio" name="q2"> Não acha</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Documentos;;src:\$destinos;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> usando a hashtable <code>$destinos</code>, mostre a pasta de destino de <code>relatorio.pdf</code> (use <code>[IO.Path]::GetExtension</code>).</p>
+
+<pre class="script" data-file="main.ps1">$destinos = @{ '.pdf' = 'Documentos'; '.jpg' = 'Imagens' }
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$destinos = @{ '.pdf' = 'Documentos'; '.jpg' = 'Imagens' }
+$destinos[[IO.Path]::GetExtension('relatorio.pdf')]
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Uma hashtable decide a pasta de cada extensão.</li>
+  <li><code>-WhatIf</code> mostra o plano antes de mexer.</li>
+  <li>Trate nomes repetidos antes de mover.</li>
+  <li><code>SupportsShouldProcess</code> dá <code>-WhatIf</code> à sua função.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

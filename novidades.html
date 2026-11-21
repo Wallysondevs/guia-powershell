@@ -31,7 +31,7 @@
 </ul>
 </div>
 
-<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional. Os quadros marcados <strong>Saída no Windows (PowerShell 7.7)</strong> foram colhidos num Windows 10 em português, com o nome do computador e o da usuária trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>).</p>
 
 <hr>
 
@@ -73,9 +73,11 @@ Café 18,900      40
 
 <p>O <code>Join-Path</code> ganhou <code>-Extension</code>, que coloca (ou troca) a extensão do arquivo ao montar o caminho:</p>
 
-<pre><code>Join-Path relatorios vendas -Extension .csv
-Join-Path relatorios vendas.txt -Extension .csv
-</code></pre>
+<pre class="term" data-title="Saída no Windows (PowerShell 7.7)">PS&gt; Join-Path relatorios vendas -Extension .csv
+relatorios\vendas.csv
+PS&gt; Join-Path relatorios vendas.txt -Extension .csv
+relatorios\vendas.csv
+</pre>
 
 <p>O resultado é o caminho com a barra do sistema (<code>relatorios\vendas.csv</code> no Windows).</p>
 

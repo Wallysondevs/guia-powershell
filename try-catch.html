@@ -31,7 +31,7 @@
 </ul>
 </div>
 
-<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional. Os quadros marcados <strong>Saída no Windows (PowerShell 7.7)</strong> foram colhidos num Windows 10 em português, com o nome do computador e o da usuária trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>).</p>
 
 <hr>
 
@@ -139,9 +139,11 @@ Isso não é número.
 
 <p>O <code>catch</code> só pega erros que <strong>encerram</strong>. Muitos cmdlets, quando falham num item, dão um erro que <em>não</em> encerra: o erro aparece em vermelho e o <code>catch</code> nem fica sabendo. A solução é pedir <code>-ErrorAction Stop</code> ao comando, que transforma o erro em um que encerra. Isso está na aula <a href="erroraction.html">-ErrorAction</a>.</p>
 
-<pre><code>try { Get-Item "nao-existe.txt" } catch { "Peguei!" }
-try { Get-Item "nao-existe.txt" -ErrorAction Stop } catch { "Peguei!" }
-</code></pre>
+<pre class="term" data-title="Saída no Windows (PowerShell 7.7)">PS&gt; try { Get-Item "nao-existe.txt" } catch { "Peguei!" }
+Get-Item: Não é possível localizar o caminho 'C:\Users\ana\AppData\Local\Temp\guia-ps\try-catch\nao-existe.txt' porque ele não existe.
+PS&gt; try { Get-Item "nao-existe.txt" -ErrorAction Stop } catch { "Peguei!" }
+Peguei!
+</pre>
 
 <p>No primeiro, o erro do <code>Get-Item</code> aparece normalmente e o <code>catch</code> não roda. No segundo, com <code>-ErrorAction Stop</code>, aparece só <code>Peguei!</code>.</p>
 

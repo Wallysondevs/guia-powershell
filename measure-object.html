@@ -31,7 +31,7 @@
 </ul>
 </div>
 
-<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional. Os quadros marcados <strong>Saída no Windows (PowerShell 7.7)</strong> foram colhidos num Windows 10 em português, com o nome do computador e o da usuária trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>).</p>
 
 <hr>
 
@@ -156,8 +156,17 @@ Lines Words Characters Property
 <div class="cenario">
 <strong>Somar texto que não é número</strong>
 
-<pre><code>"10", "vinte" | Measure-Object -Sum
-</code></pre>
+<pre class="term" data-title="Saída no Windows (PowerShell 7.7)">PS&gt; "10", "vinte" | Measure-Object -Sum
+Measure-Object: O objeto de entrada "vinte" não é numérico.
+
+Count             : 2
+Average           : 
+Sum               : 
+Maximum           : 
+Minimum           : 
+StandardDeviation : 
+Property          :
+</pre>
 
 <p>O <code>-Sum</code> precisa de números. O <code>"10"</code> é convertido, mas <code>"vinte"</code> não: aparece um erro dizendo que esse valor não é numérico, e a soma fica vazia.</p>
 

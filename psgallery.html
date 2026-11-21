@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Gallery — Find-PSResource e Install-PSResource (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a instalar módulos da PowerShell Gallery no PowerShell 7: procurar com Find-PSResource e Find-Module, instalar só para você com -Scope CurrentUser, atualizar, listar e desinstalar módulos, e os cuidados de segurança.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Instalando Módulos (<span class="hl">PowerShell Gallery</span>)</h1>
+
+<p class="intro">A <strong>PowerShell Gallery</strong> é a loja oficial (e gratuita) de módulos do PowerShell, em powershellgallery.com. Lá estão milhares de módulos feitos pela Microsoft e pela comunidade. Nesta aula você aprende a procurar, instalar, atualizar e remover módulos com segurança.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A procurar módulos com <code>Find-PSResource</code> (e o antigo <code>Find-Module</code>).</li>
+  <li>A instalar só para você, sem administrador.</li>
+  <li>A ver, atualizar e remover o que instalou.</li>
+  <li>Os cuidados de segurança antes de instalar.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional. Diferente das outras aulas de administração do Windows, as saídas desta foram colhidas no Linux, consultando a PowerShell Gallery de verdade em 21/11/2026: a galeria e os comandos são os mesmos no Windows, e os números de versão mudam com o tempo.</p>
+
+<hr>
+
+<h2>A ideia: a loja de aplicativos</h2>
+
+<p>No celular você abre a loja, procura um aplicativo, lê a descrição e instala. A PowerShell Gallery funciona igual, só que pelo terminal.</p>
+
+<hr>
+
+<h2>1. Dois jeitos: PSResourceGet e PowerShellGet</h2>
+
+<p>O PowerShell 7 traz o módulo novo <code>Microsoft.PowerShell.PSResourceGet</code> (comandos <code>*-PSResource</code>), mais rápido. O antigo <code>PowerShellGet</code> (comandos <code>*-Module</code>) continua funcionando. Os dois usam a mesma galeria:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-PSResourceRepository
+
+Name                      Uri                                      Trusted Prio
+                                                                           rity
+----                      ---                                      ------- ----
+MicrosoftArtifactRegistry https://mcr.microsoft.com/               True    40  
+PSGallery                 https://www.powershellgallery.com/api/v2 False   50  
+PS&gt; Get-Command Find-PSResource, Find-Module | Select-Object Name, Source
+
+Name            Source
+----            ------
+Find-PSResource Microsoft.PowerShell.PSResourceGet
+Find-Module     PowerShellGet
+</pre>
+
+<hr>
+
+<h2>2. Procurando um módulo</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Find-PSResource -Name PSScriptAnalyzer | Select-Object Name, Version, Description
+
+Name             Version Description
+----             ------- -----------
+PSScriptAnalyzer 1.25.0  PSScriptAnalyzer provides script analysis and checks …
+PS&gt; Find-PSResource -Name *Excel* | Select-Object -First 5 Name, Version
+
+Name                   Version
+----                   -------
+Search-ExcelFileWithUI 1.0.7
+Search-ExcelContent    1.0.7
+Read-ExcelFile         2.1
+QueryExcel             1.0.0
+PSWriteExcel           0.1.15
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Find-PSResource -Name</dt><dd>Procura pelo nome (aceita <code>*</code>).</dd>
+
+  <dt>Description</dt><dd>Leia a descrição antes de instalar.</dd>
+
+</dl>
+
+<p>No site da galeria você também vê o autor, o número de downloads e o código-fonte.</p>
+
+<hr>
+
+<h2>3. Instalando só para você</h2>
+
+<pre><code>Install-PSResource -Name PSScriptAnalyzer -Scope CurrentUser
+# ou, com o PowerShellGet antigo:
+Install-Module -Name PSScriptAnalyzer -Scope CurrentUser
+</code></pre>
+
+<dl class="anatomy">
+
+  <dt>-Scope CurrentUser</dt><dd>Instala na sua pasta <code>Documentos\PowerShell\Modules</code>. Não precisa de administrador.</dd>
+
+  <dt>"Repositório não confiável"</dt><dd>Na primeira vez, o PowerShell avisa que a PSGallery não está marcada como confiável e pergunta se quer continuar. Responda <code>S</code> (Sim) se você confia no módulo.</dd>
+
+</dl>
+
+<hr>
+
+<h2>4. Vendo o que você instalou</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-InstalledPSResource | Select-Object Name, Version, Repository
+Get-InstalledPSResource: No match was found for package '*'.
+</pre>
+
+<p>No computador desta coleta nada tinha sido instalado pela galeria, então o comando respondeu com esse erro: não há nenhum pacote para listar. Depois do primeiro <code>Install-PSResource</code>, aparece uma tabela com o nome, a versão e <code>PSGallery</code> na coluna <code>Repository</code>.</p>
+
+<hr>
+
+<h2>5. Atualizando e removendo</h2>
+
+<pre><code>Update-PSResource -Name PSScriptAnalyzer
+Uninstall-PSResource -Name PSScriptAnalyzer
+</code></pre>
+
+<div class="warning"><strong>Segurança</strong> Um módulo é código que roda com as suas permissões. Antes de instalar: confira o autor, o número de downloads, se o projeto tem código-fonte público e se é mantido. Desconfie de nomes parecidos com módulos famosos.</div>
+
+<div class="tryps" data-goal="src:Find-PSResource;;src:PSScriptAnalyzer;;src:Select-Object;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> escreva, numa string, o comando que procura o módulo <code>PSScriptAnalyzer</code> na galeria e mostra só <code>Name</code> e <code>Version</code>. O simulador do guia não acessa a galeria; depois, rode o comando de verdade no seu terminal.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'Find-PSResource -Name PSScriptAnalyzer | Select-Object Name, Version'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>"Administrator rights are required to install modules"</strong>
+
+<p>Você esqueceu o <code>-Scope CurrentUser</code> no <code>Install-Module</code> do Windows PowerShell 5.1. No PowerShell 7 o padrão já é <code>CurrentUser</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>"Unable to resolve package source" / sem resposta</strong>
+
+<p>Sem internet, proxy da empresa ou bloqueio de rede. Teste <code>Test-NetConnection www.powershellgallery.com -Port 443</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Instalei, mas o comando não existe</strong>
+
+<p>Abra uma janela nova ou rode <code>Import-Module NomeDoModulo</code>. Confira com <code>Get-Module -ListAvailable NomeDoModulo</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Find-PSResource -Name x</code></td><td>Procura na galeria.</td></tr>
+
+<tr><td><code>Install-PSResource -Name x -Scope CurrentUser</code></td><td>Instala para você.</td></tr>
+
+<tr><td><code>Get-InstalledPSResource</code></td><td>Lista o que instalou.</td></tr>
+
+<tr><td><code>Update-PSResource -Name x</code></td><td>Atualiza.</td></tr>
+
+<tr><td><code>Uninstall-PSResource -Name x</code></td><td>Remove.</td></tr>
+
+<tr><td><code>Find-Module</code> / <code>Install-Module</code></td><td>Equivalentes do PowerShellGet antigo.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Instalação pessoal</h3>
+<p>Complete:</p>
+<div class="ex-code">Install-PSResource -Name Pester -Scope <input data-answer="CurrentUser" aria-label="resposta"></div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. O que conferir antes de instalar um módulo?</p>
+
+<label><input type="radio" name="q2"> Só o tamanho do arquivo</label>
+
+<label><input type="radio" name="q2"> Autor, downloads e se o projeto é mantido</label>
+
+<label><input type="radio" name="q2"> Se o nome é curto</label>
+
+<label><input type="radio" name="q2"> Nada: a galeria verifica tudo</label>
+
+</div>
+
+<div class="mc" data-answer="4">
+
+<p class="mc-q">3. Qual comando lista os módulos que você instalou pela galeria?</p>
+
+<label><input type="radio" name="q3"> Get-Module</label>
+
+<label><input type="radio" name="q3"> Find-PSResource</label>
+
+<label><input type="radio" name="q3"> Get-Command</label>
+
+<label><input type="radio" name="q3"> Get-InstalledPSResource</label>
+
+</div>
+
+<div class="tryps" data-goal="src:Get-InstalledPSResource;;src:Select-Object;;src:Version;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> escreva, numa string, o comando que lista os módulos instalados pela galeria mostrando só <code>Name</code> e <code>Version</code>. Depois, rode-o de verdade no seu terminal.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'Get-InstalledPSResource | Select-Object Name, Version'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>A PowerShell Gallery é a loja oficial de módulos.</li>
+  <li><code>Find-PSResource</code> procura; <code>Install-PSResource -Scope CurrentUser</code> instala para você.</li>
+  <li><code>Get-InstalledPSResource</code>, <code>Update-PSResource</code> e <code>Uninstall-PSResource</code> cuidam do resto.</li>
+  <li>Confira o autor e a reputação antes de instalar.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

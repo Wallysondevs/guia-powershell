@@ -31,7 +31,7 @@
 </ul>
 </div>
 
-<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional. Os quadros marcados <strong>Saída no Windows (PowerShell 7.7)</strong> foram colhidos num Windows 10 em português, com o nome do computador e o da usuária trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>).</p>
 
 <hr>
 
@@ -51,8 +51,9 @@ PS&gt; Set-Tamanho M
 Camiseta tamanho M
 </pre>
 
-<pre><code>Set-Tamanho GG
-</code></pre>
+<pre class="term" data-title="Saída no Windows (PowerShell 7.7)">PS&gt; Set-Tamanho GG
+Set-Tamanho: Não é possível validar o argumento no parâmetro 'Tamanho'. The argument "GG" does not belong to the set "P;M;G" specified by the ValidateSet attribute. Supply an argument that is in the set and then try the command again.
+</pre>
 
 <dl class="anatomy">
 
@@ -73,8 +74,9 @@ PS&gt; Set-Nota 8
 Nota 8 registrada
 </pre>
 
-<pre><code>Set-Nota 11
-</code></pre>
+<pre class="term" data-title="Saída no Windows (PowerShell 7.7)">PS&gt; Set-Nota 11
+Set-Nota: Não é possível validar o argumento no parâmetro 'Nota'. The 11 argument is greater than the maximum allowed range of 10. Supply an argument that is less than or equal to 10 and then try the command again.
+</pre>
 
 <p>O <code>11</code> é recusado: a mensagem diz que ele é maior que o máximo permitido, <code>10</code>.</p>
 
@@ -94,9 +96,11 @@ PS&gt; New-Login ana2026
 Login ana2026 criado
 </pre>
 
-<pre><code>New-Login an
-New-Login "Ana Souza"
-</code></pre>
+<pre class="term" data-title="Saída no Windows (PowerShell 7.7)">PS&gt; New-Login an
+New-Login: Não é possível validar o argumento no parâmetro 'Login'. The character length (2) of the argument is too short. Specify an argument with a length that is greater than or equal to "3", and then try the command again.
+PS&gt; New-Login "Ana Souza"
+New-Login: Não é possível validar o argumento no parâmetro 'Login'. The argument "Ana Souza" does not match the "^[a-z0-9]+$" pattern. Supply an argument that matches "^[a-z0-9]+$" and try the command again.
+</pre>
 
 <p>O <code>an</code> é recusado por ser curto demais (2 caracteres, o mínimo é 3). O <code>"Ana Souza"</code> tem tamanho bom, mas é recusado pelo formato: tem maiúscula e espaço.</p>
 
@@ -137,8 +141,9 @@ PS&gt; Send-Recado "Chego às 8"
 Enviado: Chego às 8
 </pre>
 
-<pre><code>Send-Recado ""
-</code></pre>
+<pre class="term" data-title="Saída no Windows (PowerShell 7.7)">PS&gt; Send-Recado ""
+Send-Recado: Não é possível validar o argumento no parâmetro 'Texto'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again.
+</pre>
 
 <p>O texto vazio é recusado com um erro dizendo que o argumento é nulo ou vazio.</p>
 
@@ -153,14 +158,16 @@ PS&gt; Set-Par 4
 Par: 4
 </pre>
 
-<pre><code>Set-Par 5
-</code></pre>
+<pre class="term" data-title="Saída no Windows (PowerShell 7.7)">PS&gt; Set-Par 5
+Set-Par: Não é possível validar o argumento no parâmetro 'Numero'. The " $_ % 2 -eq 0 " validation script for the argument with value "5" did not return a result of True. Determine why the validation script failed, and then try the command again.
+</pre>
 
 <p>Com o <code>5</code>, a mensagem de erro mostra o próprio bloco que falhou, o que não é muito amigável. No PowerShell 7 dá para trocar por uma mensagem sua com <code>ErrorMessage</code>, onde <code>{0}</code> vira o valor recebido:</p>
 
-<pre><code>function Set-Par2 { param([ValidateScript({ $_ % 2 -eq 0 }, ErrorMessage = "{0} não é par")][int]$Numero) "Par: $Numero" }
-Set-Par2 7
-</code></pre>
+<pre class="term" data-title="Saída no Windows (PowerShell 7.7)">PS&gt; function Set-Par2 { param([ValidateScript({ $_ % 2 -eq 0 }, ErrorMessage = "{0} não é par")][int]$Numero) "Par: $Numero" }
+PS&gt; Set-Par2 7
+Set-Par2: Não é possível validar o argumento no parâmetro 'Numero'. 7 não é par
+</pre>
 
 <p>Agora o erro termina com a sua frase: <code>7 não é par</code>.</p>
 

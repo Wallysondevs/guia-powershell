@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Execution Policy — política de execução de scripts (guia) | Guia PowerShell</title>
+<meta name="description" content="Entenda a política de execução do PowerShell no Windows: Get-ExecutionPolicy -List, os níveis Restricted, RemoteSigned, AllSigned e Bypass, os escopos, Set-ExecutionPolicy -Scope CurrentUser e Unblock-File para arquivos baixados da internet.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Política de Execução (<span class="hl">Execution Policy</span>)</h1>
+
+<p class="intro">Na primeira vez que você tenta rodar um script no Windows, pode aparecer um erro dizendo que a execução de scripts está desabilitada. Isso é a <strong>política de execução</strong>: uma trava de segurança que decide quais scripts podem rodar. Aqui você entende o que ela faz e como liberar do jeito certo.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A ver a política atual com <code>Get-ExecutionPolicy</code>.</li>
+  <li>O que significam <code>Restricted</code>, <code>RemoteSigned</code>, <code>AllSigned</code>, <code>Unrestricted</code> e <code>Bypass</code>.</li>
+  <li>Os escopos (<code>CurrentUser</code>, <code>LocalMachine</code>, <code>Process</code>).</li>
+  <li>A liberar scripts só para você, sem ser administrador.</li>
+  <li>A desbloquear um arquivo baixado com <code>Unblock-File</code>.</li>
+</ul>
+</div>
+
+<p><span class="versao">só Windows</span> As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows.</p>
+
+<hr>
+
+<h2>A ideia: o porteiro do prédio</h2>
+
+<p>A política de execução é um porteiro. Ele não impede você de fazer nada que você realmente queira (não é uma barreira de segurança contra quem já tem acesso ao computador), mas evita que um script baixado sem querer rode sozinho. Você escolhe o quão rigoroso o porteiro é.</p>
+
+<div class="tip"><strong>Só no Windows</strong> A política de execução existe no Windows. No Linux e no macOS o PowerShell 7 sempre usa <code>Unrestricted</code> e ela não pode ser mudada.</div>
+
+<hr>
+
+<h2>1. Vendo a política atual</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-ExecutionPolicy
+Bypass
+PS&gt; Get-ExecutionPolicy -List
+
+        Scope ExecutionPolicy
+        ----- ---------------
+MachinePolicy       Undefined
+   UserPolicy       Undefined
+      Process          Bypass
+  CurrentUser       Undefined
+ LocalMachine    RemoteSigned
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Get-ExecutionPolicy</dt><dd>A política que vale agora (a "vencedora").</dd>
+
+  <dt>-List</dt><dd>Mostra a política de cada escopo, do mais forte (em cima) para o mais fraco.</dd>
+
+  <dt>Undefined</dt><dd>Nada definido naquele escopo; vale o de baixo.</dd>
+
+</dl>
+
+<p>Na saída acima, a política vencedora é <code>Bypass</code> porque aquela janela foi aberta com <code>pwsh -ExecutionPolicy Bypass</code>, o que vale só para ela (escopo <code>Process</code>, veja a seção 5). Sem isso, valeria o <code>RemoteSigned</code> do escopo <code>LocalMachine</code>, o padrão do PowerShell 7 no Windows.</p>
+
+<hr>
+
+<h2>2. Os níveis</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Política</th><th>O que permite</th></tr>
+
+<tr><td><code>Restricted</code></td><td>Nenhum script roda; só comandos digitados. Padrão do Windows PowerShell em máquinas cliente.</td></tr>
+
+<tr><td><code>RemoteSigned</code></td><td>Scripts seus rodam; scripts baixados da internet precisam de assinatura digital. Padrão do PowerShell 7 no Windows.</td></tr>
+
+<tr><td><code>AllSigned</code></td><td>Todo script precisa ser assinado, até os seus.</td></tr>
+
+<tr><td><code>Unrestricted</code></td><td>Tudo roda; avisa antes de rodar algo baixado.</td></tr>
+
+<tr><td><code>Bypass</code></td><td>Nada é bloqueado e não há aviso. Usado por programas que chamam o PowerShell.</td></tr>
+
+<tr><td><code>Undefined</code></td><td>Sem política naquele escopo.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>3. Os escopos</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Escopo</th><th>Vale para</th><th>Precisa de administrador?</th></tr>
+
+<tr><td><code>MachinePolicy</code> / <code>UserPolicy</code></td><td>Definidos por Política de Grupo (empresa)</td><td>Não dá para mudar pelo PowerShell</td></tr>
+
+<tr><td><code>Process</code></td><td>Só esta janela do PowerShell</td><td>Não</td></tr>
+
+<tr><td><code>CurrentUser</code></td><td>Você, em todas as janelas</td><td>Não</td></tr>
+
+<tr><td><code>LocalMachine</code></td><td>Todos os usuários do computador</td><td>Sim</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>4. Liberando scripts só para você</h2>
+
+<p>O jeito recomendado para estudar e para o dia a dia: <code>RemoteSigned</code> no escopo <code>CurrentUser</code>. Não precisa de administrador e não afeta outros usuários:</p>
+
+<pre><code>Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+</code></pre>
+
+<p>O PowerShell pede confirmação. Para só testar sem mudar nada, use <code>-WhatIf</code>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -WhatIf
+What If: Executando a operação "Set-ExecutionPolicy" no destino "RemoteSigned".
+</pre>
+
+<hr>
+
+<h2>5. Só nesta janela: -Scope Process</h2>
+
+<p>Quer rodar um script uma vez, sem mudar nada permanente? Use o escopo <code>Process</code>. Quando a janela fecha, a mudança some:</p>
+
+<pre><code>Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+</code></pre>
+
+<p>Ou chame o PowerShell já com a política:</p>
+
+<pre><code>pwsh -ExecutionPolicy Bypass -File .\meu-script.ps1
+</code></pre>
+
+<hr>
+
+<h2>6. Arquivos baixados da internet</h2>
+
+<p>O Windows marca arquivos baixados com uma "etiqueta" escondida (a <em>Zone.Identifier</em>). Com <code>RemoteSigned</code>, um script com essa etiqueta não roda. Se você confia no arquivo, tire a etiqueta:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Set-Content baixado.ps1 '"Rodei!"'
+PS&gt; Get-Item baixado.ps1 -Stream * | Select-Object Stream, Length
+
+Stream Length
+------ ------
+:$DATA     10
+</pre>
+
+<pre><code>Unblock-File .\script-baixado.ps1
+</code></pre>
+
+<dl class="anatomy">
+
+  <dt>-Stream *</dt><dd>Mostra os "fluxos" do arquivo. Um arquivo baixado tem o fluxo <code>Zone.Identifier</code> além do <code>:$DATA</code>.</dd>
+
+  <dt>Unblock-File</dt><dd>Remove a marca de "veio da internet". Só faça isso com arquivos de origem confiável.</dd>
+
+</dl>
+
+<p>Como o <code>baixado.ps1</code> do exemplo foi criado ali mesmo, e não baixado, só aparece o fluxo <code>:$DATA</code> (os 10 bytes do texto). Faça o teste com um arquivo baixado pelo navegador para ver a linha <code>Zone.Identifier</code>.</p>
+
+<div class="tryps" data-goal="src:Get-ExecutionPolicy;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> escreva, numa string, o comando que mostra a política de execução que vale agora. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'Get-ExecutionPolicy'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>"a execução de scripts foi desabilitada neste sistema"</strong>
+
+<p>A política é <code>Restricted</code> (comum no Windows PowerShell 5.1). Rode <code>Set-ExecutionPolicy RemoteSigned -Scope CurrentUser</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>"não está assinado digitalmente"</strong>
+
+<p>O script veio da internet e a política é <code>RemoteSigned</code>. Se confia na origem, rode <code>Unblock-File</code> nele.</p>
+
+</div>
+
+<div class="cenario">
+<strong>"A configuração foi substituída por uma política definida em um escopo mais específico"</strong>
+
+<p>Um escopo mais forte (por exemplo <code>Process</code> ou uma Política de Grupo) está vencendo. Veja com <code>Get-ExecutionPolicy -List</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Acesso negado ao mudar LocalMachine</strong>
+
+<p>Mudar o escopo <code>LocalMachine</code> exige abrir o PowerShell como administrador. Para uso pessoal, prefira <code>-Scope CurrentUser</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Get-ExecutionPolicy -List</code></td><td>Política de cada escopo.</td></tr>
+
+<tr><td><code>Set-ExecutionPolicy RemoteSigned -Scope CurrentUser</code></td><td>Libera seus scripts (recomendado).</td></tr>
+
+<tr><td><code>Set-ExecutionPolicy Bypass -Scope Process</code></td><td>Libera só nesta janela.</td></tr>
+
+<tr><td><code>pwsh -ExecutionPolicy Bypass -File s.ps1</code></td><td>Roda um script ignorando a política.</td></tr>
+
+<tr><td><code>Unblock-File arquivo.ps1</code></td><td>Tira a marca de "baixado da internet".</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Liberando para você</h3>
+<p>Complete:</p>
+<div class="ex-code">Set-ExecutionPolicy RemoteSigned -Scope <input data-answer="CurrentUser" aria-label="resposta"></div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. O que <code>RemoteSigned</code> permite?</p>
+
+<label><input type="radio" name="q2"> Nenhum script</label>
+
+<label><input type="radio" name="q2"> Scripts locais livres; baixados precisam de assinatura</label>
+
+<label><input type="radio" name="q2"> Só scripts assinados</label>
+
+<label><input type="radio" name="q2"> Tudo, sem aviso</label>
+
+</div>
+
+<div class="mc" data-answer="4">
+
+<p class="mc-q">3. Qual escopo vale só para a janela atual?</p>
+
+<label><input type="radio" name="q3"> CurrentUser</label>
+
+<label><input type="radio" name="q3"> LocalMachine</label>
+
+<label><input type="radio" name="q3"> UserPolicy</label>
+
+<label><input type="radio" name="q3"> Process</label>
+
+</div>
+
+<div class="tryps" data-goal="src:Get-ExecutionPolicy;;src:-List;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> escreva, numa string, o comando que mostra a política de <strong>cada escopo</strong> (de <code>MachinePolicy</code> até <code>LocalMachine</code>). O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'Get-ExecutionPolicy -List'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>A política de execução decide quais scripts podem rodar no Windows.</li>
+  <li><code>RemoteSigned</code> no escopo <code>CurrentUser</code> é a escolha recomendada.</li>
+  <li><code>-Scope Process</code> vale só para a janela atual.</li>
+  <li><code>Unblock-File</code> libera um arquivo baixado em que você confia.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

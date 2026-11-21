@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell tarefas agendadas — Register-ScheduledTask (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a usar o Agendador de Tarefas pelo PowerShell 7: listar tarefas com Get-ScheduledTask, ver a última execução, criar uma tarefa que roda um script .ps1 todo dia com New-ScheduledTaskAction, Trigger e Register-ScheduledTask, e remover.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Tarefas <span class="hl">Agendadas</span></h1>
+
+<p class="intro">Um script só ajuda de verdade quando roda sozinho: o backup toda noite, o relatório toda segunda, a limpeza ao ligar o computador. O <strong>Agendador de Tarefas</strong> do Windows faz isso, e o PowerShell cria e controla essas tarefas por comando.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A listar tarefas com <code>Get-ScheduledTask</code>.</li>
+  <li>A ver quando uma tarefa rodou e se deu certo.</li>
+  <li>A montar uma tarefa: ação, gatilho e registro.</li>
+  <li>A rodar, desativar e remover tarefas.</li>
+</ul>
+</div>
+
+<p><span class="versao">só Windows</span> As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows.</p>
+
+<hr>
+
+<h2>A ideia: o despertador</h2>
+
+<p>Uma tarefa agendada é um despertador com instrução: "às 8h, rode este script". Ela tem três partes: a <strong>ação</strong> (o que fazer), o <strong>gatilho</strong> (quando) e o <strong>registro</strong> (guardar no Agendador).</p>
+
+<hr>
+
+<h2>1. Listando tarefas</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-ScheduledTask | Measure-Object | Select-Object Count
+
+Count
+-----
+  239
+PS&gt; Get-ScheduledTask -TaskPath '\Microsoft\Windows\Defrag\' | Select-Object TaskName, State
+
+TaskName        State
+--------        -----
+ScheduledDefrag Ready
+</pre>
+
+<dl class="anatomy">
+
+  <dt>TaskPath</dt><dd>A "pasta" da tarefa no Agendador. As do Windows ficam em <code>\Microsoft\Windows\...</code>; as suas, normalmente em <code>\</code>.</dd>
+
+  <dt>State</dt><dd><code>Ready</code> (pronta), <code>Running</code> (rodando), <code>Disabled</code> (desativada).</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Quando rodou e como foi</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-ScheduledTask -TaskPath '\Microsoft\Windows\Defrag\' | Get-ScheduledTaskInfo | Select-Object TaskName, LastRunTime, LastTaskResult, NextRunTime
+
+TaskName        LastRunTime         LastTaskResult NextRunTime
+--------        -----------         -------------- -----------
+ScheduledDefrag 20/11/2026 23:19:19     2147943467
+</pre>
+
+<dl class="anatomy">
+
+  <dt>LastTaskResult</dt><dd><code>0</code> é sucesso. Outros números são códigos de erro.</dd>
+
+  <dt>NextRunTime</dt><dd>A próxima execução programada.</dd>
+
+</dl>
+
+<p>Na coleta, o <code>LastTaskResult</code> da desfragmentação saiu <code>2147943467</code>. Números grandes assim são códigos de erro do Windows escritos em decimal. Em hexadecimal fica mais fácil pesquisar: <code>'{0:X}' -f 2147943467</code> dá <code>8007042B</code>, o erro 1067, "o processo terminou inesperadamente". É comum quando o computador desliga ou entra em suspensão no meio da tarefa. O <code>NextRunTime</code> vazio quer dizer que a tarefa não tem um próximo horário marcado: a desfragmentação roda na manutenção automática do Windows.</p>
+
+<hr>
+
+<h2>3. Criando uma tarefa: as três partes</h2>
+
+<p>Exemplo: rodar <code>C:\Scripts\backup.ps1</code> todo dia às 20h.</p>
+
+<pre><code>$acao = New-ScheduledTaskAction -Execute "pwsh.exe" -Argument '-NoProfile -File "C:\Scripts\backup.ps1"'
+$quando = New-ScheduledTaskTrigger -Daily -At "20:00"
+Register-ScheduledTask -TaskName "Backup diário" -Action $acao -Trigger $quando -Description "Backup dos documentos"
+</code></pre>
+
+<dl class="anatomy">
+
+  <dt>New-ScheduledTaskAction</dt><dd>O que fazer: chamar o <code>pwsh.exe</code> com o script.</dd>
+
+  <dt>New-ScheduledTaskTrigger</dt><dd>Quando: <code>-Daily -At</code>, <code>-Weekly -DaysOfWeek Monday -At</code>, <code>-AtLogOn</code>, <code>-AtStartup</code>, <code>-Once -At</code>.</dd>
+
+  <dt>Register-ScheduledTask</dt><dd>Grava a tarefa no Agendador, rodando como você, só quando você está logado.</dd>
+
+</dl>
+
+<p>Para criar as partes sem registrar nada, você pode montar e inspecionar:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $acao = New-ScheduledTaskAction -Execute "pwsh.exe" -Argument '-NoProfile -File "C:\Scripts\backup.ps1"'
+PS&gt; $quando = New-ScheduledTaskTrigger -Daily -At "20:00"
+PS&gt; $acao | Select-Object Execute, Arguments
+
+Execute  Arguments
+-------  ---------
+pwsh.exe -NoProfile -File "C:\Scripts\backup.ps1"
+PS&gt; $quando | Select-Object StartBoundary, DaysInterval
+
+StartBoundary        DaysInterval
+-------------        ------------
+2026-11-21T23:00:00Z            1
+</pre>
+
+<p>Repare no <code>StartBoundary</code>: ele saiu <code>2026-11-21T23:00:00Z</code>. O <code>Z</code> no fim quer dizer UTC, o horário de referência mundial. As 20h do horário de Brasília (UTC-3) são 23h em UTC. A tarefa roda às 20h do seu relógio; só a forma de guardar o horário é que muda.</p>
+
+<hr>
+
+<h2>4. Controlando a tarefa</h2>
+
+<pre><code>Start-ScheduledTask -TaskName "Backup diário"      # roda agora, para testar
+Disable-ScheduledTask -TaskName "Backup diário"    # pausa
+Enable-ScheduledTask -TaskName "Backup diário"     # reativa
+Unregister-ScheduledTask -TaskName "Backup diário" -Confirm:$false   # remove
+</code></pre>
+
+<div class="tip"><strong>Dicas para scripts agendados</strong> Use caminhos completos (o script não roda "na pasta certa"), grave um log do que aconteceu e teste com <code>Start-ScheduledTask</code> antes de confiar. Para rodar mesmo sem ninguém logado, a tarefa precisa de uma conta com senha (<code>-User</code> e <code>-Password</code>) ou da conta <code>SYSTEM</code>, o que exige administrador.</div>
+
+<div class="tryps" data-goal="src:New-ScheduledTaskTrigger;;src:-Daily;;src:20:00;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> escreva, numa string, o comando que monta (sem registrar) um gatilho diário às 20h. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows. Lembre que o <code>StartBoundary</code> aparece em UTC.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'New-ScheduledTaskTrigger -Daily -At "20:00"'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>LastTaskResult diferente de 0</strong>
+
+<p>O script deu erro. Rode o mesmo comando da ação no terminal para ver a mensagem, e confira caminhos relativos e a política de execução (use <code>-ExecutionPolicy Bypass</code> no argumento se necessário).</p>
+
+</div>
+
+<div class="cenario">
+<strong>"Acesso negado" ao registrar</strong>
+
+<p>Tarefas que rodam como <code>SYSTEM</code>, com privilégios elevados ou para outros usuários exigem PowerShell como administrador.</p>
+
+</div>
+
+<div class="cenario">
+<strong>A tarefa roda mas abre uma janela</strong>
+
+<p>Acrescente <code>-WindowStyle Hidden</code> nos argumentos do <code>pwsh.exe</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Get-ScheduledTask</code></td><td>Lista tarefas.</td></tr>
+
+<tr><td><code>Get-ScheduledTaskInfo</code></td><td>Última e próxima execução.</td></tr>
+
+<tr><td><code>New-ScheduledTaskAction -Execute pwsh.exe -Argument '...'</code></td><td>A ação.</td></tr>
+
+<tr><td><code>New-ScheduledTaskTrigger -Daily -At 20:00</code></td><td>O gatilho.</td></tr>
+
+<tr><td><code>Register-ScheduledTask -TaskName ...</code></td><td>Registra.</td></tr>
+
+<tr><td><code>Start-ScheduledTask</code></td><td>Roda agora.</td></tr>
+
+<tr><td><code>Unregister-ScheduledTask</code></td><td>Remove.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Gatilho semanal</h3>
+<p>Complete:</p>
+<div class="ex-code">New-ScheduledTaskTrigger <input data-answer="-Weekly" aria-label="resposta"> -DaysOfWeek Monday -At "08:00"</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. O que <code>LastTaskResult = 0</code> indica?</p>
+
+<label><input type="radio" name="q2"> A tarefa nunca rodou</label>
+
+<label><input type="radio" name="q2"> A última execução deu certo</label>
+
+<label><input type="radio" name="q2"> A tarefa está desativada</label>
+
+<label><input type="radio" name="q2"> Erro de permissão</label>
+
+</div>
+
+<div class="mc" data-answer="4">
+
+<p class="mc-q">3. Quais são as três partes de uma tarefa?</p>
+
+<label><input type="radio" name="q3"> Nome, pasta e senha</label>
+
+<label><input type="radio" name="q3"> Script, log e zip</label>
+
+<label><input type="radio" name="q3"> Usuário, grupo e permissão</label>
+
+<label><input type="radio" name="q3"> Ação, gatilho e registro</label>
+
+</div>
+
+<div class="tryps" data-goal="src:New-ScheduledTaskAction;;src:pwsh\.exe;;src:relatorio\.ps1;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> escreva, numa string, o comando que monta (sem registrar) uma ação que roda <code>pwsh.exe</code> com <code>-File C:\Scripts\relatorio.ps1</code>. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'New-ScheduledTaskAction -Execute "pwsh.exe" -Argument ''-NoProfile -File "C:\Scripts\relatorio.ps1"'''
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Tarefas agendadas rodam scripts sozinhas.</li>
+  <li>Monte com ação + gatilho e grave com <code>Register-ScheduledTask</code>.</li>
+  <li><code>Get-ScheduledTaskInfo</code> mostra se deu certo (<code>LastTaskResult = 0</code>).</li>
+  <li>Use caminhos completos e grave logs nos scripts agendados.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

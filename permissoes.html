@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Get-Acl e Set-Acl — permissões de arquivos e pastas (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a ver e alterar permissões NTFS de arquivos e pastas no PowerShell 7: Get-Acl, ler as regras de acesso (Access), o dono (Owner), herança, adicionar uma regra com FileSystemAccessRule e Set-Acl, e o icacls.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Permissões (<span class="hl">Get-Acl</span>)</h1>
+
+<p class="intro">No Windows, cada arquivo e pasta tem uma lista de quem pode fazer o quê: ler, gravar, apagar. Essa lista se chama <strong>ACL</strong> (lista de controle de acesso). É o que aparece na aba "Segurança" das propriedades de um arquivo. O PowerShell lê e altera essas listas com <code>Get-Acl</code> e <code>Set-Acl</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A ver o dono e as permissões com <code>Get-Acl</code>.</li>
+  <li>A ler cada regra: quem, o quê, permitir ou negar, herdada ou não.</li>
+  <li>A dar permissão de leitura a alguém com <code>Set-Acl</code>.</li>
+  <li>O atalho <code>icacls</code> do Windows.</li>
+</ul>
+</div>
+
+<p><span class="versao">só Windows</span> As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows.</p>
+
+<hr>
+
+<h2>A ideia: a lista do porteiro</h2>
+
+<p>Na portaria de um prédio há uma lista: "Ana pode entrar em todos os andares; Beto só no térreo; visitantes não entram". Cada arquivo tem uma lista assim.</p>
+
+<div class="tip"><strong>Pasta de teste</strong> Os exemplos usam uma pasta criada só para a aula. Nunca mude permissões de pastas do sistema para testar.</div>
+
+<hr>
+
+<h2>1. Vendo a ACL</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; New-Item -ItemType Directory acl-teste -Force | Out-Null
+PS&gt; Set-Content acl-teste\segredo.txt "conteúdo"
+PS&gt; $acl = Get-Acl acl-teste\segredo.txt
+PS&gt; $acl.Owner -replace '^.*\\', '...\'
+...\Administradores
+PS&gt; $acl.Access | Select-Object IdentityReference, FileSystemRights, AccessControlType, IsInherited
+
+IdentityReference       FileSystemRights AccessControlType IsInherited
+-----------------       ---------------- ----------------- -----------
+AUTORIDADE NT\SISTEMA        FullControl             Allow        True
+BUILTIN\Administradores      FullControl             Allow        True
+NOTEBOOK\ana                 FullControl             Allow        True
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Owner</dt><dd>O dono do arquivo (pode sempre mudar as permissões).</dd>
+
+  <dt>IdentityReference</dt><dd>Quem: um usuário ou grupo (<code>BUILTIN\Administradores</code>, <code>AUTORIDADE NT\SISTEMA</code>...).</dd>
+
+  <dt>FileSystemRights</dt><dd>O quê: <code>FullControl</code>, <code>Modify</code>, <code>ReadAndExecute</code>, <code>Read</code>, <code>Write</code>...</dd>
+
+  <dt>AccessControlType</dt><dd><code>Allow</code> (permite) ou <code>Deny</code> (nega). Negar vence permitir.</dd>
+
+  <dt>IsInherited</dt><dd><code>True</code> quando a regra veio da pasta de cima.</dd>
+
+</dl>
+
+<p>Na coleta, o dono saiu como <code>Administradores</code> porque o PowerShell estava aberto como administrador: num Windows em português, arquivos criados assim ficam com esse grupo como dono. Numa janela comum, o dono é você (aqui, <code>NOTEBOOK\ana</code>). Note também que os nomes de grupo saem traduzidos: <code>AUTORIDADE NT\SISTEMA</code> é o <code>NT AUTHORITY\SYSTEM</code> dos Windows em inglês.</p>
+
+<hr>
+
+<h2>2. Herança</h2>
+
+<p>Arquivos novos herdam as regras da pasta onde estão. Por isso quase todas as regras aparecem com <code>IsInherited = True</code>. Mudar a pasta muda tudo o que está dentro.</p>
+
+<hr>
+
+<h2>3. Adicionando uma regra</h2>
+
+<p>Vamos dar permissão de leitura ao grupo "Usuários" (identificado pelo SID <code>S-1-5-32-545</code>, que funciona em qualquer idioma do Windows):</p>
+
+<pre><code>$acl = Get-Acl acl-teste\segredo.txt
+$grupo = [System.Security.Principal.SecurityIdentifier]::new('S-1-5-32-545')
+$regra = [System.Security.AccessControl.FileSystemAccessRule]::new($grupo, 'Read', 'Allow')
+$acl.AddAccessRule($regra)
+Set-Acl -Path acl-teste\segredo.txt -AclObject $acl
+(Get-Acl acl-teste\segredo.txt).Access | Where-Object { -not $_.IsInherited } | Select-Object FileSystemRights, AccessControlType
+</code></pre>
+
+<dl class="anatomy">
+
+  <dt>FileSystemAccessRule</dt><dd>Uma regra: quem, qual direito, permitir ou negar.</dd>
+
+  <dt>AddAccessRule</dt><dd>Acrescenta a regra à ACL na memória.</dd>
+
+  <dt>Set-Acl</dt><dd>Grava a ACL no arquivo de verdade.</dd>
+
+</dl>
+
+<p>Este bloco e o do <code>icacls</code> abaixo aparecem sem saída de propósito: na coleta desta aula, o guia não mudou nenhuma permissão no computador de teste. Rode-os no seu Windows, sempre no arquivo de teste <code>acl-teste\segredo.txt</code>. No fim, o último comando deve mostrar uma regra nova, não herdada (<code>IsInherited</code> falso), com <code>Read</code> em <code>FileSystemRights</code> e <code>Allow</code> em <code>AccessControlType</code>.</p>
+
+<hr>
+
+<h2>4. O atalho icacls</h2>
+
+<p>O Windows tem o programa <code>icacls</code>, mais curto para tarefas comuns:</p>
+
+<pre><code>icacls acl-teste\segredo.txt /remove '*S-1-5-32-545'
+</code></pre>
+
+<pre><code>icacls pasta /grant "Ana:(OI)(CI)M"    # Ana pode modificar a pasta e tudo dentro
+icacls pasta /inheritance:d             # desliga a herança, copiando as regras
+</code></pre>
+
+<div class="tryps" data-goal="src:Get-Acl;;src:teste\.txt;;src:AccessControlType;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> escreva, numa string, o comando que mostra o <code>AccessControlType</code> das regras da ACL de <code>teste.txt</code>. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = '(Get-Acl teste.txt).Access.AccessControlType'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>"Tentativa de executar uma operação não autorizada"</strong>
+
+<p>Você não é dono nem tem permissão de alterar a ACL. Pastas do sistema e de outros usuários exigem administrador.</p>
+
+</div>
+
+<div class="cenario">
+<strong>"Não é possível converter algumas ou todas as referências de identidade"</strong>
+
+<p>O nome do usuário ou grupo está errado ou em outro idioma (<code>Users</code> × <code>Usuários</code>). Use o SID, como no exemplo.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Dei permissão e a pessoa continua sem acesso</strong>
+
+<p>Uma regra <code>Deny</code> vence <code>Allow</code>. Confira também a permissão do compartilhamento, se o acesso for pela rede.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Get-Acl caminho</code></td><td>Lê a ACL.</td></tr>
+
+<tr><td><code>(Get-Acl x).Access</code></td><td>As regras.</td></tr>
+
+<tr><td><code>(Get-Acl x).Owner</code></td><td>O dono.</td></tr>
+
+<tr><td><code>[...FileSystemAccessRule]::new(quem, 'Read', 'Allow')</code></td><td>Cria uma regra.</td></tr>
+
+<tr><td><code>$acl.AddAccessRule($r)</code> + <code>Set-Acl</code></td><td>Acrescenta e grava.</td></tr>
+
+<tr><td><code>icacls x /grant "Ana:M"</code></td><td>Atalho do Windows.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Gravando</h3>
+<p>Complete:</p>
+<div class="ex-code"><input data-answer="Set-Acl" aria-label="resposta"> -Path arquivo.txt -AclObject $acl</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Se uma pessoa tem Allow e Deny para gravar, ela:</p>
+
+<label><input type="radio" name="q2"> Pode gravar</label>
+
+<label><input type="radio" name="q2"> Não pode gravar: Deny vence</label>
+
+<label><input type="radio" name="q2"> Pode gravar só às vezes</label>
+
+<label><input type="radio" name="q2"> Precisa reiniciar</label>
+
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">3. O que <code>IsInherited = True</code> significa?</p>
+
+<label><input type="radio" name="q3"> A regra veio da pasta de cima</label>
+
+<label><input type="radio" name="q3"> A regra foi negada</label>
+
+<label><input type="radio" name="q3"> O arquivo é do sistema</label>
+
+<label><input type="radio" name="q3"> A regra é temporária</label>
+
+</div>
+
+<div class="tryps" data-goal="src:Get-Acl;;src:IdentityReference;;src:FileSystemRights;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> escreva, numa string, o comando que mostra quem (<code>IdentityReference</code>) tem quais direitos (<code>FileSystemRights</code>) na pasta atual. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = '(Get-Acl .).Access | Select-Object IdentityReference, FileSystemRights'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>A ACL diz quem pode fazer o quê num arquivo ou pasta.</li>
+  <li><code>Get-Acl</code> lê; <code>.Access</code> traz as regras; <code>.Owner</code>, o dono.</li>
+  <li>Crie regras com <code>FileSystemAccessRule</code> e grave com <code>Set-Acl</code>.</li>
+  <li><code>Deny</code> vence <code>Allow</code>; use SIDs para não depender do idioma.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

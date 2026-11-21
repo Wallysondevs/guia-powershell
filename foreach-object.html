@@ -30,7 +30,7 @@
 </ul>
 </div>
 
-<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional. Os quadros marcados <strong>Saída no Windows (PowerShell 7.7)</strong> foram colhidos num Windows 10 em português, com o nome do computador e o da usuária trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>).</p>
 
 <hr>
 
@@ -155,8 +155,9 @@ BETO
 <div class="cenario">
 <strong>Chaves no lugar errado</strong>
 
-<pre><code>1..3 | ForEach-Object $_ * 2
-</code></pre>
+<pre class="term" data-title="Saída no Windows (PowerShell 7.7)">PS&gt; 1..3 | ForEach-Object $_ * 2
+ForEach-Object: Não é possível associar o parâmetro 'RemainingScripts'. Cannot convert the "*" value of type "System.String" to type "System.Management.Automation.ScriptBlock".
+</pre>
 
 <p>Sem as chaves, o PowerShell não sabe que <code>$_ * 2</code> é um bloco para rodar: ele tenta encaixar o <code>*</code> e o <code>2</code> como parâmetros e o comando falha com um erro de parâmetro. Coloque tudo entre <code>{ }</code>.</p>
 

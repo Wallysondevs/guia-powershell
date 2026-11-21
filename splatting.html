@@ -31,7 +31,7 @@
 </ul>
 </div>
 
-<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional. Os quadros marcados <strong>Saída no Windows (PowerShell 7.7)</strong> foram colhidos num Windows 10 em português, com o nome do computador e o da usuária trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>).</p>
 
 <hr>
 
@@ -131,8 +131,9 @@ Boa noite, Caio!
 <div class="cenario">
 <strong>Usar <code>$</code> em vez de <code>@</code></strong>
 
-<pre><code>Get-Date $natal
-</code></pre>
+<pre class="term" data-title="Saída no Windows (PowerShell 7.7)">PS&gt; Get-Date $natal
+Get-Date: Não é possível associar o parâmetro 'Date'. Cannot create object of type "System.DateTime". The property 'Format' was not found for the 'System.DateTime' object. There is no settable property available.
+</pre>
 
 <p>Com <code>$</code>, a hashtable inteira vira <strong>um</strong> valor, entregue ao primeiro parâmetro de posição. O <code>Get-Date</code> tenta transformar a hashtable numa data e falha. Troque por <code>@natal</code>.</p>
 
@@ -141,9 +142,10 @@ Boa noite, Caio!
 <div class="cenario">
 <strong>Chave com nome de parâmetro que não existe</strong>
 
-<pre><code>$errado = @{ Ano = 2026 }
-Get-Date @errado
-</code></pre>
+<pre class="term" data-title="Saída no Windows (PowerShell 7.7)">PS&gt; $errado = @{ Ano = 2026 }
+PS&gt; Get-Date @errado
+Get-Date: Não foi possível encontrar um parâmetro correspondente ao nome de parâmetro 'Ano'.
+</pre>
 
 <p>As chaves precisam ter o nome exato de um parâmetro do comando (<code>Year</code>, e não <code>Ano</code>). Com <code>Ano</code>, o erro diz que não existe parâmetro com esse nome.</p>
 

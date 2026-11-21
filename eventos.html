@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Get-WinEvent — logs de eventos do Windows (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a ler os logs de eventos do Windows com Get-WinEvent no PowerShell 7: listar logs, ver os últimos eventos, filtrar por nível e data com -FilterHashtable, procurar desligamentos e erros, e exportar para CSV.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Logs de Eventos (<span class="hl">Get-WinEvent</span>)</h1>
+
+<p class="intro">O Windows anota tudo o que acontece num diário chamado <strong>Log de Eventos</strong>: quando o computador ligou e desligou, erros de programas, atualizações instaladas. É o que o Visualizador de Eventos mostra. Com <code>Get-WinEvent</code> você lê esse diário e encontra a causa de problemas em segundos.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A listar os logs com <code>Get-WinEvent -ListLog</code>.</li>
+  <li>A ver os últimos eventos com <code>-MaxEvents</code>.</li>
+  <li>A filtrar por nível, data e Id com <code>-FilterHashtable</code>.</li>
+  <li>A achar quando o computador ligou e desligou.</li>
+  <li>A exportar o resultado para CSV.</li>
+</ul>
+</div>
+
+<p><span class="versao">só Windows</span> As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows.</p>
+
+<hr>
+
+<h2>A ideia: a caixa-preta</h2>
+
+<p>Avião tem caixa-preta; o Windows tem o Log de Eventos. Quando algo dá errado ("o computador reiniciou sozinho!"), é lá que você vai procurar.</p>
+
+<hr>
+
+<h2>1. Os logs disponíveis</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-WinEvent -ListLog Application, System | Select-Object LogName, RecordCount, IsEnabled
+
+LogName     RecordCount IsEnabled
+-------     ----------- ---------
+Application        7850      True
+System             9911      True
+</pre>
+
+<dl class="anatomy">
+
+  <dt>-ListLog</dt><dd>Lista os logs (aceita <code>*</code>). Os principais: <code>Application</code> (programas), <code>System</code> (o Windows) e <code>Security</code> (logins; precisa de administrador).</dd>
+
+  <dt>RecordCount</dt><dd>Quantos eventos o log guarda agora.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Os últimos eventos</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-WinEvent -LogName System -MaxEvents 5 | Select-Object TimeCreated, Id, LevelDisplayName, ProviderName
+
+TimeCreated            Id LevelDisplayName ProviderName
+-----------            -- ---------------- ------------
+14/03/2025 08:30:21 10016 Aviso            Microsoft-Windows-DistributedCOM
+14/03/2025 08:26:47     1 Informações      Microsoft-Windows-Kernel-General
+14/03/2025 08:26:47    24 Informações      Microsoft-Windows-Kernel-General
+14/03/2025 08:26:47    35 Informações      Microsoft-Windows-Time-Service
+14/03/2025 08:26:47     1 Informações      Microsoft-Windows-Kernel-General
+</pre>
+
+<dl class="anatomy">
+
+  <dt>-MaxEvents 5</dt><dd>Só os 5 mais recentes. Sem isso, o PowerShell lê milhares.</dd>
+
+  <dt>LevelDisplayName</dt><dd>Nível: Crítico, Erro, Aviso, Informações.</dd>
+
+  <dt>ProviderName</dt><dd>Quem escreveu o evento.</dd>
+
+</dl>
+
+<hr>
+
+<h2>3. Filtrando do jeito rápido: -FilterHashtable</h2>
+
+<p>Só erros (nível 2) do log System nas últimas 24 horas:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-WinEvent -FilterHashtable @{ LogName = 'System'; Level = 2; StartTime = (Get-Date).AddDays(-1) } -MaxEvents 10 -ErrorAction SilentlyContinue | Select-Object TimeCreated, Id, ProviderName
+
+TimeCreated            Id ProviderName
+-----------            -- ------------
+13/03/2025 23:39:12  7034 Service Control Manager
+13/03/2025 21:48:34  7034 Service Control Manager
+13/03/2025 21:40:11  7000 Service Control Manager
+13/03/2025 21:40:11  7009 Service Control Manager
+13/03/2025 19:23:45  1801 Microsoft-Windows-TPM-WMI
+13/03/2025 16:24:02 10010 Microsoft-Windows-DistributedCOM
+</pre>
+
+<dl class="anatomy">
+
+  <dt>LogName</dt><dd>Qual log.</dd>
+
+  <dt>Level</dt><dd>1 Crítico, 2 Erro, 3 Aviso, 4 Informações.</dd>
+
+  <dt>StartTime / EndTime</dt><dd>Intervalo de datas.</dd>
+
+  <dt>Id</dt><dd>Um ou mais Ids de evento.</dd>
+
+  <dt>-ErrorAction SilentlyContinue</dt><dd>Se nada for encontrado, o <code>Get-WinEvent</code> dá erro; aqui isso é normal.</dd>
+
+</dl>
+
+<p>Filtrar no <code>-FilterHashtable</code> é muito mais rápido que <code>Get-WinEvent | Where-Object</code>, porque o Windows já entrega só o que interessa.</p>
+
+<hr>
+
+<h2>4. Quando o computador ligou e desligou</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Id</th><th>Significado (log System)</th></tr>
+
+<tr><td>6005</td><td>O serviço de log foi iniciado (o computador ligou).</td></tr>
+
+<tr><td>6006</td><td>O serviço de log foi parado (desligamento normal).</td></tr>
+
+<tr><td>6008</td><td>O desligamento anterior foi inesperado (queda de energia, travamento).</td></tr>
+
+<tr><td>1074</td><td>Um programa ou usuário pediu para reiniciar/desligar.</td></tr>
+
+</table>
+</div>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-WinEvent -FilterHashtable @{ LogName = 'System'; Id = 6005, 6006, 6008 } -MaxEvents 6 | Select-Object TimeCreated, Id
+
+TimeCreated            Id
+-----------            --
+14/03/2025 08:26:51  6005
+13/03/2025 23:39:18  6006
+13/03/2025 19:18:44  6005
+02/03/2025 13:30:19  6005
+02/03/2025 13:10:38  6006
+21/02/2025 21:30:28  6006
+</pre>
+
+<hr>
+
+<h2>5. Lendo a mensagem</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $ev = Get-WinEvent -LogName System -MaxEvents 1
+PS&gt; $ev.Message
+(saída não mostrada: o texto de um evento pode trazer nomes de usuário, caminhos e outros dados pessoais)
+</pre>
+
+<hr>
+
+<h2>6. Agrupando e exportando</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-WinEvent -LogName Application -MaxEvents 200 | Group-Object LevelDisplayName | Select-Object Name, Count
+
+Name        Count
+----        -----
+               17
+Aviso           1
+Erro            3
+Informações   179
+PS&gt; Get-WinEvent -FilterHashtable @{ LogName = 'Application'; Level = 2 } -MaxEvents 20 -ErrorAction SilentlyContinue | Select-Object TimeCreated, Id, ProviderName, Message | Export-Csv erros-app.csv -NoTypeInformation
+AVISO: O parâmetro 'NoTypeInformation' está obsoleto. This parameter is obsolete and has no effect. The default behavior is to not include type information. Use -IncludeTypeInformation to include type information.
+PS&gt; Test-Path erros-app.csv
+True
+</pre>
+
+<div class="tip"><strong>-NoTypeInformation agora é obsoleto</strong> No PowerShell 7.7 esse parâmetro não faz mais nada: o <code>Export-Csv</code> já não grava a linha de tipo (<code>#TYPE ...</code>). Ele só gera o <code>AVISO</code> que aparece na saída, e pode ser tirado do comando. Se o mesmo script também precisar rodar no Windows PowerShell 5.1, mantenha o parâmetro e ignore o aviso: lá ele ainda evita a linha de tipo.</div>
+
+<div class="tryps" data-goal="src:Get-WinEvent;;src:-LogName System;;src:-MaxEvents 3;;src:TimeCreated;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> escreva, numa string, o comando que mostra os 3 últimos eventos do log <code>System</code> com <code>TimeCreated</code> e <code>Id</code>. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'Get-WinEvent -LogName System -MaxEvents 3 | Select-Object TimeCreated, Id'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>"Nenhum evento foi encontrado que corresponda aos critérios de seleção especificados"</strong>
+
+<p>O filtro não achou nada. Isso é bom (nenhum erro!) ou o filtro está apertado demais. Use <code>-ErrorAction SilentlyContinue</code> em scripts.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Acesso negado ao log Security</strong>
+
+<p>O log de segurança exige PowerShell como administrador.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Get-EventLog não existe</strong>
+
+<p><code>Get-EventLog</code> é do Windows PowerShell 5.1. No 7, use <code>Get-WinEvent</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Get-WinEvent -ListLog *</code></td><td>Lista os logs.</td></tr>
+
+<tr><td><code>Get-WinEvent -LogName System -MaxEvents 10</code></td><td>Últimos 10 eventos.</td></tr>
+
+<tr><td><code>-FilterHashtable @{ LogName='System'; Level=2 }</code></td><td>Só erros.</td></tr>
+
+<tr><td><code>StartTime = (Get-Date).AddDays(-1)</code></td><td>Último dia.</td></tr>
+
+<tr><td><code>Id = 6005, 6006, 6008</code></td><td>Ligou, desligou, queda.</td></tr>
+
+<tr><td><code>$ev.Message</code></td><td>Texto completo.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Só os erros</h3>
+<p>Complete:</p>
+<div class="ex-code">Get-WinEvent -FilterHashtable @{ LogName = 'System'; Level = <input data-answer="2" aria-label="resposta"> } -MaxEvents 5</div>
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. Qual Id indica que o desligamento anterior foi inesperado?</p>
+
+<label><input type="radio" name="q2"> 6005</label>
+
+<label><input type="radio" name="q2"> 6006</label>
+
+<label><input type="radio" name="q2"> 6008</label>
+
+<label><input type="radio" name="q2"> 1074</label>
+
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">3. Por que preferir -FilterHashtable a Where-Object?</p>
+
+<label><input type="radio" name="q3"> Porque o Windows já entrega só os eventos filtrados, muito mais rápido</label>
+
+<label><input type="radio" name="q3"> Porque Where-Object não funciona com eventos</label>
+
+<label><input type="radio" name="q3"> Porque -FilterHashtable mostra cores</label>
+
+<label><input type="radio" name="q3"> Tanto faz</label>
+
+</div>
+
+<div class="tryps" data-goal="src:Get-WinEvent;;src:Application;;src:-MaxEvents 100;;src:Group-Object LevelDisplayName;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> escreva, numa string, o comando que agrupa os 100 últimos eventos do log <code>Application</code> por nível e mostra <code>Name</code> e <code>Count</code>. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'Get-WinEvent -LogName Application -MaxEvents 100 | Group-Object LevelDisplayName | Select-Object Name, Count'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Get-WinEvent</code> lê os logs do Windows; use sempre <code>-MaxEvents</code> ou um filtro.</li>
+  <li><code>-FilterHashtable</code> filtra por log, nível, data e Id de forma rápida.</li>
+  <li>6005/6006/6008 contam a história de ligar e desligar.</li>
+  <li>Exporte com <code>Export-Csv</code> para analisar depois.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

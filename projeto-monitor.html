@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projeto PowerShell: monitor de serviços do Windows (passo a passo) | Guia PowerShell</title>
+<meta name="description" content="Projeto prático em PowerShell 7: um monitor que confere se serviços importantes do Windows estão rodando, mostra um painel colorido, grava um histórico em CSV, avisa quando algo para e pode ser agendado para rodar sozinho.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Projeto: <span class="hl">Monitor de Serviços</span></h1>
+
+<p class="intro">Em empresas, alguns serviços não podem parar: o spooler de impressão, o banco de dados, o antivírus. Neste projeto você constrói um monitor que confere uma lista de serviços, mostra um painel com cores, guarda o histórico e avisa quando algum está parado.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A conferir serviços com <code>Get-Service</code>.</li>
+  <li>A montar um painel com objetos e cores.</li>
+  <li>A gravar um histórico em CSV.</li>
+  <li>A avisar quando algo muda.</li>
+  <li>A repetir a verificação em intervalos.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows.</p>
+
+<hr>
+
+<h2>O plano</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Etapa</th><th>Ferramenta</th></tr>
+
+<tr><td>Lista de serviços</td><td>Um array com os nomes</td></tr>
+
+<tr><td>Conferir</td><td><code>Get-Service -Name ... -ErrorAction SilentlyContinue</code></td></tr>
+
+<tr><td>Painel</td><td><code>[pscustomobject]</code> + <code>Write-Host -ForegroundColor</code></td></tr>
+
+<tr><td>Histórico</td><td><code>Export-Csv -Append</code></td></tr>
+
+<tr><td>Repetir</td><td><code>while</code> + <code>Start-Sleep</code></td></tr>
+
+</table>
+</div>
+
+<div class="tip"><strong>Só leitura</strong> Este monitor apenas <em>lê</em> o estado dos serviços. Reiniciar serviços (<code>Restart-Service</code>) exige administrador e fica como desafio, com cuidado.</div>
+
+<hr>
+
+<h2>1. A lista de serviços</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $servicos = 'Spooler', 'EventLog', 'Dnscache', 'ServicoQueNaoExiste'
+PS&gt; Get-Service -Name $servicos -ErrorAction SilentlyContinue | Select-Object Name, Status, StartType
+
+Name      Status StartType
+----      ------ ---------
+Dnscache Running Automatic
+EventLog Running Automatic
+Spooler  Running Automatic
+</pre>
+
+<dl class="anatomy">
+
+  <dt>'Spooler'</dt><dd>Fila de impressão.</dd>
+
+  <dt>'EventLog'</dt><dd>Log de eventos do Windows.</dd>
+
+  <dt>'Dnscache'</dt><dd>Cliente DNS.</dd>
+
+  <dt>-ErrorAction SilentlyContinue</dt><dd>O serviço inexistente não aparece, em vez de dar erro.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Um resultado por serviço, inclusive os que não existem</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Get-EstadoServico {
+&gt;&gt;     param([string[]]$Nome)
+&gt;&gt;     foreach ($n in $Nome) {
+&gt;&gt;         $s = Get-Service -Name $n -ErrorAction SilentlyContinue
+&gt;&gt;         [pscustomobject]@{
+&gt;&gt;             Hora    = Get-Date -Format 'HH:mm:ss'
+&gt;&gt;             Servico = $n
+&gt;&gt;             Estado  = if ($s) { [string]$s.Status } else { 'NaoEncontrado' }
+&gt;&gt;         }
+&gt;&gt;     }
+&gt;&gt; }
+PS&gt; Get-EstadoServico -Nome $servicos | Select-Object Servico, Estado
+
+Servico             Estado
+-------             ------
+Spooler             Running
+EventLog            Running
+Dnscache            Running
+ServicoQueNaoExiste NaoEncontrado
+</pre>
+
+<hr>
+
+<h2>3. O painel colorido</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Show-Painel {
+&gt;&gt;     param($Estados)
+&gt;&gt;     foreach ($e in $Estados) {
+&gt;&gt;         $cor = switch ($e.Estado) { 'Running' { 'Green' } 'Stopped' { 'Red' } default { 'Yellow' } }
+&gt;&gt;         Write-Host ("{0,-22} {1}" -f $e.Servico, $e.Estado) -ForegroundColor $cor
+&gt;&gt;     }
+&gt;&gt; }
+PS&gt; Show-Painel (Get-EstadoServico -Nome $servicos)
+Spooler                Running
+EventLog               Running
+Dnscache               Running
+ServicoQueNaoExiste    NaoEncontrado
+</pre>
+
+<dl class="anatomy">
+
+  <dt>{0,-22}</dt><dd>Ocupa 22 colunas, alinhado à esquerda: as colunas ficam retas.</dd>
+
+  <dt>Write-Host -ForegroundColor</dt><dd>Escreve colorido na tela (só para pessoas lerem; não vai para o pipeline).</dd>
+
+</dl>
+
+<hr>
+
+<h2>4. O histórico</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-EstadoServico -Nome $servicos | Export-Csv historico.csv -Append -NoTypeInformation
+AVISO: O parâmetro 'NoTypeInformation' está obsoleto. This parameter is obsolete and has no effect. The default behavior is to not include type information. Use -IncludeTypeInformation to include type information.
+PS&gt; Get-EstadoServico -Nome $servicos | Export-Csv historico.csv -Append -NoTypeInformation
+AVISO: O parâmetro 'NoTypeInformation' está obsoleto. This parameter is obsolete and has no effect. The default behavior is to not include type information. Use -IncludeTypeInformation to include type information.
+PS&gt; (Import-Csv historico.csv).Count
+8
+PS&gt; Import-Csv historico.csv | Group-Object Servico | Select-Object Name, Count
+
+Name                Count
+----                -----
+Dnscache                2
+EventLog                2
+ServicoQueNaoExiste     2
+Spooler                 2
+</pre>
+
+<div class="tip"><strong>-NoTypeInformation agora é obsoleto</strong> No PowerShell 7.7 esse parâmetro não faz mais nada: o <code>Export-Csv</code> já não grava a linha de tipo (<code>#TYPE ...</code>). Ele só gera o <code>AVISO</code> que aparece na saída, e pode ser tirado do comando. Se o mesmo script também precisar rodar no Windows PowerShell 5.1, mantenha o parâmetro e ignore o aviso: lá ele ainda evita a linha de tipo.</div>
+
+<hr>
+
+<h2>5. Avisando quando algo não está rodando</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $problemas = Get-EstadoServico -Nome $servicos | Where-Object Estado -ne 'Running'
+PS&gt; if ($problemas) { "ATENÇÃO: " + ($problemas.Servico -join ', ') }
+ATENÇÃO: ServicoQueNaoExiste
+</pre>
+
+<p>Uma notificação do Windows também é possível com o módulo <code>BurntToast</code> da galeria (<code>New-BurntToastNotification -Text "Serviço parado"</code>).</p>
+
+<hr>
+
+<h2>6. Repetindo de tempos em tempos</h2>
+
+<pre><code>while ($true) {
+    Clear-Host
+    $estados = Get-EstadoServico -Nome $servicos
+    Show-Painel $estados
+    $estados | Export-Csv historico.csv -Append -NoTypeInformation
+    Start-Sleep -Seconds 60
+}
+</code></pre>
+
+<p>Aperte Ctrl+C para parar. Para rodar sem janela aberta, agende o script (sem o <code>while</code>) a cada 5 minutos em <a href="tarefas-agendadas.html">Tarefas Agendadas</a>.</p>
+
+<div class="tryps" data-goal="src:Get-Service ServicoQueNaoExiste;;src:-ErrorAction SilentlyContinue;;src:NaoEncontrado;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> escreva, numa string, o comando que mostra <code>NaoEncontrado</code> quando o serviço <code>ServicoQueNaoExiste</code> não existir, sem erro na tela. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'if (Get-Service ServicoQueNaoExiste -ErrorAction SilentlyContinue) { "Existe" } else { "NaoEncontrado" }'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Desafios</h2>
+
+<ul>
+  <li>Mostre há quanto tempo cada serviço está parado, lendo o histórico.</li>
+  <li>Como administrador, tente <code>Restart-Service</code> uma vez antes de avisar.</li>
+  <li>Monitore serviços de outro computador com <code>Invoke-Command</code> (<a href="remoting.html">PowerShell Remoto</a>).</li>
+</ul>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">1. Por que usar Write-Host no painel?</p>
+
+<label><input type="radio" name="q1"> Para mostrar cores na tela; o painel é só para ler</label>
+
+<label><input type="radio" name="q1"> Porque é mais rápido que o pipeline</label>
+
+<label><input type="radio" name="q1"> Porque Export-Csv exige</label>
+
+<label><input type="radio" name="q1"> Para gravar no log</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. O que <code>-Append</code> faz no Export-Csv?</p>
+
+<label><input type="radio" name="q2"> Apaga o arquivo</label>
+
+<label><input type="radio" name="q2"> Ordena as linhas</label>
+
+<label><input type="radio" name="q2"> Acrescenta linhas ao arquivo existente</label>
+
+<label><input type="radio" name="q2"> Abre no Excel</label>
+
+</div>
+
+<div class="tryps" data-goal="out:ATENÇÃO: Spooler;;src:Where-Object;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> da lista de objetos abaixo, mostre <code>ATENÇÃO: </code> seguido dos serviços que não estão <code>Running</code>.</p>
+
+<pre class="script" data-file="main.ps1">$estados = [pscustomobject]@{ Servico = 'Spooler'; Estado = 'Stopped' }, [pscustomobject]@{ Servico = 'EventLog'; Estado = 'Running' }
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$estados = [pscustomobject]@{ Servico = 'Spooler'; Estado = 'Stopped' }, [pscustomobject]@{ Servico = 'EventLog'; Estado = 'Running' }
+$p = $estados | Where-Object Estado -ne 'Running'
+"ATENÇÃO: " + ($p.Servico -join ', ')
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Get-Service</code> com <code>-ErrorAction SilentlyContinue</code> lê o estado sem erros.</li>
+  <li>Objetos com <code>Hora</code>, <code>Servico</code> e <code>Estado</code> alimentam o painel e o histórico.</li>
+  <li><code>Export-Csv -Append</code> guarda o histórico.</li>
+  <li>Agende para monitorar sem janela aberta.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

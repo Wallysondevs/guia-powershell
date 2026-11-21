@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell variáveis de ambiente — $env:PATH e companhia (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a ler e alterar variáveis de ambiente no PowerShell 7: $env:USERNAME, $env:PATH, a unidade Env:, criar variáveis só na sessão, gravar de forma permanente com [Environment]::SetEnvironmentVariable e acrescentar uma pasta ao PATH.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Variáveis de Ambiente (<span class="hl">$env:</span>)</h1>
+
+<p class="intro">O Windows guarda algumas informações em <strong>variáveis de ambiente</strong>: o nome do usuário, a pasta temporária, as pastas onde procurar programas (o famoso <code>PATH</code>). Todo programa pode ler essas variáveis, e o PowerShell lê e altera com o prefixo <code>$env:</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A ler variáveis com <code>$env:NOME</code>.</li>
+  <li>A listar todas com <code>Get-ChildItem Env:</code>.</li>
+  <li>A criar e mudar variáveis só nesta sessão.</li>
+  <li>A gravar de forma permanente para o seu usuário.</li>
+  <li>A acrescentar uma pasta ao <code>PATH</code> com segurança.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows.</p>
+
+<hr>
+
+<h2>A ideia: o quadro de avisos</h2>
+
+<p>As variáveis de ambiente são um quadro de avisos que o Windows pendura para todos os programas lerem: "o usuário é a Ana", "a pasta temporária fica ali", "procure programas nestas pastas".</p>
+
+<hr>
+
+<h2>1. Lendo</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $env:USERNAME
+ana
+PS&gt; $env:COMPUTERNAME
+NOTEBOOK
+PS&gt; $env:OS
+Windows_NT
+PS&gt; Test-Path $env:TEMP
+True
+</pre>
+
+<dl class="anatomy">
+
+  <dt>$env:NOME</dt><dd>Lê a variável de ambiente <code>NOME</code>. Maiúsculas e minúsculas tanto faz.</dd>
+
+  <dt>$env:TEMP</dt><dd>Pasta temporária do usuário.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Listando todas</h2>
+
+<p><code>Env:</code> é uma "unidade" como <code>C:</code>, com uma variável em cada item:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-ChildItem Env: | Select-Object -First 5 Name
+
+Name
+----
+ALLUSERSPROFILE
+APPDATA
+CommonProgramFiles
+CommonProgramFiles(x86)
+CommonProgramW6432
+PS&gt; (Get-ChildItem Env:).Count
+46
+</pre>
+
+<hr>
+
+<h2>3. O PATH</h2>
+
+<p>O <code>PATH</code> é a lista de pastas onde o Windows procura programas quando você digita um nome como <code>notepad</code> ou <code>git</code>. As pastas são separadas por ponto e vírgula:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; ($env:PATH -split ';').Count
+12
+PS&gt; $env:PATH -split ';' | Where-Object { $_ -like '*PowerShell*' }
+C:\Users\ana\AppData\Local\Microsoft\WindowsApps\Microsoft.PowerShell_8wekyb3d8bbwe
+C:\Windows\System32\WindowsPowerShell\v1.0\
+</pre>
+
+<hr>
+
+<h2>4. Mudando só nesta sessão</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $env:MEU_AMBIENTE = "teste"
+PS&gt; $env:MEU_AMBIENTE
+teste
+PS&gt; pwsh -NoProfile -Command '"O filho vê: $env:MEU_AMBIENTE"'
+O filho vê: teste
+PS&gt; Remove-Item Env:MEU_AMBIENTE
+PS&gt; $null -eq $env:MEU_AMBIENTE
+True
+</pre>
+
+<dl class="anatomy">
+
+  <dt>$env:X = "..."</dt><dd>Cria ou muda a variável nesta janela e nos programas abertos a partir dela.</dd>
+
+  <dt>Remove-Item Env:X</dt><dd>Apaga a variável (também funciona <code>$env:X = $null</code>).</dd>
+
+</dl>
+
+<p>Ao fechar a janela, a mudança some.</p>
+
+<hr>
+
+<h2>5. Gravando de forma permanente</h2>
+
+<p>Para valer em todas as janelas novas, grave no escopo do usuário:</p>
+
+<pre><code>[Environment]::SetEnvironmentVariable("EDITOR", "code", "User")
+[Environment]::GetEnvironmentVariable("EDITOR", "User")
+</code></pre>
+
+<dl class="anatomy">
+
+  <dt>"User"</dt><dd>Grava para o seu usuário (não precisa de administrador).</dd>
+
+  <dt>"Machine"</dt><dd>Grava para o computador todo (precisa de administrador).</dd>
+
+  <dt>"Process"</dt><dd>Igual a <code>$env:</code>, só esta sessão.</dd>
+
+</dl>
+
+<p>Janelas que já estavam abertas não veem a mudança: abra uma nova.</p>
+
+<hr>
+
+<h2>6. Acrescentando uma pasta ao PATH</h2>
+
+<pre><code>$pasta = "$HOME\bin"
+$atual = [Environment]::GetEnvironmentVariable("Path", "User")
+if (($atual -split ';') -notcontains $pasta) {
+    [Environment]::SetEnvironmentVariable("Path", "$atual;$pasta", "User")
+}
+</code></pre>
+
+<div class="warning"><strong>Não sobrescreva o PATH</strong> Nunca faça <code>SetEnvironmentVariable("Path", "C:\minha-pasta", "User")</code>: isso apaga todas as outras pastas. Sempre leia o valor atual e acrescente.</div>
+
+<div class="tryps" data-goal="out:teste;;src:\$env:;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> crie a variável de ambiente <code>MEU_AMBIENTE</code> com o valor <code>teste</code> e mostre o valor.</p>
+
+<pre class="script" data-file="main.ps1">
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$env:MEU_AMBIENTE = "teste"
+$env:MEU_AMBIENTE
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>A variável está vazia</strong>
+
+<p><code>$env:NOME_ERRADO</code> não dá erro: devolve vazio. Confira o nome com <code>Get-ChildItem Env:</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Mudei o PATH e o comando continua "não reconhecido"</strong>
+
+<p>A janela atual guardou o PATH antigo. Abra uma janela nova (ou atualize: <code>$env:PATH = [Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [Environment]::GetEnvironmentVariable("Path","User")</code>).</p>
+
+</div>
+
+<div class="cenario">
+<strong>Variável com espaço ou parênteses no nome</strong>
+
+<p>Use chaves: <code>${env:ProgramFiles(x86)}</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>$env:NOME</code></td><td>Lê.</td></tr>
+
+<tr><td><code>$env:NOME = "v"</code></td><td>Cria/muda só nesta sessão.</td></tr>
+
+<tr><td><code>Remove-Item Env:NOME</code></td><td>Apaga.</td></tr>
+
+<tr><td><code>Get-ChildItem Env:</code></td><td>Lista todas.</td></tr>
+
+<tr><td><code>$env:PATH -split ';'</code></td><td>Pastas do PATH, uma por linha.</td></tr>
+
+<tr><td><code>[Environment]::SetEnvironmentVariable("N","v","User")</code></td><td>Grava permanente.</td></tr>
+
+<tr><td><code>${env:ProgramFiles(x86)}</code></td><td>Nome com parênteses.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Lendo a pasta temporária</h3>
+<p>Complete:</p>
+<div class="ex-code"><input data-answer="$env:TEMP" aria-label="resposta"></div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Por que não fazer <code>SetEnvironmentVariable("Path", "C:\bin", "User")</code>?</p>
+
+<label><input type="radio" name="q2"> Porque precisa de administrador</label>
+
+<label><input type="radio" name="q2"> Porque substitui o PATH inteiro e apaga as outras pastas</label>
+
+<label><input type="radio" name="q2"> Porque a pasta não existe</label>
+
+<label><input type="radio" name="q2"> Porque o PATH é só leitura</label>
+
+</div>
+
+<div class="mc" data-answer="4">
+
+<p class="mc-q">3. Uma variável criada com <code>$env:X = 1</code> dura até:</p>
+
+<label><input type="radio" name="q3"> Reiniciar o computador</label>
+
+<label><input type="radio" name="q3"> Sempre</label>
+
+<label><input type="radio" name="q3"> O próximo login</label>
+
+<label><input type="radio" name="q3"> Fechar a janela do PowerShell</label>
+
+</div>
+
+<div class="tryps" data-goal="out:ok;;src:Remove-Item;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> crie <code>$env:TESTE</code>, apague com <code>Remove-Item Env:TESTE</code> e mostre <code>ok</code> se ela ficou vazia (<code>$null -eq $env:TESTE</code>).</p>
+
+<pre class="script" data-file="main.ps1">$env:TESTE = "1"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$env:TESTE = "1"
+Remove-Item Env:TESTE
+if ($null -eq $env:TESTE) { "ok" }
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>$env:NOME</code> lê e altera variáveis de ambiente.</li>
+  <li>Mudanças com <code>$env:</code> valem só na janela atual.</li>
+  <li><code>[Environment]::SetEnvironmentVariable(..., "User")</code> grava para sempre.</li>
+  <li>No PATH, sempre acrescente; nunca substitua.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

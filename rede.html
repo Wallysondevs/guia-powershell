@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Test-Connection e Test-NetConnection — rede (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a diagnosticar a rede com o PowerShell 7: Test-Connection (o ping), testar uma porta com Test-NetConnection e Test-Connection -TcpPort, Resolve-DnsName, ver adaptadores e endereços com Get-NetAdapter e Get-NetIPConfiguration.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Rede (<span class="hl">Test-Connection</span> e Test-NetConnection)</h1>
+
+<p class="intro">"A internet caiu ou é só aquele site?" O PowerShell responde com comandos de diagnóstico: o ping (<code>Test-Connection</code>), o teste de porta (<code>Test-NetConnection</code>), a consulta de DNS e as informações das placas de rede.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A fazer um ping com <code>Test-Connection</code> e responder sim/não com <code>-Quiet</code>.</li>
+  <li>A testar se uma porta está aberta.</li>
+  <li>A consultar o DNS com <code>Resolve-DnsName</code>.</li>
+  <li>A ver as placas de rede e a configuração de IP.</li>
+  <li>Um roteiro de diagnóstico passo a passo.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows.</p>
+
+<hr>
+
+<h2>A ideia: bater na porta</h2>
+
+<p>Para saber se alguém está em casa você bate na porta (ping). Para saber se a loja está aberta, você tenta entrar pela porta certa (teste de porta). Rede é isso: perguntar e ver se alguém responde.</p>
+
+<hr>
+
+<h2>1. O ping: Test-Connection</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Test-Connection learn.microsoft.com -Count 2 | Select-Object Ping, Status, Latency
+
+Ping  Status Latency
+----  ------ -------
+   1 Success      51
+   2 Success      51
+PS&gt; Test-Connection learn.microsoft.com -Count 1 -Quiet
+True
+PS&gt; Test-Connection endereco-que-nao-existe.invalid -Count 1 -Quiet
+False
+</pre>
+
+<dl class="anatomy">
+
+  <dt>-Count 2</dt><dd>Quantas tentativas (o padrão é 4).</dd>
+
+  <dt>Latency</dt><dd>Tempo de resposta em milissegundos.</dd>
+
+  <dt>-Quiet</dt><dd>Responde só <code>True</code> ou <code>False</code>: ótimo para <code>if</code>.</dd>
+
+</dl>
+
+<div class="tip"><strong>Ping bloqueado não é site fora do ar</strong> Muitos servidores ignoram ping de propósito. Se o ping falha, teste a porta antes de concluir que o site caiu.</div>
+
+<hr>
+
+<h2>2. Testando uma porta</h2>
+
+<p>Sites usam a porta 443 (HTTPS). Teste se ela responde:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Test-NetConnection learn.microsoft.com -Port 443 -InformationLevel Quiet
+True
+PS&gt; Test-Connection learn.microsoft.com -TcpPort 443
+True
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Test-NetConnection -Port</dt><dd>Tenta abrir uma conexão naquela porta. <code>True</code> se conseguiu.</dd>
+
+  <dt>-InformationLevel Quiet</dt><dd>Só <code>True</code>/<code>False</code>. Sem isso, mostra um relatório com endereços.</dd>
+
+  <dt>Test-Connection -TcpPort</dt><dd>O mesmo teste, só no PowerShell 7.</dd>
+
+</dl>
+
+<hr>
+
+<h2>3. DNS: nome para endereço</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; (Resolve-DnsName learn.microsoft.com -Type A -ErrorAction SilentlyContinue | Measure-Object).Count -gt 0
+True
+PS&gt; Resolve-DnsName nao-existe.invalid -ErrorAction SilentlyContinue
+PS&gt; $?
+True
+</pre>
+
+<p>Se o DNS não resolve, nada funciona pelo nome, mesmo com a internet ligada.</p>
+
+<hr>
+
+<h2>4. As placas de rede</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-NetAdapter | Select-Object Name, Status, LinkSpeed
+
+Name     Status       LinkSpeed
+----     ------       ---------
+Ethernet Disconnected 0 bps
+Wi-Fi    Up           260 Mbps
+</pre>
+
+<pre><code>Get-NetIPConfiguration           # IP, gateway e DNS de cada placa
+Get-NetIPAddress -AddressFamily IPv4 | Select-Object InterfaceAlias, IPAddress
+</code></pre>
+
+<div class="warning"><strong>Privacidade</strong> Esses comandos mostram os endereços da sua rede. Cuidado ao colar a saída em fóruns.</div>
+
+<hr>
+
+<h2>5. Roteiro de diagnóstico</h2>
+
+<pre><code>function Test-Internet {
+    [pscustomobject]@{
+        Placa   = [bool](Get-NetAdapter | Where-Object Status -eq 'Up')
+        DNS     = [bool](Resolve-DnsName learn.microsoft.com -ErrorAction SilentlyContinue)
+        HTTPS   = Test-NetConnection learn.microsoft.com -Port 443 -InformationLevel Quiet
+    }
+}
+Test-Internet
+</code></pre>
+
+<p>Se <code>Placa</code> é <code>False</code>, o problema é o cabo ou o Wi-Fi. Se só <code>DNS</code> falha, troque o servidor DNS. Se só <code>HTTPS</code> falha, pode ser firewall ou o site fora do ar.</p>
+
+<div class="tryps" data-goal="src:Test-Connection;;src:-Count 1;;src:-Quiet;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> escreva, numa string, o comando que faz um ping com uma tentativa em <code>learn.microsoft.com</code> e responde só <code>True</code> ou <code>False</code>. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'Test-Connection learn.microsoft.com -Count 1 -Quiet'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>"Não foi possível resolver o nome"</strong>
+
+<p>O DNS não achou o endereço: nome digitado errado ou problema de DNS. Teste com <code>Resolve-DnsName</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Ping falha, mas o site abre no navegador</strong>
+
+<p>O servidor bloqueia ping. Use <code>Test-NetConnection -Port 443</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Test-NetConnection demora muito</strong>
+
+<p>Quando a porta está fechada, ele espera o tempo limite. No PowerShell 7, <code>Test-Connection -TcpPort</code> com <code>-TimeoutSeconds</code> é mais rápido.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Test-Connection host -Count 2</code></td><td>Ping.</td></tr>
+
+<tr><td><code>Test-Connection host -Quiet</code></td><td>Ping só com True/False.</td></tr>
+
+<tr><td><code>Test-NetConnection host -Port 443</code></td><td>Testa uma porta.</td></tr>
+
+<tr><td><code>Test-Connection host -TcpPort 443</code></td><td>Teste de porta do PowerShell 7.</td></tr>
+
+<tr><td><code>Resolve-DnsName host</code></td><td>Consulta DNS.</td></tr>
+
+<tr><td><code>Get-NetAdapter</code></td><td>Placas de rede.</td></tr>
+
+<tr><td><code>Get-NetIPConfiguration</code></td><td>IP, gateway e DNS.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Só sim ou não</h3>
+<p>Complete:</p>
+<div class="ex-code">Test-Connection learn.microsoft.com -Count 1 <input data-answer="-Quiet" aria-label="resposta"></div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. O ping falhou mas o site abre. O que é mais provável?</p>
+
+<label><input type="radio" name="q2"> A internet caiu</label>
+
+<label><input type="radio" name="q2"> O servidor bloqueia ping</label>
+
+<label><input type="radio" name="q2"> O DNS está errado</label>
+
+<label><input type="radio" name="q2"> O cabo está solto</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. Qual porta testar para saber se um site HTTPS responde?</p>
+
+<label><input type="radio" name="q3"> 21</label>
+
+<label><input type="radio" name="q3"> 80</label>
+
+<label><input type="radio" name="q3"> 443</label>
+
+<label><input type="radio" name="q3"> 3389</label>
+
+</div>
+
+<div class="tryps" data-goal="src:Test-NetConnection;;src:-Port 443;;src:-InformationLevel Quiet;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> escreva, numa string, o comando que testa a porta 443 de <code>learn.microsoft.com</code> mostrando só <code>True</code> ou <code>False</code>. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'Test-NetConnection learn.microsoft.com -Port 443 -InformationLevel Quiet'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Test-Connection</code> é o ping; <code>-Quiet</code> responde True/False.</li>
+  <li><code>Test-NetConnection -Port</code> testa se um serviço responde.</li>
+  <li><code>Resolve-DnsName</code> confere o DNS.</li>
+  <li><code>Get-NetAdapter</code> e <code>Get-NetIPConfiguration</code> mostram a rede local.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

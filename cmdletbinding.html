@@ -31,7 +31,7 @@
 </ul>
 </div>
 
-<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional. Os quadros marcados <strong>Saída no Windows (PowerShell 7.7)</strong> foram colhidos num Windows 10 em português, com o nome do computador e o da usuária trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>).</p>
 
 <hr>
 
@@ -53,8 +53,10 @@ PS&gt; Get-Soma 2 3
 5
 </pre>
 
-<pre><code>Get-Soma 2 3 -Verbose
-</code></pre>
+<pre class="term" data-title="Saída no Windows (PowerShell 7.7)">PS&gt; Get-Soma 2 3 -Verbose
+DETALHADO: Somando 2 e 3
+5
+</pre>
 
 <p>Com <code>-Verbose</code>, antes do <code>5</code> aparece a mensagem <code>Somando 2 e 3</code>, com o prefixo de detalhe na frente (<code>DETALHADO:</code> num Windows em português, como na aula <a href="write-outros.html">Write-Warning, Write-Verbose e Companhia</a>).</p>
 
@@ -82,8 +84,9 @@ A, B, Verbose, Debug, ErrorAction, WarningAction, InformationAction, ProgressAct
 
 <h2>3. Nome errado agora é erro</h2>
 
-<pre><code>Get-Soma -A 1 -C 2
-</code></pre>
+<pre class="term" data-title="Saída no Windows (PowerShell 7.7)">PS&gt; Get-Soma -A 1 -C 2
+Get-Soma: Não foi possível encontrar um parâmetro correspondente ao nome de parâmetro 'C'.
+</pre>
 
 <p>Na função simples, o <code>-C</code> iria parar em <code>$args</code> sem aviso. Na avançada, o PowerShell recusa e diz que não existe parâmetro chamado <code>C</code>.</p>
 
@@ -155,8 +158,9 @@ PS&gt; Remove-Tarefa "lavar louça"
 Tarefa lavar louça apagada
 </pre>
 
-<pre><code>Remove-Tarefa "lavar louça" -WhatIf
-</code></pre>
+<pre class="term" data-title="Saída no Windows (PowerShell 7.7)">PS&gt; Remove-Tarefa "lavar louça" -WhatIf
+What If: Executando a operação "Apagar tarefa" no destino "lavar louça".
+</pre>
 
 <p>Com <code>-WhatIf</code>, o <code>ShouldProcess</code> devolve <code>False</code> e só mostra uma frase dizendo qual operação seria feita (<code>Apagar tarefa</code>) em qual alvo (<code>lavar louça</code>). A tarefa não é apagada.</p>
 

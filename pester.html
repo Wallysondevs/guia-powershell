@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pester — testes automatizados no PowerShell (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a testar funções do PowerShell 7 com o Pester 5: instalar o módulo, escrever Describe, It e Should, rodar com Invoke-Pester, testar erros com Should -Throw, preparar dados com BeforeAll e ler o resultado.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Testes com <span class="hl">Pester</span></h1>
+
+<p class="intro">Você escreveu uma função, ela funciona... até alguém mudar uma linha e quebrar tudo sem perceber. <strong>Testes automatizados</strong> são pequenos scripts que conferem se o seu código continua fazendo o que deveria. O Pester é a ferramenta de testes do PowerShell.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A instalar o Pester 5.</li>
+  <li>A escrever um teste com <code>Describe</code>, <code>It</code> e <code>Should</code>.</li>
+  <li>A rodar os testes com <code>Invoke-Pester</code>.</li>
+  <li>A testar erros com <code>Should -Throw</code>.</li>
+  <li>A organizar com <code>BeforeAll</code> e <code>Context</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows. Exceção: nas seções 4 e 5, os quadros mostram o Pester 5.9.1 rodando no PowerShell 7.7 no Linux (na pasta da usuária fictícia, <code>/home/ana</code>), porque o Windows da coleta só tinha o Pester 3.4.0 que vem de fábrica. O Pester escreve o mesmo texto nos dois sistemas; só o caminho do arquivo muda.</p>
+
+<hr>
+
+<h2>A ideia: a lista de conferência</h2>
+
+<p>Antes de decolar, o piloto passa por uma lista: "combustível? ok. Flaps? ok.". Os testes são a lista de conferência do seu código, e o Pester confere tudo em segundos, sempre que você pedir.</p>
+
+<hr>
+
+<h2>1. Instalando</h2>
+
+<p>O Windows vem com o Pester 3, antigo. Veja qual você tem:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-Module Pester -ListAvailable | Select-Object Name, Version
+
+Name   Version
+----   -------
+Pester 3.4.0
+</pre>
+
+<p>No Windows da coleta só havia o <code>3.4.0</code>, que não entende a sintaxe usada hoje (a desta aula). Pedir o Pester 5 sem ter instalado dá erro:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Import-Module Pester -MinimumVersion 5.0
+Import-Module: O módulo especificado "Pester" com a versão "5.0" não foi carregado porque nenhum arquivo de módulo válido foi encontrado em nenhum diretório de módulo.
+</pre>
+
+<p>Então instale o 5 só para você (não precisa de administrador):</p>
+
+<pre><code>Install-PSResource -Name Pester -Scope CurrentUser
+</code></pre>
+
+<hr>
+
+<h2>2. A função a testar</h2>
+
+<p>Crie uma pasta com a função e o arquivo de testes. O arquivo de testes termina em <code>.Tests.ps1</code>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; New-Item -ItemType Directory pester-teste -Force | Out-Null
+PS&gt; Set-Location pester-teste
+PS&gt; Set-Content Calculo.ps1 @'
+&gt;&gt; function Get-Desconto {
+&gt;&gt;     param([decimal]$Preco, [int]$Porcento)
+&gt;&gt;     if ($Porcento -lt 0 -or $Porcento -gt 100) { throw "Porcentagem inválida: $Porcento" }
+&gt;&gt;     $Preco - ($Preco * $Porcento / 100)
+&gt;&gt; }
+&gt;&gt; '@
+</pre>
+
+<hr>
+
+<h2>3. O arquivo de testes</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Set-Content Calculo.Tests.ps1 @'
+&gt;&gt; BeforeAll {
+&gt;&gt;     . $PSScriptRoot\Calculo.ps1
+&gt;&gt; }
+&gt;&gt; Describe "Get-Desconto" {
+&gt;&gt;     It "aplica 10% em 200" {
+&gt;&gt;         Get-Desconto -Preco 200 -Porcento 10 | Should -Be 180
+&gt;&gt;     }
+&gt;&gt;     It "não muda o preço com 0%" {
+&gt;&gt;         Get-Desconto -Preco 50 -Porcento 0 | Should -Be 50
+&gt;&gt;     }
+&gt;&gt;     It "recusa porcentagem maior que 100" {
+&gt;&gt;         { Get-Desconto -Preco 50 -Porcento 150 } | Should -Throw "*inválida*"
+&gt;&gt;     }
+&gt;&gt; }
+&gt;&gt; '@
+</pre>
+
+<dl class="anatomy">
+
+  <dt>BeforeAll</dt><dd>Roda antes dos testes: aqui, carrega a função com dot-source.</dd>
+
+  <dt>Describe</dt><dd>Agrupa os testes de um assunto.</dd>
+
+  <dt>It</dt><dd>Um teste: uma frase dizendo o que deveria acontecer.</dd>
+
+  <dt>Should -Be</dt><dd>Confere o valor. Se for diferente, o teste falha.</dd>
+
+  <dt>Should -Throw</dt><dd>Confere que o bloco dá erro (com a mensagem parecida com o padrão).</dd>
+
+</dl>
+
+<hr>
+
+<h2>4. Rodando</h2>
+
+<p>Com o Pester 5 instalado, rode o arquivo de testes. (Esta saída e as da seção 5 foram colhidas no Linux, como explicado no começo da aula.)</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Invoke-Pester -Path .\Calculo.Tests.ps1 -Output Detailed
+Pester v5.9.1
+
+Starting discovery in 1 files.
+Discovery found 3 tests in 145ms.
+Running tests.
+
+Running tests from '/home/ana/pester-teste/Calculo.Tests.ps1'
+Describing Get-Desconto
+  [+] aplica 10% em 200 90ms (61ms|29ms)
+  [+] não muda o preço com 0% 3ms (2ms|1ms)
+  [+] recusa porcentagem maior que 100 33ms (32ms|1ms)
+Tests completed in 457ms
+Tests Passed: 3, Failed: 0, Skipped: 0, Inconclusive: 0, NotRun: 0
+</pre>
+
+<dl class="anatomy">
+
+  <dt>[+]</dt><dd>Teste que passou, com o tempo que levou.</dd>
+
+  <dt>Tests Passed: 3, Failed: 0</dt><dd>O placar final: 3 passaram, nenhum falhou.</dd>
+
+</dl>
+
+<hr>
+
+<h2>5. Quando um teste falha</h2>
+
+<p>Vamos simular um erro na função (trocar <code>-</code> por <code>+</code>) e rodar de novo:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; (Get-Content Calculo.ps1) -replace '\$Preco - \(', '$Preco + (' | Set-Content Calculo.ps1
+PS&gt; Invoke-Pester -Path .\Calculo.Tests.ps1 -Output Normal
+
+Starting discovery in 1 files.
+Discovery found 3 tests in 2ms.
+Running tests.
+[-] Get-Desconto.aplica 10% em 200 18ms (17ms|1ms)
+ Expected 180, but got 220.
+ at Get-Desconto -Preco 200 -Porcento 10 | Should -Be 180, /home/ana/pester-teste/Calculo.Tests.ps1:6
+ at &lt;ScriptBlock&gt;, /home/ana/pester-teste/Calculo.Tests.ps1:6
+Tests completed in 82ms
+Tests Passed: 2, Failed: 1, Skipped: 0, Inconclusive: 0, NotRun: 0
+</pre>
+
+<p>O Pester diz qual teste falhou, o valor esperado e o valor recebido. É exatamente o aviso que você quer ter <em>antes</em> de publicar o script. Agora desfaça a troca e confira que tudo volta a passar:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; (Get-Content Calculo.ps1) -replace '\$Preco \+ \(', '$Preco - (' | Set-Content Calculo.ps1
+PS&gt; (Invoke-Pester -Path .\Calculo.Tests.ps1 -PassThru -Output None).Result
+Passed
+</pre>
+
+<hr>
+
+<h2>6. Outros Should</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você escreve</th><th>Confere</th></tr>
+
+<tr><td><code>Should -Be 5</code></td><td>Igual a 5.</td></tr>
+
+<tr><td><code>Should -BeExactly "Ana"</code></td><td>Igual, diferenciando maiúsculas.</td></tr>
+
+<tr><td><code>Should -BeGreaterThan 0</code></td><td>Maior que.</td></tr>
+
+<tr><td><code>Should -BeLike "*.txt"</code></td><td>Combina com o curinga.</td></tr>
+
+<tr><td><code>Should -Match '^\d+$'</code></td><td>Combina com a regex.</td></tr>
+
+<tr><td><code>Should -Contain 3</code></td><td>A lista contém 3.</td></tr>
+
+<tr><td><code>Should -BeNullOrEmpty</code></td><td>Vazio.</td></tr>
+
+<tr><td><code>Should -Not -Be 0</code></td><td>O contrário de qualquer Should.</td></tr>
+
+<tr><td><code>Should -Throw</code></td><td>Dá erro.</td></tr>
+
+</table>
+</div>
+
+<div class="tryps" data-goal="src:Invoke-Pester;;src:-PassThru;;src:Result;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> escreva, numa string, o comando que roda os testes de <code>Calculo.Tests.ps1</code> com <code>-PassThru</code> e mostra o <code>Result</code>. O simulador do guia não tem o Pester; depois, rode o comando de verdade no seu terminal, com o Pester 5 instalado.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = '(Invoke-Pester -Path .\Calculo.Tests.ps1 -PassThru -Output None).Result'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>"Describe não é reconhecido" ou mensagens estranhas</strong>
+
+<p>O PowerShell carregou o Pester 3. No Windows da coleta, o <code>Invoke-Pester -Output Detailed</code> com o Pester 3 respondeu: <code>O parâmetro não pode ser processado porque o nome do parâmetro 'Output' é ambíguo.</code> Instale o 5 (seção 1), rode <code>Import-Module Pester -MinimumVersion 5.0</code> ou remova o antigo da sessão com <code>Remove-Module Pester</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>A função não existe dentro do teste</strong>
+
+<p>No Pester 5, carregue os arquivos dentro de <code>BeforeAll</code>, não solto no topo do arquivo.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Should -Throw não pega o erro</strong>
+
+<p>O código precisa estar dentro de chaves: <code>{ Get-Desconto ... } | Should -Throw</code>. Sem as chaves, o erro acontece antes do Should.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Install-PSResource Pester -Scope CurrentUser</code></td><td>Instala o Pester 5.</td></tr>
+
+<tr><td><code>Describe "x" { It "y" { ... } }</code></td><td>Estrutura dos testes.</td></tr>
+
+<tr><td><code>BeforeAll { . $PSScriptRoot\x.ps1 }</code></td><td>Carrega o código.</td></tr>
+
+<tr><td><code>Invoke-Pester -Output Detailed</code></td><td>Roda e mostra cada teste.</td></tr>
+
+<tr><td><code>Invoke-Pester -PassThru</code></td><td>Devolve o resultado como objeto.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Conferindo um valor</h3>
+<p>Complete:</p>
+<div class="ex-code">Get-Desconto -Preco 100 -Porcento 50 | Should <input data-answer="-Be" aria-label="resposta"> 50</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Como o arquivo de testes deve terminar?</p>
+
+<label><input type="radio" name="q2"> .test.txt</label>
+
+<label><input type="radio" name="q2"> .Tests.ps1</label>
+
+<label><input type="radio" name="q2"> .pester</label>
+
+<label><input type="radio" name="q2"> .psm1</label>
+
+</div>
+
+<div class="mc" data-answer="4">
+
+<p class="mc-q">3. Por que o código vai entre chaves no Should -Throw?</p>
+
+<label><input type="radio" name="q3"> Para ficar mais bonito</label>
+
+<label><input type="radio" name="q3"> Porque é obrigatório em todo Should</label>
+
+<label><input type="radio" name="q3"> Para rodar mais rápido</label>
+
+<label><input type="radio" name="q3"> Para o Pester rodar o bloco e capturar o erro</label>
+
+</div>
+
+<div class="tryps" data-goal="src:It ;;src:Get-Desconto -Preco 80 -Porcento 25;;src:Should -Be 60;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> escreva, numa string, um <code>It</code> que confere que <code>Get-Desconto -Preco 80 -Porcento 25</code> dá <code>60</code>. Depois, coloque esse <code>It</code> dentro do <code>Describe</code> do seu <code>Calculo.Tests.ps1</code> e rode o Pester no seu terminal.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'It "25% de 80" { Get-Desconto -Preco 80 -Porcento 25 | Should -Be 60 }'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>O Pester roda testes automatizados de código PowerShell.</li>
+  <li><code>Describe</code> agrupa, <code>It</code> é um teste, <code>Should</code> confere.</li>
+  <li><code>Invoke-Pester</code> roda e diz o que passou e o que falhou.</li>
+  <li>Teste também os erros com <code>Should -Throw</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

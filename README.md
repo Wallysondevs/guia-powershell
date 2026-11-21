@@ -2,22 +2,22 @@
 
 Site: https://wallysondevs.github.io/guia-powershell/
 
-Curso de PowerShell em português, do zero ao avançado, feito para quem **nunca programou nem usou terminal**. Funciona como uma escola: uma aula para cada assunto, organizadas em **3 níveis + projetos + referência** (120 páginas).
+Curso de PowerShell em português, do zero ao avançado, feito para quem **nunca programou nem usou terminal**. Funciona como uma escola: uma aula para cada assunto, organizadas em **3 níveis + projetos + referência** (143 páginas).
 
 - **Nível 1 · Iniciante** (51 páginas): o que é o PowerShell, instalar e abrir o terminal, cmdlets e a ajuda, pastas e arquivos, variáveis e tipos, operadores, saída e entrada, decisões e repetições.
-- **Nível 2 · Intermediário** (40 páginas): o pipeline e os objetos, coleções, funções, scripts, erros, dados e textos.
-- **Nível 3 · Avançado** (15 páginas): criar o seu módulo, administrar o Windows (serviços, Registro, usuários e grupos locais, internet), recursos poderosos (o .NET, classes, `enum`, `Start-Job`, `ForEach-Object -Parallel`, `Add-Type`) e boas práticas.
-- **Projetos** (4 páginas): lista de tarefas em JSON, menu interativo, analisador de log e consulta a uma API de CEP.
+- **Nível 2 · Intermediário** (44 páginas): o pipeline e os objetos, coleções, funções, scripts (o primeiro `.ps1`, a política de execução e o perfil), erros e depuração, dados e textos.
+- **Nível 3 · Avançado** (29 páginas): módulos (usar, instalar da PowerShell Gallery e criar o seu), administrar o Windows (serviços, Registro, usuários e grupos locais, processos, variáveis de ambiente, arquivos zip, informações do computador, logs de eventos, tarefas agendadas, permissões, senhas, rede, internet e PowerShell remoto), recursos poderosos (o .NET, classes, `enum`, `Start-Job`, `ForEach-Object -Parallel`, `Add-Type`) e boas práticas (estilo e testes com Pester).
+- **Projetos** (9 páginas): lista de tarefas em JSON, menu interativo, analisador de log, consulta a uma API de CEP, organizador de Downloads, backup com zip, relatório de arquivos em CSV, fotos renomeadas em lote e monitor de serviços.
 - **Referência** (10 páginas): cmdlets mais usados, verbos aprovados, operadores, variáveis automáticas, apelidos, formatos do `-f`, tipos, cmd e Bash × PowerShell, mensagens de erro comuns e atalhos do teclado.
 
 Cada aula explica cada parte do comando (anatomia), mostra a saída real e o que acontece quando dá errado, com a mensagem como o PowerShell escreveu e a explicação em português. No fim vêm exercícios e perguntas de múltipla escolha. O guia ensina o **PowerShell 7.7**. Quando o Windows PowerShell 5.1 (o que já vem no Windows) responde diferente, uma nota avisa.
 
-**De onde vêm as saídas:** todas foram tiradas do PowerShell 7.7 de verdade, em português (pt-BR), e as aulas dizem onde. Umas foram colhidas num Windows em português, com o prompt `PS C:\Users\ana>`. Outras foram colhidas no PowerShell 7.7 rodando no Linux: essas mostram só o que sai igual nos dois sistemas, e uma saída do Linux nunca aparece como se fosse do Windows. Comandos que só existem no Windows (serviços, Registro, usuários locais) ganham a etiqueta **só Windows**. Nos exemplos, a usuária é sempre a fictícia `ana`.
+**De onde vêm as saídas:** todas foram tiradas do PowerShell 7.7 de verdade, em português (pt-BR), e as aulas dizem onde. Umas foram colhidas num Windows em português, com o prompt `PS C:\Users\ana>`. Outras foram colhidas no PowerShell 7.7 rodando no Linux: essas mostram só o que sai igual nos dois sistemas, e uma saída do Linux nunca aparece como se fosse do Windows. Comandos que só existem no Windows (serviços, Registro, usuários locais, política de execução, CIM, logs de eventos, tarefas agendadas, permissões, PowerShell remoto) ganham a etiqueta **só Windows**. Nas saídas do Windows, o computador se chama `NOTEBOOK`, e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows. Nos exemplos, a usuária é sempre a fictícia `ana`.
 
-Para praticar, as páginas trazem **229 missões** no editor **Experimente** (`.tryps`):
+Para praticar, as páginas trazem **275 missões** no editor **Experimente** (`.tryps`):
 
 - Edite o código, clique em **Rodar** e veja a saída. A caixa confere se você chegou ao resultado pedido.
-- O editor usa `assets/pssim.js`, um **PowerShell 7 simulado em JavaScript**, com um disco de mentira (`C:\Users\ana`) recriado a cada **Rodar**. Ele não é o PowerShell de verdade, mas todas as 229 missões funcionam nele. A aula "Simulador" também traz um terminal livre para experimentar.
+- O editor usa `assets/pssim.js`, um **PowerShell 7 simulado em JavaScript**, com um disco de mentira (`C:\Users\ana`) recriado a cada **Rodar**. Ele não é o PowerShell de verdade, mas todas as 275 missões funcionam nele. Nas aulas de comandos que o simulador não imita (processos, eventos, rede...), a missão pede para você **escrever** o comando certo numa string, e depois rodá-lo no seu Windows. A aula "Simulador" também traz um terminal livre para experimentar.
 - Se o simulador não carregar, a caixa vira **"Rode no seu PowerShell"** (`assets/rode-local.js`): você copia o código, roda no seu PowerShell, cola a saída e clica em **Conferir**.
 
 Nos dois modos, nada sai da página e nada é guardado no navegador.
@@ -45,7 +45,7 @@ CONTRIBUINDO.md            como escrever uma aula
 ## Testes
 
 ```bash
-node tools/testar-missoes.js                 # todas as missões (229)
+node tools/testar-missoes.js                 # todas as missões (275)
 node tools/testar-missoes.js --secao "Começando"   # só uma seção do menu
 node tools/testar-navegador.js --todas       # todas as páginas num Chrome sem janela (precisa do puppeteer-core em tools/node_modules)
 node tools/testar-navegador.js --rode-local --todas   # idem, no modo "Rode no seu PowerShell"

@@ -29,7 +29,7 @@
 </ul>
 </div>
 
-<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional. Os quadros marcados <strong>Saída no Windows (PowerShell 7.7)</strong> foram colhidos num Windows 10 em português, com o nome do computador e o da usuária trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>).</p>
 
 <hr>
 
@@ -43,8 +43,14 @@ ForEach-Object
 
 <p>Para ver todos os apelidos de um cmdlet, use <code>-Definition</code>:</p>
 
-<pre><code>Get-Alias -Definition Get-ChildItem
-</code></pre>
+<pre class="term" data-title="Saída no Windows (PowerShell 7.7)">PS&gt; Get-Alias -Definition Get-ChildItem
+
+CommandType     Name                                               Version    Source
+-----------     ----                                               -------    ------
+Alias           dir -&gt; Get-ChildItem                                          
+Alias           gci -&gt; Get-ChildItem                                          
+Alias           ls -&gt; Get-ChildItem
+</pre>
 
 <p>No Windows aparecem <code>dir</code>, <code>gci</code> e <code>ls</code>. No PowerShell instalado no Linux ou no macOS, <code>ls</code> (e outros, como <code>cat</code> e <code>rm</code>) não são apelidos: eles chamam os programas do próprio sistema. Cuidado também com <code>Get-Alias ?</code>: o <code>?</code> é curinga e lista todos os apelidos de uma letra.</p>
 
@@ -160,7 +166,7 @@ ForEach-Object
 Set-Alias -Name gerar -Value New-Relatorio
 </code></pre>
 
-<p>O apelido some quando você fecha o PowerShell. Para ter sempre, coloque o <code>Set-Alias</code> no seu <span data-rascunho="perfil.html">perfil</span>. Apelidos não aceitam parâmetros fixos; para isso, crie uma função.</p>
+<p>O apelido some quando você fecha o PowerShell. Para ter sempre, coloque o <code>Set-Alias</code> no seu <a href="perfil.html">perfil</a>. Apelidos não aceitam parâmetros fixos; para isso, crie uma função.</p>
 
 <hr>
 

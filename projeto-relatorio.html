@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projeto PowerShell: relatório de arquivos em CSV (passo a passo) | Guia PowerShell</title>
+<meta name="description" content="Projeto prático em PowerShell 7: varrer uma pasta e suas subpastas, calcular o tamanho por extensão e por pasta, achar os maiores arquivos e os mais antigos e exportar tudo para CSV que abre no Excel.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Projeto: <span class="hl">Relatório de Arquivos em CSV</span></h1>
+
+<p class="intro">"Para onde foi o espaço do meu disco?" Neste projeto você escreve um relatório que varre uma pasta, soma os tamanhos por tipo de arquivo e por subpasta, encontra os maiores e os mais antigos e salva tudo em CSV para abrir no Excel.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A varrer pastas com <code>Get-ChildItem -Recurse -File</code>.</li>
+  <li>A somar tamanhos com <code>Group-Object</code> e <code>Measure-Object</code>.</li>
+  <li>A formatar bytes em KB/MB.</li>
+  <li>A exportar para CSV que abre direito no Excel.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows.</p>
+
+<hr>
+
+<h2>O plano</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Pergunta</th><th>Ferramenta</th></tr>
+
+<tr><td>Quais arquivos existem?</td><td><code>Get-ChildItem -Recurse -File</code></td></tr>
+
+<tr><td>Quanto ocupa cada tipo?</td><td><code>Group-Object Extension</code> + <code>Measure-Object -Sum</code></td></tr>
+
+<tr><td>Quais os maiores?</td><td><code>Sort-Object Length -Descending</code></td></tr>
+
+<tr><td>Salvar</td><td><code>Export-Csv -UseCulture</code></td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>1. Uma pasta de exemplo</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; New-Item -ItemType Directory relatorio-teste\fotos, relatorio-teste\docs, relatorio-teste\docs\antigos -Force | Out-Null
+PS&gt; Set-Location relatorio-teste
+PS&gt; Set-Content fotos\a.jpg ('x' * 300KB); Set-Content fotos\b.jpg ('x' * 120KB)
+PS&gt; Set-Content docs\contrato.pdf ('x' * 80KB); Set-Content docs\notas.txt ('x' * 2KB)
+PS&gt; Set-Content docs\antigos\velho.txt ('x' * 5KB)
+PS&gt; (Get-Item docs\antigos\velho.txt).LastWriteTime = (Get-Date).AddYears(-3)
+PS&gt; (Get-ChildItem -Recurse -File).Count
+5
+</pre>
+
+<hr>
+
+<h2>2. Tamanho por extensão</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-ChildItem -Recurse -File | Group-Object Extension | ForEach-Object {
+&gt;&gt;     [pscustomobject]@{
+&gt;&gt;         Tipo     = $_.Name
+&gt;&gt;         Arquivos = $_.Count
+&gt;&gt;         KB       = [math]::Round(($_.Group | Measure-Object Length -Sum).Sum / 1KB)
+&gt;&gt;     }
+&gt;&gt; } | Sort-Object KB -Descending
+
+Tipo Arquivos     KB
+---- --------     --
+.jpg        2 420,00
+.pdf        1  80,00
+.txt        2   7,00
+</pre>
+
+<hr>
+
+<h2>3. Tamanho por pasta</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-ChildItem -Recurse -File | Group-Object { $_.Directory.Name } | Select-Object Name, @{ n = 'KB'; e = { [math]::Round(($_.Group | Measure-Object Length -Sum).Sum / 1KB) } } | Sort-Object KB -Descending
+
+Name        KB
+----        --
+fotos   420,00
+docs     82,00
+antigos   5,00
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Group-Object { $_.Directory.Name }</dt><dd>Agrupa por uma conta feita na hora: o nome da pasta de cada arquivo.</dd>
+
+</dl>
+
+<hr>
+
+<h2>4. Os maiores e os mais antigos</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-ChildItem -Recurse -File | Sort-Object Length -Descending | Select-Object -First 3 Name, @{ n = 'KB'; e = { [math]::Round($_.Length / 1KB) } }
+
+Name             KB
+----             --
+a.jpg        300,00
+b.jpg        120,00
+contrato.pdf  80,00
+PS&gt; Get-ChildItem -Recurse -File | Where-Object LastWriteTime -lt (Get-Date).AddYears(-1) | Select-Object Name
+
+Name
+----
+velho.txt
+</pre>
+
+<hr>
+
+<h2>5. Exportando para CSV</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $dados = Get-ChildItem -Recurse -File | Select-Object @{ n = 'Pasta'; e = { $_.Directory.Name } }, Name, Extension, @{ n = 'KB'; e = { [math]::Round($_.Length / 1KB, 1) } }, LastWriteTime
+PS&gt; $dados | Export-Csv relatorio.csv -UseCulture -NoTypeInformation -Encoding utf8BOM
+AVISO: O parâmetro 'NoTypeInformation' está obsoleto. This parameter is obsolete and has no effect. The default behavior is to not include type information. Use -IncludeTypeInformation to include type information.
+PS&gt; (Get-Content relatorio.csv)[0]
+"Pasta";"Name";"Extension";"KB";"LastWriteTime"
+PS&gt; (Import-Csv relatorio.csv -UseCulture).Count
+5
+</pre>
+
+<dl class="anatomy">
+
+  <dt>-UseCulture</dt><dd>Usa o separador do Windows em português (<code>;</code>), que é o que o Excel brasileiro espera.</dd>
+
+  <dt>-Encoding utf8BOM</dt><dd>Faz o Excel reconhecer os acentos.</dd>
+
+</dl>
+
+<div class="tip"><strong>-NoTypeInformation agora é obsoleto</strong> No PowerShell 7.7 esse parâmetro não faz mais nada: o <code>Export-Csv</code> já não grava a linha de tipo (<code>#TYPE ...</code>). Ele só gera o <code>AVISO</code> que aparece na saída, e pode ser tirado do comando. Se o mesmo script também precisar rodar no Windows PowerShell 5.1, mantenha o parâmetro e ignore o aviso: lá ele ainda evita a linha de tipo.</div>
+
+<p>Abra com <code>Invoke-Item relatorio.csv</code>.</p>
+
+<hr>
+
+<h2>6. Como função</h2>
+
+<pre><code>function Get-RelatorioPasta {
+    param([string]$Caminho = '.', [string]$Saida = 'relatorio.csv')
+    Get-ChildItem $Caminho -Recurse -File -ErrorAction SilentlyContinue |
+        Select-Object @{ n = 'Pasta'; e = { $_.DirectoryName } }, Name, Extension,
+            @{ n = 'MB'; e = { [math]::Round($_.Length / 1MB, 2) } }, LastWriteTime |
+        Export-Csv $Saida -UseCulture -NoTypeInformation -Encoding utf8BOM
+}
+Get-RelatorioPasta -Caminho $HOME\Downloads -Saida $HOME\Desktop\downloads.csv
+</code></pre>
+
+<p><code>-ErrorAction SilentlyContinue</code> evita que pastas sem permissão interrompam o relatório.</p>
+
+<div class="tryps" data-goal="out:.jpg;;src:Group-Object;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> agrupe os arquivos da pasta por extensão e mostre <code>Name</code> e <code>Count</code>.</p>
+
+<pre class="script" data-file="main.ps1">Set-Content a.jpg "1"; Set-Content b.jpg "2"; Set-Content c.txt "3"
+Get-ChildItem -File
+</pre>
+
+<pre class="solucao" data-file="main.ps1">Set-Content a.jpg "1"; Set-Content b.jpg "2"; Set-Content c.txt "3"
+Get-ChildItem -File | Group-Object Extension | Select-Object Name, Count
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Desafios</h2>
+
+<ul>
+  <li>Encontre arquivos duplicados com <code>Get-FileHash</code> + <code>Group-Object Hash</code>.</li>
+  <li>Mostre o total geral em GB no fim.</li>
+  <li>Gere também um HTML com <code>ConvertTo-Html</code>.</li>
+</ul>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">1. Para o Excel brasileiro abrir o CSV em colunas, use:</p>
+
+<label><input type="radio" name="q1"> UseCulture</label>
+
+<label><input type="radio" name="q1"> NoClobber</label>
+
+<label><input type="radio" name="q1"> Append</label>
+
+<label><input type="radio" name="q1"> Force</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. Como somar o tamanho de um grupo de arquivos?</p>
+
+<label><input type="radio" name="q2"> Count</label>
+
+<label><input type="radio" name="q2"> Sort-Object Length</label>
+
+<label><input type="radio" name="q2"> Measure-Object Length -Sum</label>
+
+<label><input type="radio" name="q2"> Select-Object -First</label>
+
+</div>
+
+<div class="tryps" data-goal="out:3;;src:Measure-Object;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> crie três arquivos com 1 byte cada (<code>Set-Content x -NoNewline</code>) e mostre a soma dos tamanhos.</p>
+
+<pre class="script" data-file="main.ps1">"a", "b", "c" | ForEach-Object { Set-Content "$_.txt" "x" -NoNewline }
+</pre>
+
+<pre class="solucao" data-file="main.ps1">"a", "b", "c" | ForEach-Object { Set-Content "$_.txt" "x" -NoNewline }
+(Get-ChildItem *.txt | Measure-Object Length -Sum).Sum
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Get-ChildItem -Recurse -File</code> varre tudo.</li>
+  <li><code>Group-Object</code> + <code>Measure-Object -Sum</code> somam por tipo e pasta.</li>
+  <li><code>Sort-Object Length</code> acha os maiores; <code>LastWriteTime</code>, os antigos.</li>
+  <li><code>Export-Csv -UseCulture -Encoding utf8BOM</code> abre certinho no Excel.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

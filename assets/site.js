@@ -107,15 +107,19 @@ var NIVEIS = [
       ["ajuda-comentarios.html", "Ajuda nas Suas Funções"]
     ]},
     { grupo: "Scripts", itens: [
+      ["scripts.html", "Seu Primeiro Script (.ps1)"],
+      ["execution-policy.html", "Política de Execução"],
       ["parametros-script.html", "Parâmetros de Script e $args"],
-      ["dot-source.html", "Dot-Sourcing (. .\\arquivo.ps1)"]
+      ["dot-source.html", "Dot-Sourcing (. .\\arquivo.ps1)"],
+      ["perfil.html", "O Perfil ($PROFILE)"]
     ]},
     { grupo: "Erros", itens: [
       ["erros.html", "Lendo uma Mensagem de Erro"],
       ["try-catch.html", "try, catch e finally"],
       ["erroraction.html", "-ErrorAction e $ErrorActionPreference"],
       ["throw.html", "throw: Lançando Erros"],
-      ["error-variable.html", "$Error e -ErrorVariable"]
+      ["error-variable.html", "$Error e -ErrorVariable"],
+      ["depuracao.html", "Depurando (Set-PSBreakpoint)"]
     ]},
     { grupo: "Dados e Textos", itens: [
       ["csv.html", "CSV (Import-Csv e Export-Csv)"],
@@ -128,13 +132,26 @@ var NIVEIS = [
   ]},
   { id: "n3", nome: "Nível 3 · Avançado", curto: "Avançado", desc: "Administração e automação", grupos: [
     { grupo: "Módulos", itens: [
+      ["modulos.html", "Módulos (Import-Module)"],
+      ["psgallery.html", "Instalando Módulos (PowerShell Gallery)"],
       ["modulos-proprios.html", "Criando seu Módulo (.psm1)"]
     ]},
     { grupo: "Administrando o Windows", itens: [
       ["servicos.html", "Serviços (Get-Service)"],
       ["registro.html", "O Registro do Windows"],
       ["usuarios-locais.html", "Usuários e Grupos Locais"],
-      ["web.html", "Internet (Invoke-WebRequest e Invoke-RestMethod)"]
+      ["processos.html", "Processos (Get-Process)"],
+      ["start-process.html", "Abrindo Programas (Start-Process)"],
+      ["variaveis-ambiente.html", "Variáveis de Ambiente ($env:)"],
+      ["compress-archive.html", "Arquivos Zip (Compress-Archive)"],
+      ["cim.html", "Informações do Computador (Get-CimInstance)"],
+      ["eventos.html", "Logs de Eventos (Get-WinEvent)"],
+      ["tarefas-agendadas.html", "Tarefas Agendadas"],
+      ["permissoes.html", "Permissões (Get-Acl)"],
+      ["credenciais.html", "Senhas e Credenciais"],
+      ["rede.html", "Rede (Test-Connection)"],
+      ["web.html", "Internet (Invoke-WebRequest e Invoke-RestMethod)"],
+      ["remoting.html", "PowerShell Remoto"]
     ]},
     { grupo: "Recursos Poderosos", itens: [
       ["dotnet.html", "Usando o .NET ([Math], [DateTime])"],
@@ -146,6 +163,7 @@ var NIVEIS = [
     ]},
     { grupo: "Boas Práticas", itens: [
       ["estilo.html", "Estilo e Verbos Aprovados"],
+      ["pester.html", "Testes com Pester"],
       ["cmd-para-powershell.html", "Do cmd para o PowerShell"],
       ["bash-para-powershell.html", "Do Bash para o PowerShell"],
       ["novidades.html", "Novidades do PowerShell 7.7"]
@@ -156,7 +174,12 @@ var NIVEIS = [
       ["projeto-tarefas.html", "Projeto: Lista de Tarefas (JSON)"],
       ["projeto-menu.html", "Projeto: Menu Interativo"],
       ["projeto-log.html", "Projeto: Analisador de Log"],
-      ["projeto-api.html", "Projeto: Consultando uma API (CEP)"]
+      ["projeto-api.html", "Projeto: Consultando uma API (CEP)"],
+      ["projeto-organizador.html", "Projeto: Organizador de Downloads"],
+      ["projeto-backup.html", "Projeto: Backup com Zip"],
+      ["projeto-relatorio.html", "Projeto: Relatório de Arquivos em CSV"],
+      ["projeto-renomear.html", "Projeto: Renomear Fotos em Lote"],
+      ["projeto-monitor.html", "Projeto: Monitor de Serviços"]
     ]}
   ]},
   { id: "ref", nome: "Referência", curto: "Referência", desc: "Consulta rápida", grupos: [

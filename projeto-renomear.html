@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projeto PowerShell: renomear fotos em lote (passo a passo) | Guia PowerShell</title>
+<meta name="description" content="Projeto prático em PowerShell 7: renomear muitas fotos de uma vez com Rename-Item, numeração com zeros à esquerda, data no nome, trocar espaços, testar com -WhatIf e desfazer com um arquivo de log.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Projeto: <span class="hl">Renomear Fotos em Lote</span></h1>
+
+<p class="intro">A câmera grava nomes como <code>IMG_0001.JPG</code>, <code>IMG_0002.JPG</code>... e você queria <code>Viagem-2026-001.jpg</code>. Renomear 300 fotos clicando é impossível; com o PowerShell são duas linhas. Neste projeto você renomeia em lote com segurança e ainda guarda um jeito de desfazer.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A renomear com <code>Rename-Item</code> e <code>-NewName</code> calculado.</li>
+  <li>A numerar com zeros à esquerda (<code>{0:D3}</code>).</li>
+  <li>A usar a data do arquivo no nome.</li>
+  <li>A testar com <code>-WhatIf</code> e guardar um log para desfazer.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows.</p>
+
+<hr>
+
+<h2>O plano</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Etapa</th><th>Ferramenta</th></tr>
+
+<tr><td>Listar as fotos em ordem</td><td><code>Get-ChildItem *.jpg | Sort-Object Name</code></td></tr>
+
+<tr><td>Novo nome</td><td><code>-f</code> com <code>{0:D3}</code></td></tr>
+
+<tr><td>Renomear</td><td><code>Rename-Item -NewName { ... }</code></td></tr>
+
+<tr><td>Desfazer</td><td><code>Export-Csv</code> com nome antigo e novo</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>1. Fotos de teste</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; New-Item -ItemType Directory fotos-teste -Force | Out-Null
+PS&gt; Set-Location fotos-teste
+PS&gt; 1..5 | ForEach-Object { Set-Content ("IMG_{0:D4}.JPG" -f $_) "foto $_" }
+PS&gt; (Get-ChildItem).Name
+IMG_0001.JPG
+IMG_0002.JPG
+IMG_0003.JPG
+IMG_0004.JPG
+IMG_0005.JPG
+</pre>
+
+<hr>
+
+<h2>2. Numerando com zeros</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "{0:D3}" -f 7
+007
+PS&gt; "Viagem-{0:D3}.jpg" -f 42
+Viagem-042.jpg
+</pre>
+
+<dl class="anatomy">
+
+  <dt>{0:D3}</dt><dd>Número com pelo menos 3 dígitos, completando com zeros: <code>007</code>. Assim a ordem alfabética fica certa.</dd>
+
+</dl>
+
+<hr>
+
+<h2>3. Simulando</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $i = 1
+PS&gt; Get-ChildItem *.JPG | Sort-Object Name | ForEach-Object {
+&gt;&gt;     Rename-Item $_ -NewName ("Viagem-{0:D3}.jpg" -f $i) -WhatIf
+&gt;&gt;     $i++
+&gt;&gt; }
+What If: Executando a operação "Renomear Arquivo" no destino "Item: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-renomear\fotos-teste\IMG_0001.JPG Destino: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-renomear\fotos-teste\Viagem-001.jpg".
+What If: Executando a operação "Renomear Arquivo" no destino "Item: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-renomear\fotos-teste\IMG_0002.JPG Destino: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-renomear\fotos-teste\Viagem-002.jpg".
+What If: Executando a operação "Renomear Arquivo" no destino "Item: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-renomear\fotos-teste\IMG_0003.JPG Destino: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-renomear\fotos-teste\Viagem-003.jpg".
+What If: Executando a operação "Renomear Arquivo" no destino "Item: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-renomear\fotos-teste\IMG_0004.JPG Destino: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-renomear\fotos-teste\Viagem-004.jpg".
+What If: Executando a operação "Renomear Arquivo" no destino "Item: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-renomear\fotos-teste\IMG_0005.JPG Destino: C:\Users\ana\AppData\Local\Temp\guia-ps\projeto-renomear\fotos-teste\Viagem-005.jpg".
+</pre>
+
+<hr>
+
+<h2>4. Renomeando e guardando o log</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $i = 1
+PS&gt; $log = Get-ChildItem *.JPG | Sort-Object Name | ForEach-Object {
+&gt;&gt;     $novo = "Viagem-{0:D3}.jpg" -f $i; $i++
+&gt;&gt;     Rename-Item $_ -NewName $novo
+&gt;&gt;     [pscustomobject]@{ Antigo = $_.Name; Novo = $novo }
+&gt;&gt; }
+PS&gt; $log | Export-Csv renomeados.csv -NoTypeInformation
+AVISO: O parâmetro 'NoTypeInformation' está obsoleto. This parameter is obsolete and has no effect. The default behavior is to not include type information. Use -IncludeTypeInformation to include type information.
+PS&gt; (Get-ChildItem *.jpg).Name
+Viagem-001.jpg
+Viagem-002.jpg
+Viagem-003.jpg
+Viagem-004.jpg
+Viagem-005.jpg
+</pre>
+
+<div class="tip"><strong>-NoTypeInformation agora é obsoleto</strong> No PowerShell 7.7 esse parâmetro não faz mais nada: o <code>Export-Csv</code> já não grava a linha de tipo (<code>#TYPE ...</code>). Ele só gera o <code>AVISO</code> que aparece na saída, e pode ser tirado do comando. Se o mesmo script também precisar rodar no Windows PowerShell 5.1, mantenha o parâmetro e ignore o aviso: lá ele ainda evita a linha de tipo.</div>
+
+<hr>
+
+<h2>5. Desfazendo</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Import-Csv renomeados.csv | ForEach-Object { Rename-Item $_.Novo -NewName $_.Antigo }
+PS&gt; (Get-ChildItem *.JPG).Name
+IMG_0001.JPG
+IMG_0002.JPG
+IMG_0003.JPG
+IMG_0004.JPG
+IMG_0005.JPG
+</pre>
+
+<hr>
+
+<h2>6. Com a data no nome</h2>
+
+<p>A data de modificação do arquivo vira parte do nome (para fotos reais, a data da foto fica nos metadados EXIF, mas a de modificação costuma servir):</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-ChildItem *.JPG | ForEach-Object { $_.LastWriteTime = [datetime]'2026-07-15 10:30' }
+PS&gt; Get-ChildItem *.JPG | Sort-Object Name | ForEach-Object -Begin { $n = 1 } -Process {
+&gt;&gt;     Rename-Item $_ -NewName ("{0:yyyy-MM-dd}_{1:D3}.jpg" -f $_.LastWriteTime, $n)
+&gt;&gt;     $n++
+&gt;&gt; }
+PS&gt; (Get-ChildItem *.jpg).Name
+2026-07-15_001.jpg
+2026-07-15_002.jpg
+2026-07-15_003.jpg
+2026-07-15_004.jpg
+2026-07-15_005.jpg
+</pre>
+
+<hr>
+
+<h2>7. Trocando espaços e maiúsculas</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Set-Content "Minha Foto Bonita.JPG" "x"
+PS&gt; Get-ChildItem "* *" | Rename-Item -NewName { ($_.Name -replace ' ', '-').ToLower() }
+PS&gt; Test-Path minha-foto-bonita.jpg
+True
+</pre>
+
+<dl class="anatomy">
+
+  <dt>-NewName { ... }</dt><dd>Um bloco que calcula o nome novo para cada arquivo que chega pelo pipeline.</dd>
+
+</dl>
+
+<div class="tryps" data-goal="out:Viagem-007.jpg;;src:D3;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> monte o nome <code>Viagem-007.jpg</code> a partir do número <code>7</code> usando <code>{0:D3}</code>.</p>
+
+<pre class="script" data-file="main.ps1">$n = 7
+"Viagem-$n.jpg"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$n = 7
+"Viagem-{0:D3}.jpg" -f $n
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Desafios</h2>
+
+<ul>
+  <li>Renomeie só as fotos de um mês (<code>LastWriteTime.Month</code>).</li>
+  <li>Leia a data real da foto (EXIF) com <code>System.Drawing</code> ou <code>Shell.Application</code>.</li>
+  <li>Faça uma função com <code>-WhatIf</code> (<code>SupportsShouldProcess</code>).</li>
+</ul>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">1. O que "{0:D3}" -f 5 produz?</p>
+
+<label><input type="radio" name="q1"> 5</label>
+
+<label><input type="radio" name="q1"> 005</label>
+
+<label><input type="radio" name="q1"> 500</label>
+
+<label><input type="radio" name="q1"> 0005</label>
+
+</div>
+
+<div class="mc" data-answer="4">
+
+<p class="mc-q">2. Para poder desfazer uma renomeação em lote, você deve:</p>
+
+<label><input type="radio" name="q2"> Rodar duas vezes</label>
+
+<label><input type="radio" name="q2"> Usar -Force</label>
+
+<label><input type="radio" name="q2"> Usar -WhatIf</label>
+
+<label><input type="radio" name="q2"> Guardar um log com o nome antigo e o novo</label>
+
+</div>
+
+<div class="tryps" data-goal="out:foto-001.jpg;;src:Rename-Item;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> renomeie <code>IMG_1.JPG</code> para <code>foto-001.jpg</code> e mostre o nome do arquivo.</p>
+
+<pre class="script" data-file="main.ps1">Set-Content IMG_1.JPG "x"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">Set-Content IMG_1.JPG "x"
+Rename-Item IMG_1.JPG -NewName ("foto-{0:D3}.jpg" -f 1)
+(Get-ChildItem *.jpg).Name
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Rename-Item -NewName</code> renomeia; um bloco <code>{ }</code> calcula o nome de cada arquivo.</li>
+  <li><code>{0:D3}</code> numera com zeros à esquerda.</li>
+  <li>Simule com <code>-WhatIf</code> e guarde um CSV para desfazer.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

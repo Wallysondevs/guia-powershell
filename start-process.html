@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Start-Process — abrindo programas (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a abrir programas, arquivos e sites com o PowerShell 7: Start-Process, passar argumentos, esperar terminar com -Wait, pegar o código de saída com -PassThru, abrir como administrador com -Verb RunAs e Invoke-Item.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Abrindo Programas (<span class="hl">Start-Process</span>)</h1>
+
+<p class="intro">Às vezes o que você quer é simplesmente abrir algo: um programa, um arquivo PDF, um site, uma pasta no Explorador. O <code>Start-Process</code> faz isso e ainda deixa você esperar o programa terminar, saber se deu certo e abrir como administrador.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A abrir programas, arquivos e sites com <code>Start-Process</code>.</li>
+  <li>A passar argumentos com <code>-ArgumentList</code>.</li>
+  <li>A esperar terminar (<code>-Wait</code>) e ler o código de saída (<code>-PassThru</code>).</li>
+  <li>A abrir como administrador (<code>-Verb RunAs</code>).</li>
+  <li>A diferença entre <code>Start-Process</code>, <code>&amp;</code> e <code>Invoke-Item</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows.</p>
+
+<hr>
+
+<h2>A ideia: o duplo clique</h2>
+
+<p><code>Start-Process</code> é o duplo clique do PowerShell. Abrir um <code>.txt</code> abre o Bloco de Notas, abrir um link abre o navegador, abrir uma pasta abre o Explorador.</p>
+
+<hr>
+
+<h2>1. Abrindo coisas</h2>
+
+<pre><code>Start-Process notepad
+Start-Process "https://learn.microsoft.com/powershell"
+Start-Process .            # a pasta atual no Explorador
+Invoke-Item relatorio.pdf  # abre com o programa padrão (como o duplo clique)
+</code></pre>
+
+<p>O apelido <code>start</code> também funciona: <code>start notepad</code>.</p>
+
+<hr>
+
+<h2>2. Programas de linha de comando: & ou Start-Process?</h2>
+
+<p>Para rodar um programa de terminal e ver a saída aqui mesmo, chame direto (ou com <code>&amp;</code>). O <code>Start-Process</code> abre uma janela separada e não traz a saída:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; &amp; pwsh -NoProfile -Command '"saída aqui mesmo: $(2 + 2)"'
+saída aqui mesmo: 4
+PS&gt; $LASTEXITCODE
+0
+</pre>
+
+<dl class="anatomy">
+
+  <dt>&amp;</dt><dd>Operador de chamada: roda o programa no terminal atual.</dd>
+
+  <dt>$LASTEXITCODE</dt><dd>Código de saída do último programa: <code>0</code> costuma ser sucesso.</dd>
+
+</dl>
+
+<hr>
+
+<h2>3. Argumentos, -Wait e -PassThru</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $p = Start-Process pwsh -ArgumentList '-NoProfile', '-Command', 'exit 3' -Wait -PassThru -WindowStyle Hidden
+PS&gt; $p.ExitCode
+3
+</pre>
+
+<dl class="anatomy">
+
+  <dt>-ArgumentList</dt><dd>Os argumentos do programa, em lista.</dd>
+
+  <dt>-Wait</dt><dd>Espera o programa fechar antes de seguir.</dd>
+
+  <dt>-PassThru</dt><dd>Devolve o objeto do processo (com <code>ExitCode</code>, <code>Id</code>...).</dd>
+
+  <dt>-WindowStyle Hidden</dt><dd>Roda sem mostrar janela (<code>Normal</code>, <code>Minimized</code>, <code>Maximized</code> também existem).</dd>
+
+</dl>
+
+<hr>
+
+<h2>4. Guardando a saída num arquivo (e a pegadinha das aspas)</h2>
+
+<p>A ideia é rodar um <code>pwsh</code> que escreve duas linhas e guardar o que ele escreveu em <code>saida.txt</code>. Veja o que acontece de verdade no Windows:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Start-Process pwsh -ArgumentList '-NoProfile', '-Command', '"linha 1"; "linha 2"' -Wait -NoNewWindow -RedirectStandardOutput saida.txt
+linha: O termo "linha" não é reconhecido como um nome de um cmdlet, função, arquivo de script ou programa executável.
+Verifique a ortografia do nome ou, se um caminho foi incluído, verifique se o caminho está correto e tente novamente.
+linha: O termo "linha" não é reconhecido como um nome de um cmdlet, função, arquivo de script ou programa executável.
+Verifique a ortografia do nome ou, se um caminho foi incluído, verifique se o caminho está correto e tente novamente.
+PS&gt; Get-Content saida.txt
+</pre>
+
+<dl class="anatomy">
+
+  <dt>-NoNewWindow</dt><dd>Usa a janela atual em vez de abrir outra.</dd>
+
+  <dt>-RedirectStandardOutput</dt><dd>Grava a saída do programa num arquivo.</dd>
+
+</dl>
+
+<p>Deu errado, e é um erro clássico. No Windows, o <code>Start-Process</code> junta a lista do <code>-ArgumentList</code> numa linha de texto só, e as aspas duplas de dentro se perdem no caminho. O <code>pwsh</code> filho recebe <code>linha 1; linha 2</code> e tenta rodar um comando chamado <code>linha</code>. Os erros aparecem na tela porque vão pelo canal de erros, que não foi redirecionado, e o <code>saida.txt</code> fica vazio.</p>
+
+<p>O jeito seguro é colocar os comandos num arquivo <code>.ps1</code> e passar o arquivo com <code>-File</code>, sem aspas para se perder:</p>
+
+<pre><code>Set-Content linhas.ps1 '"linha 1"; "linha 2"'
+Start-Process pwsh -ArgumentList '-NoProfile', '-File', 'linhas.ps1' -Wait -NoNewWindow -RedirectStandardOutput saida.txt
+Get-Content saida.txt
+</code></pre>
+
+<p>Essa versão corrigida não foi rodada na coleta desta aula. Rode no seu Windows: o <code>saida.txt</code> deve ficar com as duas linhas, <code>linha 1</code> e <code>linha 2</code>.</p>
+
+<hr>
+
+<h2>5. Como administrador</h2>
+
+<pre><code>Start-Process pwsh -Verb RunAs
+</code></pre>
+
+<p>O Windows mostra a janela de confirmação do Controle de Conta de Usuário (UAC). Não dá para usar <code>-Verb RunAs</code> junto com <code>-NoNewWindow</code> ou redirecionamentos.</p>
+
+<hr>
+
+<h2>6. Pasta de trabalho</h2>
+
+<pre><code>Start-Process pwsh -WorkingDirectory C:\Projetos
+</code></pre>
+
+<div class="tryps" data-goal="src:Start-Process;;src:exit 3;;src:-Wait;;src:-PassThru;;src:ExitCode;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> escreva, numa string, o comando que roda <code>pwsh</code> com <code>exit 3</code>, espera terminar e mostra o <code>ExitCode</code>. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = '(Start-Process pwsh -ArgumentList ''-NoProfile'', ''-Command'', ''exit 3'' -Wait -PassThru -WindowStyle Hidden).ExitCode'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>"Este comando não pode ser executado porque o arquivo não foi encontrado"</strong>
+
+<p>O programa não está no PATH. Use o caminho completo entre aspas: <code>Start-Process "C:\Program Files\App\app.exe"</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Argumentos com espaço quebrando</strong>
+
+<p>Se um argumento tem espaço, coloque aspas dentro: <code>-ArgumentList '"C:\Meus Arquivos\a.txt"'</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Não vejo a saída do programa</strong>
+
+<p><code>Start-Process</code> não traz a saída para o seu terminal. Use <code>&amp;</code> ou <code>-NoNewWindow -RedirectStandardOutput</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Start-Process app</code></td><td>Abre o programa.</td></tr>
+
+<tr><td><code>Start-Process arquivo.pdf</code> / <code>Invoke-Item</code></td><td>Abre com o programa padrão.</td></tr>
+
+<tr><td><code>-ArgumentList a, b</code></td><td>Argumentos.</td></tr>
+
+<tr><td><code>-Wait</code></td><td>Espera fechar.</td></tr>
+
+<tr><td><code>-PassThru</code></td><td>Devolve o processo (<code>ExitCode</code>).</td></tr>
+
+<tr><td><code>-Verb RunAs</code></td><td>Como administrador.</td></tr>
+
+<tr><td><code>-WindowStyle Hidden</code></td><td>Sem janela.</td></tr>
+
+<tr><td><code>&amp; programa args</code></td><td>Roda no terminal atual.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Como administrador</h3>
+<p>Complete:</p>
+<div class="ex-code">Start-Process pwsh -Verb <input data-answer="RunAs" aria-label="resposta"></div>
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">2. Quero ver a saída de um programa de terminal aqui mesmo. Uso:</p>
+
+<label><input type="radio" name="q2"> & programa</label>
+
+<label><input type="radio" name="q2"> Start-Process programa</label>
+
+<label><input type="radio" name="q2"> Invoke-Item programa</label>
+
+<label><input type="radio" name="q2"> Start-Process -Verb RunAs</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. Qual parâmetro faz o Start-Process devolver o objeto com ExitCode?</p>
+
+<label><input type="radio" name="q3"> Wait</label>
+
+<label><input type="radio" name="q3"> NoNewWindow</label>
+
+<label><input type="radio" name="q3"> PassThru</label>
+
+<label><input type="radio" name="q3"> Verb</label>
+
+</div>
+
+<div class="tryps" data-goal="src:Start-Process;;src:-File;;src:linhas\.ps1;;src:-RedirectStandardOutput;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> escreva, numa string, o comando seguro da seção 4: rodar <code>pwsh</code> com o arquivo <code>linhas.ps1</code> (pelo <code>-File</code>), esperando terminar, na mesma janela, e gravando a saída em <code>saida.txt</code>. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'Start-Process pwsh -ArgumentList ''-NoProfile'', ''-File'', ''linhas.ps1'' -Wait -NoNewWindow -RedirectStandardOutput saida.txt'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Start-Process</code> é o duplo clique: abre programas, arquivos e sites.</li>
+  <li><code>-Wait</code> espera, <code>-PassThru</code> devolve o processo e seu <code>ExitCode</code>.</li>
+  <li><code>-Verb RunAs</code> pede para abrir como administrador.</li>
+  <li>Para ver a saída de um programa de terminal, use <code>&amp;</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell senhas e credenciais — SecureString e PSCredential (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a lidar com senhas no PowerShell 7 sem deixá-las expostas: Read-Host -AsSecureString, Get-Credential, PSCredential, ConvertFrom-SecureString com proteção do Windows, guardar credenciais em arquivo com Export-Clixml e o módulo SecretManagement.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Senhas e Credenciais (<span class="hl">SecureString</span>)</h1>
+
+<p class="intro">Muitos scripts precisam de uma senha: para entrar num servidor, mandar e-mail, acessar uma API. Escrever a senha no meio do script é o erro mais comum (e mais perigoso). Nesta aula você aprende a pedir, guardar e usar senhas sem deixá-las expostas.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Por que nunca escrever senhas no script.</li>
+  <li>A pedir senhas com <code>Read-Host -AsSecureString</code> e <code>Get-Credential</code>.</li>
+  <li>O que é um <code>PSCredential</code>.</li>
+  <li>A guardar uma credencial protegida com <code>Export-Clixml</code>.</li>
+  <li>O módulo SecretManagement para cofres de senha.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows.</p>
+
+<hr>
+
+<h2>A ideia: o cofre</h2>
+
+<p>Senha escrita no script é como chave debaixo do tapete: qualquer um que abrir o arquivo (ou o histórico, ou o repositório no GitHub) encontra. O PowerShell oferece cofres: a senha fica cifrada e só você, no seu usuário do Windows, consegue abrir.</p>
+
+<hr>
+
+<h2>1. O jeito errado</h2>
+
+<pre><code>$senha = "MinhaSenha123"   # NÃO faça isso
+</code></pre>
+
+<p>Essa linha fica no arquivo, no histórico do PSReadLine e em qualquer cópia do script.</p>
+
+<hr>
+
+<h2>2. Pedindo a senha</h2>
+
+<pre><code>$senha = Read-Host "Senha" -AsSecureString
+Senha: ********
+</code></pre>
+
+<dl class="anatomy">
+
+  <dt>-AsSecureString</dt><dd>Mostra asteriscos e guarda a senha como <code>SecureString</code>, cifrada na memória.</dd>
+
+</dl>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $s = ConvertTo-SecureString "exemplo-de-aula" -AsPlainText -Force
+PS&gt; $s
+System.Security.SecureString
+PS&gt; $s.Length
+15
+</pre>
+
+<p>Um <code>SecureString</code> não mostra o conteúdo quando você imprime. (<code>ConvertTo-SecureString -AsPlainText</code> só aparece aqui para a aula funcionar sem digitar; em scripts reais, a senha vem de <code>Read-Host</code> ou de um cofre.)</p>
+
+<hr>
+
+<h2>3. PSCredential: usuário + senha</h2>
+
+<p>Muitos comandos pedem uma credencial (<code>-Credential</code>), que junta o nome do usuário e a senha:</p>
+
+<pre><code>$cred = Get-Credential -UserName "ana" -Message "Senha do servidor"
+</code></pre>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $cred = [pscredential]::new("ana", $s)
+PS&gt; $cred
+
+UserName                     Password
+--------                     --------
+ana      System.Security.SecureString
+PS&gt; $cred.GetNetworkCredential().Password.Length
+15
+</pre>
+
+<dl class="anatomy">
+
+  <dt>[pscredential]</dt><dd>new :: Monta a credencial a partir de um nome e um <code>SecureString</code>.</dd>
+
+  <dt>GetNetworkCredential().Password</dt><dd>Recupera a senha em texto. Use só no último momento, quando uma API exigir texto puro.</dd>
+
+</dl>
+
+<hr>
+
+<h2>4. Guardando para usar depois</h2>
+
+<p>No Windows, <code>Export-Clixml</code> grava a senha cifrada com a sua conta (DPAPI). Só o seu usuário, neste computador, consegue ler:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $cred | Export-Clixml credencial.xml
+PS&gt; (Get-Content credencial.xml -Raw) -match 'exemplo-de-aula'
+False
+PS&gt; $lida = Import-Clixml credencial.xml
+PS&gt; $lida.UserName
+ana
+PS&gt; $lida.GetNetworkCredential().Password -eq 'exemplo-de-aula'
+True
+</pre>
+
+<p>O arquivo não contém a senha em texto (<code>False</code>), mas a credencial volta inteira com <code>Import-Clixml</code>.</p>
+
+<div class="warning"><strong>Só no Windows, só para você</strong> Copiar <code>credencial.xml</code> para outro computador ou usuário não funciona: a chave é da sua conta. E no Linux e macOS essa proteção não existe; lá, use um cofre (próxima seção).</div>
+
+<hr>
+
+<h2>5. Cofres: SecretManagement</h2>
+
+<p>O módulo oficial <code>Microsoft.PowerShell.SecretManagement</code> guarda segredos num cofre e os scripts só pedem pelo nome:</p>
+
+<pre><code>Install-PSResource Microsoft.PowerShell.SecretManagement, Microsoft.PowerShell.SecretStore -Scope CurrentUser
+Register-SecretVault -Name Cofre -ModuleName Microsoft.PowerShell.SecretStore -DefaultVault
+Set-Secret -Name ApiToken -Secret "valor-do-token"
+$token = Get-Secret -Name ApiToken -AsPlainText
+</code></pre>
+
+<div class="tryps" data-goal="src:ConvertTo-SecureString;;src:-AsPlainText;;src:-is \[securestring\];;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> escreva, numa string, o comando que cria um <code>SecureString</code> a partir de <code>abc</code> (só para teste) e confere com <code>-is [securestring]</code>. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = '(ConvertTo-SecureString "abc" -AsPlainText -Force) -is [securestring]'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>"A chave não é válida para uso no estado especificado"</strong>
+
+<p>O <code>credencial.xml</code> foi criado por outro usuário ou em outro computador. Crie de novo com a sua conta.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Senha aparecendo no histórico</strong>
+
+<p>Se você digitou a senha num comando, ela foi para o histórico do PSReadLine. Apague o arquivo indicado em <code>(Get-PSReadLineOption).HistorySavePath</code> ou a linha específica.</p>
+
+</div>
+
+<div class="cenario">
+<strong>"Não é possível associar o parâmetro 'Credential'"</strong>
+
+<p>O comando espera um <code>PSCredential</code>, não um texto. Monte com <code>Get-Credential</code> ou <code>[pscredential]::new()</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Read-Host "Senha" -AsSecureString</code></td><td>Pede a senha escondida.</td></tr>
+
+<tr><td><code>Get-Credential</code></td><td>Pede usuário e senha.</td></tr>
+
+<tr><td><code>[pscredential]::new(nome, secure)</code></td><td>Monta uma credencial.</td></tr>
+
+<tr><td><code>$cred | Export-Clixml c.xml</code></td><td>Guarda cifrada (Windows, seu usuário).</td></tr>
+
+<tr><td><code>Import-Clixml c.xml</code></td><td>Lê de volta.</td></tr>
+
+<tr><td><code>Get-Secret -Name x</code></td><td>Lê de um cofre SecretManagement.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Pedindo escondido</h3>
+<p>Complete:</p>
+<div class="ex-code">$senha = Read-Host "Senha" <input data-answer="-AsSecureString" aria-label="resposta"></div>
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">2. Onde está o risco de escrever a senha no script?</p>
+
+<label><input type="radio" name="q2"> No arquivo, no histórico e nas cópias do script</label>
+
+<label><input type="radio" name="q2"> Só na memória</label>
+
+<label><input type="radio" name="q2"> Em lugar nenhum se o arquivo for .ps1</label>
+
+<label><input type="radio" name="q2"> Só no Linux</label>
+
+</div>
+
+<div class="mc" data-answer="4">
+
+<p class="mc-q">3. Quem consegue ler um credencial.xml criado com Export-Clixml no Windows?</p>
+
+<label><input type="radio" name="q3"> Qualquer usuário do computador</label>
+
+<label><input type="radio" name="q3"> Qualquer pessoa com o arquivo</label>
+
+<label><input type="radio" name="q3"> Só administradores</label>
+
+<label><input type="radio" name="q3"> Só o mesmo usuário, no mesmo computador</label>
+
+</div>
+
+<div class="tryps" data-goal="src:pscredential;;src:ana;;src:UserName;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> escreva, numa string, o comando que monta uma credencial <code>[pscredential]</code> com o usuário <code>ana</code> (senha de teste <code>abc</code>) e mostra o <code>UserName</code>. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = '[pscredential]::new("ana", (ConvertTo-SecureString "abc" -AsPlainText -Force)).UserName'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Nunca escreva senhas no script.</li>
+  <li><code>Read-Host -AsSecureString</code> e <code>Get-Credential</code> pedem sem mostrar.</li>
+  <li><code>PSCredential</code> junta usuário e senha para os comandos.</li>
+  <li><code>Export-Clixml</code> guarda cifrado para o seu usuário; SecretManagement guarda em cofres.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

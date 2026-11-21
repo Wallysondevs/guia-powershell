@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell módulos — Get-Module e Import-Module (guia) | Guia PowerShell</title>
+<meta name="description" content="Entenda os módulos do PowerShell 7: o que são, Get-Module para ver os carregados e os disponíveis, Import-Module, carregamento automático, $env:PSModulePath, comandos de um módulo com Get-Command -Module e Remove-Module.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Módulos (<span class="hl">Import-Module</span>)</h1>
+
+<p class="intro">Os comandos do PowerShell vêm organizados em pacotes chamados <strong>módulos</strong>. Um módulo junta cmdlets de um mesmo assunto: arquivos, rede, segurança... Saber ver, carregar e explorar módulos é o que faz você descobrir comandos novos sozinho.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é um módulo.</li>
+  <li>A ver os módulos carregados e os disponíveis com <code>Get-Module</code>.</li>
+  <li>A carregar com <code>Import-Module</code> (e por que quase nunca precisa).</li>
+  <li>Onde os módulos ficam (<code>$env:PSModulePath</code>).</li>
+  <li>A listar os comandos de um módulo.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows.</p>
+
+<hr>
+
+<h2>A ideia: a caixa de ferramentas</h2>
+
+<p>Você não carrega todas as ferramentas da casa no bolso. Elas ficam em caixas: uma de elétrica, uma de pintura, uma de jardim. Quando precisa, pega a caixa certa. Os módulos são essas caixas.</p>
+
+<hr>
+
+<h2>1. Módulos carregados agora</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-Module | Select-Object Name, Version, ModuleType
+
+Name                            Version ModuleType
+----                            ------- ----------
+Microsoft.PowerShell.Management 7.0.0.0   Manifest
+Microsoft.PowerShell.Utility    7.0.0.0   Manifest
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Get-Module</dt><dd>Lista os módulos já carregados nesta sessão.</dd>
+
+  <dt>ModuleType</dt><dd><code>Manifest</code>, <code>Script</code> (escrito em PowerShell) ou <code>Binary</code> (compilado em C#).</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Módulos disponíveis no computador</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-Module -ListAvailable | Measure-Object | Select-Object Count
+
+Count
+-----
+   76
+PS&gt; Get-Module -ListAvailable Microsoft.PowerShell.* | Select-Object Name, Version
+
+Name                                      Version
+----                                      -------
+Microsoft.PowerShell.Archive              1.2.7
+Microsoft.PowerShell.Diagnostics          7.0.0.0
+Microsoft.PowerShell.Host                 7.0.0.0
+Microsoft.PowerShell.Management           7.0.0.0
+Microsoft.PowerShell.PSResourceGet        1.3.1
+Microsoft.PowerShell.Security             7.0.0.0
+Microsoft.PowerShell.ThreadJob            2.2.0
+Microsoft.PowerShell.Utility              7.0.0.0
+Microsoft.PowerShell.Operation.Validation 1.0.1
+Microsoft.PowerShell.Diagnostics          3.0.0.0
+Microsoft.PowerShell.LocalAccounts        1.0.0.0
+Microsoft.PowerShell.Management           3.1.0.0
+</pre>
+
+<p><code>-ListAvailable</code> procura em todas as pastas de módulos, carregados ou não.</p>
+
+<hr>
+
+<h2>3. Carregamento automático</h2>
+
+<p>Você não precisa importar um módulo para usar seus comandos: basta chamar o comando e o PowerShell carrega o módulo sozinho.</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-Module Microsoft.PowerShell.Archive | Select-Object Name
+PS&gt; Get-Command Compress-Archive | Select-Object Name, Source
+
+Name             Source
+----             ------
+Compress-Archive Microsoft.PowerShell.Archive
+PS&gt; Get-Module Microsoft.PowerShell.Archive | Select-Object Name
+
+Name
+----
+Microsoft.PowerShell.Archive
+</pre>
+
+<hr>
+
+<h2>4. Import-Module</h2>
+
+<p>Às vezes você quer carregar explicitamente: para garantir uma versão, recarregar um módulo seu que mudou, ou usar um módulo fora das pastas padrão:</p>
+
+<pre><code>Import-Module Microsoft.PowerShell.Archive
+Import-Module .\MeuModulo.psm1 -Force      # recarrega depois de editar
+Import-Module NomeDoModulo -RequiredVersion 2.1.0
+</code></pre>
+
+<p>Para criar seus próprios módulos, veja <a href="modulos-proprios.html">Criando seu Módulo</a>.</p>
+
+<hr>
+
+<h2>5. Onde os módulos ficam</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $env:PSModulePath -split ';'
+C:\Users\ana\Documents\PowerShell\Modules
+C:\Program Files\PowerShell\Modules
+c:\program files\windowsapps\microsoft.powershell_7.7.0.0_x64__8wekyb3d8bbwe\Modules
+C:\Users\ana\Documents\WindowsPowerShell\Modules
+C:\Program Files\WindowsPowerShell\Modules
+C:\Windows\system32\WindowsPowerShell\v1.0\Modules
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Documentos\PowerShell\Modules</dt><dd>Seus módulos (instalados com <code>-Scope CurrentUser</code>).</dd>
+
+  <dt>Program Files\PowerShell\Modules</dt><dd>Módulos para todos os usuários.</dd>
+
+  <dt>pasta de instalação\Modules</dt><dd>Os módulos que vêm com o PowerShell 7.</dd>
+
+  <dt>WindowsPowerShell</dt><dd>Pastas do Windows PowerShell 5.1, que o 7 também consulta.</dd>
+
+</dl>
+
+<hr>
+
+<h2>6. Explorando um módulo</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-Command -Module Microsoft.PowerShell.Archive
+
+CommandType     Name                                               Version    Source
+-----------     ----                                               -------    ------
+Function        Compress-Archive                                   1.2.7      Microsoft.PowerShell.Archive
+Function        Expand-Archive                                     1.2.7      Microsoft.PowerShell.Archive
+PS&gt; (Get-Command -Module Microsoft.PowerShell.Utility).Count
+119
+</pre>
+
+<p>Essa é a melhor forma de descobrir o que um módulo sabe fazer.</p>
+
+<div class="tryps" data-goal="src:Get-Command;;src:-Module;;src:Microsoft\.PowerShell\.Archive;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> escreva, numa string, o comando que lista os comandos do módulo <code>Microsoft.PowerShell.Archive</code>. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'Get-Command -Module Microsoft.PowerShell.Archive'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>"O módulo especificado ... não foi carregado porque nenhum arquivo de módulo válido foi encontrado"</strong>
+
+<p>O módulo não está instalado ou está fora das pastas do <code>$env:PSModulePath</code>. Instale com <code>Install-Module</code> (veja <a href="psgallery.html">PowerShell Gallery</a>) ou use o caminho completo.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Mudei meu módulo e nada mudou</strong>
+
+<p>O PowerShell não recarrega um módulo já carregado. Use <code>Import-Module ... -Force</code> ou abra uma janela nova.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Módulo só do Windows PowerShell 5.1</strong>
+
+<p>Alguns módulos antigos não funcionam no 7. O PowerShell 7 tenta carregá-los em modo de compatibilidade (<code>-UseWindowsPowerShell</code>), o que funciona na maioria dos casos.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Get-Module</code></td><td>Módulos carregados.</td></tr>
+
+<tr><td><code>Get-Module -ListAvailable</code></td><td>Módulos instalados.</td></tr>
+
+<tr><td><code>Import-Module Nome</code></td><td>Carrega.</td></tr>
+
+<tr><td><code>Import-Module Nome -Force</code></td><td>Recarrega.</td></tr>
+
+<tr><td><code>Remove-Module Nome</code></td><td>Descarrega da sessão.</td></tr>
+
+<tr><td><code>Get-Command -Module Nome</code></td><td>Comandos do módulo.</td></tr>
+
+<tr><td><code>$env:PSModulePath -split ';'</code></td><td>Pastas de módulos.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Comandos do módulo</h3>
+<p>Complete:</p>
+<div class="ex-code">Get-Command <input data-answer="-Module" aria-label="resposta"> Microsoft.PowerShell.Utility</div>
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. Preciso rodar Import-Module antes de usar Compress-Archive?</p>
+
+<label><input type="radio" name="q2"> Sim, sempre</label>
+
+<label><input type="radio" name="q2"> Sim, como administrador</label>
+
+<label><input type="radio" name="q2"> Não: o PowerShell carrega o módulo sozinho quando o comando é chamado</label>
+
+<label><input type="radio" name="q2"> Não, porque ele não está em módulo nenhum</label>
+
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">3. Qual comando mostra os módulos instalados, mesmo os não carregados?</p>
+
+<label><input type="radio" name="q3"> Get-Module -ListAvailable</label>
+
+<label><input type="radio" name="q3"> Get-Module</label>
+
+<label><input type="radio" name="q3"> Get-InstalledProgram</label>
+
+<label><input type="radio" name="q3"> Import-Module -All</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Microsoft.PowerShell.Utility;;src:Get-Command;;src:\.Source;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> descubra de qual módulo vem o comando <code>ConvertTo-Json</code> mostrando a propriedade <code>Source</code> do <code>Get-Command</code>.</p>
+
+<pre class="script" data-file="main.ps1">Get-Command ConvertTo-Json
+</pre>
+
+<pre class="solucao" data-file="main.ps1">(Get-Command ConvertTo-Json).Source
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Módulos são pacotes de comandos sobre um assunto.</li>
+  <li><code>Get-Module</code> mostra os carregados; <code>-ListAvailable</code>, os instalados.</li>
+  <li>O carregamento é automático; <code>Import-Module</code> serve para casos especiais.</li>
+  <li><code>Get-Command -Module</code> mostra o que um módulo oferece.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

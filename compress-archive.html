@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Compress-Archive e Expand-Archive — arquivos zip (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a criar e extrair arquivos .zip no PowerShell 7 com Compress-Archive e Expand-Archive: compactar pastas e arquivos, atualizar um zip, escolher a compressão, extrair para uma pasta e listar o conteúdo de um zip.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Arquivos Zip (<span class="hl">Compress-Archive</span>)</h1>
+
+<p class="intro">Para mandar vários arquivos por e-mail, guardar um backup ou economizar espaço, juntamos tudo num arquivo <strong>.zip</strong>. O PowerShell faz isso sem programa extra: <code>Compress-Archive</code> cria o zip e <code>Expand-Archive</code> abre.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A compactar arquivos e pastas com <code>Compress-Archive</code>.</li>
+  <li>A acrescentar arquivos a um zip existente (<code>-Update</code>).</li>
+  <li>A extrair com <code>Expand-Archive</code>.</li>
+  <li>A listar o que tem dentro de um zip.</li>
+  <li>Os cuidados com <code>-Force</code> e nomes repetidos.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows.</p>
+
+<hr>
+
+<h2>A ideia: a mala de viagem</h2>
+
+<p>Em vez de carregar dez sacolas, você coloca tudo numa mala só. O zip é a mala: um arquivo que carrega vários outros, de preferência ocupando menos espaço.</p>
+
+<hr>
+
+<h2>1. Preparando arquivos de exemplo</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; New-Item -ItemType Directory -Path zip-teste\docs -Force | Out-Null
+PS&gt; Set-Location zip-teste
+PS&gt; 1..3 | ForEach-Object { Set-Content "docs\nota$_.txt" ("Linha de exemplo " * 200) }
+PS&gt; Get-ChildItem docs | Select-Object Name, Length
+
+Name      Length
+----      ------
+nota1.txt   3402
+nota2.txt   3402
+nota3.txt   3402
+</pre>
+
+<hr>
+
+<h2>2. Criando o zip</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Compress-Archive -Path docs -DestinationPath docs.zip
+PS&gt; Get-Item docs.zip | Select-Object Name, Length
+
+Name     Length
+----     ------
+docs.zip    517
+</pre>
+
+<dl class="anatomy">
+
+  <dt>-Path docs</dt><dd>O que vai para dentro: aqui, a pasta inteira (o zip terá a pasta <code>docs</code> dentro).</dd>
+
+  <dt>-DestinationPath docs.zip</dt><dd>O nome do zip a criar.</dd>
+
+</dl>
+
+<p>Os textos repetidos encolhem muito: três arquivos de alguns KB viram um zip bem menor.</p>
+
+<hr>
+
+<h2>3. Só o conteúdo, sem a pasta</h2>
+
+<p>Com <code>docs\*</code>, entram os arquivos, sem a pasta <code>docs</code> em volta:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Compress-Archive -Path docs\* -DestinationPath so-arquivos.zip
+</pre>
+
+<hr>
+
+<h2>4. Acrescentando e substituindo</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Set-Content docs\nota4.txt "nova"
+PS&gt; Compress-Archive -Path docs\nota4.txt -DestinationPath so-arquivos.zip -Update
+PS&gt; Compress-Archive -Path docs -DestinationPath docs.zip
+Compress-Archive: The archive file C:\Users\ana\AppData\Local\Temp\guia-ps\compress-archive\zip-teste\docs.zip already exists. Use the -Update parameter to update the existing archive file or use the -Force parameter to overwrite the existing archive file.
+</pre>
+
+<dl class="anatomy">
+
+  <dt>-Update</dt><dd>Acrescenta ou atualiza arquivos dentro de um zip que já existe.</dd>
+
+  <dt>(sem -Update nem -Force)</dt><dd>Se o zip já existe, dá erro em vez de sobrescrever.</dd>
+
+  <dt>-Force</dt><dd>Sobrescreve o zip inteiro.</dd>
+
+</dl>
+
+<hr>
+
+<h2>5. Vendo o que tem dentro</h2>
+
+<p>Não existe um cmdlet para listar o zip, mas o .NET resolve:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Add-Type -AssemblyName System.IO.Compression.FileSystem
+PS&gt; $zip = [IO.Compression.ZipFile]::OpenRead((Join-Path $PWD so-arquivos.zip))
+PS&gt; $zip.Entries | Select-Object FullName, Length
+
+FullName  Length
+--------  ------
+nota1.txt   3402
+nota2.txt   3402
+nota3.txt   3402
+nota4.txt      6
+PS&gt; $zip.Dispose()
+</pre>
+
+<dl class="anatomy">
+
+  <dt>OpenRead</dt><dd>Abre o zip só para leitura.</dd>
+
+  <dt>.Entries</dt><dd>A lista de arquivos dentro do zip.</dd>
+
+  <dt>.Dispose()</dt><dd>Fecha o arquivo (senão ele fica travado).</dd>
+
+</dl>
+
+<hr>
+
+<h2>6. Extraindo</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Expand-Archive -Path so-arquivos.zip -DestinationPath extraido
+PS&gt; Get-ChildItem extraido | Select-Object Name
+
+Name
+----
+nota1.txt
+nota2.txt
+nota3.txt
+nota4.txt
+PS&gt; Expand-Archive -Path so-arquivos.zip -DestinationPath extraido
+Write-Error: Failed to create file
+'C:\Users\ana\AppData\Local\Temp\guia-ps\compress-archive\zip-teste\extraido\nota1.txt'
+while expanding the archive file
+'C:\Users\ana\AppData\Local\Temp\guia-ps\compress-archive\zip-teste\so-arquivos.zip'
+contents as the file
+'C:\Users\ana\AppData\Local\Temp\guia-ps\compress-archive\zip-teste\extraido\nota1.txt'
+already exists. Use the -Force parameter if you want to overwrite the existing directory
+'C:\Users\ana\AppData\Local\Temp\guia-ps\compress-archive\zip-teste\extraido\nota1.txt'
+contents when expanding the archive file.
+Write-Error: Failed to create file
+'C:\Users\ana\AppData\Local\Temp\guia-ps\compress-archive\zip-teste\extraido\nota2.txt'
+while expanding the archive file
+'C:\Users\ana\AppData\Local\Temp\guia-ps\compress-archive\zip-teste\so-arquivos.zip'
+contents as the file
+'C:\Users\ana\AppData\Local\Temp\guia-ps\compress-archive\zip-teste\extraido\nota2.txt'
+already exists. Use the -Force parameter if you want to overwrite the existing directory
+'C:\Users\ana\AppData\Local\Temp\guia-ps\compress-archive\zip-teste\extraido\nota2.txt'
+contents when expanding the archive file.
+Write-Error: Failed to create file
+'C:\Users\ana\AppData\Local\Temp\guia-ps\compress-archive\zip-teste\extraido\nota3.txt'
+while expanding the archive file
+'C:\Users\ana\AppData\Local\Temp\guia-ps\compress-archive\zip-teste\so-arquivos.zip'
+contents as the file
+'C:\Users\ana\AppData\Local\Temp\guia-ps\compress-archive\zip-teste\extraido\nota3.txt'
+already exists. Use the -Force parameter if you want to overwrite the existing directory
+'C:\Users\ana\AppData\Local\Temp\guia-ps\compress-archive\zip-teste\extraido\nota3.txt'
+contents when expanding the archive file.
+Write-Error: Failed to create file
+'C:\Users\ana\AppData\Local\Temp\guia-ps\compress-archive\zip-teste\extraido\nota4.txt'
+while expanding the archive file
+'C:\Users\ana\AppData\Local\Temp\guia-ps\compress-archive\zip-teste\so-arquivos.zip'
+contents as the file
+'C:\Users\ana\AppData\Local\Temp\guia-ps\compress-archive\zip-teste\extraido\nota4.txt'
+already exists. Use the -Force parameter if you want to overwrite the existing directory
+'C:\Users\ana\AppData\Local\Temp\guia-ps\compress-archive\zip-teste\extraido\nota4.txt'
+contents when expanding the archive file.
+</pre>
+
+<p>A segunda extração dá erro porque os arquivos já existem. Use <code>-Force</code> para sobrescrever.</p>
+
+<div class="tryps" data-goal="src:Compress-Archive;;src:-Path docs;;src:-DestinationPath docs\.zip;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> escreva, numa string, o comando que compacta a pasta <code>docs</code> em <code>docs.zip</code>. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'Compress-Archive -Path docs -DestinationPath docs.zip'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>"The archive file ... already exists"</strong>
+
+<p>O zip já existe. Use <code>-Update</code> para acrescentar ou <code>-Force</code> para sobrescrever.</p>
+
+</div>
+
+<div class="cenario">
+<strong>"is not a supported archive file format"</strong>
+
+<p><code>Expand-Archive</code> só abre <code>.zip</code>. Para <code>.7z</code> ou <code>.rar</code>, use outro programa. Se o arquivo é zip mas tem outra extensão, renomeie para <code>.zip</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Arquivo maior que 2 GB</strong>
+
+<p><code>Compress-Archive</code> tem limite de 2 GB por arquivo. Para arquivos enormes, use <code>[IO.Compression.ZipFile]::CreateFromDirectory()</code> ou o <code>tar</code> que vem com o Windows.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Compress-Archive -Path p -DestinationPath z.zip</code></td><td>Cria o zip.</td></tr>
+
+<tr><td><code>... -Path p\*</code></td><td>Só o conteúdo, sem a pasta.</td></tr>
+
+<tr><td><code>... -Update</code></td><td>Acrescenta a um zip existente.</td></tr>
+
+<tr><td><code>... -CompressionLevel Fastest</code></td><td>Mais rápido, menos compressão (<code>Optimal</code> é o padrão; <code>NoCompression</code> só junta).</td></tr>
+
+<tr><td><code>Expand-Archive z.zip -DestinationPath pasta</code></td><td>Extrai.</td></tr>
+
+<tr><td><code>Expand-Archive ... -Force</code></td><td>Extrai sobrescrevendo.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Extraindo</h3>
+<p>Complete:</p>
+<div class="ex-code"><input data-answer="Expand-Archive" aria-label="resposta"> fotos.zip -DestinationPath fotos</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. O que <code>-Update</code> faz?</p>
+
+<label><input type="radio" name="q2"> Sobrescreve o zip inteiro</label>
+
+<label><input type="radio" name="q2"> Acrescenta arquivos a um zip existente</label>
+
+<label><input type="radio" name="q2"> Atualiza o PowerShell</label>
+
+<label><input type="radio" name="q2"> Extrai só os arquivos novos</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. Qual comando cria um zip só com o conteúdo da pasta, sem a pasta em volta?</p>
+
+<label><input type="radio" name="q3"> Compress-Archive -Path docs -DestinationPath z.zip</label>
+
+<label><input type="radio" name="q3"> Compress-Archive -Path docs -Flat</label>
+
+<label><input type="radio" name="q3"> Compress-Archive -Path docs\* -DestinationPath z.zip</label>
+
+<label><input type="radio" name="q3"> Expand-Archive docs</label>
+
+</div>
+
+<div class="tryps" data-goal="src:Expand-Archive;;src:docs\.zip;;src:copia;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> escreva, numa string, o comando que extrai <code>docs.zip</code> para a pasta <code>copia</code>. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'Expand-Archive -Path docs.zip -DestinationPath copia'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Compress-Archive</code> cria zips; <code>Expand-Archive</code> extrai.</li>
+  <li><code>-Path pasta</code> inclui a pasta; <code>-Path pasta\*</code> só o conteúdo.</li>
+  <li><code>-Update</code> acrescenta, <code>-Force</code> sobrescreve.</li>
+  <li>Para listar um zip, use <code>[IO.Compression.ZipFile]::OpenRead()</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell $PROFILE — o arquivo de perfil (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a usar o perfil do PowerShell 7: onde fica o $PROFILE, como criar o arquivo, colocar apelidos, funções, prompt personalizado e módulos que carregam sozinhos, e como recarregar o perfil sem fechar o terminal.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>O Perfil (<span class="hl">$PROFILE</span>)</h1>
+
+<p class="intro">Toda vez que você abre o PowerShell, ele procura um arquivo chamado <strong>perfil</strong> e roda o que estiver lá dentro. É onde você guarda seus apelidos, funções favoritas e ajustes, para não ter que digitar tudo de novo a cada janela.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Onde fica o perfil (<code>$PROFILE</code>).</li>
+  <li>A criar o arquivo se ele não existir.</li>
+  <li>O que vale a pena colocar no perfil.</li>
+  <li>A recarregar o perfil sem fechar a janela.</li>
+  <li>A abrir o PowerShell sem o perfil (<code>-NoProfile</code>).</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows.</p>
+
+<hr>
+
+<h2>A ideia: arrumar a mesa de trabalho</h2>
+
+<p>Quem chega no escritório e sempre arruma a mesa do mesmo jeito ganharia tempo se a mesa já estivesse arrumada. O perfil é isso: o PowerShell "arruma a mesa" para você toda vez que abre.</p>
+
+<hr>
+
+<h2>1. Onde fica o perfil</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $PROFILE
+C:\Users\ana\Documents\PowerShell\Microsoft.PowerShell_profile.ps1
+PS&gt; Test-Path $PROFILE
+False
+</pre>
+
+<dl class="anatomy">
+
+  <dt>$PROFILE</dt><dd>Caminho do perfil do usuário atual para este programa (o "CurrentUserCurrentHost").</dd>
+
+  <dt>Test-Path</dt><dd><code>True</code> se o arquivo existe; numa instalação nova, normalmente <code>False</code>.</dd>
+
+</dl>
+
+<p>O perfil do PowerShell 7 fica em <code>Documentos\PowerShell</code>. O do Windows PowerShell 5.1 fica em <code>Documentos\WindowsPowerShell</code>: são arquivos diferentes.</p>
+
+<hr>
+
+<h2>2. Os quatro perfis</h2>
+
+<p>Existem quatro perfis, do mais geral ao mais específico:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $PROFILE | Select-Object AllUsersAllHosts, AllUsersCurrentHost, CurrentUserAllHosts, CurrentUserCurrentHost | Format-List
+
+AllUsersAllHosts       : C:\Program Files\WindowsApps\Microsoft.PowerShell_7.7.0.0_x64__8wekyb3d8bbwe\profile.ps1
+AllUsersCurrentHost    : C:\Program Files\WindowsApps\Microsoft.PowerShell_7.7.0.0_x64__8wekyb3d8bbwe\Microsoft.PowerSh
+                         ell_profile.ps1
+CurrentUserAllHosts    : C:\Users\ana\Documents\PowerShell\profile.ps1
+CurrentUserCurrentHost : C:\Users\ana\Documents\PowerShell\Microsoft.PowerShell_profile.ps1
+</pre>
+
+<p>Para uso pessoal, use o <code>$PROFILE</code> (o último). Os de "AllUsers" ficam na pasta de instalação e exigem administrador.</p>
+
+<hr>
+
+<h2>3. Criando o perfil</h2>
+
+<pre><code>if (-not (Test-Path $PROFILE)) {
+    New-Item -ItemType File -Path $PROFILE -Force
+}
+notepad $PROFILE      # ou: code $PROFILE
+</code></pre>
+
+<dl class="anatomy">
+
+  <dt>-Force</dt><dd>Cria também as pastas que faltarem no caminho.</dd>
+
+  <dt>notepad $PROFILE</dt><dd>Abre o perfil no Bloco de Notas para editar.</dd>
+
+</dl>
+
+<hr>
+
+<h2>4. O que colocar no perfil</h2>
+
+<p>Um exemplo de perfil simples:</p>
+
+<pre><code># Apelidos
+Set-Alias -Name np -Value notepad
+
+# Funções
+function cdp { Set-Location "$HOME\Projetos" }
+function ll { Get-ChildItem -Force @args }
+
+# Prompt mais curto: só o nome da pasta
+function prompt { "PS $(Split-Path -Leaf (Get-Location))&gt; " }
+
+# Histórico com sugestões em lista
+Set-PSReadLineOption -PredictionViewStyle ListView
+</code></pre>
+
+<ul>
+  <li>Apelidos e funções curtas que você usa todo dia.</li>
+  <li>Ajustes do PSReadLine (cores, previsão, teclas).</li>
+  <li><code>Import-Module</code> de módulos que você sempre usa.</li>
+</ul>
+
+<div class="warning"><strong>Perfil lento = terminal lento</strong> Tudo no perfil roda a cada janela aberta. Evite comandos demorados (consultas de rede, listar pastas enormes). Se o PowerShell começou a demorar para abrir, o perfil é o primeiro suspeito.</div>
+
+<hr>
+
+<h2>5. Recarregando sem fechar a janela</h2>
+
+<p>Depois de editar, carregue o perfil de novo com dot-source:</p>
+
+<pre><code>. $PROFILE
+</code></pre>
+
+<p>O ponto e o espaço na frente rodam o arquivo <em>na sessão atual</em>, então as funções e apelidos passam a existir aqui. Veja a aula <a href="dot-source.html">Dot-source</a>.</p>
+
+<hr>
+
+<h2>6. Abrindo sem o perfil</h2>
+
+<p>Para testar se um problema vem do perfil, ou para rodar scripts de forma previsível:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; pwsh -NoProfile -Command '"Sem perfil: rápido e limpo"'
+Sem perfil: rápido e limpo
+</pre>
+
+<div class="tryps" data-goal="out:Olá do perfil;;src:\. ;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> o arquivo <code>perfil-teste.ps1</code> define a função <code>oi</code>. Carregue-o com dot-source (<code>. .\perfil-teste.ps1</code>) e chame <code>oi</code>.</p>
+
+<pre class="script" data-file="main.ps1">Set-Content perfil-teste.ps1 'function oi { "Olá do perfil" }'
+oi
+</pre>
+
+<pre class="solucao" data-file="main.ps1">Set-Content perfil-teste.ps1 'function oi { "Olá do perfil" }'
+. .\perfil-teste.ps1
+oi
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>"não pode ser carregado porque a execução de scripts foi desabilitada"</strong>
+
+<p>O perfil é um script e obedece à política de execução. Veja <a href="execution-policy.html">Política de Execução</a>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Editei o perfil e nada mudou</strong>
+
+<p>O perfil só roda ao abrir o PowerShell. Rode <code>. $PROFILE</code> ou abra uma janela nova. Confira também se você editou o perfil do PowerShell 7 e não o do 5.1.</p>
+
+</div>
+
+<div class="cenario">
+<strong>A pasta Documentos está no OneDrive</strong>
+
+<p>Com o OneDrive ligado, o <code>$PROFILE</code> pode apontar para <code>OneDrive\Documentos\PowerShell</code>. Use sempre <code>$PROFILE</code> em vez de escrever o caminho na mão.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>$PROFILE</code></td><td>Caminho do seu perfil.</td></tr>
+
+<tr><td><code>Test-Path $PROFILE</code></td><td>O perfil existe?</td></tr>
+
+<tr><td><code>New-Item $PROFILE -ItemType File -Force</code></td><td>Cria o perfil.</td></tr>
+
+<tr><td><code>notepad $PROFILE</code></td><td>Edita o perfil.</td></tr>
+
+<tr><td><code>. $PROFILE</code></td><td>Recarrega o perfil.</td></tr>
+
+<tr><td><code>pwsh -NoProfile</code></td><td>Abre sem o perfil.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Recarregando</h3>
+<p>Complete para recarregar o perfil na sessão atual:</p>
+<div class="ex-code"><input data-answer="." aria-label="resposta"> $PROFILE</div>
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. Quando o perfil é executado?</p>
+
+<label><input type="radio" name="q2"> Só quando você digita $PROFILE</label>
+
+<label><input type="radio" name="q2"> Uma vez por dia</label>
+
+<label><input type="radio" name="q2"> Toda vez que o PowerShell abre</label>
+
+<label><input type="radio" name="q2"> Só como administrador</label>
+
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">3. Como abrir o PowerShell sem carregar o perfil?</p>
+
+<label><input type="radio" name="q3"> pwsh -NoProfile</label>
+
+<label><input type="radio" name="q3"> pwsh -Clean</label>
+
+<label><input type="radio" name="q3"> pwsh -Safe</label>
+
+<label><input type="radio" name="q3"> pwsh -Reset</label>
+
+</div>
+
+<div class="tryps" data-goal="out:np;;src:Set-Alias;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> crie o apelido <code>np</code> para <code>notepad</code> (como faria no perfil) e mostre o apelido com <code>Get-Alias np</code>.</p>
+
+<pre class="script" data-file="main.ps1">Get-Alias np
+</pre>
+
+<pre class="solucao" data-file="main.ps1">Set-Alias -Name np -Value notepad
+Get-Alias np
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>O perfil é um script que roda toda vez que o PowerShell abre.</li>
+  <li>O caminho está em <code>$PROFILE</code>; crie com <code>New-Item -Force</code>.</li>
+  <li>Coloque apelidos, funções e ajustes, nada demorado.</li>
+  <li><code>. $PROFILE</code> recarrega; <code>pwsh -NoProfile</code> abre sem ele.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

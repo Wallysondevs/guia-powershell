@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Get-Process e Stop-Process — processos (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a ver e encerrar programas pelo PowerShell 7: Get-Process, filtrar por nome, ordenar por memória e CPU, achar o processo mais pesado, Stop-Process com segurança usando -WhatIf e o Id, e Wait-Process.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Processos (<span class="hl">Get-Process</span> e Stop-Process)</h1>
+
+<p class="intro">Cada programa aberto no computador é um <strong>processo</strong>: o navegador, o Bloco de Notas, até o próprio PowerShell. É o que você vê no Gerenciador de Tarefas. Pelo PowerShell você lista, investiga e encerra processos, e consegue responder perguntas como "quem está comendo minha memória?".</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A listar processos com <code>Get-Process</code>.</li>
+  <li>A filtrar, ordenar e calcular memória em MB.</li>
+  <li>A achar o processo do próprio PowerShell (<code>$PID</code>).</li>
+  <li>A encerrar com <code>Stop-Process</code>, testando antes com <code>-WhatIf</code>.</li>
+  <li>A esperar um processo terminar com <code>Wait-Process</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows.</p>
+
+<hr>
+
+<h2>A ideia: o Gerenciador de Tarefas em texto</h2>
+
+<p>Tudo o que você faz clicando no Gerenciador de Tarefas dá para fazer com comandos, só que com uma vantagem: dá para filtrar, ordenar, salvar em arquivo e automatizar.</p>
+
+<hr>
+
+<h2>1. Listando processos</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-Process | Select-Object -First 5
+
+ NPM(K)    PM(M)      WS(M)     CPU(s)      Id  SI ProcessName
+ ------    -----      -----     ------      --  -- -----------
+      7     2,50       7,58       0,33    8416   0 AggregatorHost
+     19     6,12      21,47       1,02    6120   1 ApplicationFrameHost
+     10     6,55      11,92       0,11   14544   0 audiodg
+      8     1,62       7,05       0,05    3312   1 conhost
+     24     2,03       5,88       1,19     712   0 csrss
+</pre>
+
+<dl class="anatomy">
+
+  <dt>NPM(K) / PM(M) / WS(M)</dt><dd>Memória usada (em KB e MB). WS é a memória física em uso agora.</dd>
+
+  <dt>CPU(s)</dt><dd>Segundos de processador gastos desde que o processo abriu.</dd>
+
+  <dt>Id</dt><dd>O número único do processo. Dois Bloco de Notas abertos têm o mesmo nome e Ids diferentes.</dd>
+
+  <dt>ProcessName</dt><dd>O nome do programa, sem <code>.exe</code>.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. O próprio PowerShell</h2>
+
+<p>A variável <code>$PID</code> guarda o Id do PowerShell que você está usando:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-Process -Id $PID | Select-Object Id, ProcessName, StartTime
+
+  Id ProcessName StartTime
+  -- ----------- ---------
+1476 pwsh        21/11/2026 11:33:35
+</pre>
+
+<hr>
+
+<h2>3. Os que mais usam memória</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-Process | Sort-Object WorkingSet64 -Descending | Select-Object -First 5 ProcessName, Id, @{ n = 'MemoriaMB'; e = { [math]::Round($_.WorkingSet64 / 1MB) } }
+
+ProcessName    Id MemoriaMB
+-----------    -- ---------
+MsMpEng      4216    393,00
+explorer     5032    186,00
+pwsh        10972    127,00
+dwm          1388    112,00
+pwsh         1476     99,00
+</pre>
+
+<dl class="anatomy">
+
+  <dt>WorkingSet64</dt><dd>Memória em bytes.</dd>
+
+  <dt>@{ n = ...; e = ... }</dt><dd>Uma coluna calculada: converte bytes para MB.</dd>
+
+  <dt>1MB</dt><dd>O PowerShell entende <code>1KB</code>, <code>1MB</code> e <code>1GB</code> como números.</dd>
+
+</dl>
+
+<hr>
+
+<h2>4. Agrupando por nome</h2>
+
+<p>Navegadores abrem dezenas de processos. Quanto cada programa usa no total?</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-Process | Group-Object ProcessName | ForEach-Object { [pscustomobject]@{ Programa = $_.Name; Processos = $_.Count; MB = [math]::Round(($_.Group | Measure-Object WorkingSet64 -Sum).Sum / 1MB) } } | Sort-Object MB -Descending | Select-Object -First 5
+
+Programa Processos      MB
+-------- ---------      --
+svchost         78 1057,00
+MsMpEng          1  393,00
+pwsh             2  226,00
+explorer         1  186,00
+dwm              1  112,00
+</pre>
+
+<hr>
+
+<h2>5. Procurando pelo nome</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-Process -Name pwsh
+
+ NPM(K)    PM(M)      WS(M)     CPU(s)      Id  SI ProcessName
+ ------    -----      -----     ------      --  -- -----------
+     66    42,79      98,93       1,11    1476   1 pwsh
+     75    56,91     127,09       6,05   10972   1 pwsh
+PS&gt; Get-Process -Name programa-que-nao-existe
+Get-Process: Não é possível localizar um processo com o nome "programa-que-nao-existe". Verifique o nome do processo e chame o cmdlet novamente.
+PS&gt; Get-Process -Name programa-que-nao-existe -ErrorAction SilentlyContinue
+</pre>
+
+<hr>
+
+<h2>6. Encerrando com segurança</h2>
+
+<p>Vamos abrir um processo de teste (um PowerShell escondido que só espera 60 segundos) e encerrá-lo. Primeiro, sempre teste com <code>-WhatIf</code>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $teste = Start-Process pwsh -ArgumentList '-NoProfile', '-Command', 'Start-Sleep 60' -WindowStyle Hidden -PassThru
+PS&gt; Stop-Process -Id $teste.Id -WhatIf
+What If: Executando a operação "Stop-Process" no destino "pwsh (14668)".
+PS&gt; Stop-Process -Id $teste.Id
+PS&gt; $teste.WaitForExit(5000)
+True
+PS&gt; $teste.HasExited
+True
+</pre>
+
+<dl class="anatomy">
+
+  <dt>-PassThru</dt><dd>Faz o <code>Start-Process</code> devolver o processo criado, para você guardar o Id.</dd>
+
+  <dt>-WhatIf</dt><dd>Mostra o que faria, sem fazer.</dd>
+
+  <dt>Stop-Process -Id</dt><dd>Encerra exatamente aquele processo. Pelo nome (<code>-Name</code>) encerraria todos com o mesmo nome.</dd>
+
+</dl>
+
+<div class="warning"><strong>Cuidado com -Name</strong> <code>Stop-Process -Name chrome</code> fecha <strong>todas</strong> as janelas do Chrome, sem perguntar e sem salvar nada. Prefira <code>-Id</code> e sempre teste com <code>-WhatIf</code> primeiro.</div>
+
+<hr>
+
+<h2>7. Esperando um processo terminar</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $p = Start-Process pwsh -ArgumentList '-NoProfile', '-Command', 'Start-Sleep 2' -WindowStyle Hidden -PassThru
+PS&gt; Wait-Process -Id $p.Id
+PS&gt; "Terminou com código $($p.ExitCode)"
+Terminou com código 0
+</pre>
+
+<div class="tryps" data-goal="src:Get-Process;;src:\$PID;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> escreva, numa string, o comando que mostra o nome do processo do PowerShell atual usando <code>$PID</code>. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = '(Get-Process -Id $PID).ProcessName'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>"Não é possível localizar um processo com o nome"</strong>
+
+<p>Nenhum processo com esse nome está aberto. Lembre: o nome é sem <code>.exe</code>. Use <code>-ErrorAction SilentlyContinue</code> se a ausência for normal.</p>
+
+</div>
+
+<div class="cenario">
+<strong>"Acesso negado" ao encerrar</strong>
+
+<p>Processos de outros usuários ou do sistema exigem PowerShell como administrador. E alguns processos do Windows não devem ser encerrados nunca.</p>
+
+</div>
+
+<div class="cenario">
+<strong>StartTime vazio ou erro</strong>
+
+<p>Para processos do sistema, ler <code>StartTime</code> ou <code>Path</code> pode exigir administrador. Isso é normal.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Get-Process</code></td><td>Lista processos.</td></tr>
+
+<tr><td><code>Get-Process -Name x</code></td><td>Pelo nome (sem <code>.exe</code>).</td></tr>
+
+<tr><td><code>Get-Process -Id 1234</code></td><td>Pelo Id.</td></tr>
+
+<tr><td><code>$PID</code></td><td>Id do PowerShell atual.</td></tr>
+
+<tr><td><code>Stop-Process -Id 1234 -WhatIf</code></td><td>Simula o encerramento.</td></tr>
+
+<tr><td><code>Stop-Process -Id 1234</code></td><td>Encerra.</td></tr>
+
+<tr><td><code>Wait-Process -Id 1234</code></td><td>Espera terminar.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Testando antes</h3>
+<p>Complete para só simular:</p>
+<div class="ex-code">Stop-Process -Id 4321 <input data-answer="-WhatIf" aria-label="resposta"></div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Por que preferir <code>-Id</code> a <code>-Name</code> no Stop-Process?</p>
+
+<label><input type="radio" name="q2"> Porque -Name não existe</label>
+
+<label><input type="radio" name="q2"> Porque -Name encerra todos os processos com aquele nome</label>
+
+<label><input type="radio" name="q2"> Porque -Id é mais rápido de digitar</label>
+
+<label><input type="radio" name="q2"> Porque -Id pede confirmação</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. Qual propriedade tem a memória em bytes?</p>
+
+<label><input type="radio" name="q3"> CPU</label>
+
+<label><input type="radio" name="q3"> Id</label>
+
+<label><input type="radio" name="q3"> WorkingSet64</label>
+
+<label><input type="radio" name="q3"> Handles</label>
+
+</div>
+
+<div class="tryps" data-goal="src:Get-Process;;src:Sort-Object WorkingSet64;;src:-First 3;;src:MB;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> escreva, numa string, o comando que mostra os 3 processos que mais usam memória, com uma coluna <code>MB</code>. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'Get-Process | Sort-Object WorkingSet64 -Descending | Select-Object -First 3 ProcessName, @{ n = ''MB''; e = { [math]::Round($_.WorkingSet64 / 1MB) } }'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Get-Process</code> lista os programas em execução.</li>
+  <li>Ordene por <code>WorkingSet64</code> para achar os pesados.</li>
+  <li><code>Stop-Process -Id</code> encerra; teste com <code>-WhatIf</code>.</li>
+  <li><code>$PID</code> é o Id do seu PowerShell.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

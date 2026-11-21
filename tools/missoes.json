@@ -1,7 +1,7 @@
 {
   "versao": 1,
   "alvo": "Níveis 1, 2 e 3, projetos e referência",
-  "total": 229,
+  "total": 275,
   "por_secao": {
     "Começando": 32,
     "Pastas e Arquivos": 33,
@@ -13,14 +13,14 @@
     "O Pipeline e os Objetos": 24,
     "Coleções": 14,
     "Funções": 16,
-    "Scripts": 4,
-    "Erros": 10,
+    "Scripts": 10,
+    "Erros": 12,
     "Dados e Textos": 10,
-    "Módulos": 2,
-    "Administrando o Windows": 7,
+    "Módulos": 6,
+    "Administrando o Windows": 29,
     "Recursos Poderosos": 10,
-    "Boas Práticas": 1,
-    "Projetos": 8
+    "Boas Práticas": 3,
+    "Projetos": 18
   },
   "comecando_e_pastas": 65,
   "pssim": {
@@ -7038,6 +7038,113 @@
       "etapa": "pwsh-7.7"
     },
     {
+      "id": "scripts-1",
+      "pagina": "scripts.html",
+      "titulo": "Seu Primeiro Script (.ps1)",
+      "secao": "Scripts",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Olá, Ana!;;src:\\.\\\\saudar\\.ps1;;semerro",
+      "metas": [
+        "out:Olá, Ana!",
+        "src:\\.\\\\saudar\\.ps1",
+        "semerro"
+      ],
+      "task": "Experimente: o script saudar.ps1 já está gravado. Rode-o passando o nome Ana.",
+      "script": "Set-Content saudar.ps1 'param($Nome = \"mundo\") \"Olá, $Nome!\"'",
+      "solucao": "Set-Content saudar.ps1 'param($Nome = \"mundo\") \"Olá, $Nome!\"'\n.\\saudar.ps1 -Nome Ana",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Set-Content"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "scripts-2",
+      "pagina": "scripts.html",
+      "titulo": "Seu Primeiro Script (.ps1)",
+      "secao": "Scripts",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:3 linhas;;src:\\$PSScriptRoot;;semerro",
+      "metas": [
+        "out:3 linhas",
+        "src:\\$PSScriptRoot",
+        "semerro"
+      ],
+      "task": "Missão final: crie conta.ps1 que lê lista.txt usando $PSScriptRoot e mostra 3 linhas. Depois rode o script.",
+      "script": "Set-Content lista.txt \"a`nb`nc\"\nSet-Content conta.ps1 '\"$((Get-Content lista.txt).Count) linhas\"'\n.\\conta.ps1",
+      "solucao": "Set-Content lista.txt \"a`nb`nc\"\nSet-Content conta.ps1 '\"$((Get-Content (Join-Path $PSScriptRoot lista.txt)).Count) linhas\"'\n.\\conta.ps1",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Content",
+        "Join-Path",
+        "Set-Content"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "execution-policy-1",
+      "pagina": "execution-policy.html",
+      "titulo": "Política de Execução",
+      "secao": "Scripts",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "src:Get-ExecutionPolicy;;semerro",
+      "metas": [
+        "src:Get-ExecutionPolicy",
+        "semerro"
+      ],
+      "task": "Experimente: escreva, numa string, o comando que mostra a política de execução que vale agora. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'Get-ExecutionPolicy'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-ExecutionPolicy",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "execution-policy-2",
+      "pagina": "execution-policy.html",
+      "titulo": "Política de Execução",
+      "secao": "Scripts",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "src:Get-ExecutionPolicy;;src:-List;;semerro",
+      "metas": [
+        "src:Get-ExecutionPolicy",
+        "src:-List",
+        "semerro"
+      ],
+      "task": "Missão final: escreva, numa string, o comando que mostra a política de cada escopo (de MachinePolicy até LocalMachine). O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'Get-ExecutionPolicy -List'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-ExecutionPolicy",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
       "id": "parametros-script-1",
       "pagina": "parametros-script.html",
       "titulo": "Parâmetros de Script e $args",
@@ -7139,6 +7246,59 @@
       "cmdlets": [
         "Dizer-Ola",
         "Set-Content"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "perfil-1",
+      "pagina": "perfil.html",
+      "titulo": "O Perfil ($PROFILE)",
+      "secao": "Scripts",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Olá do perfil;;src:\\. ;;semerro",
+      "metas": [
+        "out:Olá do perfil",
+        "src:\\. ",
+        "semerro"
+      ],
+      "task": "Experimente: o arquivo perfil-teste.ps1 define a função oi. Carregue-o com dot-source (. .\\perfil-teste.ps1) e chame oi.",
+      "script": "Set-Content perfil-teste.ps1 'function oi { \"Olá do perfil\" }'\noi",
+      "solucao": "Set-Content perfil-teste.ps1 'function oi { \"Olá do perfil\" }'\n. .\\perfil-teste.ps1\noi",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Set-Content"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "perfil-2",
+      "pagina": "perfil.html",
+      "titulo": "O Perfil ($PROFILE)",
+      "secao": "Scripts",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:np;;src:Set-Alias;;semerro",
+      "metas": [
+        "out:np",
+        "src:Set-Alias",
+        "semerro"
+      ],
+      "task": "Missão final: crie o apelido np para notepad (como faria no perfil) e mostre o apelido com Get-Alias np.",
+      "script": "Get-Alias np",
+      "solucao": "Set-Alias -Name np -Value notepad\nGet-Alias np",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Alias",
+        "Set-Alias"
       ],
       "aliases": [],
       "recursos": [],
@@ -7401,6 +7561,56 @@
       "etapa": "pwsh-7.7"
     },
     {
+      "id": "depuracao-1",
+      "pagina": "depuracao.html",
+      "titulo": "Depurando (Set-PSBreakpoint)",
+      "secao": "Erros",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Média: 8;;src:\\+=;;semerro",
+      "metas": [
+        "out:Média: 8",
+        "src:\\+=",
+        "semerro"
+      ],
+      "task": "Experimente: corrija o cálculo da soma para a média dar Média: 8.",
+      "script": "$Notas = 8, 6, 10\n$soma = 0\nforeach ($n in $Notas) { $soma = $n }\n\"Média: $($soma / $Notas.Count)\"",
+      "solucao": "$Notas = 8, 6, 10\n$soma = 0\nforeach ($n in $Notas) { $soma += $n }\n\"Média: $($soma / $Notas.Count)\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "depuracao-2",
+      "pagina": "depuracao.html",
+      "titulo": "Depurando (Set-PSBreakpoint)",
+      "secao": "Erros",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:soma=24;;src:Write-Debug;;semerro",
+      "metas": [
+        "out:soma=24",
+        "src:Write-Debug",
+        "semerro"
+      ],
+      "task": "Missão final: com $DebugPreference = 'Continue', use Write-Debug para mostrar soma=24 depois de somar 8, 6 e 10.",
+      "script": "$soma = 0\n8, 6, 10 | ForEach-Object { $soma += $_ }",
+      "solucao": "$DebugPreference = 'Continue'\n$soma = 0\n8, 6, 10 | ForEach-Object { $soma += $_ }\nWrite-Debug \"soma=$soma\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Write-Debug"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
       "id": "csv-1",
       "pagina": "csv.html",
       "titulo": "CSV (Import-Csv e Export-Csv)",
@@ -7656,6 +7866,119 @@
       "etapa": "pwsh-7.7"
     },
     {
+      "id": "modulos-1",
+      "pagina": "modulos.html",
+      "titulo": "Módulos (Import-Module)",
+      "secao": "Módulos",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "src:Get-Command;;src:-Module;;src:Microsoft\\.PowerShell\\.Archive;;semerro",
+      "metas": [
+        "src:Get-Command",
+        "src:-Module",
+        "src:Microsoft\\.PowerShell\\.Archive",
+        "semerro"
+      ],
+      "task": "Experimente: escreva, numa string, o comando que lista os comandos do módulo Microsoft.PowerShell.Archive. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'Get-Command -Module Microsoft.PowerShell.Archive'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Command",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "modulos-2",
+      "pagina": "modulos.html",
+      "titulo": "Módulos (Import-Module)",
+      "secao": "Módulos",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "out:Microsoft.PowerShell.Utility;;src:Get-Command;;src:\\.Source;;semerro",
+      "metas": [
+        "out:Microsoft.PowerShell.Utility",
+        "src:Get-Command",
+        "src:\\.Source",
+        "semerro"
+      ],
+      "task": "Missão final: descubra de qual módulo vem o comando ConvertTo-Json mostrando a propriedade Source do Get-Command.",
+      "script": "Get-Command ConvertTo-Json",
+      "solucao": "(Get-Command ConvertTo-Json).Source",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Command"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "psgallery-1",
+      "pagina": "psgallery.html",
+      "titulo": "Instalando Módulos (PowerShell Gallery)",
+      "secao": "Módulos",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "src:Find-PSResource;;src:PSScriptAnalyzer;;src:Select-Object;;semerro",
+      "metas": [
+        "src:Find-PSResource",
+        "src:PSScriptAnalyzer",
+        "src:Select-Object",
+        "semerro"
+      ],
+      "task": "Experimente: escreva, numa string, o comando que procura o módulo PSScriptAnalyzer na galeria e mostra só Name e Version. O simulador do guia não acessa a galeria; depois, rode o comando de verdade no seu terminal.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'Find-PSResource -Name PSScriptAnalyzer | Select-Object Name, Version'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Find-PSResource",
+        "Select-Object",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "psgallery-2",
+      "pagina": "psgallery.html",
+      "titulo": "Instalando Módulos (PowerShell Gallery)",
+      "secao": "Módulos",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "src:Get-InstalledPSResource;;src:Select-Object;;src:Version;;semerro",
+      "metas": [
+        "src:Get-InstalledPSResource",
+        "src:Select-Object",
+        "src:Version",
+        "semerro"
+      ],
+      "task": "Missão final: escreva, numa string, o comando que lista os módulos instalados pela galeria mostrando só Name e Version. Depois, rode-o de verdade no seu terminal.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'Get-InstalledPSResource | Select-Object Name, Version'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-InstalledPSResource",
+        "Select-Object",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
       "id": "modulos-proprios-1",
       "pagina": "modulos-proprios.html",
       "titulo": "Criando seu Módulo (.psm1)",
@@ -7883,6 +8206,571 @@
       "etapa": "pwsh-7.7"
     },
     {
+      "id": "processos-1",
+      "pagina": "processos.html",
+      "titulo": "Processos (Get-Process)",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "src:Get-Process;;src:\\$PID;;semerro",
+      "metas": [
+        "src:Get-Process",
+        "src:\\$PID",
+        "semerro"
+      ],
+      "task": "Experimente: escreva, numa string, o comando que mostra o nome do processo do PowerShell atual usando $PID. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = '(Get-Process -Id $PID).ProcessName'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Process",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "processos-2",
+      "pagina": "processos.html",
+      "titulo": "Processos (Get-Process)",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "src:Get-Process;;src:Sort-Object WorkingSet64;;src:-First 3;;src:MB;;semerro",
+      "metas": [
+        "src:Get-Process",
+        "src:Sort-Object WorkingSet64",
+        "src:-First 3",
+        "src:MB",
+        "semerro"
+      ],
+      "task": "Missão final: escreva, numa string, o comando que mostra os 3 processos que mais usam memória, com uma coluna MB. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'Get-Process | Sort-Object WorkingSet64 -Descending | Select-Object -First 3 ProcessName, @{ n = ''MB''; e = { [math]::Round($_.WorkingSet64 / 1MB) } }'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Process",
+        "Select-Object",
+        "Sort-Object",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "start-process-1",
+      "pagina": "start-process.html",
+      "titulo": "Abrindo Programas (Start-Process)",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "src:Start-Process;;src:exit 3;;src:-Wait;;src:-PassThru;;src:ExitCode;;semerro",
+      "metas": [
+        "src:Start-Process",
+        "src:exit 3",
+        "src:-Wait",
+        "src:-PassThru",
+        "src:ExitCode",
+        "semerro"
+      ],
+      "task": "Experimente: escreva, numa string, o comando que roda pwsh com exit 3, espera terminar e mostra o ExitCode. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = '(Start-Process pwsh -ArgumentList ''-NoProfile'', ''-Command'', ''exit 3'' -Wait -PassThru -WindowStyle Hidden).ExitCode'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Start-Process",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "start-process-2",
+      "pagina": "start-process.html",
+      "titulo": "Abrindo Programas (Start-Process)",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "src:Start-Process;;src:-File;;src:linhas\\.ps1;;src:-RedirectStandardOutput;;semerro",
+      "metas": [
+        "src:Start-Process",
+        "src:-File",
+        "src:linhas\\.ps1",
+        "src:-RedirectStandardOutput",
+        "semerro"
+      ],
+      "task": "Missão final: escreva, numa string, o comando seguro da seção 4: rodar pwsh com o arquivo linhas.ps1 (pelo -File), esperando terminar, na mesma janela, e gravando a saída em saida.txt. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'Start-Process pwsh -ArgumentList ''-NoProfile'', ''-File'', ''linhas.ps1'' -Wait -NoNewWindow -RedirectStandardOutput saida.txt'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Start-Process",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "variaveis-ambiente-1",
+      "pagina": "variaveis-ambiente.html",
+      "titulo": "Variáveis de Ambiente ($env:)",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "out:teste;;src:\\$env:;;semerro",
+      "metas": [
+        "out:teste",
+        "src:\\$env:",
+        "semerro"
+      ],
+      "task": "Experimente: crie a variável de ambiente MEU_AMBIENTE com o valor teste e mostre o valor.",
+      "script": "",
+      "solucao": "$env:MEU_AMBIENTE = \"teste\"\n$env:MEU_AMBIENTE",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "variaveis-ambiente-2",
+      "pagina": "variaveis-ambiente.html",
+      "titulo": "Variáveis de Ambiente ($env:)",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "out:ok;;src:Remove-Item;;semerro",
+      "metas": [
+        "out:ok",
+        "src:Remove-Item",
+        "semerro"
+      ],
+      "task": "Missão final: crie $env:TESTE, apague com Remove-Item Env:TESTE e mostre ok se ela ficou vazia ($null -eq $env:TESTE).",
+      "script": "$env:TESTE = \"1\"",
+      "solucao": "$env:TESTE = \"1\"\nRemove-Item Env:TESTE\nif ($null -eq $env:TESTE) { \"ok\" }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Remove-Item"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "compress-archive-1",
+      "pagina": "compress-archive.html",
+      "titulo": "Arquivos Zip (Compress-Archive)",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "src:Compress-Archive;;src:-Path docs;;src:-DestinationPath docs\\.zip;;semerro",
+      "metas": [
+        "src:Compress-Archive",
+        "src:-Path docs",
+        "src:-DestinationPath docs\\.zip",
+        "semerro"
+      ],
+      "task": "Experimente: escreva, numa string, o comando que compacta a pasta docs em docs.zip. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'Compress-Archive -Path docs -DestinationPath docs.zip'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Compress-Archive",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "compress-archive-2",
+      "pagina": "compress-archive.html",
+      "titulo": "Arquivos Zip (Compress-Archive)",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "src:Expand-Archive;;src:docs\\.zip;;src:copia;;semerro",
+      "metas": [
+        "src:Expand-Archive",
+        "src:docs\\.zip",
+        "src:copia",
+        "semerro"
+      ],
+      "task": "Missão final: escreva, numa string, o comando que extrai docs.zip para a pasta copia. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'Expand-Archive -Path docs.zip -DestinationPath copia'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Expand-Archive",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "cim-1",
+      "pagina": "cim.html",
+      "titulo": "Informações do Computador (Get-CimInstance)",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "src:Get-CimInstance;;src:Win32_LogicalDisk;;src:FreeSpace;;src:1GB;;semerro",
+      "metas": [
+        "src:Get-CimInstance",
+        "src:Win32_LogicalDisk",
+        "src:FreeSpace",
+        "src:1GB",
+        "semerro"
+      ],
+      "task": "Experimente: escreva, numa string, o comando que mostra o espaço livre do disco C: em GB, no formato Livre: 123,4 GB. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = '\"Livre: {0:N1} GB\" -f ((Get-CimInstance Win32_LogicalDisk -Filter \"DeviceID = ''C:''\").FreeSpace / 1GB)'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-CimInstance",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "cim-2",
+      "pagina": "cim.html",
+      "titulo": "Informações do Computador (Get-CimInstance)",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "src:Win32_OperatingSystem;;src:LastBootUpTime;;src:Days;;semerro",
+      "metas": [
+        "src:Win32_OperatingSystem",
+        "src:LastBootUpTime",
+        "src:Days",
+        "semerro"
+      ],
+      "task": "Missão final: escreva, numa string, o comando que mostra há quantos dias o computador está ligado, usando LastBootUpTime, no formato Ligado há N dias. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = '\"Ligado há {0} dias\" -f ((Get-Date) - (Get-CimInstance Win32_OperatingSystem).LastBootUpTime).Days'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-CimInstance",
+        "Get-Date",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "eventos-1",
+      "pagina": "eventos.html",
+      "titulo": "Logs de Eventos (Get-WinEvent)",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "src:Get-WinEvent;;src:-LogName System;;src:-MaxEvents 3;;src:TimeCreated;;semerro",
+      "metas": [
+        "src:Get-WinEvent",
+        "src:-LogName System",
+        "src:-MaxEvents 3",
+        "src:TimeCreated",
+        "semerro"
+      ],
+      "task": "Experimente: escreva, numa string, o comando que mostra os 3 últimos eventos do log System com TimeCreated e Id. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'Get-WinEvent -LogName System -MaxEvents 3 | Select-Object TimeCreated, Id'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-WinEvent",
+        "Select-Object",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "eventos-2",
+      "pagina": "eventos.html",
+      "titulo": "Logs de Eventos (Get-WinEvent)",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "src:Get-WinEvent;;src:Application;;src:-MaxEvents 100;;src:Group-Object LevelDisplayName;;semerro",
+      "metas": [
+        "src:Get-WinEvent",
+        "src:Application",
+        "src:-MaxEvents 100",
+        "src:Group-Object LevelDisplayName",
+        "semerro"
+      ],
+      "task": "Missão final: escreva, numa string, o comando que agrupa os 100 últimos eventos do log Application por nível e mostra Name e Count. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'Get-WinEvent -LogName Application -MaxEvents 100 | Group-Object LevelDisplayName | Select-Object Name, Count'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-WinEvent",
+        "Group-Object",
+        "Select-Object",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "tarefas-agendadas-1",
+      "pagina": "tarefas-agendadas.html",
+      "titulo": "Tarefas Agendadas",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "src:New-ScheduledTaskTrigger;;src:-Daily;;src:20:00;;semerro",
+      "metas": [
+        "src:New-ScheduledTaskTrigger",
+        "src:-Daily",
+        "src:20:00",
+        "semerro"
+      ],
+      "task": "Experimente: escreva, numa string, o comando que monta (sem registrar) um gatilho diário às 20h. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows. Lembre que o StartBoundary aparece em UTC.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'New-ScheduledTaskTrigger -Daily -At \"20:00\"'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "New-ScheduledTaskTrigger",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "tarefas-agendadas-2",
+      "pagina": "tarefas-agendadas.html",
+      "titulo": "Tarefas Agendadas",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "src:New-ScheduledTaskAction;;src:pwsh\\.exe;;src:relatorio\\.ps1;;semerro",
+      "metas": [
+        "src:New-ScheduledTaskAction",
+        "src:pwsh\\.exe",
+        "src:relatorio\\.ps1",
+        "semerro"
+      ],
+      "task": "Missão final: escreva, numa string, o comando que monta (sem registrar) uma ação que roda pwsh.exe com -File C:\\Scripts\\relatorio.ps1. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'New-ScheduledTaskAction -Execute \"pwsh.exe\" -Argument ''-NoProfile -File \"C:\\Scripts\\relatorio.ps1\"'''\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "New-ScheduledTaskAction",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "permissoes-1",
+      "pagina": "permissoes.html",
+      "titulo": "Permissões (Get-Acl)",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "src:Get-Acl;;src:teste\\.txt;;src:AccessControlType;;semerro",
+      "metas": [
+        "src:Get-Acl",
+        "src:teste\\.txt",
+        "src:AccessControlType",
+        "semerro"
+      ],
+      "task": "Experimente: escreva, numa string, o comando que mostra o AccessControlType das regras da ACL de teste.txt. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = '(Get-Acl teste.txt).Access.AccessControlType'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Acl",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "permissoes-2",
+      "pagina": "permissoes.html",
+      "titulo": "Permissões (Get-Acl)",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "src:Get-Acl;;src:IdentityReference;;src:FileSystemRights;;semerro",
+      "metas": [
+        "src:Get-Acl",
+        "src:IdentityReference",
+        "src:FileSystemRights",
+        "semerro"
+      ],
+      "task": "Missão final: escreva, numa string, o comando que mostra quem (IdentityReference) tem quais direitos (FileSystemRights) na pasta atual. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = '(Get-Acl .).Access | Select-Object IdentityReference, FileSystemRights'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Acl",
+        "Select-Object",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "credenciais-1",
+      "pagina": "credenciais.html",
+      "titulo": "Senhas e Credenciais",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "src:ConvertTo-SecureString;;src:-AsPlainText;;src:-is \\[securestring\\];;semerro",
+      "metas": [
+        "src:ConvertTo-SecureString",
+        "src:-AsPlainText",
+        "src:-is \\[securestring\\]",
+        "semerro"
+      ],
+      "task": "Experimente: escreva, numa string, o comando que cria um SecureString a partir de abc (só para teste) e confere com -is [securestring]. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = '(ConvertTo-SecureString \"abc\" -AsPlainText -Force) -is [securestring]'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "credenciais-2",
+      "pagina": "credenciais.html",
+      "titulo": "Senhas e Credenciais",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "src:pscredential;;src:ana;;src:UserName;;semerro",
+      "metas": [
+        "src:pscredential",
+        "src:ana",
+        "src:UserName",
+        "semerro"
+      ],
+      "task": "Missão final: escreva, numa string, o comando que monta uma credencial [pscredential] com o usuário ana (senha de teste abc) e mostra o UserName. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = '[pscredential]::new(\"ana\", (ConvertTo-SecureString \"abc\" -AsPlainText -Force)).UserName'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "rede-1",
+      "pagina": "rede.html",
+      "titulo": "Rede (Test-Connection)",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "src:Test-Connection;;src:-Count 1;;src:-Quiet;;semerro",
+      "metas": [
+        "src:Test-Connection",
+        "src:-Count 1",
+        "src:-Quiet",
+        "semerro"
+      ],
+      "task": "Experimente: escreva, numa string, o comando que faz um ping com uma tentativa em learn.microsoft.com e responde só True ou False. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'Test-Connection learn.microsoft.com -Count 1 -Quiet'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Test-Connection",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "rede-2",
+      "pagina": "rede.html",
+      "titulo": "Rede (Test-Connection)",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "src:Test-NetConnection;;src:-Port 443;;src:-InformationLevel Quiet;;semerro",
+      "metas": [
+        "src:Test-NetConnection",
+        "src:-Port 443",
+        "src:-InformationLevel Quiet",
+        "semerro"
+      ],
+      "task": "Missão final: escreva, numa string, o comando que testa a porta 443 de learn.microsoft.com mostrando só True ou False. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'Test-NetConnection learn.microsoft.com -Port 443 -InformationLevel Quiet'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Test-NetConnection",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
       "id": "web-1",
       "pagina": "web.html",
       "titulo": "Internet (Invoke-WebRequest e Invoke-RestMethod)",
@@ -7903,6 +8791,63 @@
       "inicial_igual_solucao": false,
       "cmdlets": [
         "Invoke-RestMethod"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "remoting-1",
+      "pagina": "remoting.html",
+      "titulo": "PowerShell Remoto",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "src:Get-Service;;src:WinRM;;src:Status;;semerro",
+      "metas": [
+        "src:Get-Service",
+        "src:WinRM",
+        "src:Status",
+        "semerro"
+      ],
+      "task": "Experimente: escreva, numa string, o comando que mostra se o serviço WinRM está rodando (a propriedade Status). O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = '(Get-Service WinRM).Status'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Service",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "remoting-2",
+      "pagina": "remoting.html",
+      "titulo": "PowerShell Remoto",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "src:Get-Service;;src:WinRM;;src:StartType;;semerro",
+      "metas": [
+        "src:Get-Service",
+        "src:WinRM",
+        "src:StartType",
+        "semerro"
+      ],
+      "task": "Missão final: escreva, numa string, o comando que mostra Name e StartType do serviço WinRM. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'Get-Service WinRM | Select-Object Name, StartType'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Service",
+        "Select-Object",
+        "Write-Output"
       ],
       "aliases": [],
       "recursos": [],
@@ -8164,6 +9109,62 @@
       "etapa": "pwsh-7.7"
     },
     {
+      "id": "pester-1",
+      "pagina": "pester.html",
+      "titulo": "Testes com Pester",
+      "secao": "Boas Práticas",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "src:Invoke-Pester;;src:-PassThru;;src:Result;;semerro",
+      "metas": [
+        "src:Invoke-Pester",
+        "src:-PassThru",
+        "src:Result",
+        "semerro"
+      ],
+      "task": "Experimente: escreva, numa string, o comando que roda os testes de Calculo.Tests.ps1 com -PassThru e mostra o Result. O simulador do guia não tem o Pester; depois, rode o comando de verdade no seu terminal, com o Pester 5 instalado.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = '(Invoke-Pester -Path .\\Calculo.Tests.ps1 -PassThru -Output None).Result'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Invoke-Pester",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "pester-2",
+      "pagina": "pester.html",
+      "titulo": "Testes com Pester",
+      "secao": "Boas Práticas",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "src:It ;;src:Get-Desconto -Preco 80 -Porcento 25;;src:Should -Be 60;;semerro",
+      "metas": [
+        "src:It ",
+        "src:Get-Desconto -Preco 80 -Porcento 25",
+        "src:Should -Be 60",
+        "semerro"
+      ],
+      "task": "Missão final: escreva, numa string, um It que confere que Get-Desconto -Preco 80 -Porcento 25 dá 60. Depois, coloque esse It dentro do Describe do seu Calculo.Tests.ps1 e rode o Pester no seu terminal.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'It \"25% de 80\" { Get-Desconto -Preco 80 -Porcento 25 | Should -Be 60 }'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Desconto",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
       "id": "bash-para-powershell-1",
       "pagina": "bash-para-powershell.html",
       "titulo": "Do Bash para o PowerShell",
@@ -8404,6 +9405,275 @@
       "inicial_igual_solucao": false,
       "cmdlets": [
         "Invoke-RestMethod"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "projeto-organizador-1",
+      "pagina": "projeto-organizador.html",
+      "titulo": "Projeto: Organizador de Downloads",
+      "secao": "Projetos",
+      "nivel": "pj",
+      "n": 1,
+      "goal": "out:Imagens;;src:-WhatIf;;semerro",
+      "metas": [
+        "out:Imagens",
+        "src:-WhatIf",
+        "semerro"
+      ],
+      "task": "Experimente: simule com -WhatIf a mudança de foto.jpg para a pasta Imagens.",
+      "script": "Set-Content foto.jpg \"x\"\nNew-Item -ItemType Directory Imagens -Force | Out-Null",
+      "solucao": "Set-Content foto.jpg \"x\"\nNew-Item -ItemType Directory Imagens -Force | Out-Null\nMove-Item foto.jpg -Destination Imagens -WhatIf",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Move-Item",
+        "New-Item",
+        "Out-Null",
+        "Set-Content"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "projeto-organizador-2",
+      "pagina": "projeto-organizador.html",
+      "titulo": "Projeto: Organizador de Downloads",
+      "secao": "Projetos",
+      "nivel": "pj",
+      "n": 2,
+      "goal": "out:Documentos;;src:\\$destinos;;semerro",
+      "metas": [
+        "out:Documentos",
+        "src:\\$destinos",
+        "semerro"
+      ],
+      "task": "Missão final: usando a hashtable $destinos, mostre a pasta de destino de relatorio.pdf (use [IO.Path]::GetExtension).",
+      "script": "$destinos = @{ '.pdf' = 'Documentos'; '.jpg' = 'Imagens' }",
+      "solucao": "$destinos = @{ '.pdf' = 'Documentos'; '.jpg' = 'Imagens' }\n$destinos[[IO.Path]::GetExtension('relatorio.pdf')]",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "projeto-backup-1",
+      "pagina": "projeto-backup.html",
+      "titulo": "Projeto: Backup com Zip",
+      "secao": "Projetos",
+      "nivel": "pj",
+      "n": 1,
+      "goal": "out:True;;src:Get-Date -Format;;semerro",
+      "metas": [
+        "out:True",
+        "src:Get-Date -Format",
+        "semerro"
+      ],
+      "task": "Experimente: monte o nome Fotos_AAAA-MM-DD.zip com a data de hoje e confira com -match '^Fotos_\\d{4}-\\d{2}-\\d{2}\\.zip$'.",
+      "script": "$nome = \"Fotos.zip\"",
+      "solucao": "$nome = \"Fotos_{0}.zip\" -f (Get-Date -Format 'yyyy-MM-dd')\n$nome -match '^Fotos_\\d{4}-\\d{2}-\\d{2}\\.zip$'",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Date"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "projeto-backup-2",
+      "pagina": "projeto-backup.html",
+      "titulo": "Projeto: Backup com Zip",
+      "secao": "Projetos",
+      "nivel": "pj",
+      "n": 2,
+      "goal": "out:a.zip;;src:-Skip;;semerro",
+      "metas": [
+        "out:a.zip",
+        "src:-Skip",
+        "semerro"
+      ],
+      "task": "Missão final: da lista a.zip, b.zip, c.zip (ordem do mais velho ao mais novo), mantenha os 2 mais novos e mostre o que seria apagado.",
+      "script": "$zips = \"a.zip\", \"b.zip\", \"c.zip\"",
+      "solucao": "$zips = \"a.zip\", \"b.zip\", \"c.zip\"\n$zips | Sort-Object -Descending | Select-Object -Skip 2",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Select-Object",
+        "Sort-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "projeto-relatorio-1",
+      "pagina": "projeto-relatorio.html",
+      "titulo": "Projeto: Relatório de Arquivos em CSV",
+      "secao": "Projetos",
+      "nivel": "pj",
+      "n": 1,
+      "goal": "out:.jpg;;src:Group-Object;;semerro",
+      "metas": [
+        "out:.jpg",
+        "src:Group-Object",
+        "semerro"
+      ],
+      "task": "Experimente: agrupe os arquivos da pasta por extensão e mostre Name e Count.",
+      "script": "Set-Content a.jpg \"1\"; Set-Content b.jpg \"2\"; Set-Content c.txt \"3\"\nGet-ChildItem -File",
+      "solucao": "Set-Content a.jpg \"1\"; Set-Content b.jpg \"2\"; Set-Content c.txt \"3\"\nGet-ChildItem -File | Group-Object Extension | Select-Object Name, Count",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-ChildItem",
+        "Group-Object",
+        "Select-Object",
+        "Set-Content"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "projeto-relatorio-2",
+      "pagina": "projeto-relatorio.html",
+      "titulo": "Projeto: Relatório de Arquivos em CSV",
+      "secao": "Projetos",
+      "nivel": "pj",
+      "n": 2,
+      "goal": "out:3;;src:Measure-Object;;semerro",
+      "metas": [
+        "out:3",
+        "src:Measure-Object",
+        "semerro"
+      ],
+      "task": "Missão final: crie três arquivos com 1 byte cada (Set-Content x -NoNewline) e mostre a soma dos tamanhos.",
+      "script": "\"a\", \"b\", \"c\" | ForEach-Object { Set-Content \"$_.txt\" \"x\" -NoNewline }",
+      "solucao": "\"a\", \"b\", \"c\" | ForEach-Object { Set-Content \"$_.txt\" \"x\" -NoNewline }\n(Get-ChildItem *.txt | Measure-Object Length -Sum).Sum",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-ChildItem",
+        "Measure-Object",
+        "Set-Content"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "projeto-renomear-1",
+      "pagina": "projeto-renomear.html",
+      "titulo": "Projeto: Renomear Fotos em Lote",
+      "secao": "Projetos",
+      "nivel": "pj",
+      "n": 1,
+      "goal": "out:Viagem-007.jpg;;src:D3;;semerro",
+      "metas": [
+        "out:Viagem-007.jpg",
+        "src:D3",
+        "semerro"
+      ],
+      "task": "Experimente: monte o nome Viagem-007.jpg a partir do número 7 usando {0:D3}.",
+      "script": "$n = 7\n\"Viagem-$n.jpg\"",
+      "solucao": "$n = 7\n\"Viagem-{0:D3}.jpg\" -f $n",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "projeto-renomear-2",
+      "pagina": "projeto-renomear.html",
+      "titulo": "Projeto: Renomear Fotos em Lote",
+      "secao": "Projetos",
+      "nivel": "pj",
+      "n": 2,
+      "goal": "out:foto-001.jpg;;src:Rename-Item;;semerro",
+      "metas": [
+        "out:foto-001.jpg",
+        "src:Rename-Item",
+        "semerro"
+      ],
+      "task": "Missão final: renomeie IMG_1.JPG para foto-001.jpg e mostre o nome do arquivo.",
+      "script": "Set-Content IMG_1.JPG \"x\"",
+      "solucao": "Set-Content IMG_1.JPG \"x\"\nRename-Item IMG_1.JPG -NewName (\"foto-{0:D3}.jpg\" -f 1)\n(Get-ChildItem *.jpg).Name",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-ChildItem",
+        "Rename-Item",
+        "Set-Content"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "projeto-monitor-1",
+      "pagina": "projeto-monitor.html",
+      "titulo": "Projeto: Monitor de Serviços",
+      "secao": "Projetos",
+      "nivel": "pj",
+      "n": 1,
+      "goal": "src:Get-Service ServicoQueNaoExiste;;src:-ErrorAction SilentlyContinue;;src:NaoEncontrado;;semerro",
+      "metas": [
+        "src:Get-Service ServicoQueNaoExiste",
+        "src:-ErrorAction SilentlyContinue",
+        "src:NaoEncontrado",
+        "semerro"
+      ],
+      "task": "Experimente: escreva, numa string, o comando que mostra NaoEncontrado quando o serviço ServicoQueNaoExiste não existir, sem erro na tela. O simulador do guia não imita esse comando; depois, rode-o de verdade no seu Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'if (Get-Service ServicoQueNaoExiste -ErrorAction SilentlyContinue) { \"Existe\" } else { \"NaoEncontrado\" }'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Service",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "projeto-monitor-2",
+      "pagina": "projeto-monitor.html",
+      "titulo": "Projeto: Monitor de Serviços",
+      "secao": "Projetos",
+      "nivel": "pj",
+      "n": 2,
+      "goal": "out:ATENÇÃO: Spooler;;src:Where-Object;;semerro",
+      "metas": [
+        "out:ATENÇÃO: Spooler",
+        "src:Where-Object",
+        "semerro"
+      ],
+      "task": "Missão final: da lista de objetos abaixo, mostre ATENÇÃO:  seguido dos serviços que não estão Running.",
+      "script": "$estados = [pscustomobject]@{ Servico = 'Spooler'; Estado = 'Stopped' }, [pscustomobject]@{ Servico = 'EventLog'; Estado = 'Running' }",
+      "solucao": "$estados = [pscustomobject]@{ Servico = 'Spooler'; Estado = 'Stopped' }, [pscustomobject]@{ Servico = 'EventLog'; Estado = 'Running' }\n$p = $estados | Where-Object Estado -ne 'Running'\n\"ATENÇÃO: \" + ($p.Servico -join ', ')",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Where-Object"
       ],
       "aliases": [],
       "recursos": [],

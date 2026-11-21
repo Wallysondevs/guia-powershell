@@ -31,7 +31,7 @@
 </ul>
 </div>
 
-<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional. Os quadros marcados <strong>Saída no Windows (PowerShell 7.7)</strong> foram colhidos num Windows 10 em português, com o nome do computador e o da usuária trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>).</p>
 
 <hr>
 
@@ -164,8 +164,9 @@ chegou 3
 <div class="cenario">
 <strong><code>$_</code> fora do bloco</strong>
 
-<pre><code>1..3 | Where-Object $_ -gt 1
-</code></pre>
+<pre class="term" data-title="Saída no Windows (PowerShell 7.7)">PS&gt; 1..3 | Where-Object $_ -gt 1
+Where-Object: Não é possível validar o argumento no parâmetro 'Property'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again.
+</pre>
 
 <p>O <code>$_</code> só existe dentro das chaves <code>{ }</code> do bloco. Fora delas ele está vazio, e o <code>Where-Object</code> recebe um nome de propriedade vazio: o PowerShell recusa o comando com um erro dizendo que o argumento do parâmetro <code>Property</code> está vazio. Escreva sempre <code>Where-Object { $_ -gt 1 }</code>.</p>
 

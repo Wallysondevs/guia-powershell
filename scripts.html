@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell scripts .ps1 — criar, salvar e rodar (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a criar seu primeiro script .ps1 no PowerShell 7: salvar comandos num arquivo, rodar com .\script.ps1, passar argumentos, comentários, $PSScriptRoot e os erros mais comuns ao executar scripts no Windows.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Scripts (<span class="hl">.ps1</span>)</h1>
+
+<p class="intro">Até aqui você digitou um comando de cada vez. Um <strong>script</strong> é um arquivo de texto com extensão <code>.ps1</code> que guarda vários comandos para rodar de uma vez, quantas vezes quiser. É a receita de bolo escrita: em vez de lembrar cada passo, você só manda executar.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A criar um arquivo <code>.ps1</code> e rodar com <code>.\nome.ps1</code>.</li>
+  <li>Por que o <code>.\</code> na frente é obrigatório.</li>
+  <li>A usar comentários e <code>$PSScriptRoot</code>.</li>
+  <li>A passar valores para o script.</li>
+  <li>A rodar um script de outra pasta e pelo <code>pwsh -File</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows.</p>
+
+<hr>
+
+<h2>A ideia: a receita escrita</h2>
+
+<p>Quem faz bolo toda semana não decora a receita: escreve num papel. O script é esse papel. Você escreve os comandos uma vez e o PowerShell lê o arquivo de cima para baixo, executando linha por linha.</p>
+
+<hr>
+
+<h2>1. Criando o primeiro script</h2>
+
+<p>Vamos criar uma pasta de testes e, nela, um arquivo <code>ola.ps1</code>. Você pode usar o Bloco de Notas, o VS Code ou o próprio PowerShell:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; New-Item -ItemType Directory -Path scripts-teste -Force | Out-Null
+PS&gt; Set-Location scripts-teste
+PS&gt; Set-Content ola.ps1 @'
+&gt;&gt; # Meu primeiro script
+&gt;&gt; "Olá! Hoje é $((Get-Date).ToString('dddd'))."
+&gt;&gt; "Você está na pasta: $(Split-Path -Leaf (Get-Location))"
+&gt;&gt; '@
+PS&gt; Get-Content ola.ps1
+# Meu primeiro script
+"Olá! Hoje é $((Get-Date).ToString('dddd'))."
+"Você está na pasta: $(Split-Path -Leaf (Get-Location))"
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Set-Content ola.ps1</dt><dd>Grava o texto no arquivo <code>ola.ps1</code> (cria se não existir).</dd>
+
+  <dt>@' ... '@</dt><dd>Texto de várias linhas, guardado exatamente como está (sem trocar variáveis).</dd>
+
+  <dt>#</dt><dd>Começa um comentário: o PowerShell ignora o resto da linha.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Rodando com .\</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; .\ola.ps1
+Olá! Hoje é sábado.
+Você está na pasta: scripts-teste
+</pre>
+
+<dl class="anatomy">
+
+  <dt>.\</dt><dd>"Nesta pasta". O PowerShell não roda scripts da pasta atual só pelo nome, por segurança.</dd>
+
+</dl>
+
+<p>Se você digitar só <code>ola.ps1</code>, sem o <code>.\</code>, o PowerShell procura um comando com esse nome nas pastas do sistema e não acha:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; ola.ps1
+ola.ps1: O termo "ola.ps1" não é reconhecido como um nome de um cmdlet, função, arquivo de script ou programa executável.
+Verifique a ortografia do nome ou, se um caminho foi incluído, verifique se o caminho está correto e tente novamente.
+</pre>
+
+<p>Isso é proposital: impede que um arquivo malicioso com nome de comando (por exemplo <code>dir.ps1</code>) seja executado sem querer.</p>
+
+<div class="tip"><strong>Política de execução</strong> No Windows, a primeira tentativa de rodar um script pode ser bloqueada pela <strong>política de execução</strong>. Veja a aula <a href="execution-policy.html">Política de Execução</a> para entender e liberar com segurança.</div>
+
+<hr>
+
+<h2>3. Comentários</h2>
+
+<pre><code># Comentário de uma linha
+
+&lt;#
+  Comentário de várias linhas.
+  Ótimo para explicar o que o script faz.
+#&gt;
+"O código continua aqui"
+</code></pre>
+
+<p>Comente o <em>porquê</em>, não o óbvio. <code># soma 1</code> em cima de <code>$i++</code> não ajuda ninguém; <code># o sistema conta a partir de 1</code> ajuda.</p>
+
+<hr>
+
+<h2>4. $PSScriptRoot: a pasta do script</h2>
+
+<p>Um script costuma ler arquivos que ficam ao lado dele. Se você usar caminhos relativos, eles dependem de onde o terminal está, não de onde o script está. A variável <code>$PSScriptRoot</code> resolve isso:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Set-Content dados.txt "maçã`nbanana`nuva"
+PS&gt; Set-Content contar.ps1 @'
+&gt;&gt; $arquivo = Join-Path $PSScriptRoot "dados.txt"
+&gt;&gt; $linhas = Get-Content $arquivo
+&gt;&gt; "O arquivo tem $($linhas.Count) linhas."
+&gt;&gt; '@
+PS&gt; Set-Location ..
+PS&gt; .\scripts-teste\contar.ps1
+O arquivo tem 3 linhas.
+PS&gt; Set-Location scripts-teste
+</pre>
+
+<dl class="anatomy">
+
+  <dt>$PSScriptRoot</dt><dd>A pasta onde o script está gravado. Só tem valor dentro de um script.</dd>
+
+  <dt>Join-Path</dt><dd>Junta pasta e arquivo com a barra certa.</dd>
+
+</dl>
+
+<hr>
+
+<h2>5. Passando valores para o script</h2>
+
+<p>Os valores digitados depois do nome do script chegam na variável <code>$args</code>. O jeito profissional é um bloco <code>param()</code>, que você conhece em detalhes na aula <a href="parametros-script.html">Parâmetros de Script</a>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Set-Content saudar.ps1 @'
+&gt;&gt; param([string]$Nome = "mundo", [int]$Vezes = 1)
+&gt;&gt; 1..$Vezes | ForEach-Object { "Olá, $Nome!" }
+&gt;&gt; '@
+PS&gt; .\saudar.ps1
+Olá, mundo!
+PS&gt; .\saudar.ps1 -Nome Ana -Vezes 2
+Olá, Ana!
+Olá, Ana!
+</pre>
+
+<hr>
+
+<h2>6. Rodando de fora: pwsh -File</h2>
+
+<p>Para rodar um script a partir do Prompt de Comando, do Agendador de Tarefas ou de um atalho, chame o PowerShell 7 com <code>-File</code>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; pwsh -NoProfile -File .\saudar.ps1 -Nome Carla
+Olá, Carla!
+</pre>
+
+<dl class="anatomy">
+
+  <dt>pwsh</dt><dd>O PowerShell 7.</dd>
+
+  <dt>-NoProfile</dt><dd>Não carrega o seu perfil (fica mais rápido e previsível).</dd>
+
+  <dt>-File</dt><dd>Roda o script e repassa os parâmetros.</dd>
+
+</dl>
+
+<div class="tryps" data-goal="out:Olá, Ana!;;src:\.\\saudar\.ps1;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> o script <code>saudar.ps1</code> já está gravado. Rode-o passando o nome <code>Ana</code>.</p>
+
+<pre class="script" data-file="main.ps1">Set-Content saudar.ps1 'param($Nome = "mundo") "Olá, $Nome!"'
+</pre>
+
+<pre class="solucao" data-file="main.ps1">Set-Content saudar.ps1 'param($Nome = "mundo") "Olá, $Nome!"'
+.\saudar.ps1 -Nome Ana
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>"O termo 'ola.ps1' não é reconhecido"</strong>
+
+<p>Faltou o <code>.\</code> na frente, ou você não está na pasta do script. Confira com <code>Get-Location</code> e rode <code>.\ola.ps1</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>"não pode ser carregado porque a execução de scripts foi desabilitada"</strong>
+
+<p>É a política de execução. Veja a aula <a href="execution-policy.html">Política de Execução</a>; o comum é <code>Set-ExecutionPolicy RemoteSigned -Scope CurrentUser</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Acentos aparecendo errado</strong>
+
+<p>O PowerShell 7 grava e lê UTF-8 por padrão. Se o arquivo foi salvo em outra codificação por um editor antigo, salve de novo como UTF-8. Se o script também vai rodar no Windows PowerShell 5.1, prefira "UTF-8 com BOM".</p>
+
+</div>
+
+<div class="cenario">
+<strong>Caminho com espaço</strong>
+
+<p><code>.\Meus Scripts\a.ps1</code> quebra no espaço. Use aspas e o operador de chamada: <code>&amp; ".\Meus Scripts\a.ps1"</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>.\script.ps1</code></td><td>Roda o script da pasta atual.</td></tr>
+
+<tr><td><code>&amp; "C:\caminho com espaço\s.ps1"</code></td><td>Roda um caminho entre aspas.</td></tr>
+
+<tr><td><code>. .\funcoes.ps1</code></td><td>Dot-source: carrega o script na sessão atual.</td></tr>
+
+<tr><td><code>pwsh -File s.ps1 -Param valor</code></td><td>Roda de fora do PowerShell.</td></tr>
+
+<tr><td><code>$PSScriptRoot</code></td><td>Pasta do script.</td></tr>
+
+<tr><td><code>$PSCommandPath</code></td><td>Caminho completo do script.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Rodando da pasta atual</h3>
+<p>Complete para rodar <code>backup.ps1</code> que está na pasta atual:</p>
+<div class="ex-code"><input data-answer=".\" aria-label="resposta">backup.ps1</div>
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. Por que <code>ola.ps1</code> sem <code>.\</code> não roda?</p>
+
+<label><input type="radio" name="q2"> Porque o arquivo está corrompido</label>
+
+<label><input type="radio" name="q2"> Porque falta a extensão</label>
+
+<label><input type="radio" name="q2"> Porque o PowerShell não procura scripts na pasta atual sem você pedir</label>
+
+<label><input type="radio" name="q2"> Porque precisa ser administrador</label>
+
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">3. Qual variável tem a pasta onde o script está gravado?</p>
+
+<label><input type="radio" name="q3"> $PSScriptRoot</label>
+
+<label><input type="radio" name="q3"> $PWD</label>
+
+<label><input type="radio" name="q3"> $HOME</label>
+
+<label><input type="radio" name="q3"> $PSHOME</label>
+
+</div>
+
+<div class="tryps" data-goal="out:3 linhas;;src:\$PSScriptRoot;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> crie <code>conta.ps1</code> que lê <code>lista.txt</code> usando <code>$PSScriptRoot</code> e mostra <code>3 linhas</code>. Depois rode o script.</p>
+
+<pre class="script" data-file="main.ps1">Set-Content lista.txt "a`nb`nc"
+Set-Content conta.ps1 '"$((Get-Content lista.txt).Count) linhas"'
+.\conta.ps1
+</pre>
+
+<pre class="solucao" data-file="main.ps1">Set-Content lista.txt "a`nb`nc"
+Set-Content conta.ps1 '"$((Get-Content (Join-Path $PSScriptRoot lista.txt)).Count) linhas"'
+.\conta.ps1
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Um script é um arquivo <code>.ps1</code> com comandos.</li>
+  <li>Rode com <code>.\nome.ps1</code>; o <code>.\</code> é obrigatório por segurança.</li>
+  <li><code>$PSScriptRoot</code> aponta para a pasta do script.</li>
+  <li><code>param()</code> recebe valores; <code>pwsh -File</code> roda de fora.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

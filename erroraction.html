@@ -31,7 +31,7 @@
 </ul>
 </div>
 
-<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional. Os quadros marcados <strong>Saída no Windows (PowerShell 7.7)</strong> foram colhidos num Windows 10 em português, com o nome do computador e o da usuária trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>).</p>
 
 <hr>
 
@@ -83,8 +83,11 @@ Item 'outro' ok
 
 <p>Com o padrão (<code>Continue</code>), o erro apareceria em vermelho entre as duas linhas:</p>
 
-<pre><code>"bom", "ruim", "outro" | ForEach-Object { Testar-Item $_ }
-</code></pre>
+<pre class="term" data-title="Saída no Windows (PowerShell 7.7)">PS&gt; "bom", "ruim", "outro" | ForEach-Object { Testar-Item $_ }
+Item 'bom' ok
+Testar-Item: Item 'ruim' com problema.
+Item 'outro' ok
+</pre>
 
 <dl class="anatomy">
 

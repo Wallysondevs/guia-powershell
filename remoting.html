@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell remoto — Enter-PSSession, Invoke-Command e SSH (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda o PowerShell Remoting no PowerShell 7: rodar comandos em outro computador com Invoke-Command, sessão interativa com Enter-PSSession, sessões reaproveitáveis com New-PSSession, remoting por SSH e por WinRM, e os cuidados de segurança.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>PowerShell Remoto (<span class="hl">Enter-PSSession</span> e SSH)</h1>
+
+<p class="intro">Com o <strong>PowerShell Remoting</strong> você roda comandos em outros computadores como se estivesse sentado na frente deles: um servidor no escritório, o computador da sala, dezenas de máquinas de uma vez. O PowerShell 7 fala por dois "canais": o WinRM (tradicional do Windows) e o SSH (que funciona também com Linux e macOS).</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A diferença entre WinRM e SSH.</li>
+  <li>A rodar um comando remoto com <code>Invoke-Command</code>.</li>
+  <li>A abrir uma sessão interativa com <code>Enter-PSSession</code>.</li>
+  <li>A reaproveitar uma conexão com <code>New-PSSession</code>.</li>
+  <li>A testar tudo no próprio computador (<code>localhost</code>).</li>
+</ul>
+</div>
+
+<p><span class="versao">só Windows</span> As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows.</p>
+
+<hr>
+
+<h2>A ideia: o controle remoto</h2>
+
+<p>Em vez de ir até a outra sala para ligar a TV, você usa o controle remoto. O remoting é o controle remoto do PowerShell: os comandos rodam lá, e o resultado volta para você como objetos.</p>
+
+<hr>
+
+<h2>1. Os dois canais</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Canal</th><th>Como chamar</th><th>Quando usar</th></tr>
+
+<tr><td>WinRM</td><td><code>-ComputerName PC01</code></td><td>Redes Windows de empresa (domínio). Precisa de <code>Enable-PSRemoting</code> no destino.</td></tr>
+
+<tr><td>SSH</td><td><code>-HostName usuario@pc01</code></td><td>Entre sistemas diferentes, ou quando já existe um servidor OpenSSH.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>2. Preparando o destino (WinRM)</h2>
+
+<p>No computador que vai receber os comandos, como administrador:</p>
+
+<pre><code>Enable-PSRemoting
+</code></pre>
+
+<p>Isso liga o serviço WinRM e libera o firewall na rede de domínio ou privada. Em redes "públicas" o Windows não libera por segurança.</p>
+
+<hr>
+
+<h2>3. Conferindo o que já está ligado</h2>
+
+<p>Estes comandos só leem e funcionam sem administrador:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-Service WinRM | Select-Object Name, Status, StartType
+
+Name   Status StartType
+----   ------ ---------
+WinRM Stopped    Manual
+PS&gt; Get-PSSessionConfiguration -ErrorAction SilentlyContinue | Select-Object Name
+PS&gt; $?
+True
+</pre>
+
+<hr>
+
+<h2>4. Invoke-Command: um comando, muitos computadores</h2>
+
+<pre><code>Invoke-Command -ComputerName PC01, PC02 -ScriptBlock { Get-CimInstance Win32_OperatingSystem | Select-Object Caption }
+</code></pre>
+
+<dl class="anatomy">
+
+  <dt>-ComputerName</dt><dd>Um ou vários computadores. Os comandos rodam em paralelo.</dd>
+
+  <dt>-ScriptBlock</dt><dd>O que rodar lá.</dd>
+
+  <dt>PSComputerName</dt><dd>Coluna acrescentada ao resultado: de qual computador veio cada linha.</dd>
+
+</dl>
+
+<p>Para levar variáveis daqui para lá, use <code>$using:</code> (como nos <a href="jobs.html">jobs</a>):</p>
+
+<pre><code>$pasta = "C:\Logs"
+Invoke-Command -ComputerName PC01 { Get-ChildItem $using:pasta }
+</code></pre>
+
+<hr>
+
+<h2>5. Enter-PSSession: sessão interativa</h2>
+
+<pre><code>Enter-PSSession -ComputerName PC01
+[PC01]: PS C:\Users\ana\Documents&gt; hostname
+PC01
+[PC01]: PS C:\Users\ana\Documents&gt; Exit-PSSession
+</code></pre>
+
+<p>O prompt ganha <code>[PC01]:</code> na frente para lembrar que você está no outro computador.</p>
+
+<hr>
+
+<h2>6. Pelo SSH</h2>
+
+<p>Com o OpenSSH instalado no destino e o PowerShell 7 configurado como subsistema SSH:</p>
+
+<pre><code>Enter-PSSession -HostName ana@servidor
+Invoke-Command -HostName ana@servidor -ScriptBlock { $PSVersionTable.PSVersion }
+</code></pre>
+
+<hr>
+
+<h2>7. Sessões reaproveitáveis</h2>
+
+<p>Cada <code>Invoke-Command -ComputerName</code> abre e fecha uma conexão. Para vários comandos, abra uma sessão e reaproveite:</p>
+
+<pre><code>$s = New-PSSession -ComputerName PC01
+Invoke-Command -Session $s { $contador = 1 }
+Invoke-Command -Session $s { $contador + 1 }     # 2: a sessão lembra as variáveis
+Remove-PSSession $s
+</code></pre>
+
+<div class="tryps" data-goal="src:Get-Service;;src:WinRM;;src:Status;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> escreva, numa string, o comando que mostra se o serviço <code>WinRM</code> está rodando (a propriedade <code>Status</code>). O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = '(Get-Service WinRM).Status'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>"Falha na conexão com o servidor remoto ... WinRM não pode concluir a operação"</strong>
+
+<p>O destino não tem o remoting ligado (<code>Enable-PSRemoting</code>), o firewall bloqueia ou o nome está errado. Teste a porta com <code>Test-NetConnection PC01 -Port 5985</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>"Acesso negado"</strong>
+
+<p>Por padrão, só administradores do computador destino podem conectar.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Fora de um domínio</strong>
+
+<p>Entre computadores sem domínio, o WinRM exige configurar <code>TrustedHosts</code> ou usar HTTPS. Nesses casos, o SSH costuma ser mais simples.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Enable-PSRemoting</code></td><td>Liga o remoting (no destino, como administrador).</td></tr>
+
+<tr><td><code>Invoke-Command -ComputerName PC { }</code></td><td>Roda e traz o resultado.</td></tr>
+
+<tr><td><code>Enter-PSSession PC</code> / <code>Exit-PSSession</code></td><td>Entra e sai de uma sessão interativa.</td></tr>
+
+<tr><td><code>-HostName usuario@pc</code></td><td>Usa SSH em vez de WinRM.</td></tr>
+
+<tr><td><code>New-PSSession</code> / <code>Remove-PSSession</code></td><td>Sessão reaproveitável.</td></tr>
+
+<tr><td><code>$using:var</code></td><td>Leva uma variável local para o remoto.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Sessão interativa</h3>
+<p>Complete:</p>
+<div class="ex-code"><input data-answer="Enter-PSSession" aria-label="resposta"> -ComputerName PC01</div>
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. Qual parâmetro usa SSH em vez de WinRM?</p>
+
+<label><input type="radio" name="q2"> ComputerName</label>
+
+<label><input type="radio" name="q2"> Session</label>
+
+<label><input type="radio" name="q2"> HostName</label>
+
+<label><input type="radio" name="q2"> UseSSL</label>
+
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">3. Como levar uma variável local para dentro do Invoke-Command remoto?</p>
+
+<label><input type="radio" name="q3"> $using:variavel</label>
+
+<label><input type="radio" name="q3"> $global:variavel</label>
+
+<label><input type="radio" name="q3"> $remote:variavel</label>
+
+<label><input type="radio" name="q3"> Não é possível</label>
+
+</div>
+
+<div class="tryps" data-goal="src:Get-Service;;src:WinRM;;src:StartType;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> escreva, numa string, o comando que mostra <code>Name</code> e <code>StartType</code> do serviço <code>WinRM</code>. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = 'Get-Service WinRM | Select-Object Name, StartType'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>O remoting roda comandos em outros computadores e traz objetos.</li>
+  <li><code>Invoke-Command</code> para comandos; <code>Enter-PSSession</code> para trabalhar interativamente.</li>
+  <li>WinRM com <code>-ComputerName</code>; SSH com <code>-HostName</code>.</li>
+  <li><code>New-PSSession</code> reaproveita a conexão; <code>$using:</code> leva variáveis.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

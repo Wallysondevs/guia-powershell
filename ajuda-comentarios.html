@@ -29,7 +29,7 @@
 </ul>
 </div>
 
-<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional. Os quadros marcados <strong>Saída no Windows (PowerShell 7.7)</strong> foram colhidos num Windows 10 em português, com o nome do computador e o da usuária trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>).</p>
 
 <hr>
 
@@ -121,8 +121,20 @@ PS&gt; Get-Help Get-Desconto -Parameter Percentual
 
 <h2>3. Só os exemplos</h2>
 
-<pre><code>Get-Help Get-Desconto -Examples
-</code></pre>
+<pre class="term" data-title="Saída no Windows (PowerShell 7.7)">PS&gt; Get-Help Get-Desconto -Examples
+
+NOME
+    Get-Desconto
+    
+SYNOPSIS
+    Calcula o preço com desconto.
+    
+    
+    -------------------------- EXAMPLE 1 --------------------------
+    
+    PS &gt; Get-Desconto -Preco 200 -Percentual 15
+    Devolve 170.
+</pre>
 
 <p>Com <code>-Examples</code>, o <code>Get-Help</code> mostra o nome, o resumo e cada <code>.EXAMPLE</code>, numerado. Num Windows em português, os títulos das seções saem traduzidos (<code>NOME</code>, por exemplo), como você viu na aula <a href="get-help.html">Get-Help</a>.</p>
 

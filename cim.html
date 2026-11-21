@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Get-CimInstance — informações do computador (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a consultar informações do Windows com Get-CimInstance no PowerShell 7: sistema operacional, processador, memória, discos e espaço livre, BIOS e tempo ligado, e filtrar com -Filter. Inclui Get-ComputerInfo.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Informações do Computador (<span class="hl">Get-CimInstance</span>)</h1>
+
+<p class="intro">Qual versão do Windows está instalada? Quanto espaço sobra no disco? Quanto de memória tem? Há quanto tempo o computador está ligado? O <code>Get-CimInstance</code> consulta o "banco de dados" interno do Windows (o CIM/WMI) e responde tudo isso em forma de objetos.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A consultar classes com <code>Get-CimInstance</code>.</li>
+  <li>Sistema operacional, processador, memória e BIOS.</li>
+  <li>Espaço livre em disco em GB.</li>
+  <li>Tempo ligado (uptime).</li>
+  <li>A filtrar com <code>-Filter</code>.</li>
+</ul>
+</div>
+
+<p><span class="versao">só Windows</span> As saídas desta aula foram colhidas no <strong>PowerShell 7.7 de um Windows 10</strong> em português (pt-BR), numa pasta de testes dentro do <code>TEMP</code>. O nome do computador e o da usuária foram trocados por exemplos (<code>NOTEBOOK</code> e <code>ana</code>), e listas que mostrariam os programas instalados foram reduzidas aos itens do próprio Windows.</p>
+
+<hr>
+
+<h2>A ideia: a ficha técnica</h2>
+
+<p>Todo computador tem uma ficha técnica, como a de um carro. O Windows mantém essa ficha atualizada em <strong>classes</strong> (uma para o sistema, uma para o disco, uma para o processador...). Você pergunta pela classe e recebe os dados.</p>
+
+<hr>
+
+<h2>1. O sistema operacional</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-CimInstance Win32_OperatingSystem | Select-Object Caption, Version, OSArchitecture
+
+Caption                                   Version    OSArchitecture
+-------                                   -------    --------------
+Microsoft Windows 10 Pro for Workstations 10.0.19045 64 bits
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Get-CimInstance</dt><dd>Consulta uma classe do CIM.</dd>
+
+  <dt>Win32_OperatingSystem</dt><dd>A classe com dados do Windows instalado.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Processador e memória</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-CimInstance Win32_Processor | Select-Object Name, NumberOfCores, NumberOfLogicalProcessors
+(saída não mostrada: o modelo do processador ajuda a identificar o computador)
+PS&gt; $cs = Get-CimInstance Win32_ComputerSystem
+PS&gt; "Memória: {0:N1} GB" -f ($cs.TotalPhysicalMemory / 1GB)
+Memória: 16,0 GB
+</pre>
+
+<hr>
+
+<h2>3. Discos e espaço livre</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-CimInstance Win32_LogicalDisk -Filter "DriveType = 3" | Select-Object DeviceID, @{ n = 'TamanhoGB'; e = { [math]::Round($_.Size / 1GB, 1) } }, @{ n = 'LivreGB'; e = { [math]::Round($_.FreeSpace / 1GB, 1) } }, @{ n = 'Livre%'; e = { [math]::Round($_.FreeSpace / $_.Size * 100) } }
+
+DeviceID TamanhoGB LivreGB Livre%
+-------- --------- ------- ------
+C:          465,00  120,00  26,00
+</pre>
+
+<dl class="anatomy">
+
+  <dt>-Filter "DriveType = 3"</dt><dd>Só discos locais (3). Pendrives são 2, unidades de rede 4.</dd>
+
+  <dt>FreeSpace / Size</dt><dd>Em bytes; dividimos por <code>1GB</code> para ficar legível.</dd>
+
+</dl>
+
+<p>O filtro usa a linguagem do WMI (WQL): <code>=</code>, <code>&lt;&gt;</code>, <code>&gt;</code>, <code>AND</code>, <code>LIKE 'C%'</code>. Filtrar no <code>-Filter</code> é mais rápido que trazer tudo e usar <code>Where-Object</code>.</p>
+
+<hr>
+
+<h2>4. Há quanto tempo está ligado</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $os = Get-CimInstance Win32_OperatingSystem
+PS&gt; $ligado = (Get-Date) - $os.LastBootUpTime
+PS&gt; "Ligado há {0} dias e {1} horas" -f $ligado.Days, $ligado.Hours
+Ligado há 0 dias e 0 horas
+</pre>
+
+<p>No PowerShell 7 também existe o atalho <code>Get-Uptime</code>.</p>
+
+<hr>
+
+<h2>5. BIOS e fabricante</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-CimInstance Win32_BIOS | Select-Object Manufacturer, SMBIOSBIOSVersion
+(saída não mostrada: a versão da BIOS ajuda a identificar o computador)
+PS&gt; Get-CimInstance Win32_ComputerSystem | Select-Object Manufacturer, Model
+(saída não mostrada: fabricante e modelo ajudam a identificar o computador)
+</pre>
+
+<hr>
+
+<h2>6. Descobrindo classes</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-CimClass -ClassName Win32_*Disk* | Select-Object -First 8 CimClassName
+
+CimClassName
+------------
+Win32_DiskDrive
+Win32_LogicalDisk
+Win32_MappedLogicalDisk
+Win32_DiskPartition
+Win32_LogicalDiskRootDirectory
+Win32_DiskQuota
+Win32_LogonSessionMappedDisk
+Win32_LogicalDiskToPartition
+</pre>
+
+<hr>
+
+<h2>7. Get-ComputerInfo</h2>
+
+<p>Um resumo de tudo de uma vez (demora alguns segundos):</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-ComputerInfo -Property OsName, OsVersion, CsNumberOfLogicalProcessors
+
+OsName                                    OsVersion  CsNumberOfLogicalProcessors
+------                                    ---------  ---------------------------
+Microsoft Windows 10 Pro for Workstations 10.0.19045                           8
+</pre>
+
+<div class="tryps" data-goal="src:Get-CimInstance;;src:Win32_LogicalDisk;;src:FreeSpace;;src:1GB;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> escreva, numa string, o comando que mostra o espaço livre do disco <code>C:</code> em GB, no formato <code>Livre: 123,4 GB</code>. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = '"Livre: {0:N1} GB" -f ((Get-CimInstance Win32_LogicalDisk -Filter "DeviceID = ''C:''").FreeSpace / 1GB)'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>"Classe inválida"</strong>
+
+<p>O nome da classe está errado. Procure com <code>Get-CimClass -ClassName *parte*</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>"Consulta inválida" no -Filter</strong>
+
+<p>O filtro usa WQL, não PowerShell: é <code>=</code> (não <code>-eq</code>) e texto vai entre aspas simples: <code>-Filter "Name = 'pwsh.exe'"</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Get-WmiObject não existe</strong>
+
+<p><code>Get-WmiObject</code> é do Windows PowerShell 5.1 e foi removido no 7. Use <code>Get-CimInstance</code>, que faz o mesmo.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Classe</th><th>O que tem</th></tr>
+
+<tr><td><code>Win32_OperatingSystem</code></td><td>Windows, versão, último boot, memória livre.</td></tr>
+
+<tr><td><code>Win32_ComputerSystem</code></td><td>Fabricante, modelo, memória total.</td></tr>
+
+<tr><td><code>Win32_Processor</code></td><td>Processador e núcleos.</td></tr>
+
+<tr><td><code>Win32_LogicalDisk</code></td><td>Discos e espaço.</td></tr>
+
+<tr><td><code>Win32_BIOS</code></td><td>BIOS.</td></tr>
+
+<tr><td><code>Win32_NetworkAdapterConfiguration</code></td><td>Placas de rede.</td></tr>
+
+<tr><td><code>Win32_Product</code></td><td>Evite: é lento e pode disparar reparos de programas.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Discos locais</h3>
+<p>Complete o filtro para só discos locais:</p>
+<div class="ex-code">Get-CimInstance Win32_LogicalDisk -Filter "DriveType = <input data-answer="3" aria-label="resposta">"</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. O que substitui o <code>Get-WmiObject</code> no PowerShell 7?</p>
+
+<label><input type="radio" name="q2"> Get-Wmi</label>
+
+<label><input type="radio" name="q2"> Get-CimInstance</label>
+
+<label><input type="radio" name="q2"> Get-ComputerInfo</label>
+
+<label><input type="radio" name="q2"> Get-Item</label>
+
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">3. Num <code>-Filter</code>, como se escreve "igual"?</p>
+
+<label><input type="radio" name="q3"> =</label>
+
+<label><input type="radio" name="q3"> eq</label>
+
+<label><input type="radio" name="q3"> ==</label>
+
+<label><input type="radio" name="q3"> like</label>
+
+</div>
+
+<div class="tryps" data-goal="src:Win32_OperatingSystem;;src:LastBootUpTime;;src:Days;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> escreva, numa string, o comando que mostra há quantos dias o computador está ligado, usando <code>LastBootUpTime</code>, no formato <code>Ligado há N dias</code>. O simulador do guia <strong>não imita</strong> esse comando; depois, rode-o de verdade no seu Windows.</p>
+
+<pre class="script" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = ''
+Write-Output $comando
+</pre>
+
+<pre class="solucao" data-file="main.ps1"># Escreva o comando numa string. Não chame o cmdlet.
+$comando = '"Ligado há {0} dias" -f ((Get-Date) - (Get-CimInstance Win32_OperatingSystem).LastBootUpTime).Days'
+Write-Output $comando
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Get-CimInstance Classe</code> consulta a ficha técnica do Windows.</li>
+  <li><code>Win32_OperatingSystem</code>, <code>Win32_LogicalDisk</code> e <code>Win32_Processor</code> são as mais usadas.</li>
+  <li>Filtre no <code>-Filter</code> (linguagem WQL) para ser rápido.</li>
+  <li><code>Get-WmiObject</code> não existe no PowerShell 7.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
