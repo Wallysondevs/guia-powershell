@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell $Error e -ErrorVariable — guardando erros (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a usar $Error e -ErrorVariable no PowerShell 7: a lista automática de erros, guardar os erros de um comando numa variável, acumular com + e conferir se algo falhou, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">$Error</span> e -ErrorVariable</h1>
+
+<p class="intro">Todo erro fica anotado num caderno chamado <code>$Error</code>. E, quando você quer os erros de <strong>um</strong> comando separados, o parâmetro <code>-ErrorVariable</code> guarda só eles numa variável sua.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Como a lista <code>$Error</code> funciona (o mais novo primeiro).</li>
+  <li>A guardar os erros de um comando com <code>-ErrorVariable</code>.</li>
+  <li>A acumular erros de vários comandos com <code>+</code>.</li>
+  <li>A conferir se um comando deu certo com <code>$?</code>.</li>
+  <li>A combinar com <code>-ErrorAction SilentlyContinue</code> para um relatório limpo.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: o caderno de ocorrências</h2>
+
+<p>Na portaria do prédio existe um caderno onde toda ocorrência é anotada, a mais recente em cima. Esse é o <code>$Error</code>. O <code>-ErrorVariable</code> é como pedir ao porteiro: "anote as ocorrências do <em>meu</em> apartamento numa folha separada".</p>
+
+<hr>
+
+<h2>1. A lista $Error</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $Error.Clear()
+PS&gt; try { 1 / 0 } catch { }
+PS&gt; try { [int]"abc" } catch { }
+PS&gt; $Error.Count
+2
+PS&gt; $Error[0].Exception.Message
+Cannot convert value "abc" to type "System.Int32". Error: "The input string 'abc' was not in a correct format."
+PS&gt; $Error[1].Exception.Message
+Attempted to divide by zero.
+</pre>
+
+<dl class="anatomy">
+
+  <dt>$Error[0]</dt><dd>O erro mais <strong>recente</strong>.</dd>
+
+  <dt>$Error[1]</dt><dd>O anterior. A lista cresce para baixo, guardando até 256 erros por padrão.</dd>
+
+</dl>
+
+<p>Repare: até erros tratados com <code>try/catch</code> entram em <code>$Error</code>.</p>
+
+<hr>
+
+<h2>2. -ErrorVariable</h2>
+
+<p>Com <code>-ErrorVariable nome</code> (sem o <code>$</code>!), os erros daquele comando vão para <code>$nome</code>. Vamos usar uma função avançada que gera erro em alguns itens:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Testar-Nota { [CmdletBinding()] param([int]$Nota)
+&gt;&gt;   if ($Nota -gt 10) { Write-Error "Nota $Nota acima de 10." } else { "Nota $Nota ok" }
+&gt;&gt; }
+PS&gt; Testar-Nota 12 -ErrorVariable problemas -ErrorAction SilentlyContinue
+PS&gt; $problemas.Count
+1
+PS&gt; $problemas[0].Exception.Message
+Nota 12 acima de 10.
+</pre>
+
+<dl class="anatomy">
+
+  <dt>-ErrorVariable problemas</dt><dd>Guarda os erros em <code>$problemas</code>. O nome vai <strong>sem</strong> o <code>$</code>.</dd>
+
+  <dt>-ErrorAction SilentlyContinue</dt><dd>Esconde o erro da tela; ele continua guardado em <code>$problemas</code>.</dd>
+
+</dl>
+
+<div class="tryps" data-goal="out:Nota 15 acima de 10.;;src:-ErrorVariable;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> chame <code>Testar-Nota 15</code> guardando o erro em <code>erros</code> (com <code>-ErrorVariable</code> e <code>-ErrorAction SilentlyContinue</code>), e mostre <code>$erros[0].Exception.Message</code>.</p>
+
+<pre class="script" data-file="main.ps1">function Testar-Nota { [CmdletBinding()] param([int]$Nota)
+  if ($Nota -gt 10) { Write-Error "Nota $Nota acima de 10." } else { "Nota $Nota ok" }
+}
+Testar-Nota 15
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Testar-Nota { [CmdletBinding()] param([int]$Nota)
+  if ($Nota -gt 10) { Write-Error "Nota $Nota acima de 10." } else { "Nota $Nota ok" }
+}
+Testar-Nota 15 -ErrorVariable erros -ErrorAction SilentlyContinue
+$erros[0].Exception.Message
+</pre>
+
+</div>
+
+<hr>
+
+<h2>3. Acumulando com +</h2>
+
+<p>Normalmente cada chamada substitui o conteúdo da variável. Com <code>+</code> antes do nome, os erros vão se somando:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; foreach ($n in 8, 11, 9, 14) {
+&gt;&gt;   Testar-Nota $n -ErrorVariable +ruins -ErrorAction SilentlyContinue
+&gt;&gt; }
+Nota 8 ok
+Nota 9 ok
+PS&gt; "Problemas encontrados: $($ruins.Count)"
+Problemas encontrados: 2
+PS&gt; $ruins | ForEach-Object { $_.Exception.Message }
+Nota 11 acima de 10.
+Nota 14 acima de 10.
+</pre>
+
+<hr>
+
+<h2>4. Deu certo? $?</h2>
+
+<p>A variável <code>$?</code> diz se o último comando terminou sem erro (<code>True</code>) ou com erro (<code>False</code>):</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Testar-Nota 7; $?
+Nota 7 ok
+True
+PS&gt; [int]"abc"; $?
+InvalidArgument: Cannot convert value "abc" to type "System.Int32". Error: "The input string 'abc' was not in a correct format."
+False
+</pre>
+
+<p>O <code>$?</code> olha só para o <strong>último</strong> comando. Confira logo depois do comando que interessa, antes de rodar qualquer outro (por isso, aqui, ele está na mesma linha, depois do <code>;</code>).</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Escrever o $ no -ErrorVariable</strong>
+
+<p><code>-ErrorVariable $problemas</code> usa o <em>valor</em> de <code>$problemas</code> como nome (geralmente vazio). Escreva <code>-ErrorVariable problemas</code>, sem o <code>$</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Usar -ErrorVariable numa função simples</strong>
+
+<p>Só cmdlets e funções avançadas (com <code>[CmdletBinding()]</code>) têm <code>-ErrorVariable</code>. Numa função simples, o parâmetro vai parar em <code>$args</code> e não guarda nada.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>$Error[0]</code></td><td>Erro mais recente da sessão.</td></tr>
+
+<tr><td><code>$Error.Clear()</code></td><td>Limpa a lista.</td></tr>
+
+<tr><td><code>-ErrorVariable nome</code></td><td>Guarda os erros do comando em <code>$nome</code>.</td></tr>
+
+<tr><td><code>-ErrorVariable +nome</code></td><td>Acumula com o que já estava lá.</td></tr>
+
+<tr><td><code>$?</code></td><td><code>True</code> se o último comando não teve erro.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Sem cifrão</h3>
+<p>Complete o parâmetro:</p>
+<div class="ex-code">Testar-Nota 99 <input data-answer="-ErrorVariable" aria-label="resposta"> falhas</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Para somar erros de várias chamadas na mesma variável, escreva:</p>
+
+<label><input type="radio" name="q2"> <code>-ErrorVariable *lista</code></label>
+
+<label><input type="radio" name="q2"> <code>-ErrorVariable +lista</code></label>
+
+<label><input type="radio" name="q2"> <code>-ErrorVariable $lista</code></label>
+
+<label><input type="radio" name="q2"> <code>-ErrorVariable lista[]</code></label>
+
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">3. O que <code>$?</code> mostra logo depois de um comando que falhou?</p>
+
+<label><input type="radio" name="q3"> False</label>
+
+<label><input type="radio" name="q3"> True</label>
+
+<label><input type="radio" name="q3"> 0</label>
+
+<label><input type="radio" name="q3"> O erro</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Problemas: 2;;src:\+ruins;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> teste as notas <code>5, 12, 30</code> acumulando os erros em <code>ruins</code> (com <code>+</code>) e, no fim, mostre <code>Problemas: </code> + a quantidade.</p>
+
+<pre class="script" data-file="main.ps1">function Testar-Nota { [CmdletBinding()] param([int]$Nota)
+  if ($Nota -gt 10) { Write-Error "Nota $Nota acima de 10." } else { "Nota $Nota ok" }
+}
+foreach ($n in 5, 12, 30) {
+  Testar-Nota $n
+}
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Testar-Nota { [CmdletBinding()] param([int]$Nota)
+  if ($Nota -gt 10) { Write-Error "Nota $Nota acima de 10." } else { "Nota $Nota ok" }
+}
+foreach ($n in 5, 12, 30) {
+  Testar-Nota $n -ErrorVariable +ruins -ErrorAction SilentlyContinue
+}
+"Problemas: $($ruins.Count)"
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>$Error</code> guarda todos os erros, o mais recente em <code>[0]</code>.</li>
+  <li><code>-ErrorVariable nome</code> guarda só os erros daquele comando.</li>
+  <li><code>+nome</code> acumula entre chamadas.</li>
+  <li><code>$?</code> diz se o último comando deu certo.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

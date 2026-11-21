@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Hashtables (@{}) — chave e valor | Guia PowerShell</title>
+<meta name="description" content="Aprenda as hashtables do PowerShell: criar com @{}, ler e mudar valores pela chave, acrescentar e remover chaves, testar se uma chave existe e usar [ordered], com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Hashtables</span> (@{})</h1>
+
+<p class="intro">Uma <strong>hashtable</strong> guarda pares de <strong>chave</strong> e <strong>valor</strong>: "nome → Ana", "cidade → Recife". Em vez de lembrar a posição, como no array, você busca pelo nome da chave.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A criar uma hashtable com <code>@{ chave = valor }</code>.</li>
+  <li>A ler um valor com <code>$h.chave</code> ou <code>$h["chave"]</code>.</li>
+  <li>A mudar, acrescentar e remover chaves.</li>
+  <li>A testar se uma chave existe com <code>.ContainsKey()</code>.</li>
+  <li>A manter a ordem com <code>[ordered]</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a agenda de telefones</h2>
+
+<p>Na agenda, você não procura "o terceiro telefone", procura <strong>pelo nome</strong>: "Beto → 9999-0002". O nome é a chave; o telefone é o valor. Numa agenda, cada nome aparece uma vez só.</p>
+
+<hr>
+
+<h2>1. Criando e lendo</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $pessoa = @{ Nome = "Ana"; Cidade = "Recife"; Idade = 30 }
+PS&gt; $pessoa
+
+Name                           Value
+----                           -----
+Idade                          30
+Nome                           Ana
+Cidade                         Recife
+PS&gt; $pessoa.Nome
+Ana
+PS&gt; $pessoa["Cidade"]
+Recife
+</pre>
+
+<dl class="anatomy">
+
+  <dt>@{ ... }</dt><dd>Cria a hashtable. Os pares ficam separados por <code>;</code> (ou um por linha).</dd>
+
+  <dt>Nome = "Ana"</dt><dd>Chave <code>Nome</code>, valor <code>"Ana"</code>.</dd>
+
+  <dt>$pessoa.Nome</dt><dd>Lê o valor da chave com ponto.</dd>
+
+  <dt>$pessoa["Cidade"]</dt><dd>Lê com colchetes. Útil quando a chave está numa variável ou tem espaço.</dd>
+
+</dl>
+
+<p>Repare que a ordem na tela não é a ordem em que você escreveu. A hashtable comum não guarda ordem, e no PowerShell 7 essa ordem pode até mudar de uma sessão para outra: se você rodar o mesmo exemplo, as linhas podem sair em outra sequência. Quando a ordem importa, use <code>[ordered]</code> (adiante).</p>
+
+<hr>
+
+<h2>2. Mudando, acrescentando e removendo</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $pessoa.Idade = 31
+PS&gt; $pessoa.Email = "ana@exemplo.com"
+PS&gt; $pessoa.Remove("Cidade")
+PS&gt; $pessoa.Count
+3
+PS&gt; $pessoa.ContainsKey("Email")
+True
+</pre>
+
+<dl class="anatomy">
+
+  <dt>$pessoa.Idade = 31</dt><dd>A chave já existe: o valor é trocado.</dd>
+
+  <dt>$pessoa.Email = ...</dt><dd>A chave não existe: é criada.</dd>
+
+  <dt>.Remove("Cidade")</dt><dd>Tira a chave e o valor.</dd>
+
+  <dt>.Count</dt><dd>Quantos pares. Sobraram 3: <code>Nome</code>, <code>Idade</code> e o novo <code>Email</code>.</dd>
+
+  <dt>.ContainsKey("Email")</dt><dd>A chave existe? Mais sobre isso na seção 3. Para a lista das chaves, use <code>.Keys</code>; para os valores, <code>.Values</code>.</dd>
+
+</dl>
+
+<div class="tryps" data-goal="out:Recife;;src:@\{;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> crie a hashtable <code>$loja</code> com as chaves <code>Nome = "Mercadinho"</code> e <code>Cidade = "Recife"</code> e mostre só a cidade.</p>
+
+<pre class="script" data-file="main.ps1">$loja = @{}
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$loja = @{ Nome = "Mercadinho"; Cidade = "Recife" }
+$loja.Cidade
+</pre>
+
+</div>
+
+<hr>
+
+<h2>3. A chave existe?</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $estoque = @{ arroz = 12; cafe = 0 }
+PS&gt; $estoque.ContainsKey("cafe")
+True
+PS&gt; $estoque.ContainsKey("leite")
+False
+PS&gt; $estoque["leite"]
+</pre>
+
+<p>Uma chave que não existe devolve <code>$null</code> (nada), sem erro. O <code>ContainsKey</code> diferencia "não existe" de "existe e vale 0".</p>
+
+<hr>
+
+<h2>4. Chaves não diferenciam maiúsculas</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $estoque["ARROZ"]
+12
+</pre>
+
+<hr>
+
+<h2>5. Mantendo a ordem: <code>[ordered]</code></h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $ficha = [ordered]@{ Nome = "Ana"; Cidade = "Recife"; Idade = 30 }
+PS&gt; $ficha
+
+Name                           Value
+----                           -----
+Nome                           Ana
+Cidade                         Recife
+Idade                          30
+</pre>
+
+<p>Com <code>[ordered]</code> na frente, a ordem de escrita é respeitada.</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Chave repetida</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $h = @{ a = 1; a = 2 }
+ParserError: 
+Line |
+   1 |  $h = @{ a = 1; a = 2 }
+     |                 ~
+     | Duplicate keys 'a' are not allowed in hash literals.
+</pre>
+
+<p>Numa hashtable, cada chave aparece uma vez só (<code>Duplicate keys</code>).</p>
+
+</div>
+
+<div class="cenario">
+<strong><code>.Add()</code> com chave que já existe</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $h = @{ a = 1 }
+PS&gt; $h.Add("a", 2)
+MethodInvocationException: Exception calling "Add" with "2" argument(s): "Item has already been added. Key in dictionary: 'a'  Key being added: 'a'"
+</pre>
+
+<p>O <code>.Add()</code> não troca valores: ele só cria chaves novas. Para trocar, use <code>$h.a = 2</code> ou <code>$h["a"] = 2</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>$h = @{ a = 1; b = 2 }</code></td><td>Cria.</td></tr>
+
+<tr><td><code>$h = @{}</code></td><td>Hashtable vazia.</td></tr>
+
+<tr><td><code>$h.a</code> / <code>$h["a"]</code></td><td>Lê.</td></tr>
+
+<tr><td><code>$h.a = 5</code></td><td>Troca ou cria.</td></tr>
+
+<tr><td><code>$h.Remove("a")</code></td><td>Tira a chave.</td></tr>
+
+<tr><td><code>$h.ContainsKey("a")</code></td><td>A chave existe?</td></tr>
+
+<tr><td><code>$h.Keys</code> / <code>$h.Values</code></td><td>Chaves / valores.</td></tr>
+
+<tr><td><code>[ordered]@{ }</code></td><td>Mantém a ordem.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Ler o valor</h3>
+<p>Complete para ler a chave <code>Cidade</code>:</p>
+<div class="ex-code">$pessoa.<input data-answer="Cidade" aria-label="resposta"></div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. O que mostra <code>$h["nada"]</code> se a chave <code>nada</code> não existe?</p>
+
+<label><input type="radio" name="q2"> Um erro vermelho</label>
+
+<label><input type="radio" name="q2"> Nada: o valor é <code>$null</code></label>
+
+<label><input type="radio" name="q2"> O texto "nada"</label>
+
+<label><input type="radio" name="q2"> Zero</label>
+
+</div>
+
+<div class="mc" data-answer="4">
+
+<p class="mc-q">3. Para a hashtable guardar a ordem em que as chaves foram escritas, use:</p>
+
+<label><input type="radio" name="q3"> <code>@{ }</code> mesmo</label>
+
+<label><input type="radio" name="q3"> <code>[sorted]@{ }</code></label>
+
+<label><input type="radio" name="q3"> <code>@[ ]</code></label>
+
+<label><input type="radio" name="q3"> <code>[ordered]@{ }</code></label>
+
+</div>
+
+<div class="tryps" data-goal="out:Preço do café: 18;;src:\.cafe\s*=\s*18|\[&quot;cafe&quot;\]\s*=\s*18;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> o café subiu. Troque o valor da chave <code>cafe</code> para <code>18</code> e mostre <code>Preço do café: 18</code>.</p>
+
+<pre class="script" data-file="main.ps1">$precos = @{ arroz = 25; cafe = 15 }
+
+"Preço do café: $($precos.cafe)"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$precos = @{ arroz = 25; cafe = 15 }
+$precos.cafe = 18
+"Preço do café: $($precos.cafe)"
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Hashtable = pares chave → valor: <code>@{ Nome = "Ana" }</code>.</li>
+  <li>Leia com <code>$h.Nome</code> ou <code>$h["Nome"]</code>; troque ou crie com <code>=</code>.</li>
+  <li><code>.Remove()</code>, <code>.ContainsKey()</code>, <code>.Keys</code>, <code>.Values</code>, <code>.Count</code>.</li>
+  <li>Chave inexistente devolve <code>$null</code>; chaves não diferenciam maiúsculas.</li>
+  <li><code>[ordered]@{ }</code> mantém a ordem de escrita.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

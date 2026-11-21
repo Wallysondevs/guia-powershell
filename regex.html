@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell expressões regulares — -match, -replace, -split e $Matches | Guia PowerShell</title>
+<meta name="description" content="Aprenda expressões regulares no PowerShell 7: -match e a variável $Matches, grupos com nome, -replace com $1, -split por padrão, Select-String e os símbolos mais usados, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Expressões Regulares (<span class="hl">-match</span>, -replace)</h1>
+
+<p class="intro">Uma expressão regular (regex) é um <strong>molde de texto</strong>: "três dígitos, um traço, quatro dígitos". Com ela você encontra CEPs, e-mails e datas no meio de um texto, troca pedaços e divide frases, tudo com uma linha só.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Os símbolos mais usados: <code>\d</code>, <code>\w</code>, <code>+</code>, <code>*</code>, <code>?</code>, <code>{n}</code>, <code>^</code>, <code>$</code>.</li>
+  <li>A testar e capturar com <code>-match</code> e <code>$Matches</code>.</li>
+  <li>A trocar texto com <code>-replace</code> e grupos (<code>$1</code>).</li>
+  <li>A dividir com <code>-split</code> usando um padrão.</li>
+  <li>A procurar em várias linhas com <code>Select-String</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: o molde de biscoito</h2>
+
+<p>O molde de estrela corta só estrelas, não importa a massa. Uma regex é um molde para texto: você descreve a forma ("5 dígitos, traço, 3 dígitos") e o PowerShell encontra tudo que tem essa forma.</p>
+
+<hr>
+
+<h2>1. Os símbolos básicos</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Símbolo</th><th>Quer dizer</th><th>Exemplo que combina</th></tr>
+
+<tr><td><code>\d</code></td><td>um dígito (0 a 9)</td><td><code>7</code></td></tr>
+
+<tr><td><code>\w</code></td><td>uma letra, dígito ou <code>_</code></td><td><code>a</code>, <code>Z</code>, <code>3</code></td></tr>
+
+<tr><td><code>\s</code></td><td>um espaço (ou tab, quebra de linha)</td><td><code> </code></td></tr>
+
+<tr><td><code>.</code></td><td>qualquer caractere</td><td><code>x</code>, <code>#</code></td></tr>
+
+<tr><td><code>+</code></td><td>um ou mais do anterior</td><td><code>\d+</code> → <code>2026</code></td></tr>
+
+<tr><td><code>*</code></td><td>zero ou mais do anterior</td><td><code>a*</code> → `<code>, </code>aaa`</td></tr>
+
+<tr><td><code>?</code></td><td>o anterior é opcional</td><td><code>cores?</code> → <code>core</code>, <code>cores</code></td></tr>
+
+<tr><td><code>{3}</code></td><td>exatamente 3 do anterior</td><td><code>\d{3}</code> → <code>123</code></td></tr>
+
+<tr><td><code>[abc]</code></td><td>um destes</td><td><code>[aeiou]</code> → uma vogal</td></tr>
+
+<tr><td><code>^</code> e <code>$</code></td><td>começo e fim do texto</td><td><code>^\d+$</code> → só dígitos</td></tr>
+
+<tr><td><code>( )</code></td><td>grupo (para capturar)</td><td><code>(\d{5})</code></td></tr>
+
+<tr><td><code>\</code></td><td>tira o poder especial do próximo</td><td><code>\.</code> → um ponto de verdade</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>2. -match: combina?</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "CEP 01310-100" -match '\d{5}-\d{3}'
+True
+PS&gt; "sem número" -match '\d'
+False
+PS&gt; "Ana" -match 'ana'
+True
+PS&gt; "Ana" -cmatch 'ana'
+False
+</pre>
+
+<dl class="anatomy">
+
+  <dt>-match</dt><dd><code>True</code> se o padrão aparece em algum lugar do texto. Não diferencia maiúsculas.</dd>
+
+  <dt>-cmatch</dt><dd>Versão que diferencia maiúsculas de minúsculas.</dd>
+
+  <dt>'\d{5}-\d{3}'</dt><dd>Use aspas simples: assim o <code>$</code> e a crase não são interpretados pelo PowerShell.</dd>
+
+</dl>
+
+<hr>
+
+<h2>3. $Matches: o que foi encontrado</h2>
+
+<p>Depois de um <code>-match</code> que deu <code>True</code>, a variável <code>$Matches</code> guarda o pedaço encontrado e os grupos:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; if ("Pedido 4821 entregue em 15/03/2026" -match '(\d{2})/(\d{2})/(\d{4})') {
+&gt;&gt;   "Data: $($Matches[0])"
+&gt;&gt;   "Dia: $($Matches[1]), mês: $($Matches[2]), ano: $($Matches[3])"
+&gt;&gt; }
+Data: 15/03/2026
+Dia: 15, mês: 03, ano: 2026
+</pre>
+
+<p>Com grupos <strong>nomeados</strong> fica mais fácil de ler:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; if ("ana.souza@exemplo.com.br" -match '^(?&lt;usuario&gt;[\w.]+)@(?&lt;dominio&gt;.+)$') {
+&gt;&gt;   $Matches.usuario
+&gt;&gt;   $Matches.dominio
+&gt;&gt; }
+ana.souza
+exemplo.com.br
+</pre>
+
+<div class="tryps" data-goal="out:01310;;src:-match;;src:\$Matches;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> use <code>-match</code> com um grupo para capturar os 5 primeiros dígitos do CEP e mostre <code>$Matches[1]</code>.</p>
+
+<pre class="script" data-file="main.ps1">$texto = "Rua X, 100, CEP 01310-100"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$texto = "Rua X, 100, CEP 01310-100"
+if ($texto -match '(\d{5})-\d{3}') { $Matches[1] }
+</pre>
+
+</div>
+
+<hr>
+
+<h2>4. -replace: trocando pelo padrão</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "Telefone: (11) 98765-4321" -replace '\D', ''
+11987654321
+PS&gt; "2026-12-25" -replace '(\d{4})-(\d{2})-(\d{2})', '$3/$2/$1'
+25/12/2026
+PS&gt; "muitos     espaços   aqui" -replace '\s+', ' '
+muitos espaços aqui
+</pre>
+
+<dl class="anatomy">
+
+  <dt>'\D'</dt><dd><code>\D</code> maiúsculo é o contrário de <code>\d</code>: tudo que <strong>não</strong> é dígito. Trocar por <code>''</code> apaga.</dd>
+
+  <dt>'$3/$2/$1'</dt><dd>Na troca, <code>$1</code>, <code>$2</code>, <code>$3</code> são os grupos encontrados. Use aspas simples, senão o PowerShell acha que <code>$1</code> é uma variável.</dd>
+
+</dl>
+
+<hr>
+
+<h2>5. -split por padrão</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "maçã, banana;uva  pera" -split '[,;\s]+'
+maçã
+banana
+uva
+pera
+</pre>
+
+<hr>
+
+<h2>6. Procurando em várias linhas: Select-String</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $log = "10:01 INFO início", "10:02 ERRO disco cheio", "10:05 INFO fim", "10:07 ERRO sem rede"
+PS&gt; $log | Select-String 'ERRO'
+
+10:02 ERRO disco cheio
+10:07 ERRO sem rede
+PS&gt; ($log | Select-String 'ERRO (.+)').Matches | ForEach-Object { $_.Groups[1].Value }
+disco cheio
+sem rede
+</pre>
+
+<p>Com arquivos, o <code>Select-String</code> também recebe <code>-Path</code> e mostra o nome do arquivo e o número da linha de cada resultado.</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>O ponto que combina com tudo</strong>
+
+<p><code>"arquivo.txt" -match 'arquivo.txt'</code> é <code>True</code>, mas <code>"arquivoXtxt"</code> também! O <code>.</code> quer dizer "qualquer caractere". Para um ponto de verdade, escreva <code>\.</code>. Se o texto vem de uma variável, proteja com <code>[regex]::Escape($texto)</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>$Matches com valor antigo</strong>
+
+<p>O <code>$Matches</code> só é atualizado quando o <code>-match</code> dá <code>True</code>. Se der <code>False</code>, ele continua com o resultado anterior. Por isso, use <code>$Matches</code> sempre dentro de um <code>if (... -match ...)</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Aspas duplas no -replace</strong>
+
+<p><code>-replace '(\d+)', "[$1]"</code> com aspas duplas troca por <code>[]</code>: o PowerShell substituiu <code>$1</code> (uma variável vazia) antes da regex. Use aspas simples: <code>'[$1]'</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>$t -match 'padrão'</code></td><td>True/False; preenche <code>$Matches</code>.</td></tr>
+
+<tr><td><code>$Matches[1]</code> / <code>$Matches.nome</code></td><td>Grupo capturado.</td></tr>
+
+<tr><td><code>$t -replace 'padrão', 'troca'</code></td><td>Troca tudo que combina.</td></tr>
+
+<tr><td><code>$t -split 'padrão'</code></td><td>Divide pelo padrão.</td></tr>
+
+<tr><td><code>Select-String 'padrão'</code></td><td>Filtra linhas que combinam.</td></tr>
+
+<tr><td><code>[regex]::Escape($t)</code></td><td>Protege caracteres especiais.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Um ou mais dígitos</h3>
+<p>Complete o padrão para "um ou mais dígitos":</p>
+<div class="ex-code">"Pedido 4821" -match '\d<input data-answer="+" aria-label="resposta">'</div>
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. O que <code>"a1b2" -replace '\d', ''</code> mostra?</p>
+
+<label><input type="radio" name="q2"> a1b2</label>
+
+<label><input type="radio" name="q2"> 12</label>
+
+<label><input type="radio" name="q2"> ab</label>
+
+<label><input type="radio" name="q2"> Erro</label>
+
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">3. Na troca do <code>-replace</code>, por que usar aspas simples em <code>'$2/$1'</code>?</p>
+
+<label><input type="radio" name="q3"> Para o PowerShell não trocar <code>$1</code> por uma variável</label>
+
+<label><input type="radio" name="q3"> Porque aspas duplas dão erro sempre</label>
+
+<label><input type="radio" name="q3"> Para diferenciar maiúsculas</label>
+
+<label><input type="radio" name="q3"> Não faz diferença</label>
+
+</div>
+
+<div class="tryps" data-goal="out:25/12/2026;;src:-replace;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> com um único <code>-replace</code> e grupos, transforme <code>2026-12-25</code> em <code>25/12/2026</code>.</p>
+
+<pre class="script" data-file="main.ps1">$data = "2026-12-25"
+$data
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$data = "2026-12-25"
+$data -replace '(\d{4})-(\d{2})-(\d{2})', '$3/$2/$1'
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Regex é um molde: <code>\d</code> dígito, <code>\w</code> letra, <code>+</code> um ou mais, <code>{n}</code> repetição.</li>
+  <li><code>-match</code> testa e preenche <code>$Matches</code>; use grupos <code>( )</code> para capturar.</li>
+  <li><code>-replace</code> troca pelo padrão; <code>$1</code>, <code>$2</code> são os grupos (aspas simples!).</li>
+  <li><code>-split</code> divide por padrão; <code>Select-String</code> filtra linhas.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

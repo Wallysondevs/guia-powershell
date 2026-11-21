@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell [CmdletBinding()] — funções avançadas | Guia PowerShell</title>
+<meta name="description" content="Aprenda as funções avançadas do PowerShell: [CmdletBinding()], [Parameter()], parâmetros comuns como -Verbose, Write-Verbose e -WhatIf com SupportsShouldProcess, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Funções Avançadas (<span class="hl">[CmdletBinding()]</span>)</h1>
+
+<p class="intro">Basta uma linha, <code>[CmdletBinding()]</code>, para a sua função ganhar os poderes de um cmdlet: os parâmetros comuns (<code>-Verbose</code>, <code>-ErrorAction</code>…), a recusa de parâmetros desconhecidos e, se você quiser, o <code>-WhatIf</code> e o <code>-Confirm</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A transformar uma função em avançada com <code>[CmdletBinding()]</code>.</li>
+  <li>A usar <code>Write-Verbose</code> e ligar as mensagens com <code>-Verbose</code>.</li>
+  <li>A configurar parâmetros com <code>[Parameter(Mandatory, Position = 0)]</code>.</li>
+  <li>A aceitar <code>-WhatIf</code> com <code>SupportsShouldProcess</code>.</li>
+  <li>Que a função avançada recusa parâmetros que não existem.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: o crachá de funcionário</h2>
+
+<p>Uma função simples é um visitante: entra, faz o serviço, mas não tem acesso às portas internas. Com <code>[CmdletBinding()]</code>, ela ganha o crachá: passa a ter os mesmos recursos que os cmdlets oficiais.</p>
+
+<hr>
+
+<h2>1. A linha mágica</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Get-Soma {
+&gt;&gt;   [CmdletBinding()]
+&gt;&gt;   param([int]$A, [int]$B)
+&gt;&gt;   Write-Verbose "Somando $A e $B"
+&gt;&gt;   $A + $B
+&gt;&gt; }
+PS&gt; Get-Soma 2 3
+5
+</pre>
+
+<pre><code>Get-Soma 2 3 -Verbose
+</code></pre>
+
+<p>Com <code>-Verbose</code>, antes do <code>5</code> aparece a mensagem <code>Somando 2 e 3</code>, com o prefixo de detalhe na frente (<code>DETALHADO:</code> num Windows em português, como na aula <a href="write-outros.html">Write-Warning, Write-Verbose e Companhia</a>).</p>
+
+<dl class="anatomy">
+
+  <dt>[CmdletBinding()]</dt><dd>Fica antes do <code>param()</code>. Liga os recursos de cmdlet.</dd>
+
+  <dt>Write-Verbose "..."</dt><dd>Uma mensagem de bastidor: só aparece se quem chamar usar <code>-Verbose</code>.</dd>
+
+  <dt>-Verbose</dt><dd>Parâmetro comum que a função ganhou de graça. Você não declarou, mas ele existe.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Parâmetros comuns de graça</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; (Get-Command Get-Soma).Parameters.Keys -join ", "
+A, B, Verbose, Debug, ErrorAction, WarningAction, InformationAction, ProgressAction, ErrorVariable, WarningVariable, InformationVariable, OutVariable, OutBuffer, PipelineVariable
+</pre>
+
+<p>Além de <code>A</code> e <code>B</code>, apareceram <code>Verbose</code>, <code>Debug</code>, <code>ErrorAction</code>, <code>WarningAction</code>… Veja as aulas <a href="write-outros.html">Write-Verbose</a> e <a href="erroraction.html">-ErrorAction</a>.</p>
+
+<hr>
+
+<h2>3. Nome errado agora é erro</h2>
+
+<pre><code>Get-Soma -A 1 -C 2
+</code></pre>
+
+<p>Na função simples, o <code>-C</code> iria parar em <code>$args</code> sem aviso. Na avançada, o PowerShell recusa e diz que não existe parâmetro chamado <code>C</code>.</p>
+
+<hr>
+
+<h2>4. <code>[Parameter()]</code>: obrigatório, posição, ajuda</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function New-Usuario {
+&gt;&gt;   [CmdletBinding()]
+&gt;&gt;   param(
+&gt;&gt;     [Parameter(Mandatory, Position = 0, HelpMessage = "Nome de login")]
+&gt;&gt;     [string]$Login,
+&gt;&gt;     [Parameter(Position = 1)]
+&gt;&gt;     [string]$Grupo = "Usuarios"
+&gt;&gt;   )
+&gt;&gt;   "Criaria $Login no grupo $Grupo"
+&gt;&gt; }
+PS&gt; New-Usuario ana
+Criaria ana no grupo Usuarios
+PS&gt; New-Usuario beto Admins
+Criaria beto no grupo Admins
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Mandatory</dt><dd>Obrigatório.</dd>
+
+  <dt>Position = 0</dt><dd>O primeiro valor sem nome vai para este parâmetro.</dd>
+
+  <dt>HelpMessage</dt><dd>Um texto de ajuda que o PowerShell mostra se perguntar o valor.</dd>
+
+</dl>
+
+<div class="tryps" data-goal="out:Calculando o dobro de 4;;src:\[CmdletBinding\(\)\];;src:-Verbose;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> a função tem um <code>Write-Verbose</code>, mas a mensagem não aparece. Transforme em função avançada com <code>[CmdletBinding()]</code> e chame com <code>-Verbose</code>.</p>
+
+<pre class="script" data-file="main.ps1">function Get-Dobro {
+    param([int]$N)
+    Write-Verbose "Calculando o dobro de $N"
+    $N * 2
+}
+Get-Dobro 4
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Get-Dobro {
+    [CmdletBinding()]
+    param([int]$N)
+    Write-Verbose "Calculando o dobro de $N"
+    $N * 2
+}
+Get-Dobro 4 -Verbose
+</pre>
+
+</div>
+
+<hr>
+
+<h2>5. <code>-WhatIf</code>: "e se eu rodasse?"</h2>
+
+<p>Para funções que mudam alguma coisa, <code>SupportsShouldProcess</code> dá ao usuário o <code>-WhatIf</code> (só mostra o que faria) e o <code>-Confirm</code>. Dentro, você pergunta <code>$PSCmdlet.ShouldProcess(...)</code> antes de agir:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Remove-Tarefa {
+&gt;&gt;   [CmdletBinding(SupportsShouldProcess)]
+&gt;&gt;   param([string]$Nome)
+&gt;&gt;   if ($PSCmdlet.ShouldProcess($Nome, "Apagar tarefa")) { "Tarefa $Nome apagada" }
+&gt;&gt; }
+PS&gt; Remove-Tarefa "lavar louça"
+Tarefa lavar louça apagada
+</pre>
+
+<pre><code>Remove-Tarefa "lavar louça" -WhatIf
+</code></pre>
+
+<p>Com <code>-WhatIf</code>, o <code>ShouldProcess</code> devolve <code>False</code> e só mostra uma frase dizendo qual operação seria feita (<code>Apagar tarefa</code>) em qual alvo (<code>lavar louça</code>). A tarefa não é apagada.</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong><code>[CmdletBinding()]</code> fora do lugar</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function F { param($x) [CmdletBinding()] $x }
+PS&gt; F 1
+1
+</pre>
+
+<p>Fora do lugar, o <code>[CmdletBinding()]</code> não liga nada: a função continua simples. Ele precisa vir logo antes do <code>param()</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>[CmdletBinding()]</code> antes do <code>param()</code></td><td>Função avançada.</td></tr>
+
+<tr><td><code>Write-Verbose "msg"</code></td><td>Mensagem que aparece com <code>-Verbose</code>.</td></tr>
+
+<tr><td><code>[Parameter(Mandatory)]</code></td><td>Obrigatório.</td></tr>
+
+<tr><td><code>[Parameter(Position = 0)]</code></td><td>Primeiro valor sem nome.</td></tr>
+
+<tr><td><code>[CmdletBinding(SupportsShouldProcess)]</code></td><td>Ganha <code>-WhatIf</code> e <code>-Confirm</code>.</td></tr>
+
+<tr><td><code>$PSCmdlet.ShouldProcess(alvo, ação)</code></td><td>Pergunta se pode agir.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. A linha mágica</h3>
+<p>Complete o atributo que transforma a função em avançada:</p>
+<div class="ex-code">function F { <input data-answer="[CmdletBinding()" aria-label="resposta">] param($x) $x }</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. O que acontece com <code>Write-Verbose</code> numa função avançada chamada sem <code>-Verbose</code>?</p>
+
+<label><input type="radio" name="q2"> A mensagem aparece em amarelo</label>
+
+<label><input type="radio" name="q2"> A mensagem não aparece</label>
+
+<label><input type="radio" name="q2"> Dá erro</label>
+
+<label><input type="radio" name="q2"> A mensagem vira o resultado</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. Para a sua função aceitar <code>-WhatIf</code>, você usa:</p>
+
+<label><input type="radio" name="q3"> <code>[Parameter(WhatIf)]</code></label>
+
+<label><input type="radio" name="q3"> <code>param([switch]$WhatIf)</code> e nada mais</label>
+
+<label><input type="radio" name="q3"> <code>[CmdletBinding(SupportsShouldProcess)]</code> e <code>$PSCmdlet.ShouldProcess()</code></label>
+
+<label><input type="radio" name="q3"> <code>Write-WhatIf</code></label>
+
+</div>
+
+<div class="tryps" data-goal="src:SupportsShouldProcess;;src:ShouldProcess\(;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> faça a função aceitar <code>-WhatIf</code>: acrescente <code>SupportsShouldProcess</code> ao <code>[CmdletBinding()]</code> e coloque a ação dentro de <code>if ($PSCmdlet.ShouldProcess($Nome, "Apagar"))</code>. Com <code>-WhatIf</code>, a nota não pode ser apagada.</p>
+
+<pre class="script" data-file="main.ps1">function Remove-Nota {
+    [CmdletBinding()]
+    param([string]$Nome)
+    "Nota $Nome apagada"
+}
+Remove-Nota "compras" -WhatIf
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Remove-Nota {
+    [CmdletBinding(SupportsShouldProcess)]
+    param([string]$Nome)
+    if ($PSCmdlet.ShouldProcess($Nome, "Apagar")) { "Nota $Nome apagada" }
+}
+Remove-Nota "compras" -WhatIf
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>[CmdletBinding()]</code> antes do <code>param()</code> cria uma função avançada.</li>
+  <li>Ela ganha os parâmetros comuns (<code>-Verbose</code>, <code>-ErrorAction</code>…) e recusa nomes errados.</li>
+  <li><code>[Parameter(Mandatory, Position = 0)]</code> configura cada parâmetro.</li>
+  <li><code>SupportsShouldProcess</code> + <code>$PSCmdlet.ShouldProcess()</code> dão <code>-WhatIf</code> e <code>-Confirm</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

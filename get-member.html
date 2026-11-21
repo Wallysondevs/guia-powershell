@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Get-Member — o que tem dentro de um objeto | Guia PowerShell</title>
+<meta name="description" content="Use o Get-Member para ver as propriedades e os métodos de qualquer objeto do PowerShell, filtrar por tipo de membro e descobrir o nome certo de um campo.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Get-Member</span>: o que Tem no Objeto</h1>
+
+<p class="intro">Você já sabe que tudo no PowerShell é objeto. Mas como saber quais campos e quais ações um objeto tem? O <code>Get-Member</code> (apelido <code>gm</code>) é a "radiografia": mostra o tipo e a lista de tudo o que existe dentro dele.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A mandar um objeto para o <code>Get-Member</code> pelo pipeline.</li>
+  <li>A ler as colunas <code>Name</code>, <code>MemberType</code> e <code>Definition</code>.</li>
+  <li>A filtrar só as propriedades ou só os métodos com <code>-MemberType</code>.</li>
+  <li>A procurar um membro pelo nome, com curinga.</li>
+  <li>Que o <code>Get-Member</code> mostra cada <strong>tipo</strong> uma vez só.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a etiqueta da embalagem</h2>
+
+<p>Antes de usar um aparelho novo, você olha a etiqueta: o modelo, o que ele tem e o que ele faz. O <code>Get-Member</code> lê a etiqueta de um objeto. A primeira linha (<code>TypeName</code>) é o modelo, e a tabela embaixo lista as peças.</p>
+
+<hr>
+
+<h2>1. A radiografia de um objeto seu</h2>
+
+<p>Crie um objeto com três campos e passe para o <code>Get-Member</code>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $pessoa = [pscustomobject]@{ Nome = "Ana"; Cidade = "Recife"; Idade = 30 }
+PS&gt; $pessoa | Get-Member
+
+   TypeName: System.Management.Automation.PSCustomObject
+
+Name        MemberType   Definition
+----        ----------   ----------
+Equals      Method       bool Equals(System.Object obj)
+GetHashCode Method       int GetHashCode()
+GetType     Method       type GetType()
+ToString    Method       string ToString()
+Cidade      NoteProperty string Cidade=Recife
+Idade       NoteProperty int Idade=30
+Nome        NoteProperty string Nome=Ana
+</pre>
+
+<dl class="anatomy">
+
+  <dt>TypeName</dt><dd>O tipo do objeto. Aqui é <code>PSCustomObject</code>, um objeto feito por você.</dd>
+
+  <dt>Name</dt><dd>O nome do membro: é o que vem depois do ponto (<code>$pessoa.Nome</code>).</dd>
+
+  <dt>MemberType</dt><dd>O que ele é. <code>Method</code> é uma ação; <code>NoteProperty</code> é um campo que você criou.</dd>
+
+  <dt>Definition</dt><dd>Os detalhes: para campos, o tipo e o valor; para métodos, o que recebem e devolvem.</dd>
+
+  <dt>Equals, GetHashCode, GetType, ToString</dt><dd>Métodos que <strong>todo</strong> objeto tem, até os seus.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Só as propriedades, ou só os métodos</h2>
+
+<p>A lista de um texto é grande. Use <code>-MemberType</code> para filtrar:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "Ana" | Get-Member -MemberType Property
+
+   TypeName: System.String
+
+Name   MemberType Definition
+----   ---------- ----------
+Length Property   int Length {get;}
+</pre>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "Ana" | Get-Member -Name To*
+
+   TypeName: System.String
+
+Name             MemberType Definition
+----             ---------- ----------
+ToBoolean        Method     bool IConvertible.ToBoolean(System.IFormatProvider…
+ToByte           Method     byte IConvertible.ToByte(System.IFormatProvider pr…
+ToChar           Method     char IConvertible.ToChar(System.IFormatProvider pr…
+ToCharArray      Method     char[] ToCharArray(), char[] ToCharArray(int start…
+ToDateTime       Method     datetime IConvertible.ToDateTime(System.IFormatPro…
+ToDecimal        Method     decimal IConvertible.ToDecimal(System.IFormatProvi…
+ToDouble         Method     double IConvertible.ToDouble(System.IFormatProvide…
+ToInt16          Method     short IConvertible.ToInt16(System.IFormatProvider …
+ToInt32          Method     int IConvertible.ToInt32(System.IFormatProvider pr…
+ToInt64          Method     long IConvertible.ToInt64(System.IFormatProvider p…
+ToLower          Method     string ToLower(), string ToLower(cultureinfo cultu…
+ToLowerInvariant Method     string ToLowerInvariant()
+ToLowerOrdinal   Method     string ToLowerOrdinal()
+ToSByte          Method     sbyte IConvertible.ToSByte(System.IFormatProvider …
+ToSingle         Method     float IConvertible.ToSingle(System.IFormatProvider…
+ToString         Method     string ToString(), string ToString(System.IFormatP…
+ToType           Method     System.Object IConvertible.ToType(type conversionT…
+ToUInt16         Method     ushort IConvertible.ToUInt16(System.IFormatProvide…
+ToUInt32         Method     uint IConvertible.ToUInt32(System.IFormatProvider …
+ToUInt64         Method     ulong IConvertible.ToUInt64(System.IFormatProvider…
+ToUpper          Method     string ToUpper(), string ToUpper(cultureinfo cultu…
+ToUpperInvariant Method     string ToUpperInvariant()
+ToUpperOrdinal   Method     string ToUpperOrdinal()
+</pre>
+
+<dl class="anatomy">
+
+  <dt>-MemberType Property</dt><dd>Só as propriedades. Um texto tem uma só: <code>Length</code>.</dd>
+
+  <dt>-Name To*</dt><dd>Só os membros cujo nome começa com <code>To</code>. O <code>*</code> é o curinga ("qualquer coisa").</dd>
+
+</dl>
+
+<p>Cada linha de <code>Definition</code> pode ter várias formas do mesmo método, separadas por vírgula: são os jeitos diferentes de chamar o método (com ou sem valores entre os parênteses).</p>
+
+<div class="tryps" data-goal="out:Length;;src:Get-Member;;src:-MemberType\s+Property;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> o código lista tudo o que o texto <code>"PowerShell"</code> tem. Acrescente <code>-MemberType Property</code> para ver só as propriedades.</p>
+
+<pre class="script" data-file="main.ps1">"PowerShell" | Get-Member
+</pre>
+
+<pre class="solucao" data-file="main.ps1">"PowerShell" | Get-Member -MemberType Property
+</pre>
+
+</div>
+
+<hr>
+
+<h2>3. Uma linha por tipo</h2>
+
+<p>Mandando uma lista com vários itens do mesmo tipo, o <code>Get-Member</code> mostra o tipo uma vez só. Com tipos diferentes, aparece um bloco para cada tipo:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; 1, 2, 3 | Get-Member -MemberType Method -Name CompareTo
+
+   TypeName: System.Int32
+
+Name      MemberType Definition
+----      ---------- ----------
+CompareTo Method     int CompareTo(System.Object value), int CompareTo(int val…
+</pre>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; 1, "dois" | Get-Member -Name Length
+
+   TypeName: System.String
+
+Name   MemberType Definition
+----   ---------- ----------
+Length Property   int Length {get;}
+</pre>
+
+<p>No segundo, só o texto <code>"dois"</code> tem <code>Length</code>, então só aparece o bloco do <code>String</code>. O número <code>1</code> não tem esse membro.</p>
+
+<hr>
+
+<h2>4. Para que serve na prática</h2>
+
+<p>Quando um comando devolve objetos e você não sabe os nomes dos campos, o <code>Get-Member</code> responde. Por exemplo, a data do <code>Get-Date</code>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-Date | Get-Member -MemberType Property -Name D*
+
+   TypeName: System.DateTime
+
+Name      MemberType Definition
+----      ---------- ----------
+Date      Property   datetime Date {get;}
+Day       Property   int Day {get;}
+DayOfWeek Property   System.DayOfWeek DayOfWeek {get;}
+DayOfYear Property   int DayOfYear {get;}
+</pre>
+
+<p>Pronto: agora você sabe que dá para pedir <code>(Get-Date).DayOfYear</code> ou <code>.DayOfWeek</code>.</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Nada para inspecionar</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $vazio = $null
+</pre>
+
+<pre><code>$vazio | Get-Member
+</code></pre>
+
+<p>Com <code>$null</code> não há objeto nenhum na esteira, então o <code>Get-Member</code> não tem o que inspecionar e responde com um erro pedindo que você informe um objeto. Confira se a variável tem mesmo um valor.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>$x | Get-Member</code></td><td>Lista o tipo e todos os membros.</td></tr>
+
+<tr><td><code>$x | gm</code></td><td>O mesmo, com o apelido.</td></tr>
+
+<tr><td><code>-MemberType Property</code></td><td>Só as propriedades.</td></tr>
+
+<tr><td><code>-MemberType Method</code></td><td>Só os métodos.</td></tr>
+
+<tr><td><code>-Name To*</code></td><td>Só os membros com nome parecido.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. O apelido</h3>
+<p>Complete com o apelido curto do Get-Member:</p>
+<div class="ex-code">"oi" | <input data-answer="gm|Get-Member" aria-label="resposta"></div>
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. Na tabela do <code>Get-Member</code>, o que quer dizer <code>MemberType</code> igual a <code>Method</code>?</p>
+
+<label><input type="radio" name="q2"> É um campo com um dado</label>
+
+<label><input type="radio" name="q2"> É o tipo do objeto</label>
+
+<label><input type="radio" name="q2"> É uma ação que o objeto sabe fazer, chamada com parênteses</label>
+
+<label><input type="radio" name="q2"> É um erro</label>
+
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">3. O que mostra a linha <code>TypeName: System.String</code>?</p>
+
+<label><input type="radio" name="q3"> O nome da variável</label>
+
+<label><input type="radio" name="q3"> O tipo do objeto inspecionado: um texto</label>
+
+<label><input type="radio" name="q3"> Quantos objetos foram enviados</label>
+
+<label><input type="radio" name="q3"> O nome do comando</label>
+
+</div>
+
+<div class="tryps" data-goal="out:NoteProperty;;out:Sabor;;src:Get-Member;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> crie um <code>[pscustomobject]</code> com os campos <code>Sabor = "Uva"</code> e <code>Preco = 8</code> e inspecione com o <code>Get-Member</code>. Na saída devem aparecer o campo <code>Sabor</code> e o tipo de membro <code>NoteProperty</code>.</p>
+
+<pre class="script" data-file="main.ps1">$suco = [pscustomobject]@{ Sabor = "Uva"; Preco = 8 }
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$suco = [pscustomobject]@{ Sabor = "Uva"; Preco = 8 }
+$suco | Get-Member
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Get-Member</code> (apelido <code>gm</code>) mostra o tipo e os membros de um objeto.</li>
+  <li><code>Name</code> é o que vem depois do ponto; <code>MemberType</code> diz se é campo ou ação.</li>
+  <li><code>-MemberType Property</code> ou <code>Method</code> filtra; <code>-Name</code> aceita curinga.</li>
+  <li>Cada tipo diferente aparece uma vez só.</li>
+  <li>Com <code>$null</code> não há o que inspecionar.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

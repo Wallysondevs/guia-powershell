@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell: cmdlets mais usados — referência rápida | Guia PowerShell</title>
+<meta name="description" content="Referência rápida dos cmdlets mais usados do PowerShell 7, organizados por tarefa: arquivos e pastas, texto, pipeline, formatação, dados (CSV/JSON), sistema, rede e ajuda, com link para a aula de cada um.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Cmdlets</span> Mais Usados</h1>
+
+<p class="intro">Uma cola para deixar aberta ao lado do terminal: os cmdlets que mais aparecem no dia a dia, agrupados pelo que você quer fazer, com o apelido mais comum e a aula onde ele é explicado.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Qual cmdlet usar para cada tarefa comum.</li>
+  <li>O apelido curto de cada um (para o terminal).</li>
+  <li>Onde aprender mais sobre cada cmdlet neste guia.</li>
+</ul>
+</div>
+
+
+
+<hr>
+
+<h2>Ajuda e descoberta</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Cmdlet</th><th>Apelido</th><th>Para quê</th></tr>
+
+<tr><td><a href="get-help.html"><code>Get-Help</code></a></td><td><code>help</code></td><td>Ajuda de um comando (<code>-Examples</code> para exemplos).</td></tr>
+
+<tr><td><a href="get-command.html"><code>Get-Command</code></a></td><td><code>gcm</code></td><td>Procura comandos (<code>Get-Command *csv*</code>).</td></tr>
+
+<tr><td><a href="get-member.html"><code>Get-Member</code></a></td><td><code>gm</code></td><td>Propriedades e métodos de um objeto.</td></tr>
+
+<tr><td><code>Get-Alias</code></td><td><code>gal</code></td><td>De quem um apelido é atalho.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Arquivos e pastas</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Cmdlet</th><th>Apelido</th><th>Para quê</th></tr>
+
+<tr><td><a href="get-location.html"><code>Get-Location</code></a></td><td><code>pwd</code></td><td>Pasta atual.</td></tr>
+
+<tr><td><a href="set-location.html"><code>Set-Location</code></a></td><td><code>cd</code></td><td>Muda de pasta.</td></tr>
+
+<tr><td><a href="get-childitem.html"><code>Get-ChildItem</code></a></td><td><code>dir</code>, <code>ls</code></td><td>Lista arquivos (<code>-Recurse</code>, <code>-Filter</code>, <code>-File</code>).</td></tr>
+
+<tr><td><a href="new-item.html"><code>New-Item</code></a></td><td><code>ni</code></td><td>Cria arquivo ou pasta (<code>-ItemType Directory</code>).</td></tr>
+
+<tr><td><a href="copy-move.html"><code>Copy-Item</code></a> / <code>Move-Item</code></td><td><code>copy</code> / <code>move</code></td><td>Copia / move.</td></tr>
+
+<tr><td><a href="rename-item.html"><code>Rename-Item</code></a></td><td><code>ren</code></td><td>Renomeia.</td></tr>
+
+<tr><td><a href="remove-item.html"><code>Remove-Item</code></a></td><td><code>del</code>, <code>rm</code></td><td>Apaga (<code>-Recurse</code>, <code>-WhatIf</code>).</td></tr>
+
+<tr><td><a href="test-path.html"><code>Test-Path</code></a></td><td>:: Existe?</td></tr>
+
+<tr><td><code>Join-Path</code> / <code>Split-Path</code></td><td>:: Monta / separa caminhos.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Conteúdo de arquivos</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Cmdlet</th><th>Apelido</th><th>Para quê</th></tr>
+
+<tr><td><a href="get-content.html"><code>Get-Content</code></a></td><td><code>cat</code>, <code>type</code>, <code>gc</code></td><td>Lê (<code>-Raw</code>, <code>-Tail</code>, <code>-Wait</code>).</td></tr>
+
+<tr><td><code>Set-Content</code> / <code>Add-Content</code></td><td><code>sc</code> / <code>ac</code></td><td>Grava / acrescenta texto.</td></tr>
+
+<tr><td><a href="out-string-out-file.html"><code>Out-File</code></a></td><td>:: Grava a saída formatada num arquivo.</td></tr>
+
+<tr><td><code>Select-String</code></td><td><code>sls</code></td><td>Procura texto (como o grep).</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Pipeline</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Cmdlet</th><th>Apelido</th><th>Para quê</th></tr>
+
+<tr><td><a href="where-object.html"><code>Where-Object</code></a></td><td><code>?</code>, <code>where</code></td><td>Filtra.</td></tr>
+
+<tr><td><a href="select-object.html"><code>Select-Object</code></a></td><td><code>select</code></td><td>Escolhe propriedades, primeiros/últimos.</td></tr>
+
+<tr><td><a href="sort-object.html"><code>Sort-Object</code></a></td><td><code>sort</code></td><td>Ordena.</td></tr>
+
+<tr><td><a href="foreach-object.html"><code>ForEach-Object</code></a></td><td><code>%</code>, <code>foreach</code></td><td>Faz algo com cada item.</td></tr>
+
+<tr><td><a href="group-object.html"><code>Group-Object</code></a></td><td><code>group</code></td><td>Agrupa e conta.</td></tr>
+
+<tr><td><a href="measure-object.html"><code>Measure-Object</code></a></td><td><code>measure</code></td><td>Conta, soma, média, mínimo, máximo.</td></tr>
+
+<tr><td><code>Tee-Object</code></td><td><code>tee</code></td><td>Grava e continua o pipeline.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Formatação e saída</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Cmdlet</th><th>Apelido</th><th>Para quê</th></tr>
+
+<tr><td><a href="format-table.html"><code>Format-Table</code></a></td><td><code>ft</code></td><td>Tabela (sempre no fim).</td></tr>
+
+<tr><td><a href="format-list.html"><code>Format-List</code></a></td><td><code>fl</code></td><td>Lista de propriedades.</td></tr>
+
+<tr><td><a href="write-host-output.html"><code>Write-Output</code></a> / <code>Write-Host</code></td><td><code>echo</code> /</td><td>Saída para o pipeline / direto na tela.</td></tr>
+
+<tr><td><code>Write-Warning</code> / <code>Write-Error</code> / <code>Write-Verbose</code></td><td>:: Avisos, erros e detalhes.</td></tr>
+
+<tr><td><code>Out-GridView</code></td><td><code>ogv</code></td><td>Janela com tabela filtrável (Windows).</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Dados</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Cmdlet</th><th>Para quê</th></tr>
+
+<tr><td><a href="csv.html"><code>Import-Csv</code> / <code>Export-Csv</code></a></td><td>Ler / gravar CSV.</td></tr>
+
+<tr><td><a href="json.html"><code>ConvertFrom-Json</code> / <code>ConvertTo-Json</code></a></td><td>Ler / gerar JSON.</td></tr>
+
+<tr><td><a href="get-date.html"><code>Get-Date</code></a></td><td>Datas e horas.</td></tr>
+
+<tr><td><code>Get-Random</code></td><td>Número ou item aleatório.</td></tr>
+
+<tr><td><a href="web.html"><code>Invoke-RestMethod</code></a></td><td>Consultar APIs.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Sistema (Windows)</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Cmdlet</th><th>Para quê</th></tr>
+
+<tr><td><code>Get-Process</code> / <code>Stop-Process</code></td><td>Programas abertos / encerrar.</td></tr>
+
+<tr><td><a href="servicos.html"><code>Get-Service</code></a></td><td>Serviços do Windows.</td></tr>
+
+<tr><td><code>Get-CimInstance</code></td><td>Informações do computador (disco, memória, sistema).</td></tr>
+
+<tr><td><code>Get-WinEvent</code></td><td>Logs de eventos.</td></tr>
+
+<tr><td><code>Test-Connection</code> / <code>Test-NetConnection</code></td><td>Ping / testar porta.</td></tr>
+
+<tr><td><code>Get-ComputerInfo</code></td><td>Resumo do computador.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Variáveis e sessão</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Cmdlet</th><th>Para quê</th></tr>
+
+<tr><td><a href="variaveis.html"><code>Get-Variable</code></a></td><td>Lista variáveis.</td></tr>
+
+<tr><td><code>Get-History</code></td><td>Comandos já digitados (<code>h</code>).</td></tr>
+
+<tr><td><code>Clear-Host</code></td><td>Limpa a tela (<code>cls</code>).</td></tr>
+
+<tr><td><code>Start-Transcript</code></td><td>Grava tudo o que acontece no terminal num arquivo.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Para descobrir: <code>Get-Help</code>, <code>Get-Command</code>, <code>Get-Member</code>.</li>
+  <li>Para o pipeline: <code>Where-Object</code>, <code>Select-Object</code>, <code>Sort-Object</code>, <code>ForEach-Object</code>.</li>
+  <li>Apelidos são para o terminal; em scripts, use o nome completo.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell: tipos ([int], [string], [datetime], [double]...) — referência | Guia PowerShell</title>
+<meta name="description" content="Referência dos tipos mais usados no PowerShell 7: [string], [int], [long], [double], [decimal], [bool], [datetime], [timespan], [array], [hashtable], [pscustomobject], [xml], [regex], [guid], conversões e como descobrir o tipo de um valor, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Tipos (<span class="hl">[int]</span>, [datetime]…)</h1>
+
+<p class="intro">Todo valor no PowerShell tem um tipo. Os colchetes servem para três coisas: converter (<code>[int]"42"</code>), restringir uma variável (<code>[int]$idade = 30</code>) e usar métodos do tipo (<code>[int]::MaxValue</code>). Veja as aulas <a href="tipos.html">Tipos</a> e <a href="conversao.html">Conversão</a>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Os apelidos de tipo mais usados e o nome completo no .NET.</li>
+  <li>Como converter e como testar o tipo.</li>
+  <li>Os limites e cuidados de cada tipo numérico.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>Descobrindo o tipo</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; (42).GetType().Name
+Int32
+PS&gt; (3.5).GetType().Name
+Double
+PS&gt; ("oi").GetType().Name
+String
+PS&gt; (Get-Date -Year 2026 -Month 1 -Day 1).GetType().FullName
+System.DateTime
+PS&gt; @(1, 2).GetType().Name
+Object[]
+PS&gt; @{}.GetType().Name
+Hashtable
+</pre>
+
+<hr>
+
+<h2>Tabela dos tipos</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Apelido</th><th>Nome no .NET</th><th>Guarda</th></tr>
+
+<tr><td><code>[string]</code></td><td><code>System.String</code></td><td>texto</td></tr>
+
+<tr><td><code>[char]</code></td><td><code>System.Char</code></td><td>um caractere</td></tr>
+
+<tr><td><code>[int]</code></td><td><code>System.Int32</code></td><td>inteiro até ±2,1 bilhões</td></tr>
+
+<tr><td><code>[long]</code></td><td><code>System.Int64</code></td><td>inteiro muito grande</td></tr>
+
+<tr><td><code>[double]</code></td><td><code>System.Double</code></td><td>número com casas (rápido, pode ter arredondamento)</td></tr>
+
+<tr><td><code>[decimal]</code></td><td><code>System.Decimal</code></td><td>número com casas exato (dinheiro)</td></tr>
+
+<tr><td><code>[bool]</code></td><td><code>System.Boolean</code></td><td><code>$true</code> / <code>$false</code></td></tr>
+
+<tr><td><code>[datetime]</code></td><td><code>System.DateTime</code></td><td>data e hora</td></tr>
+
+<tr><td><code>[timespan]</code></td><td><code>System.TimeSpan</code></td><td>duração</td></tr>
+
+<tr><td><code>[array]</code> / <code>[object[]]</code></td><td><code>System.Object[]</code></td><td>lista</td></tr>
+
+<tr><td><code>[hashtable]</code></td><td><code>System.Collections.Hashtable</code></td><td>chave → valor</td></tr>
+
+<tr><td><code>[ordered]</code></td><td><code>OrderedDictionary</code></td><td>hashtable que mantém a ordem</td></tr>
+
+<tr><td><code>[pscustomobject]</code></td><td><code>PSCustomObject</code></td><td>objeto com propriedades</td></tr>
+
+<tr><td><code>[xml]</code></td><td><code>System.Xml.XmlDocument</code></td><td>documento XML</td></tr>
+
+<tr><td><code>[regex]</code></td><td><code>System.Text.RegularExpressions.Regex</code></td><td>expressão regular</td></tr>
+
+<tr><td><code>[guid]</code></td><td><code>System.Guid</code></td><td>identificador único</td></tr>
+
+<tr><td><code>[version]</code></td><td><code>System.Version</code></td><td>número de versão (comparável)</td></tr>
+
+<tr><td><code>[scriptblock]</code></td><td><code>ScriptBlock</code></td><td>bloco de código <code>{ }</code></td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Convertendo</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; [int]"42" + 1
+43
+PS&gt; [int]3.5
+4
+PS&gt; [int]4.5
+4
+PS&gt; [double]"3.75"
+3,75
+PS&gt; [bool]"qualquer texto"
+True
+PS&gt; [bool]""
+False
+PS&gt; [string]123 + 4
+1234
+PS&gt; [version]"7.10.0" -gt [version]"7.9.1"
+True
+</pre>
+
+<dl class="anatomy">
+
+  <dt>[int]3.5 / [int]4.5</dt><dd>Arredonda para o par mais próximo quando está no meio: 3,5 vira 4 e 4,5 também vira 4.</dd>
+
+  <dt>[double]"3.75"</dt><dd>Texto com ponto converte direto; com vírgula, troque antes (<code>-replace ',', '.'</code>).</dd>
+
+  <dt>[bool]"qualquer texto"</dt><dd>Todo texto não vazio é verdadeiro.</dd>
+
+  <dt>[version]</dt><dd>Compara versões do jeito certo (10 > 9), diferente de comparar texto.</dd>
+
+</dl>
+
+<hr>
+
+<h2>Testando e convertendo sem erro</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; 42 -is [int]
+True
+PS&gt; "42" -is [int]
+False
+PS&gt; "abc" -as [int]
+PS&gt; $null -eq ("abc" -as [int])
+True
+</pre>
+
+<hr>
+
+<h2>double × decimal</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; 0.1 + 0.2
+0,3
+PS&gt; (0.1 + 0.2) -eq 0.3
+False
+PS&gt; 0.1d + 0.2d -eq 0.3d
+True
+</pre>
+
+<p>O <code>double</code> guarda números em binário e às vezes tem pequenos erros de arredondamento escondidos (a tela mostra <code>0,3</code>, mas a comparação dá <code>False</code>). Para dinheiro, use <code>decimal</code>: o sufixo <code>d</code> (<code>0.1d</code>) cria o número já como decimal. Cuidado com <code>[decimal]0.1</code>: ali o <code>0.1</code> nasce como double (com o erro escondido) e só depois é convertido.</p>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>.GetType().Name</code> mostra o tipo; <code>-is</code> testa; <code>-as</code> converte sem erro.</li>
+  <li><code>[int]</code> arredonda para o par quando está no meio.</li>
+  <li>Dinheiro em <code>[decimal]</code>; versões em <code>[version]</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

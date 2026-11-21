@@ -1,18 +1,43 @@
 #!/usr/bin/env python3
-# Monta a base do Guia PowerShell a partir de um Guia Lua local.
-import os, re, shutil
-HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(HERE)
-SRC = os.environ.get("GUIA_LUA", os.path.join(os.path.dirname(ROOT), "guia-lua"))
-DST = ROOT
+# Menu do guia: a lista NIVEIS de assets/site.js é a ÚNICA fonte (menu, selo de nível, pager).
+# tools/niveis.js é só uma cópia dela, usada quando a base é montada do zero.
+#   python3 tools/montar.py --niveis   copia a NIVEIS de assets/site.js para tools/niveis.js
+#   python3 tools/montar.py --conferir sai com erro se tools/niveis.js estiver diferente de assets/site.js
+#   python3 tools/montar.py            monta a base do zero a partir do Guia Lua, usando tools/niveis.js
+#                                      (só na criação do guia; o Guia Lua fica ao lado desta pasta, ou em GUIA_LUA)
+# Caminhos relativos a este arquivo: o guia é a pasta acima de tools/.
+import os, re, shutil, sys
+AQUI = os.path.dirname(os.path.abspath(__file__))
+DST = os.path.abspath(os.path.join(AQUI, ".."))
+SRC = os.environ.get("GUIA_LUA", os.path.join(DST, "..", "guia-lua"))
+NIVEIS_JS = os.path.join(AQUI, "niveis.js")
+
+def com_niveis(js):
+    niveis = open(NIVEIS_JS, encoding="utf-8").read().strip()
+    a = js.index("var NIVEIS = ["); b = js.index("\n];", a) + 3
+    return js[:a] + niveis + js[b:]
+
+def niveis_do_site():
+    js = open(os.path.join(DST, "assets", "site.js"), encoding="utf-8").read()
+    a = js.index("var NIVEIS = ["); b = js.index("\n];", a) + 3
+    return js[a:b] + "\n"
+
+if len(sys.argv) > 1 and sys.argv[1] in ("--niveis", "--conferir"):
+    do_site = niveis_do_site()
+    if sys.argv[1] == "--conferir":
+        if not os.path.exists(NIVEIS_JS) or open(NIVEIS_JS, encoding="utf-8").read() != do_site:
+            sys.exit("tools/niveis.js está diferente da NIVEIS de assets/site.js: rode python3 tools/montar.py --niveis")
+        print("ok: tools/niveis.js é igual à NIVEIS de assets/site.js"); sys.exit(0)
+    open(NIVEIS_JS, "w", encoding="utf-8").write(do_site)
+    print("ok", len(re.findall(r'\["[a-z0-9-]+\.html"', do_site)), "páginas na NIVEIS"); sys.exit(0)
+
 os.makedirs(DST + "/assets", exist_ok=True)
 os.makedirs(DST + "/tools", exist_ok=True)
 shutil.copy(SRC + "/assets/style.css", DST + "/assets/style.css")
 
 js = open(SRC + "/assets/site.js").read()
-niveis = open(os.path.join(HERE, "niveis.js")).read().strip()
-a = js.index("var NIVEIS = ["); b = js.index("];", a) + 2
-js = js[:a] + niveis + js[b:]
+js = com_niveis(js)
+niveis = open(NIVEIS_JS, encoding="utf-8").read()
 
 def troca(old, new):
     global js
@@ -21,7 +46,7 @@ def troca(old, new):
 
 troca("Guia Lua — navegação e componentes", "Guia PowerShell — navegação e componentes")
 js = js.replace("</span>Guia Lua</a>", "</span>Guia PowerShell</a>")
-js = re.sub(r'"Guia Lua · [^"]*"', '"Guia PowerShell · PowerShell 7.6 · Os exemplos rodam de verdade no seu navegador (o PowerShell 7 em WebAssembly) · Saídas conferidas no Windows e no Linux de verdade · Vale para Windows, Linux e macOS."', js)
+js = re.sub(r'"Guia Lua · [^"]*"', '"Guia PowerShell · PowerShell 7.7 · As saídas das aulas foram colhidas no PowerShell 7 de verdade · Os exercícios rodam num simulador de PowerShell no navegador"', js)
 
 # o modo interativo do Lua sai; entra o prompt do PowerShell:
 #   "PS C:\Users\ana> comando"  (Windows)   "PS /home/ana> comando"  (Linux)   ">> " = continuação
@@ -39,7 +64,7 @@ troca('''        modoLua = /^\\s*lua(?:5\\.\\d)?\\s*$/.test(m[2]) || /^\\s*lua(?
 troca('var tries = document.querySelectorAll(".try, .trylua");', 'var tries = document.querySelectorAll(".try, .tryps");')
 troca('t.classList.contains("trylua") ? "Experimente: edite o código e clique em Rodar"', 't.classList.contains("tryps") ? "Experimente: edite o código e clique em Rodar"')
 troca('''  // o editor (assets/luasim.js): o Lua de verdade (lua.c oficial em WebAssembly), carregado no primeiro Rodar
-  if (document.querySelector(".trylua")) body.appendChild(el("script", { src: "assets/luasim.js" }));''', '''  // o editor (assets/pssim.js): o PowerShell 7 de verdade (em WebAssembly), carregado no primeiro Rodar
+  if (document.querySelector(".trylua")) body.appendChild(el("script", { src: "assets/luasim.js" }));''', '''  // o editor (assets/pssim.js): um simulador de PowerShell escrito em JavaScript (não é o PowerShell de verdade), carregado no primeiro Rodar
   if (document.querySelector(".tryps")) body.appendChild(el("script", { src: "assets/pssim.js" }));''')
 # no PowerShell maiúsculas não importam nos nomes (Get-ChildItem = get-childitem); dentro de aspas, sim
 troca('''        // no Lua maiúsculas importam (true ≠ True): a comparação é exata

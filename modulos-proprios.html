@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell criando um módulo .psm1 — Import-Module e Export-ModuleMember | Guia PowerShell</title>
+<meta name="description" content="Aprenda a criar seu próprio módulo PowerShell 7: um arquivo .psm1 com funções, Import-Module, Export-ModuleMember para escolher o que fica público, Remove-Module e o manifesto .psd1, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Criando seu <span class="hl">Módulo</span> (.psm1)</h1>
+
+<p class="intro">Quando você junta várias funções úteis, chega a hora de empacotar tudo num <strong>módulo</strong>: um arquivo <code>.psm1</code> que você carrega com <code>Import-Module</code>. Com ele, você escolhe o que fica visível, compartilha com colegas e carrega tudo com uma linha.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A criar um arquivo <code>.psm1</code> com funções.</li>
+  <li>A carregar com <code>Import-Module</code> e listar os comandos do módulo.</li>
+  <li>A esconder funções auxiliares com <code>Export-ModuleMember</code>.</li>
+  <li>A recarregar depois de mudar o código (<code>-Force</code>).</li>
+  <li>O que é o manifesto <code>.psd1</code> e onde guardar o módulo para carregar sozinho.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a caixa de ferramentas</h2>
+
+<p>Dot-sourcing é deixar as ferramentas soltas na bancada. Um módulo é a caixa: tem etiqueta (nome), tem divisórias (o que é público e o que é interno) e você leva para onde quiser.</p>
+
+<hr>
+
+<h2>1. O primeiro módulo</h2>
+
+<p>Um módulo é só um arquivo com a extensão <code>.psm1</code>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Set-Content Conversor.psm1 @'
+&gt;&gt; function ConvertTo-Fahrenheit { param([double]$Celsius) $Celsius * 9 / 5 + 32 }
+&gt;&gt; function ConvertTo-Celsius { param([double]$Fahrenheit) [math]::Round(($Fahrenheit - 32) * 5 / 9, 1) }
+&gt;&gt; function Get-Fator { 1.8 }
+&gt;&gt; Export-ModuleMember -Function ConvertTo-Fahrenheit, ConvertTo-Celsius
+&gt;&gt; '@
+</pre>
+
+<dl class="anatomy">
+
+  <dt>.psm1</dt><dd>A extensão de módulo de script.</dd>
+
+  <dt>Export-ModuleMember</dt><dd>Diz quais funções ficam públicas. <code>Get-Fator</code> é interna: os comandos do módulo usam, mas quem importa não vê.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Importando e usando</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Import-Module .\Conversor.psm1
+PS&gt; ConvertTo-Fahrenheit 30
+86
+PS&gt; ConvertTo-Celsius 100
+37,8
+PS&gt; (Get-Command -Module Conversor).Name
+ConvertTo-Celsius
+ConvertTo-Fahrenheit
+PS&gt; Get-Command Get-Fator -ErrorAction SilentlyContinue | Measure-Object | ForEach-Object Count
+0
+</pre>
+
+<p>O nome do módulo é o nome do arquivo (<code>Conversor</code>). <code>Get-Fator</code> não foi exportada, por isso não aparece.</p>
+
+<hr>
+
+<h2>3. Mudou o código? Recarregue</h2>
+
+<p>O <code>Import-Module</code> não carrega de novo um módulo que já está na memória. Depois de editar o arquivo, use <code>-Force</code>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Add-Content Conversor.psm1 'function Get-Versao { "1.1" }; Export-ModuleMember -Function Get-Versao'
+PS&gt; Import-Module .\Conversor.psm1 -Force
+PS&gt; Get-Versao
+1.1
+</pre>
+
+<p>E para tirar o módulo da sessão:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Remove-Module Conversor
+PS&gt; Get-Module Conversor | Measure-Object | ForEach-Object Count
+0
+</pre>
+
+<hr>
+
+<h2>4. O manifesto (.psd1)</h2>
+
+<p>Para compartilhar, o módulo ganha um <strong>manifesto</strong>: um arquivo <code>.psd1</code> com versão, autor, descrição e o que é exportado. O <code>New-ModuleManifest</code> cria o arquivo para você:</p>
+
+<pre><code>New-ModuleManifest .\Conversor.psd1 -RootModule Conversor.psm1 -ModuleVersion 1.1.0 -Author "Ana" -Description "Converte temperaturas" -FunctionsToExport ConvertTo-Fahrenheit, ConvertTo-Celsius, Get-Versao
+</code></pre>
+
+<p>Depois disso, você importa pelo <code>.psd1</code>, e o PowerShell lê a versão e as funções dali.</p>
+
+<hr>
+
+<h2>5. Carregar sozinho, pelo nome</h2>
+
+<p>O PowerShell procura módulos nas pastas da variável <code>$env:PSModulePath</code>. Se você criar a pasta <code>Conversor</code> (com o mesmo nome do módulo) dentro de uma delas e colocar lá o <code>Conversor.psm1</code> e o <code>Conversor.psd1</code>, basta digitar <code>ConvertTo-Celsius</code> em qualquer sessão: o módulo carrega sozinho. No Windows, a pasta do seu usuário é <code>Documentos\PowerShell\Modules</code>.</p>
+
+<pre><code>$env:PSModulePath -split ';'
+</code></pre>
+
+<div class="tryps" data-goal="out:86;;src:Import-Module;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> o módulo já foi gravado. Importe <code>.\Conversor.psm1</code> e converta 30 °C com <code>ConvertTo-Fahrenheit 30</code>.</p>
+
+<pre class="script" data-file="main.ps1">Set-Content Conversor.psm1 'function ConvertTo-Fahrenheit { param([double]$Celsius) $Celsius * 9 / 5 + 32 }'
+ConvertTo-Fahrenheit 30
+</pre>
+
+<pre class="solucao" data-file="main.ps1">Set-Content Conversor.psm1 'function ConvertTo-Fahrenheit { param([double]$Celsius) $Celsius * 9 / 5 + 32 }'
+Import-Module .\Conversor.psm1
+ConvertTo-Fahrenheit 30
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Mudei o arquivo e nada mudou</strong>
+
+<p>Sem <code>-Force</code>, o <code>Import-Module</code> usa a versão que já está na memória. Use <code>Import-Module .\Arquivo.psm1 -Force</code> ou abra uma sessão nova.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Pasta com nome diferente do módulo</strong>
+
+<p>Para carregar sozinho pelo <code>$env:PSModulePath</code>, a pasta precisa ter o <strong>mesmo nome</strong> do arquivo: <code>Modules\Conversor\Conversor.psm1</code>. Com outro nome, o PowerShell não encontra.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Verbo fora da lista</strong>
+
+<p>Se uma função exportada usar um verbo que não está no <code>Get-Verb</code> (por exemplo <code>Calcular-Total</code>), o <code>Import-Module</code> mostra um aviso. Use verbos aprovados (veja <a href="estilo.html">Estilo e Verbos Aprovados</a>).</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Import-Module .\Mod.psm1</code></td><td>Carrega o módulo.</td></tr>
+
+<tr><td><code>Import-Module .\Mod.psm1 -Force</code></td><td>Recarrega.</td></tr>
+
+<tr><td><code>Export-ModuleMember -Function A, B</code></td><td>Escolhe o que é público.</td></tr>
+
+<tr><td><code>Get-Command -Module Mod</code></td><td>Lista os comandos do módulo.</td></tr>
+
+<tr><td><code>Remove-Module Mod</code></td><td>Descarrega.</td></tr>
+
+<tr><td><code>New-ModuleManifest .\Mod.psd1 ...</code></td><td>Cria o manifesto.</td></tr>
+
+<tr><td><code>$env:PSModulePath</code></td><td>Onde o PowerShell procura módulos.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Recarregar</h3>
+<p>Complete para recarregar o módulo depois de editar:</p>
+<div class="ex-code">Import-Module .\Util.psm1 <input data-answer="-Force" aria-label="resposta"></div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Qual a extensão de um módulo de script?</p>
+
+<label><input type="radio" name="q2"> .ps1</label>
+
+<label><input type="radio" name="q2"> .psm1</label>
+
+<label><input type="radio" name="q2"> .psd1</label>
+
+<label><input type="radio" name="q2"> .mod</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. Para que serve <code>Export-ModuleMember</code>?</p>
+
+<label><input type="radio" name="q3"> Para salvar o módulo no disco</label>
+
+<label><input type="radio" name="q3"> Para instalar o módulo na PowerShell Gallery</label>
+
+<label><input type="radio" name="q3"> Para escolher quais funções ficam visíveis para quem importa</label>
+
+<label><input type="radio" name="q3"> Para apagar funções antigas</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Olá, Ana!;;src:Import-Module;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> grave em <code>Saudacao.psm1</code> a função <code>Get-Saudacao</code> (com o parâmetro <code>$Nome</code>, devolvendo <code>Olá, $Nome!</code>), importe o módulo e chame <code>Get-Saudacao -Nome Ana</code>.</p>
+
+<pre class="script" data-file="main.ps1">Set-Content Saudacao.psm1 ''
+</pre>
+
+<pre class="solucao" data-file="main.ps1">Set-Content Saudacao.psm1 'function Get-Saudacao { param($Nome) "Olá, $Nome!" }'
+Import-Module .\Saudacao.psm1
+Get-Saudacao -Nome Ana
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Um módulo é um arquivo <code>.psm1</code> com funções; carregue com <code>Import-Module</code>.</li>
+  <li><code>Export-ModuleMember</code> escolhe o que é público.</li>
+  <li><code>-Force</code> recarrega depois de mudanças.</li>
+  <li>Manifesto <code>.psd1</code> + pasta no <code>$env:PSModulePath</code> = módulo que carrega sozinho.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

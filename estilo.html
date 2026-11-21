@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell boas práticas — estilo, nomes e verbos aprovados (Get-Verb) | Guia PowerShell</title>
+<meta name="description" content="Aprenda o estilo recomendado no PowerShell 7: nomes Verbo-Substantivo com verbos aprovados (Get-Verb), nomes completos em vez de apelidos nos scripts, parâmetros, recuo, comentários e o PSScriptAnalyzer, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Estilo e <span class="hl">Verbos Aprovados</span></h1>
+
+<p class="intro">Um script bem escrito é lido muito mais vezes do que é escrito: por você daqui a seis meses e por colegas. O PowerShell tem convenções fortes: nomes no formato Verbo-Substantivo, verbos de uma lista oficial e nomes completos nos scripts. Seguindo isso, qualquer pessoa entende o seu código.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O padrão Verbo-Substantivo e a lista de verbos aprovados (<code>Get-Verb</code>).</li>
+  <li>Por que evitar apelidos (<code>ls</code>, <code>%</code>, <code>?</code>) em scripts.</li>
+  <li>Boas práticas para parâmetros e nomes de variáveis.</li>
+  <li>Recuo, chaves e comentários.</li>
+  <li>A ferramenta PSScriptAnalyzer, que revisa o estilo para você.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: as placas de trânsito</h2>
+
+<p>Placas de trânsito são iguais em todo o país: você entende uma placa de "Pare" em qualquer cidade. Os verbos aprovados são as placas do PowerShell: <code>Get-</code> sempre lê, <code>Set-</code> sempre altera, <code>Remove-</code> sempre apaga. Quem vê o nome já sabe o que esperar.</p>
+
+<hr>
+
+<h2>1. Verbo-Substantivo</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Bom</th><th>Ruim</th><th>Por quê</th></tr>
+
+<tr><td><code>Get-Cliente</code></td><td><code>PegarCliente</code></td><td>Sem hífen e com verbo fora da lista.</td></tr>
+
+<tr><td><code>New-Relatorio</code></td><td><code>Criar-Relatorio</code></td><td><code>Criar</code> não é aprovado; use <code>New</code>.</td></tr>
+
+<tr><td><code>Remove-ArquivoTemporario</code></td><td><code>Apagar-Temp</code></td><td>Use <code>Remove</code> e um substantivo claro, no singular.</td></tr>
+
+<tr><td><code>Get-Pedido</code></td><td><code>Get-Pedidos</code></td><td>O substantivo fica no singular, mesmo que devolva vários.</td></tr>
+
+</table>
+</div>
+
+<p>O verbo vem em inglês (da lista oficial); o substantivo pode ser em português.</p>
+
+<hr>
+
+<h2>2. A lista oficial: Get-Verb</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; (Get-Verb).Count
+100
+PS&gt; Get-Verb | Group-Object Group | Select-Object Name, Count
+
+Name           Count
+----           -----
+Common            34
+Communications     6
+Data              24
+Diagnostic         7
+Lifecycle         22
+Other              1
+Security           6
+PS&gt; Get-Verb -Verb Get, New, Set, Remove | Select-Object Verb, Group
+
+Verb   Group
+----   -----
+Get    Common
+New    Common
+Remove Common
+Set    Common
+</pre>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Quero...</th><th>Use</th></tr>
+
+<tr><td>ler ou buscar</td><td><code>Get</code></td></tr>
+
+<tr><td>criar</td><td><code>New</code></td></tr>
+
+<tr><td>alterar</td><td><code>Set</code></td></tr>
+
+<tr><td>apagar</td><td><code>Remove</code></td></tr>
+
+<tr><td>adicionar a algo existente</td><td><code>Add</code></td></tr>
+
+<tr><td>iniciar / parar</td><td><code>Start</code> / <code>Stop</code></td></tr>
+
+<tr><td>testar (devolve True/False)</td><td><code>Test</code></td></tr>
+
+<tr><td>converter</td><td><code>ConvertTo</code> / <code>ConvertFrom</code></td></tr>
+
+<tr><td>exportar / importar</td><td><code>Export</code> / <code>Import</code></td></tr>
+
+<tr><td>mostrar na tela</td><td><code>Show</code></td></tr>
+
+</table>
+</div>
+
+<p>Se uma função de um <a href="modulos-proprios.html">módulo</a> usar um verbo fora da lista, o <code>Import-Module</code> mostra um aviso.</p>
+
+<hr>
+
+<h2>3. Apelidos: no terminal sim, no script não</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>No terminal (rápido)</th><th>No script (claro)</th></tr>
+
+<tr><td><code>ls</code></td><td><code>Get-ChildItem</code></td></tr>
+
+<tr><td><code>gci . -r</code></td><td><code>Get-ChildItem -Path . -Recurse</code></td></tr>
+
+<tr><td><code>% { $_ * 2 }</code></td><td><code>ForEach-Object { $_ * 2 }</code></td></tr>
+
+<tr><td><code>? { $_.Length -gt 1KB }</code></td><td><code>Where-Object { $_.Length -gt 1KB }</code></td></tr>
+
+<tr><td><code>select -f 5</code></td><td><code>Select-Object -First 5</code></td></tr>
+
+</table>
+</div>
+
+<p>Apelidos economizam teclas na hora, mas confundem quem lê e alguns não existem em todos os sistemas (no Linux, <code>ls</code> chama o programa do sistema, não o <code>Get-ChildItem</code>). No script, escreva nomes completos e parâmetros com nome.</p>
+
+<hr>
+
+<h2>4. Parâmetros e variáveis</h2>
+
+<ul>
+</ul>
+
+<hr>
+
+<h2>5. Recuo, chaves e linhas longas</h2>
+
+<pre><code>function Get-Desconto {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [decimal]$Valor,
+
+        [ValidateRange(0, 50)]
+        [int]$Percentual = 10
+    )
+
+    if ($Valor -le 0) {
+        throw "Valor precisa ser positivo: $Valor"
+    }
+
+    $parametros = @{
+        Object          = "Desconto de $Percentual%"
+        ForegroundColor = "Green"
+    }
+    Write-Host @parametros
+
+    return $Valor * $Percentual / 100
+}
+</code></pre>
+
+<ul>
+</ul>
+
+<hr>
+
+<h2>6. Comentários que ajudam</h2>
+
+<p>Comente o <strong>porquê</strong>, não o óbvio. <code>$i++ # soma 1 no i</code> não ajuda; <code># a API devolve no máximo 100 itens por página</code> ajuda. E coloque ajuda nas funções (veja <a href="ajuda-comentarios.html">Ajuda nas Suas Funções</a>).</p>
+
+<hr>
+
+<h2>7. PSScriptAnalyzer: o revisor automático</h2>
+
+<p>O módulo PSScriptAnalyzer lê seus scripts e aponta problemas de estilo e erros comuns (apelidos, verbos fora da lista, variáveis não usadas, senhas em texto puro). Instale uma vez pela <span data-rascunho="psgallery.html">PowerShell Gallery</span> e rode na pasta do projeto:</p>
+
+<pre><code>Install-PSResource PSScriptAnalyzer
+Invoke-ScriptAnalyzer -Path .\meu-script.ps1
+</code></pre>
+
+<p>O resultado é uma tabela com a regra, a gravidade, a linha e a mensagem de cada problema. O editor VS Code com a extensão do PowerShell mostra os mesmos avisos enquanto você digita.</p>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. O verbo de criar</h3>
+<p>Complete com o verbo aprovado:</p>
+<div class="ex-code">function <input data-answer="New" aria-label="resposta">-Relatorio { }</div>
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. Qual nome segue as convenções?</p>
+
+<label><input type="radio" name="q2"> <code>CriarUsuario</code></label>
+
+<label><input type="radio" name="q2"> <code>Criar-Usuario</code></label>
+
+<label><input type="radio" name="q2"> <code>New-Usuario</code></label>
+
+<label><input type="radio" name="q2"> <code>new_usuario</code></label>
+
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">3. Por que evitar <code>%</code> e <code>?</code> em scripts?</p>
+
+<label><input type="radio" name="q3"> Porque dão erro em scripts</label>
+
+<label><input type="radio" name="q3"> Porque deixam o código difícil de ler</label>
+
+<label><input type="radio" name="q3"> Porque são mais lentos</label>
+
+<label><input type="radio" name="q3"> Porque só funcionam no Linux</label>
+
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">4. Qual verbo usar numa função que devolve <code>True</code> ou <code>False</code>?</p>
+
+<label><input type="radio" name="q4"> Test</label>
+
+<label><input type="radio" name="q4"> Check</label>
+
+<label><input type="radio" name="q4"> Is</label>
+
+<label><input type="radio" name="q4"> Validate</label>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Nomes Verbo-Substantivo, com verbos de <code>Get-Verb</code> e substantivo no singular.</li>
+  <li>No script: nomes completos e parâmetros com nome, sem apelidos.</li>
+  <li>Parâmetros em PascalCase, com tipos e validação.</li>
+  <li>Recuo de 4 espaços, splatting para linhas longas e comentários com o porquê.</li>
+  <li>O PSScriptAnalyzer revisa tudo isso por você.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

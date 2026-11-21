@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projeto PowerShell: consultando uma API de CEP (ViaCEP) passo a passo | Guia PowerShell</title>
+<meta name="description" content="Projeto prático em PowerShell 7: uma função Get-Endereco que consulta o ViaCEP, valida o CEP, trata CEP inexistente e erros de rede, consulta vários CEPs, guarda em cache e exporta para CSV, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Projeto: <span class="hl">Consultando uma API</span> (CEP)</h1>
+
+<p class="intro">Neste projeto você cria a função <code>Get-Endereco</code>, que recebe um ou vários CEPs e devolve o endereço de cada um, consultando o serviço gratuito ViaCEP. É o tipo de ferramenta que resolve um problema real: completar uma planilha de clientes com rua, bairro e cidade.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A validar a entrada com regex antes de chamar a API.</li>
+  <li>A consultar a API com <code>Invoke-RestMethod</code> e montar um objeto limpo.</li>
+  <li>A tratar CEP inexistente e falha de rede.</li>
+  <li>A receber vários CEPs pelo pipeline.</li>
+  <li>A evitar consultas repetidas com um cache em hashtable e exportar para CSV.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>O plano</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Etapa</th><th>Ferramenta</th></tr>
+
+<tr><td>Limpar e validar o CEP</td><td><code>-replace</code> e <code>-match</code></td></tr>
+
+<tr><td>Consultar</td><td><code>Invoke-RestMethod</code> (veja <a href="web.html">Internet</a>)</td></tr>
+
+<tr><td>Montar o resultado</td><td><code>[pscustomobject]</code></td></tr>
+
+<tr><td>Vários CEPs</td><td><code>process { }</code> com <code>ValueFromPipeline</code></td></tr>
+
+<tr><td>Não repetir consultas</td><td>hashtable como cache</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>1. A primeira versão</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Get-Endereco { param([string]$Cep)
+&gt;&gt;     $limpo = $Cep -replace '\D', ''
+&gt;&gt;     $r = Invoke-RestMethod "https://viacep.com.br/ws/$limpo/json/"
+&gt;&gt;     [pscustomobject]@{ CEP = $r.cep; Rua = $r.logradouro; Bairro = $r.bairro; Cidade = $r.localidade; UF = $r.uf }
+&gt;&gt; }
+PS&gt; Get-Endereco "01310-100"
+
+CEP    : 01310-100
+Rua    : Avenida Paulista
+Bairro : Bela Vista
+Cidade : São Paulo
+UF     : SP
+</pre>
+
+<hr>
+
+<h2>2. Validando e tratando erros</h2>
+
+<p>O ViaCEP responde de jeitos diferentes para cada problema: um CEP com formato errado dá erro HTTP 400, e um CEP que não existe volta com o campo <code>erro</code>. A função precisa cuidar dos dois:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Get-Endereco { param([string]$Cep)
+&gt;&gt;     $limpo = $Cep -replace '\D', ''
+&gt;&gt;     if ($limpo -notmatch '^\d{8}$') { return [pscustomobject]@{ CEP = $Cep; Status = "Formato inválido" } }
+&gt;&gt;     try { $r = Invoke-RestMethod "https://viacep.com.br/ws/$limpo/json/" -TimeoutSec 10 }
+&gt;&gt;     catch { return [pscustomobject]@{ CEP = $Cep; Status = "Falha na consulta" } }
+&gt;&gt;     if ($r.erro) { return [pscustomobject]@{ CEP = $Cep; Status = "Não encontrado" } }
+&gt;&gt;     [pscustomobject]@{ CEP = $r.cep; Status = "OK"; Rua = $r.logradouro; Bairro = $r.bairro; Cidade = $r.localidade; UF = $r.uf }
+&gt;&gt; }
+PS&gt; (Get-Endereco "123").Status
+Formato inválido
+PS&gt; (Get-Endereco "99999-999").Status
+Não encontrado
+PS&gt; (Get-Endereco "20040020").Cidade
+Rio de Janeiro
+</pre>
+
+<dl class="anatomy">
+
+  <dt>-notmatch '^\d{8}$'</dt><dd>Se não sobrarem exatamente 8 dígitos, nem chama a API.</dd>
+
+  <dt>-TimeoutSec 10</dt><dd>Desiste depois de 10 segundos sem resposta.</dd>
+
+  <dt>catch { ... }</dt><dd>Sem internet, ou a API fora do ar: devolve um objeto com o status, em vez de parar tudo.</dd>
+
+  <dt>$r.erro</dt><dd>CEP com formato certo mas que não existe.</dd>
+
+</dl>
+
+<p>Devolver sempre um objeto (com <code>Status</code>) em vez de mostrar erros deixa o resultado fácil de filtrar depois.</p>
+
+<hr>
+
+<h2>3. Vários CEPs pelo pipeline e cache</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $Cache = @{}
+PS&gt; function Get-Endereco {
+&gt;&gt;     param([Parameter(ValueFromPipeline)][string]$Cep)
+&gt;&gt;     process {
+&gt;&gt;         $limpo = $Cep -replace '\D', ''
+&gt;&gt;         if ($Cache.ContainsKey($limpo)) { return $Cache[$limpo] }
+&gt;&gt;         if ($limpo -notmatch '^\d{8}$') { return [pscustomobject]@{ CEP = $Cep; Status = "Formato inválido"; Cidade = $null; UF = $null } }
+&gt;&gt;         try { $r = Invoke-RestMethod "https://viacep.com.br/ws/$limpo/json/" -TimeoutSec 10 }
+&gt;&gt;         catch { return [pscustomobject]@{ CEP = $Cep; Status = "Falha na consulta"; Cidade = $null; UF = $null } }
+&gt;&gt;         $obj = if ($r.erro) { [pscustomobject]@{ CEP = $Cep; Status = "Não encontrado"; Cidade = $null; UF = $null } }
+&gt;&gt;                else { [pscustomobject]@{ CEP = $r.cep; Status = "OK"; Cidade = $r.localidade; UF = $r.uf } }
+&gt;&gt;         $Cache[$limpo] = $obj
+&gt;&gt;         $obj
+&gt;&gt;     }
+&gt;&gt; }
+PS&gt; "01310-100", "20040-020", "70040-010", "abc", "01310100" | Get-Endereco | Format-Table -AutoSize
+
+CEP       Status           Cidade         UF
+---       ------           ------         --
+01310-100 OK               São Paulo      SP
+20040-020 OK               Rio de Janeiro RJ
+70040-010 OK               Brasília       DF
+abc       Formato inválido                
+01310-100 OK               São Paulo      SP
+PS&gt; $Cache.Count
+3
+</pre>
+
+<p>O CEP <code>01310100</code> apareceu duas vezes, mas só foi consultado uma: a segunda resposta veio do cache. O <code>"abc"</code> nem foi para o cache.</p>
+
+<hr>
+
+<h2>4. Exportando</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "01310-100", "20040-020", "70040-010" | Get-Endereco | Where-Object Status -eq "OK" | Export-Csv enderecos.csv -Delimiter ';'
+PS&gt; Get-Content enderecos.csv
+"CEP";"Status";"Cidade";"UF"
+"01310-100";"OK";"São Paulo";"SP"
+"20040-020";"OK";"Rio de Janeiro";"RJ"
+"70040-010";"OK";"Brasília";"DF"
+</pre>
+
+<p>Para completar uma planilha de clientes: <code>Import-Csv clientes.csv -Delimiter ';' | ForEach-Object { $_.CEP } | Get-Endereco</code>.</p>
+
+<div class="tryps" data-goal="out:Formato inválido;;src:-notmatch;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> complete a validação: se o CEP limpo não tiver exatamente 8 dígitos, mostre <code>Formato inválido</code>.</p>
+
+<pre class="script" data-file="main.ps1">function Test-Cep { param([string]$Cep)
+    $limpo = $Cep -replace '\D', ''
+    "OK"
+}
+Test-Cep "123"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Test-Cep { param([string]$Cep)
+    $limpo = $Cep -replace '\D', ''
+    if ($limpo -notmatch '^\d{8}$') { return "Formato inválido" }
+    "OK"
+}
+Test-Cep "123"
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Desafios</h2>
+
+<ul>
+</ul>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">1. Por que validar o CEP antes de chamar a API?</p>
+
+<label><input type="radio" name="q1"> Porque a API não aceita números</label>
+
+<label><input type="radio" name="q1"> Para não gastar uma consulta com uma entrada que certamente está errada</label>
+
+<label><input type="radio" name="q1"> Porque o Invoke-RestMethod exige</label>
+
+<label><input type="radio" name="q1"> Para deixar mais lento</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. Para que serve o <code>$Cache</code>?</p>
+
+<label><input type="radio" name="q2"> Guardar a senha da API</label>
+
+<label><input type="radio" name="q2"> Mostrar a tabela</label>
+
+<label><input type="radio" name="q2"> Não consultar de novo um CEP que já foi buscado</label>
+
+<label><input type="radio" name="q2"> Apagar CEPs repetidos do CSV</label>
+
+</div>
+
+<div class="tryps" data-goal="out:São Paulo/SP;;src:Invoke-RestMethod;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> no seu terminal, consulte o CEP <code>01310100</code> e mostre <code>Cidade/UF</code> (ex.: <code>São Paulo/SP</code>). Aqui no navegador a internet é simulada e devolve o mesmo resultado.</p>
+
+<pre class="script" data-file="main.ps1">$r = $null
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$r = Invoke-RestMethod "https://viacep.com.br/ws/01310100/json/"
+"$($r.localidade)/$($r.uf)"
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Valide a entrada antes de chamar a API.</li>
+  <li>Devolva sempre um objeto com <code>Status</code>, mesmo quando der errado.</li>
+  <li><code>ValueFromPipeline</code> + <code>process { }</code> processam vários CEPs.</li>
+  <li>Um cache em hashtable evita consultas repetidas; <code>Export-Csv</code> fecha o trabalho.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

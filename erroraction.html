@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell -ErrorAction e $ErrorActionPreference (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda -ErrorAction no PowerShell 7: Continue, SilentlyContinue, Stop, Ignore e Inquire, a variável $ErrorActionPreference e como combinar com try/catch, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">-ErrorAction</span> e $ErrorActionPreference</h1>
+
+<p class="intro">Cada cmdlet aceita o parâmetro <code>-ErrorAction</code>, que diz o que fazer quando ele encontra um erro que não encerra: mostrar e seguir, calar e seguir, ou parar tudo. A variável <code>$ErrorActionPreference</code> muda o padrão para tudo de uma vez.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Os valores de <code>-ErrorAction</code> e o que cada um faz.</li>
+  <li>O apelido curto <code>-EA</code>.</li>
+  <li>Como <code>-ErrorAction Stop</code> deixa o <code>catch</code> funcionar.</li>
+  <li>A variável <code>$ErrorActionPreference</code>.</li>
+  <li>Quando usar (e quando não usar) <code>SilentlyContinue</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: o aviso no GPS</h2>
+
+<p>O GPS pode reagir a uma rua fechada de três jeitos: avisar e recalcular (Continue), recalcular sem dizer nada (SilentlyContinue) ou parar a viagem e pedir ajuda (Stop). O <code>-ErrorAction</code> escolhe qual desses comportamentos o comando vai ter.</p>
+
+<hr>
+
+<h2>1. Os valores</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Valor</th><th>O que acontece com o erro</th></tr>
+
+<tr><td><code>Continue</code></td><td>(padrão) Mostra o erro e segue em frente.</td></tr>
+
+<tr><td><code>SilentlyContinue</code></td><td>Não mostra, mas guarda em <code>$Error</code>, e segue.</td></tr>
+
+<tr><td><code>Ignore</code></td><td>Não mostra e nem guarda. Segue.</td></tr>
+
+<tr><td><code>Stop</code></td><td>Vira um erro que encerra: o comando para e o <code>catch</code> consegue pegar.</td></tr>
+
+<tr><td><code>Inquire</code></td><td>Pergunta o que fazer (útil para testar, ruim em script automático).</td></tr>
+
+<tr><td><code>Break</code></td><td>Entra no depurador (veja a aula de depuração).</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>2. Vendo na prática</h2>
+
+<p>Para não depender de arquivos do seu computador, vamos usar uma função que gera um erro que não encerra, igual a um cmdlet faria:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Testar-Item { [CmdletBinding()] param($nome)
+&gt;&gt;   if ($nome -eq "ruim") { Write-Error "Item '$nome' com problema." } else { "Item '$nome' ok" }
+&gt;&gt; }
+</pre>
+
+<p>Com <code>SilentlyContinue</code>, o erro some da tela e o resto continua:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "bom", "ruim", "outro" | ForEach-Object { Testar-Item $_ -ErrorAction SilentlyContinue }
+Item 'bom' ok
+Item 'outro' ok
+</pre>
+
+<p>Com o padrão (<code>Continue</code>), o erro apareceria em vermelho entre as duas linhas:</p>
+
+<pre><code>"bom", "ruim", "outro" | ForEach-Object { Testar-Item $_ }
+</code></pre>
+
+<dl class="anatomy">
+
+  <dt>[CmdletBinding()]</dt><dd>Faz a sua função ganhar os parâmetros comuns, como <code>-ErrorAction</code> (veja <a href="cmdletbinding.html">funções avançadas</a>).</dd>
+
+  <dt>Write-Error</dt><dd>Gera um erro que <strong>não</strong> encerra.</dd>
+
+  <dt>-ErrorAction SilentlyContinue</dt><dd>Esconde o erro desta chamada.</dd>
+
+</dl>
+
+<hr>
+
+<h2>3. Stop + try/catch</h2>
+
+<p>Com <code>Stop</code>, o erro vira um que encerra, e o <code>catch</code> pega:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; try { Testar-Item "ruim" -ErrorAction Stop; "não chega aqui" }
+&gt;&gt; catch { "Capturado: $($_.Exception.Message)" }
+Capturado: Item 'ruim' com problema.
+</pre>
+
+<p>Esse é o par mais usado em scripts: <code>-ErrorAction Stop</code> no comando e <code>try/catch</code> em volta.</p>
+
+<div class="tryps" data-goal="out:Capturado: Item &#x27;x&#x27; com problema.;;src:-ErrorAction Stop;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> o <code>catch</code> abaixo não roda porque o erro não encerra. Acrescente <code>-ErrorAction Stop</code> na chamada para o <code>catch</code> mostrar a mensagem.</p>
+
+<pre class="script" data-file="main.ps1">function Testar-Item { [CmdletBinding()] param($nome) Write-Error "Item '$nome' com problema." }
+try { Testar-Item "x" } catch { "Capturado: $($_.Exception.Message)" }
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Testar-Item { [CmdletBinding()] param($nome) Write-Error "Item '$nome' com problema." }
+try { Testar-Item "x" -ErrorAction Stop } catch { "Capturado: $($_.Exception.Message)" }
+</pre>
+
+</div>
+
+<hr>
+
+<h2>4. O padrão para tudo: $ErrorActionPreference</h2>
+
+<p>Em vez de escrever <code>-ErrorAction Stop</code> em cada linha, você pode mudar o padrão da sessão (ou do script):</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $ErrorActionPreference
+Continue
+PS&gt; $ErrorActionPreference = "Stop"
+PS&gt; try { Testar-Item "ruim" } catch { "Parou no primeiro erro." }
+Parou no primeiro erro.
+PS&gt; $ErrorActionPreference = "Continue"
+</pre>
+
+<p>Muitos scripts começam com <code>$ErrorActionPreference = "Stop"</code>: assim nenhum erro passa despercebido e o script não continua com dados pela metade.</p>
+
+<hr>
+
+<h2>5. O apelido -EA</h2>
+
+<p><code>-EA</code> é o apelido de <code>-ErrorAction</code>. E os valores podem ser escritos por número (<code>0</code> = SilentlyContinue), mas use o nome: é muito mais fácil de ler.</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Testar-Item "ruim" -EA SilentlyContinue
+PS&gt; "seguiu"
+seguiu
+</pre>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>SilentlyContinue em tudo</strong>
+
+<p>Esconder todos os erros faz o script "funcionar" mostrando um resultado errado. Use <code>SilentlyContinue</code> só quando você <strong>sabe</strong> que o erro é esperado (por exemplo, testar se algo existe) e trata a falta do resultado logo depois.</p>
+
+</div>
+
+<div class="cenario">
+<strong>-ErrorAction não muda erros de sintaxe nem o throw</strong>
+
+<p><code>-ErrorAction</code> controla os erros que <em>o comando</em> gera. Um erro de digitação no código (<code>ParserError</code>) ou um <code>throw</code> não são afetados por ele.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>-ErrorAction Stop</code></td><td>Erro vira encerrante; use com try/catch.</td></tr>
+
+<tr><td><code>-ErrorAction SilentlyContinue</code></td><td>Esconde o erro, mas guarda em <code>$Error</code>.</td></tr>
+
+<tr><td><code>-ErrorAction Ignore</code></td><td>Esconde e não guarda.</td></tr>
+
+<tr><td><code>-EA</code></td><td>Apelido de <code>-ErrorAction</code>.</td></tr>
+
+<tr><td><code>$ErrorActionPreference = "Stop"</code></td><td>Muda o padrão de todos os comandos.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Fazer o catch funcionar</h3>
+<p>Complete o valor:</p>
+<div class="ex-code">Get-Item "x.txt" -ErrorAction <input data-answer="Stop" aria-label="resposta"></div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Qual valor esconde o erro mas ainda o guarda em <code>$Error</code>?</p>
+
+<label><input type="radio" name="q2"> Ignore</label>
+
+<label><input type="radio" name="q2"> SilentlyContinue</label>
+
+<label><input type="radio" name="q2"> Stop</label>
+
+<label><input type="radio" name="q2"> Inquire</label>
+
+</div>
+
+<div class="mc" data-answer="4">
+
+<p class="mc-q">3. Qual variável muda o padrão de todos os comandos?</p>
+
+<label><input type="radio" name="q3"> $Error</label>
+
+<label><input type="radio" name="q3"> $ErrorView</label>
+
+<label><input type="radio" name="q3"> $ErrorList</label>
+
+<label><input type="radio" name="q3"> $ErrorActionPreference</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Item &#x27;a&#x27; ok;;out:Item &#x27;c&#x27; ok;;src:SilentlyContinue;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> processe <code>"a", "ruim", "c"</code> com <code>Testar-Item</code>, escondendo o erro do item ruim com <code>-ErrorAction SilentlyContinue</code>.</p>
+
+<pre class="script" data-file="main.ps1">function Testar-Item { [CmdletBinding()] param($nome)
+  if ($nome -eq "ruim") { Write-Error "Item '$nome' com problema." } else { "Item '$nome' ok" }
+}
+"a", "ruim", "c" | ForEach-Object { Testar-Item $_ }
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Testar-Item { [CmdletBinding()] param($nome)
+  if ($nome -eq "ruim") { Write-Error "Item '$nome' com problema." } else { "Item '$nome' ok" }
+}
+"a", "ruim", "c" | ForEach-Object { Testar-Item $_ -ErrorAction SilentlyContinue }
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>-ErrorAction</code> decide o que fazer com erros que não encerram.</li>
+  <li><code>Stop</code> + <code>try/catch</code> é a dupla de todo script cuidadoso.</li>
+  <li><code>$ErrorActionPreference</code> muda o padrão de uma vez.</li>
+  <li><code>SilentlyContinue</code> só quando o erro é esperado e tratado.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

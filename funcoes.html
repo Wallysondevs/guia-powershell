@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell funções (function) — criando seus próprios comandos | Guia PowerShell</title>
+<meta name="description" content="Aprenda a criar funções no PowerShell: function, nomes Verbo-Substantivo, chamar sem parênteses, parâmetros simples e por que a função precisa existir antes de ser usada.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Funções</span> (function)</h1>
+
+<p class="intro">Uma <strong>função</strong> é um pedaço de código com nome. Você escreve uma vez e chama quantas vezes quiser, como se fosse um comando novo do PowerShell. É o primeiro passo para deixar de repetir código.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A criar uma função com <code>function Nome { ... }</code>.</li>
+  <li>A dar nomes no estilo Verbo-Substantivo, como os cmdlets.</li>
+  <li>A passar valores para a função e chamar <strong>sem parênteses e sem vírgulas</strong>.</li>
+  <li>Que a função precisa ser definida antes de ser chamada.</li>
+  <li>A ver as funções que existem com <code>Get-Command -CommandType Function</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a receita com nome</h2>
+
+<p>No caderno de receitas, você escreve "Bolo de cenoura" e os passos uma vez. Depois, basta dizer "faz o bolo de cenoura" e todo mundo sabe o que fazer. A função é a receita: o nome é o título, o bloco <code>{ }</code> são os passos.</p>
+
+<hr>
+
+<h2>1. A primeira função</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Dizer-Ola { "Olá! Hoje é dia $((Get-Date -Year 2026 -Month 3 -Day 15).Day)." }
+PS&gt; Dizer-Ola
+Olá! Hoje é dia 15.
+PS&gt; Dizer-Ola
+Olá! Hoje é dia 15.
+</pre>
+
+<dl class="anatomy">
+
+  <dt>function</dt><dd>A palavra que cria a função.</dd>
+
+  <dt>Dizer-Ola</dt><dd>O nome. Depois de criada, você chama pelo nome, como um cmdlet.</dd>
+
+  <dt>{ ... }</dt><dd>O corpo: o que a função faz cada vez que é chamada.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Recebendo valores</h2>
+
+<p>Coloque nomes de variáveis entre parênteses depois do nome da função. Na hora de chamar, passe os valores <strong>separados por espaço</strong>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Somar($a, $b) { $a + $b }
+PS&gt; Somar 2 3
+5
+PS&gt; Somar -a 10 -b 5
+15
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Somar($a, $b)</dt><dd>A função recebe dois valores, que dentro dela se chamam <code>$a</code> e <code>$b</code>.</dd>
+
+  <dt>Somar 2 3</dt><dd>Chamada por posição: 2 vai para <code>$a</code>, 3 vai para <code>$b</code>.</dd>
+
+  <dt>Somar -a 10 -b 5</dt><dd>Chamada pelo nome, como os parâmetros de um cmdlet.</dd>
+
+</dl>
+
+<p>O jeito mais completo de declarar parâmetros é o bloco <code>param()</code>, assunto da aula <a href="param.html">Parâmetros</a>.</p>
+
+<div class="tryps" data-goal="out:O dobro de 21 é 42;;src:function\s+\S+;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> crie a função <code>Dobro</code> que recebe <code>$n</code> e mostra <code>O dobro de 21 é 42</code> quando chamada com <code>Dobro 21</code>.</p>
+
+<pre class="script" data-file="main.ps1">
+Dobro 21
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Dobro($n) { "O dobro de $n é $($n * 2)" }
+Dobro 21
+</pre>
+
+</div>
+
+<hr>
+
+<h2>3. Nomes no estilo do PowerShell</h2>
+
+<p>Os cmdlets seguem o padrão <strong>Verbo-Substantivo</strong> (aula <a href="cmdlets.html">Cmdlets</a>). Use o mesmo nas suas funções, com um verbo da lista aprovada (<code>Get</code>, <code>Set</code>, <code>New</code>, <code>Show</code>…). A aula <a href="estilo.html">Estilo e Verbos Aprovados</a> mostra a lista.</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Get-Quadrado($n) { $n * $n }
+PS&gt; Get-Quadrado 7
+49
+PS&gt; (Get-Command Get-Quadrado).CommandType
+Function
+</pre>
+
+<hr>
+
+<h2>4. Funções com várias linhas</h2>
+
+<p>O corpo pode ter quantas linhas quiser. O <code>[string]</code> e o <code>[double]</code> na frente dos parâmetros dizem o tipo de cada um (mais na aula <a href="param.html">Parâmetros</a>):</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Show-Recibo([string]$cliente, [double]$valor) {
+&gt;&gt;   "Cliente: $cliente"
+&gt;&gt;   "Valor:   R$ {0:N2}" -f $valor
+&gt;&gt;   "Obrigado pela compra!"
+&gt;&gt; }
+PS&gt; Show-Recibo "Ana" 49.9
+Cliente: Ana
+Valor:   R$ 49,90
+Obrigado pela compra!
+</pre>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Chamar com parênteses e vírgula</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Somar(2, 3)
+2
+3
+</pre>
+
+<p>Com parênteses e vírgula, <code>(2, 3)</code> vira <strong>uma lista</strong> que vai inteira para <code>$a</code>. O <code>$b</code> fica vazio, e o resultado é a lista. Chame funções do PowerShell como comandos: <code>Somar 2 3</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Chamar antes de criar</strong>
+
+<pre><code>Show-Aviso
+function Show-Aviso { "Atenção!" }
+Show-Aviso
+</code></pre>
+
+<p>O PowerShell lê e roda de cima para baixo. Na primeira chamada, a função ainda não existia, e aparece o mesmo erro de "termo não reconhecido" da aula <a href="primeiro-comando.html">Seu Primeiro Comando</a>. Na segunda, ela já existe e mostra <code>Atenção!</code>. Nos scripts, coloque as funções no começo.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>function Nome { ... }</code></td><td>Cria a função.</td></tr>
+
+<tr><td><code>function Nome($a, $b) { ... }</code></td><td>Com parâmetros simples.</td></tr>
+
+<tr><td><code>Nome 1 2</code></td><td>Chama passando valores por posição.</td></tr>
+
+<tr><td><code>Nome -a 1 -b 2</code></td><td>Chama pelo nome dos parâmetros.</td></tr>
+
+<tr><td><code>Get-Command Nome</code></td><td>Mostra a função.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. A palavra que cria</h3>
+<p>Complete com a palavra que cria a função:</p>
+<div class="ex-code"><input data-answer="function" aria-label="resposta"> Get-Tchau { "Tchau!" }</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Qual o jeito certo de chamar <code>function Somar($a, $b)</code>?</p>
+
+<label><input type="radio" name="q2"> <code>Somar(2, 3)</code></label>
+
+<label><input type="radio" name="q2"> <code>Somar 2 3</code></label>
+
+<label><input type="radio" name="q2"> <code>Somar 2, 3</code></label>
+
+<label><input type="radio" name="q2"> <code>Somar[2, 3]</code></label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. O que acontece ao chamar uma função antes da linha que a cria?</p>
+
+<label><input type="radio" name="q3"> Funciona normalmente</label>
+
+<label><input type="radio" name="q3"> O PowerShell procura no fim do arquivo</label>
+
+<label><input type="radio" name="q3"> Dá erro: o nome ainda não é reconhecido</label>
+
+<label><input type="radio" name="q3"> A função roda duas vezes</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Área: 12;;src:function\s+Get-Area;;src:Get-Area\s+3\s+4;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> crie <code>Get-Area</code> com os parâmetros <code>$largura</code> e <code>$altura</code>, que mostra <code>Área: 12</code> ao ser chamada com <code>Get-Area 3 4</code>.</p>
+
+<pre class="script" data-file="main.ps1">Get-Area 3 4
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Get-Area($largura, $altura) { "Área: $($largura * $altura)" }
+Get-Area 3 4
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>function Nome { ... }</code> cria um comando novo.</li>
+  <li>Parâmetros simples: <code>function Nome($a, $b)</code>.</li>
+  <li>Chame como cmdlet: <code>Nome 1 2</code> ou <code>Nome -a 1 -b 2</code>, nunca <code>Nome(1, 2)</code>.</li>
+  <li>A função precisa ser criada antes de ser chamada.</li>
+  <li>Use nomes Verbo-Substantivo com verbos aprovados.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -14,7 +14,7 @@
    simulador: PSSim.testar(goal, codigo) (ou PSSim.avaliar). O semerro
    usa os erros reais do pssim e o exitCode — não uma heurística no
    texto da saída (o aviso "cannot find the Help files" do Get-Help
-   não é erro). Contrato (Zeca): PSSim.run(codigo); no navegador,
+   não é erro). Contrato do simulador: PSSim.run(codigo); no navegador,
    PSSim.caixas[i].testar("inicial"|"solucao") → {ok, metas, saida}.
    ========================================================= */
 "use strict";
@@ -113,7 +113,7 @@ function carregarPssim(pssimPath) {
     throw new Error("pssim.js carregou, mas não definiu o global PSSim nem pssim (o site.js procura um dos dois, de forma síncrona).");
   }
   if (typeof sim.testar !== "function" && typeof sim.avaliar !== "function" && typeof sim.run !== "function") {
-    throw new Error("O global PSSim/pssim precisa oferecer testar(goal, codigo) ou avaliar(goal, codigo) — ver o contrato no QUADRO.md.");
+    throw new Error("O global PSSim/pssim precisa oferecer testar(goal, codigo) ou avaliar(goal, codigo) — ver o contrato no começo deste arquivo.");
   }
   return sim;
 }
@@ -188,7 +188,7 @@ function main() {
   if (!fs.existsSync(opt.pssim)) {
     console.error(
       "Não achei " + opt.pssim + ".\n" +
-      "O simulador ainda não existe (quem escreve o assets/pssim.js é o Zeca).\n" +
+      "O simulador (assets/pssim.js) não foi encontrado.\n" +
       "Quando o arquivo estiver no lugar e definir o global PSSim (ou pssim) com PSSim.run(codigo), rode de novo:\n" +
       "  node tools/testar-missoes.js\n" +
       "  node tools/testar-missoes.js --secao \"Começando\"\n" +

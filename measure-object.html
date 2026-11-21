@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Measure-Object — contar, somar, média, mínimo e máximo | Guia PowerShell</title>
+<meta name="description" content="Aprenda o Measure-Object: contar itens, somar, tirar a média, o mínimo e o máximo de um campo, e contar linhas, palavras e letras de um texto, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Measure-Object</span>: Contando e Somando</h1>
+
+<p class="intro">Quantos itens tem a lista? Quanto dá a soma? Qual a média? O <code>Measure-Object</code> (apelido <code>measure</code>) é a calculadora do pipeline: recebe os objetos e devolve as contas.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A contar itens com <code>Measure-Object</code>.</li>
+  <li>A somar, tirar a média, o mínimo e o máximo com <code>-Sum</code>, <code>-Average</code>, <code>-Minimum</code> e <code>-Maximum</code>.</li>
+  <li>A medir um campo dos objetos com <code>-Property</code>.</li>
+  <li>A pegar só o número do resultado com <code>.Sum</code> ou <code>.Average</code>.</li>
+  <li>A contar linhas, palavras e caracteres de um texto.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a calculadora do caixa</h2>
+
+<p>No fim do dia, o caixa quer saber: quantas vendas, quanto entrou, qual foi a maior e qual a média. Ele não quer a lista de vendas, quer o resumo. O <code>Measure-Object</code> devolve esse resumo.</p>
+
+<hr>
+
+<h2>1. Contando</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "maçã", "banana", "uva" | Measure-Object
+
+Count             : 3
+Average           : 
+Sum               : 
+Maximum           : 
+Minimum           : 
+StandardDeviation : 
+Property          : 
+</pre>
+
+<p>Sem opções, ele só conta (<code>Count</code>). Os outros campos ficam vazios.</p>
+
+<hr>
+
+<h2>2. Todas as contas de uma vez</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $vendas = 120, 45, 300, 80
+PS&gt; $vendas | Measure-Object -Sum -Average -Minimum -Maximum
+
+Count             : 4
+Average           : 136,25
+Sum               : 545
+Maximum           : 300
+Minimum           : 45
+StandardDeviation : 
+Property          : 
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Count</dt><dd>Quantos valores.</dd>
+
+  <dt>Average</dt><dd>A média (soma dividida pela quantidade).</dd>
+
+  <dt>Sum</dt><dd>A soma.</dd>
+
+  <dt>Maximum / Minimum</dt><dd>O maior e o menor.</dd>
+
+  <dt>Property</dt><dd>O campo medido. Vazio quando a lista é de números soltos.</dd>
+
+</dl>
+
+<p>Repare que o resultado é um objeto com campos, e não um texto. Para ficar só com um número, use o ponto:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; ($vendas | Measure-Object -Sum).Sum
+545
+PS&gt; ($vendas | Measure-Object -Average).Average
+136,25
+</pre>
+
+<div class="tryps" data-goal="out:Soma: 545;;src:Measure-Object;;src:\.Sum;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> mostre <code>Soma: 545</code> usando <code>Measure-Object -Sum</code> e o campo <code>.Sum</code> do resultado.</p>
+
+<pre class="script" data-file="main.ps1">$vendas = 120, 45, 300, 80
+$total = 0
+"Soma: $total"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$vendas = 120, 45, 300, 80
+$total = ($vendas | Measure-Object -Sum).Sum
+"Soma: $total"
+</pre>
+
+</div>
+
+<hr>
+
+<h2>3. Medindo um campo dos objetos</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $produtos = @(
+&gt;&gt;   [pscustomobject]@{ Nome = "Arroz"; Preco = 25.9 }
+&gt;&gt;   [pscustomobject]@{ Nome = "Café"; Preco = 18.5 }
+&gt;&gt;   [pscustomobject]@{ Nome = "Azeite"; Preco = 42 }
+&gt;&gt; )
+PS&gt; $produtos | Measure-Object -Property Preco -Sum -Maximum
+
+Count             : 3
+Average           : 
+Sum               : 86,4
+Maximum           : 42
+Minimum           : 
+StandardDeviation : 
+Property          : Preco
+</pre>
+
+<p>Com <code>-Property</code>, a conta é feita só com aquele campo. Num PowerShell em português, os números com casas decimais aparecem com vírgula na tela (<code>86,4</code>).</p>
+
+<hr>
+
+<h2>4. Contando linhas, palavras e letras</h2>
+
+<p>Com texto, o <code>Measure-Object</code> conta como o <code>wc</code> do Linux:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $poema = @"
+&gt;&gt; Batatinha quando nasce
+&gt;&gt; esparrama pelo chão
+&gt;&gt; "@
+PS&gt; $poema | Measure-Object -Line -Word -Character
+
+Lines Words Characters Property
+----- ----- ---------- --------
+    2     6         42 
+</pre>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Somar texto que não é número</strong>
+
+<pre><code>"10", "vinte" | Measure-Object -Sum
+</code></pre>
+
+<p>O <code>-Sum</code> precisa de números. O <code>"10"</code> é convertido, mas <code>"vinte"</code> não: aparece um erro dizendo que esse valor não é numérico, e a soma fica vazia.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Measure-Object</code></td><td>Conta os itens.</td></tr>
+
+<tr><td><code>-Sum -Average -Minimum -Maximum</code></td><td>Soma, média, menor, maior.</td></tr>
+
+<tr><td><code>-Property Preco</code></td><td>Faz as contas com um campo.</td></tr>
+
+<tr><td><code>(... | Measure-Object -Sum).Sum</code></td><td>Só o número da soma.</td></tr>
+
+<tr><td><code>-Line -Word -Character</code></td><td>Conta linhas, palavras e letras.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. A média</h3>
+<p>Complete para tirar a média:</p>
+<div class="ex-code">7, 8, 9 | Measure-Object <input data-answer="-Average" aria-label="resposta"></div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. O que devolve <code>(1, 2, 3 | Measure-Object -Sum).Sum</code>?</p>
+
+<label><input type="radio" name="q2"> Um objeto com várias colunas</label>
+
+<label><input type="radio" name="q2"> O número 6</label>
+
+<label><input type="radio" name="q2"> O número 3</label>
+
+<label><input type="radio" name="q2"> Um erro</label>
+
+</div>
+
+<div class="mc" data-answer="4">
+
+<p class="mc-q">3. Para medir o campo <code>Preco</code> de uma lista de produtos, você usa:</p>
+
+<label><input type="radio" name="q3"> <code>Measure-Object Preco -Count</code></label>
+
+<label><input type="radio" name="q3"> <code>Measure-Object -Campo Preco</code></label>
+
+<label><input type="radio" name="q3"> <code>Measure-Object $_.Preco</code></label>
+
+<label><input type="radio" name="q3"> <code>Measure-Object -Property Preco -Sum</code></label>
+
+</div>
+
+<div class="tryps" data-goal="out:Maior: 300;;src:-Maximum;;src:\.Maximum;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> mostre a maior venda no formato <code>Maior: 300</code>, usando <code>Measure-Object -Maximum</code> e o campo <code>.Maximum</code>.</p>
+
+<pre class="script" data-file="main.ps1">$vendas = 120, 45, 300, 80
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$vendas = 120, 45, 300, 80
+$maior = ($vendas | Measure-Object -Maximum).Maximum
+"Maior: $maior"
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Measure-Object</code> conta; com <code>-Sum</code>, <code>-Average</code>, <code>-Minimum</code> e <code>-Maximum</code> faz as contas.</li>
+  <li><code>-Property Campo</code> mede um campo dos objetos.</li>
+  <li>O resultado é um objeto: use <code>.Sum</code>, <code>.Average</code>… para ter só o número.</li>
+  <li>Com texto: <code>-Line</code>, <code>-Word</code>, <code>-Character</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell escopo das variáveis — local, script e global | Guia PowerShell</title>
+<meta name="description" content="Entenda o escopo das variáveis no PowerShell: o que a função enxerga, por que a mudança dentro da função não vale fora, $script:, $global: e como devolver valores do jeito certo.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Escopo</span> das Variáveis</h1>
+
+<p class="intro">Uma variável criada dentro de uma função existe só lá dentro. E a função consegue <strong>ler</strong> as variáveis de fora, mas, ao <strong>mudar</strong> uma delas, cria uma cópia local. Entender esse "quem enxerga o quê" evita muitos bugs.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Que a função lê as variáveis de fora.</li>
+  <li>Que mudar uma variável dentro da função não muda a de fora.</li>
+  <li>Que as variáveis da função somem quando ela termina.</li>
+  <li>A usar <code>$script:</code> e <code>$global:</code> quando realmente precisar.</li>
+  <li>Por que devolver o valor é melhor que mexer em variável de fora.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a casa e os quartos</h2>
+
+<p>A casa (o escopo de fora) tem uma sala que todos os quartos (as funções) conseguem ver pela porta. Mas, se alguém pendura um quadro novo dentro do quarto, ele fica no quarto. Quando a pessoa sai do quarto e fecha a porta, o que estava lá dentro fica lá.</p>
+
+<hr>
+
+<h2>1. A função enxerga o que está fora</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $cidade = "Recife"
+PS&gt; function Show-Cidade { "Moro em $cidade" }
+PS&gt; Show-Cidade
+Moro em Recife
+</pre>
+
+<hr>
+
+<h2>2. Mudar dentro não muda fora</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $contador = 10
+PS&gt; function Add-Um { $contador = $contador + 1; "dentro: $contador" }
+PS&gt; Add-Um
+dentro: 11
+PS&gt; "fora: $contador"
+fora: 10
+</pre>
+
+<dl class="anatomy">
+
+  <dt>$contador = $contador + 1</dt><dd>Lê o <code>10</code> de fora e cria uma variável <strong>nova</strong>, local, com <code>11</code>.</dd>
+
+  <dt>fora: 10</dt><dd>A variável de fora não mudou.</dd>
+
+</dl>
+
+<hr>
+
+<h2>3. O que nasce na função, morre na função</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function New-Segredo { $segredo = "abc"; "criei o segredo" }
+PS&gt; New-Segredo
+criei o segredo
+PS&gt; "segredo fora: [$segredo]"
+segredo fora: []
+</pre>
+
+<div class="tryps" data-goal="out:Total: 15;;src:return|\$total\s*=\s*Add;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> a função soma, mas o <code>$total</code> de fora não muda. Em vez de mexer na variável de fora, faça a função <strong>devolver</strong> a soma e guarde: <code>$total = Add-Valor $total 5</code>.</p>
+
+<pre class="script" data-file="main.ps1">$total = 10
+function Add-Valor($atual, $mais) { $total = $atual + $mais }
+Add-Valor $total 5
+"Total: $total"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$total = 10
+function Add-Valor($atual, $mais) { return $atual + $mais }
+$total = Add-Valor $total 5
+"Total: $total"
+</pre>
+
+</div>
+
+<hr>
+
+<h2>4. <code>$script:</code> e <code>$global:</code></h2>
+
+<p>Com um prefixo, você diz em qual escopo a variável mora. <code>$script:</code> é o escopo do arquivo <code>.ps1</code> (no console, é o mesmo que o global). <code>$global:</code> é a sessão inteira:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $pontos = 0
+PS&gt; function Add-Ponto { $script:pontos++ }
+PS&gt; Add-Ponto
+PS&gt; Add-Ponto
+PS&gt; "pontos: $pontos"
+pontos: 2
+</pre>
+
+<p>Funciona, mas use pouco: uma função que mexe em variáveis de fora é difícil de entender e de testar. Prefira receber por parâmetro e devolver o resultado.</p>
+
+<hr>
+
+<h2>5. Os escopos ficam em camadas</h2>
+
+<p>Uma função chamada por outra enxerga as variáveis da que chamou:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Externa { $nivel = "da externa"; Interna }
+PS&gt; function Interna { "Interna vê: $nivel" }
+PS&gt; Externa
+Interna vê: da externa
+</pre>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>O "contador que não conta"</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $visitas = 0
+PS&gt; function Registrar { $visitas++ }
+PS&gt; Registrar; Registrar; Registrar
+PS&gt; "visitas: $visitas"
+visitas: 0
+</pre>
+
+<p>Cada <code>$visitas++</code> dentro da função mexeu numa cópia local. Fora, continua 0. Corrija com <code>$script:visitas++</code> ou, melhor, devolvendo o valor.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você escreve</th><th>Onde mora a variável</th></tr>
+
+<tr><td><code>$x</code> (dentro da função)</td><td>Local: some quando a função termina.</td></tr>
+
+<tr><td><code>$script:x</code></td><td>No escopo do script (o arquivo <code>.ps1</code>).</td></tr>
+
+<tr><td><code>$global:x</code></td><td>Na sessão inteira.</td></tr>
+
+<tr><td><code>$x = F $x</code></td><td>Jeito recomendado: a função devolve, você guarda.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. O prefixo do script</h3>
+<p>Complete para a função mudar a variável do script:</p>
+<div class="ex-code">function F { <input data-answer="$script:" aria-label="resposta">n++ }</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. <code>$a = 1; function F { $a = 5 }; F; $a</code> mostra:</p>
+
+<label><input type="radio" name="q2"> 5</label>
+
+<label><input type="radio" name="q2"> 1</label>
+
+<label><input type="radio" name="q2"> Nada</label>
+
+<label><input type="radio" name="q2"> Erro</label>
+
+</div>
+
+<div class="mc" data-answer="4">
+
+<p class="mc-q">3. Qual é o jeito recomendado de uma função "mudar" um valor de fora?</p>
+
+<label><input type="radio" name="q3"> Usar sempre <code>$global:</code></label>
+
+<label><input type="radio" name="q3"> Criar a variável com o mesmo nome dentro</label>
+
+<label><input type="radio" name="q3"> Não tem como</label>
+
+<label><input type="radio" name="q3"> Devolver o novo valor e guardar: <code>$x = F $x</code></label>
+
+</div>
+
+<div class="tryps" data-goal="out:pontos: 3;;src:\$script:pontos;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> faça o placar contar de verdade, usando <code>$script:pontos</code> dentro da função. Depois de três chamadas, deve aparecer <code>pontos: 3</code>.</p>
+
+<pre class="script" data-file="main.ps1">$pontos = 0
+function Add-Ponto { $pontos++ }
+Add-Ponto; Add-Ponto; Add-Ponto
+"pontos: $pontos"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$pontos = 0
+function Add-Ponto { $script:pontos++ }
+Add-Ponto; Add-Ponto; Add-Ponto
+"pontos: $pontos"
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>A função lê as variáveis de fora, mas mudar cria uma cópia local.</li>
+  <li>O que nasce na função some quando ela termina.</li>
+  <li><code>$script:</code> e <code>$global:</code> escolhem o escopo, mas use pouco.</li>
+  <li>O melhor caminho: receba por parâmetro e devolva o resultado.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

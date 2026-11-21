@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell: atalhos do teclado no terminal (PSReadLine) — referência | Guia PowerShell</title>
+<meta name="description" content="Referência dos atalhos de teclado do PowerShell 7 no terminal (PSReadLine): Tab, Ctrl+Espaço, setas e histórico, Ctrl+R, F2 para trocar a visão das sugestões, copiar e colar, apagar palavras, Ctrl+C e mais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Atalhos</span> do Teclado</h1>
+
+<p class="intro">O PowerShell 7 vem com o módulo PSReadLine, que dá ao terminal recursos de editor: completar com Tab, buscar no histórico, sugestões enquanto você digita. Estes atalhos valem para o modo padrão no Windows.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Os atalhos para completar, navegar e editar a linha.</li>
+  <li>Como buscar comandos antigos no histórico.</li>
+  <li>Como usar as sugestões (IntelliSense) e trocar a forma de exibição.</li>
+</ul>
+</div>
+
+
+
+<hr>
+
+<h2>Completar e sugerir</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Atalho</th><th>Faz</th></tr>
+
+<tr><td><code>Tab</code></td><td>Completa o comando, parâmetro, caminho ou valor. Aperte de novo para a próxima opção.</td></tr>
+
+<tr><td><code>Shift+Tab</code></td><td>Volta para a opção anterior.</td></tr>
+
+<tr><td><code>Ctrl+Espaço</code></td><td>Mostra todas as opções numa lista para escolher com as setas.</td></tr>
+
+<tr><td><code>→</code> (seta direita)</td><td>Aceita a sugestão cinza do histórico.</td></tr>
+
+<tr><td><code>Ctrl+→</code></td><td>Aceita só a próxima palavra da sugestão.</td></tr>
+
+<tr><td><code>F2</code></td><td>Troca a sugestão entre "em linha" (cinza) e "lista".</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Histórico</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Atalho</th><th>Faz</th></tr>
+
+<tr><td><code>↑</code> / <code>↓</code></td><td>Comando anterior / próximo.</td></tr>
+
+<tr><td><code>Ctrl+R</code></td><td>Busca no histórico enquanto você digita (aperte de novo para resultados mais antigos).</td></tr>
+
+<tr><td><code>F8</code></td><td>Busca no histórico o que começa com o que já está digitado.</td></tr>
+
+<tr><td><code>Get-History</code> / <code>h</code></td><td>Lista o histórico da sessão; <code>r 5</code> repete o comando número 5.</td></tr>
+
+</table>
+</div>
+
+<p>O PSReadLine também guarda o histórico entre sessões num arquivo; para ver onde: <code>(Get-PSReadLineOption).HistorySavePath</code>.</p>
+
+<hr>
+
+<h2>Movendo na linha</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Atalho</th><th>Faz</th></tr>
+
+<tr><td><code>Home</code> / <code>End</code></td><td>Início / fim da linha.</td></tr>
+
+<tr><td><code>Ctrl+←</code> / <code>Ctrl+→</code></td><td>Palavra anterior / próxima.</td></tr>
+
+<tr><td><code>Shift+Enter</code></td><td>Nova linha sem executar (para escrever blocos).</td></tr>
+
+<tr><td><code>Esc</code></td><td>Apaga a linha inteira.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Editando</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Atalho</th><th>Faz</th></tr>
+
+<tr><td><code>Ctrl+Backspace</code></td><td>Apaga a palavra anterior.</td></tr>
+
+<tr><td><code>Ctrl+Delete</code></td><td>Apaga a próxima palavra.</td></tr>
+
+<tr><td><code>Ctrl+Z</code> / <code>Ctrl+Y</code></td><td>Desfaz / refaz.</td></tr>
+
+<tr><td><code>Ctrl+A</code></td><td>Seleciona a linha toda.</td></tr>
+
+<tr><td><code>Shift+←</code> / <code>Shift+→</code></td><td>Seleciona caractere por caractere.</td></tr>
+
+<tr><td><code>Ctrl+C</code> (com seleção) / <code>Ctrl+V</code></td><td>Copia / cola.</td></tr>
+
+<tr><td><code>Ctrl+Shift+V</code> / clique direito</td><td>Cola (no Terminal do Windows).</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Controle</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Atalho</th><th>Faz</th></tr>
+
+<tr><td><code>Ctrl+C</code> (sem seleção)</td><td>Interrompe o comando que está rodando.</td></tr>
+
+<tr><td><code>Ctrl+L</code></td><td>Limpa a tela (como <code>Clear-Host</code>).</td></tr>
+
+<tr><td><code>Alt+F7</code></td><td>Limpa o histórico da sessão.</td></tr>
+
+<tr><td><code>Ctrl+Alt+?</code></td><td>Mostra todos os atalhos configurados.</td></tr>
+
+</table>
+</div>
+
+<p>Para ver e mudar atalhos: <code>Get-PSReadLineKeyHandler</code> e <code>Set-PSReadLineKeyHandler</code>. Coloque suas mudanças no <span data-rascunho="perfil.html">perfil</span>.</p>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Tab</code> e <code>Ctrl+Espaço</code> completam; <code>→</code> aceita a sugestão cinza; <code>F2</code> troca a visão.</li>
+  <li><code>↑</code>/<code>↓</code> e <code>Ctrl+R</code> navegam no histórico.</li>
+  <li><code>Ctrl+C</code> interrompe; <code>Esc</code> limpa a linha; <code>Shift+Enter</code> quebra a linha.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

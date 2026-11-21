@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell CSV — Import-Csv, Export-Csv e ConvertFrom-Csv (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a trabalhar com CSV no PowerShell 7: Export-Csv para salvar objetos, Import-Csv para ler, ponto e vírgula do Excel brasileiro com -Delimiter, filtrar e somar colunas, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">CSV</span> (Import-Csv e Export-Csv)</h1>
+
+<p class="intro">CSV é a planilha em forma de texto: uma linha por registro, colunas separadas por vírgula (ou ponto e vírgula). O PowerShell lê e grava CSV transformando cada linha num <a href="objetos.html">objeto</a>, então você filtra, ordena e soma com os cmdlets que já conhece.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A salvar objetos num CSV com <code>Export-Csv</code>.</li>
+  <li>A ler um CSV com <code>Import-Csv</code> e usar as colunas como propriedades.</li>
+  <li>A lidar com o ponto e vírgula do Excel em português (<code>-Delimiter ';'</code>).</li>
+  <li>Que tudo o que vem do CSV é texto, e como converter para número.</li>
+  <li>A converter na memória com <code>ConvertTo-Csv</code> e <code>ConvertFrom-Csv</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a lista de chamada</h2>
+
+<p>A professora tem uma lista em papel: na primeira linha, os títulos (Nome, Turma, Nota); nas outras, um aluno por linha. Um CSV é exatamente isso. A primeira linha diz o nome das colunas, e o PowerShell usa esses nomes como propriedades.</p>
+
+<hr>
+
+<h2>1. Salvando objetos em CSV</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $alunos = @(
+&gt;&gt;   [pscustomobject]@{ Nome = "Ana";  Turma = "A"; Nota = 9.5 }
+&gt;&gt;   [pscustomobject]@{ Nome = "Beto"; Turma = "B"; Nota = 6 }
+&gt;&gt;   [pscustomobject]@{ Nome = "Caio"; Turma = "A"; Nota = 7.5 }
+&gt;&gt; )
+PS&gt; $alunos | Export-Csv alunos.csv
+PS&gt; Get-Content alunos.csv
+"Nome","Turma","Nota"
+"Ana","A","9,5"
+"Beto","B","6"
+"Caio","A","7,5"
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Export-Csv alunos.csv</dt><dd>Grava os objetos no arquivo <code>alunos.csv</code>, na pasta atual.</dd>
+
+  <dt>"Nome","Turma","Nota"</dt><dd>A primeira linha: os nomes das propriedades viram o cabeçalho.</dd>
+
+  <dt>"Ana","A","9,5"</dt><dd>Uma linha por objeto. No PowerShell 7 todos os valores vão entre aspas. O número <code>9.5</code> foi gravado como <code>9,5</code>, no formato do idioma do sistema (pt-BR).</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Lendo de volta</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $lidos = Import-Csv alunos.csv
+PS&gt; $lidos
+
+Nome Turma Nota
+---- ----- ----
+Ana  A     9,5
+Beto B     6
+Caio A     7,5
+PS&gt; $lidos[0].Nome
+Ana
+</pre>
+
+<p>Cada linha virou um objeto com as propriedades <code>Nome</code>, <code>Turma</code> e <code>Nota</code>. Agora vale tudo que você aprendeu:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $lidos | Where-Object Turma -eq "A" | Select-Object Nome, Nota
+
+Nome Nota
+---- ----
+Ana  9,5
+Caio 7,5
+</pre>
+
+<hr>
+
+<h2>3. Tudo vem como texto</h2>
+
+<p>O CSV não guarda tipos: tudo volta como <code>string</code>. Para comparar ou somar números, é preciso converter. E aqui mora uma pegadinha: o <code>[double]</code> lê números no formato internacional, com <strong>ponto</strong> decimal. A vírgula é tratada como separador de milhar:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $lidos[0].Nota.GetType().Name
+String
+PS&gt; [double]"9,5"
+95
+PS&gt; [double]("9,5" -replace ',', '.')
+9,5
+</pre>
+
+<p>Por isso, com notas gravadas com vírgula, troque a vírgula por ponto antes de converter:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $lidos | Sort-Object { [double]($_.Nota -replace ',', '.') } -Descending | Select-Object -First 1 -ExpandProperty Nome
+Ana
+PS&gt; ($lidos | Measure-Object { [double]($_.Nota -replace ',', '.') } -Average).Average
+7,66666666666667
+</pre>
+
+<dl class="anatomy">
+
+  <dt>$_.Nota -replace ',', '.'</dt><dd>Troca a vírgula por ponto no texto da nota (veja <a href="regex.html">-replace</a>).</dd>
+
+  <dt>[double](...)</dt><dd>Converte o texto já com ponto para número.</dd>
+
+  <dt>-ExpandProperty Nome</dt><dd>Mostra só o valor, sem a tabela.</dd>
+
+</dl>
+
+<div class="tryps" data-goal="out:Ana;;src:Import-Csv;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> o código grava um CSV com notas inteiras. Leia com <code>Import-Csv</code> e mostre só o <code>Nome</code> de quem tem nota maior ou igual a 9 (lembre do <code>[int]</code>).</p>
+
+<pre class="script" data-file="main.ps1">@(
+  [pscustomobject]@{ Nome = "Ana";  Nota = 10 }
+  [pscustomobject]@{ Nome = "Beto"; Nota = 6 }
+) | Export-Csv notas.csv
+</pre>
+
+<pre class="solucao" data-file="main.ps1">@(
+  [pscustomobject]@{ Nome = "Ana";  Nota = 10 }
+  [pscustomobject]@{ Nome = "Beto"; Nota = 6 }
+) | Export-Csv notas.csv
+Import-Csv notas.csv | Where-Object { [int]$_.Nota -ge 9 } | ForEach-Object Nome
+</pre>
+
+</div>
+
+<hr>
+
+<h2>4. O Excel em português usa ponto e vírgula</h2>
+
+<p>No Brasil, o Excel salva CSV com <code>;</code>, porque a vírgula é a casa decimal. Use <code>-Delimiter ';'</code> para ler e para gravar:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Set-Content gastos.csv @'
+&gt;&gt; Item;Valor
+&gt;&gt; Aluguel;1200,00
+&gt;&gt; Mercado;850,50
+&gt;&gt; '@
+PS&gt; $gastos = Import-Csv gastos.csv -Delimiter ';'
+PS&gt; $gastos
+
+Item    Valor
+----    -----
+Aluguel 1200,00
+Mercado 850,50
+</pre>
+
+<p>O valor <code>850,50</code> tem vírgula decimal. Para somar, troque a vírgula por ponto antes de converter:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; ($gastos | ForEach-Object { [double]($_.Valor -replace ',', '.') } | Measure-Object -Sum).Sum
+2050,5
+</pre>
+
+<p>E para o Excel abrir certinho um arquivo que você gerou, grave com <code>;</code> também:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $alunos | Export-Csv alunos-excel.csv -Delimiter ';'
+PS&gt; Get-Content alunos-excel.csv -TotalCount 2
+"Nome";"Turma";"Nota"
+"Ana";"A";"9,5"
+</pre>
+
+<hr>
+
+<h2>5. Sem arquivo: ConvertTo-Csv e ConvertFrom-Csv</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $alunos | ConvertTo-Csv
+"Nome","Turma","Nota"
+"Ana","A","9,5"
+"Beto","B","6"
+"Caio","A","7,5"
+PS&gt; "cor,qtd`nazul,3`nverde,5" | ConvertFrom-Csv
+
+cor   qtd
+---   ---
+azul  3
+verde 5
+</pre>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Tudo numa coluna só</strong>
+
+<p>Se o <code>Import-Csv</code> mostra uma única coluna chamada <code>Item;Valor</code>, o arquivo usa <code>;</code> e você não avisou. Acrescente <code>-Delimiter ';'</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Ordenar números como texto</strong>
+
+<p>Ordenando a coluna <code>Nota</code> sem converter, <code>10</code> vem antes de <code>9</code> (a comparação é letra a letra: "1" vem antes de "9"). Converta no <code>Sort-Object</code>, como na seção 3.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Export-Csv depois de Format-Table</strong>
+
+<p><code>Get-Process | Format-Table | Export-Csv</code> grava lixo de formatação, não os dados. Os cmdlets <code>Format-*</code> são sempre o <strong>último</strong> passo, só para a tela. Use <code>Select-Object</code> para escolher colunas antes do <code>Export-Csv</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>$dados | Export-Csv arq.csv</code></td><td>Grava objetos em CSV.</td></tr>
+
+<tr><td><code>Import-Csv arq.csv</code></td><td>Lê o CSV como objetos.</td></tr>
+
+<tr><td><code>-Delimiter ';'</code></td><td>Usa ponto e vírgula (Excel em português).</td></tr>
+
+<tr><td><code>-Append</code></td><td>Acrescenta linhas a um CSV existente.</td></tr>
+
+<tr><td><code>[double]($_.Coluna -replace ',', '.')</code></td><td>Converte para número uma coluna com vírgula decimal.</td></tr>
+
+<tr><td><code>ConvertTo-Csv</code> / <code>ConvertFrom-Csv</code></td><td>O mesmo, sem arquivo.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Ler o CSV do Excel</h3>
+<p>Complete para ler um CSV com ponto e vírgula:</p>
+<div class="ex-code">Import-Csv planilha.csv <input data-answer="-Delimiter" aria-label="resposta"> ';'</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. De que tipo é o valor de uma coluna lida com <code>Import-Csv</code>?</p>
+
+<label><input type="radio" name="q2"> int</label>
+
+<label><input type="radio" name="q2"> string</label>
+
+<label><input type="radio" name="q2"> double</label>
+
+<label><input type="radio" name="q2"> depende da coluna</label>
+
+</div>
+
+<div class="mc" data-answer="4">
+
+<p class="mc-q">3. O que vira o cabeçalho quando você usa <code>Export-Csv</code>?</p>
+
+<label><input type="radio" name="q3"> O nome do arquivo</label>
+
+<label><input type="radio" name="q3"> A primeira linha de dados</label>
+
+<label><input type="radio" name="q3"> Nada; CSV não tem cabeçalho</label>
+
+<label><input type="radio" name="q3"> Os nomes das propriedades dos objetos</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Total: 2050;;src:-Delimiter;;src:Measure-Object;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> leia <code>gastos.csv</code> (que usa <code>;</code>), some a coluna <code>Valor</code> e mostre <code>Total: </code> seguido da soma.</p>
+
+<pre class="script" data-file="main.ps1">Set-Content gastos.csv "Item;Valor`nAluguel;1200`nMercado;850"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">Set-Content gastos.csv "Item;Valor`nAluguel;1200`nMercado;850"
+$soma = (Import-Csv gastos.csv -Delimiter ';' | ForEach-Object { [double]$_.Valor } | Measure-Object -Sum).Sum
+"Total: $soma"
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Export-Csv</code> grava objetos; <code>Import-Csv</code> lê de volta como objetos.</li>
+  <li>O cabeçalho vira o nome das propriedades.</li>
+  <li>Tudo volta como texto: converta com <code>[int]</code> ou <code>[double]</code>, trocando a vírgula decimal por ponto antes.</li>
+  <li>CSV do Excel em português: <code>-Delimiter ';'</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell classes — class, propriedades, construtor, métodos e herança | Guia PowerShell</title>
+<meta name="description" content="Aprenda classes no PowerShell 7: criar um tipo com class, propriedades com tipo e valor padrão, construtores, métodos com return, $this, ToString, propriedades estáticas e herança, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Classes</span></h1>
+
+<p class="intro">Com <code>[pscustomobject]</code> você monta objetos na hora. Com <code>class</code> você cria um <strong>molde</strong>: um tipo novo, com propriedades que têm tipo certo e métodos que sabem fazer coisas. É o mesmo recurso das linguagens como C# e Java, dentro do PowerShell.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A criar uma classe com propriedades tipadas e valores padrão.</li>
+  <li>A criar objetos com <code>::new()</code> e com uma hashtable.</li>
+  <li>A escrever construtores e métodos (com <code>return</code> e <code>$this</code>).</li>
+  <li>A mudar como o objeto aparece com <code>ToString()</code>.</li>
+  <li>Herança: uma classe que estende outra.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a forma de bolo</h2>
+
+<p>A forma define o formato; cada bolo que sai dela é um objeto diferente (um de chocolate, outro de cenoura). A <code>class</code> é a forma: diz que todo <code>Produto</code> tem <code>Nome</code> e <code>Preco</code>. Cada <code>[Produto]::new(...)</code> é um bolo novo.</p>
+
+<hr>
+
+<h2>1. A primeira classe</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; class Produto {
+&gt;&gt;     [string]$Nome
+&gt;&gt;     [decimal]$Preco
+&gt;&gt;     [int]$Estoque = 0
+&gt;&gt; }
+PS&gt; $cafe = [Produto]::new()
+PS&gt; $cafe.Nome = "Café 500g"
+PS&gt; $cafe.Preco = 18.90
+PS&gt; $cafe
+
+Nome       Preco Estoque
+----       ----- -------
+Café 500g 18,900       0
+</pre>
+
+<dl class="anatomy">
+
+  <dt>class Produto { }</dt><dd>Cria o tipo <code>[Produto]</code>.</dd>
+
+  <dt>[string]$Nome</dt><dd>Uma propriedade com tipo. Atribuir outro tipo faz o PowerShell converter (ou dar erro).</dd>
+
+  <dt>[int]$Estoque = 0</dt><dd>Propriedade com valor padrão.</dd>
+
+  <dt>[Produto]</dt><dd>new() :: Cria um objeto (uma instância) da classe.</dd>
+
+</dl>
+
+<p>Também dá para criar a partir de uma hashtable, se a classe tiver um construtor sem argumentos (o padrão):</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; [Produto]@{ Nome = "Pão"; Preco = 0.80; Estoque = 120 }
+
+Nome Preco Estoque
+---- ----- -------
+Pão  0,800     120
+</pre>
+
+<hr>
+
+<h2>2. Construtor</h2>
+
+<p>O construtor é um método com o <strong>mesmo nome</strong> da classe. Ele roda no <code>::new()</code>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; class Aluno {
+&gt;&gt;     [string]$Nome
+&gt;&gt;     [double[]]$Notas
+&gt;&gt;     Aluno([string]$nome, [double[]]$notas) {
+&gt;&gt;         $this.Nome = $nome
+&gt;&gt;         $this.Notas = $notas
+&gt;&gt;     }
+&gt;&gt;     [double] Media() {
+&gt;&gt;         return ($this.Notas | Measure-Object -Average).Average
+&gt;&gt;     }
+&gt;&gt;     [string] ToString() {
+&gt;&gt;         return "$($this.Nome) (média $($this.Media()))"
+&gt;&gt;     }
+&gt;&gt; }
+PS&gt; $ana = [Aluno]::new("Ana", @(8, 9.5, 10))
+PS&gt; $ana.Media()
+9,16666666666667
+PS&gt; "$ana"
+Ana (média 9.16666666666667)
+</pre>
+
+<dl class="anatomy">
+
+  <dt>$this</dt><dd>O próprio objeto. Dentro da classe, propriedades são sempre <code>$this.Nome</code>.</dd>
+
+  <dt>[double] Media()</dt><dd>Um método que devolve um <code>double</code>. O tipo antes do nome é obrigatório (use <code>[void]</code> se não devolver nada).</dd>
+
+  <dt>return</dt><dd>Em métodos, só sai o que vem no <code>return</code>. Diferente das funções, linhas soltas não viram saída.</dd>
+
+  <dt>ToString()</dt><dd>Define como o objeto vira texto (por exemplo, dentro de aspas).</dd>
+
+</dl>
+
+<p>Repare na diferença: <code>$ana.Media()</code> mostra <code>9,16...</code> com vírgula, porque a tela usa o formato do idioma; dentro de aspas (<code>"$ana"</code>), o número vira texto no formato internacional, com ponto. Para controlar, formate você mesmo: <code>"{0:N1}" -f $this.Media()</code>.</p>
+
+<div class="tryps" data-goal="out:Carla (média 8);;src:class;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> crie a aluna Carla com as notas 7, 8 e 9 e mostre <code>"$carla"</code>.</p>
+
+<pre class="script" data-file="main.ps1">class Aluno {
+    [string]$Nome
+    [double[]]$Notas
+    Aluno([string]$nome, [double[]]$notas) { $this.Nome = $nome; $this.Notas = $notas }
+    [double] Media() { return ($this.Notas | Measure-Object -Average).Average }
+    [string] ToString() { return "$($this.Nome) (média $($this.Media()))" }
+}
+</pre>
+
+<pre class="solucao" data-file="main.ps1">class Aluno {
+    [string]$Nome
+    [double[]]$Notas
+    Aluno([string]$nome, [double[]]$notas) { $this.Nome = $nome; $this.Notas = $notas }
+    [double] Media() { return ($this.Notas | Measure-Object -Average).Average }
+    [string] ToString() { return "$($this.Nome) (média $($this.Media()))" }
+}
+$carla = [Aluno]::new("Carla", @(7, 8, 9))
+"$carla"
+</pre>
+
+</div>
+
+<hr>
+
+<h2>3. Estático: da classe, não do objeto</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; class Contador {
+&gt;&gt;     static [int]$Total = 0
+&gt;&gt;     static [void] Somar() { [Contador]::Total++ }
+&gt;&gt; }
+PS&gt; [Contador]::Somar()
+PS&gt; [Contador]::Somar()
+PS&gt; [Contador]::Total
+2
+</pre>
+
+<hr>
+
+<h2>4. Herança</h2>
+
+<p>Uma classe pode <strong>estender</strong> outra com <code>:</code>. Ela herda tudo e pode trocar (sobrescrever) métodos:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; class Animal {
+&gt;&gt;     [string]$Nome
+&gt;&gt;     Animal([string]$nome) { $this.Nome = $nome }
+&gt;&gt;     [string] Falar() { return "..." }
+&gt;&gt; }
+PS&gt; class Cachorro : Animal {
+&gt;&gt;     Cachorro([string]$nome) : base($nome) { }
+&gt;&gt;     [string] Falar() { return "$($this.Nome): Au au!" }
+&gt;&gt; }
+PS&gt; $rex = [Cachorro]::new("Rex")
+PS&gt; $rex.Falar()
+Rex: Au au!
+PS&gt; $rex -is [Animal]
+True
+</pre>
+
+<dl class="anatomy">
+
+  <dt>class Cachorro : Animal</dt><dd><code>Cachorro</code> herda de <code>Animal</code>.</dd>
+
+  <dt>: base($nome)</dt><dd>Chama o construtor da classe mãe.</dd>
+
+  <dt>-is [Animal]</dt><dd>Todo Cachorro também é um Animal.</dd>
+
+</dl>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Esquecer o return no método</strong>
+
+<p>Num método com tipo (<code>[string] Ola()</code>), a saída só sai pelo <code>return</code>. Escrever <code>"Olá"</code> sozinho numa linha não devolve nada, e o PowerShell reclama que nem todos os caminhos de código retornam um valor.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Usar $Nome em vez de $this.Nome</strong>
+
+<p>Dentro de um método, <code>$Nome</code> é uma variável comum (normalmente vazia). A propriedade do objeto é <code>$this.Nome</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Mudar a classe e não ver a mudança</strong>
+
+<p>Na mesma sessão, redefinir uma classe que já foi usada pode deixar objetos antigos com o formato antigo. Se algo ficar estranho, abra uma sessão nova do PowerShell.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você escreve</th><th>O que faz</th></tr>
+
+<tr><td><code>class Nome { [tipo]$Prop }</code></td><td>Cria a classe.</td></tr>
+
+<tr><td><code>[Nome]::new(args)</code></td><td>Cria um objeto.</td></tr>
+
+<tr><td><code>[Nome]@{ Prop = valor }</code></td><td>Cria a partir de uma hashtable.</td></tr>
+
+<tr><td><code>Nome(args) { }</code></td><td>Construtor.</td></tr>
+
+<tr><td><code>[tipo] Metodo() { return ... }</code></td><td>Método.</td></tr>
+
+<tr><td><code>$this.Prop</code></td><td>A propriedade do próprio objeto.</td></tr>
+
+<tr><td><code>static [tipo]$Prop</code></td><td>Membro da classe.</td></tr>
+
+<tr><td><code>class Filha : Mae { }</code></td><td>Herança.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. O próprio objeto</h3>
+<p>Complete dentro do método:</p>
+<div class="ex-code">return "Olá, " + <input data-answer="$this" aria-label="resposta">.Nome</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Como se chama o método que roda quando você faz <code>[Produto]::new()</code>?</p>
+
+<label><input type="radio" name="q2"> Main</label>
+
+<label><input type="radio" name="q2"> O construtor (mesmo nome da classe)</label>
+
+<label><input type="radio" name="q2"> Init</label>
+
+<label><input type="radio" name="q2"> New-Object</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. Num método <code>[int] Dobro() { ... }</code>, como devolver o valor?</p>
+
+<label><input type="radio" name="q3"> Deixando o número sozinho numa linha</label>
+
+<label><input type="radio" name="q3"> Com Write-Output</label>
+
+<label><input type="radio" name="q3"> Com return</label>
+
+<label><input type="radio" name="q3"> Com $this</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Rex: Au au!;;src:class Cachorro;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> complete a classe <code>Cachorro</code> com o método <code>[string] Falar()</code> que devolve <code>"$($this.Nome): Au au!"</code>, crie o Rex e chame <code>Falar()</code>.</p>
+
+<pre class="script" data-file="main.ps1">class Cachorro {
+    [string]$Nome
+    Cachorro([string]$nome) { $this.Nome = $nome }
+}
+</pre>
+
+<pre class="solucao" data-file="main.ps1">class Cachorro {
+    [string]$Nome
+    Cachorro([string]$nome) { $this.Nome = $nome }
+    [string] Falar() { return "$($this.Nome): Au au!" }
+}
+[Cachorro]::new("Rex").Falar()
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>class</code> cria um tipo novo, com propriedades tipadas e valores padrão.</li>
+  <li><code>::new()</code> chama o construtor; <code>$this</code> é o próprio objeto.</li>
+  <li>Métodos têm tipo de retorno e só devolvem pelo <code>return</code>.</li>
+  <li><code>static</code> é da classe; <code>: Mae</code> faz herança.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

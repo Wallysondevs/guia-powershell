@@ -2,8 +2,7 @@
    Guia PowerShell — navegação e componentes
    NIVEIS é a única fonte do menu lateral, do selo de nível e
    dos botões Anterior/Próximo. Para adicionar uma página,
-   inclua-a aqui. Sem o arquivo .html, use {pronta: false}:
-   o menu mostra "em breve" sem link e o pager pula a página.
+   inclua-a aqui (só páginas que já existem).
    ========================================================= */
 var NIVEIS = [
   { id: "n1", nome: "Nível 1 · Iniciante", curto: "Iniciante", desc: "PowerShell do zero", grupos: [
@@ -75,126 +74,103 @@ var NIVEIS = [
   ]},
   { id: "n2", nome: "Nível 2 · Intermediário", curto: "Intermediário", desc: "Pipeline, objetos e scripts", grupos: [
     { grupo: "O Pipeline e os Objetos", itens: [
-      ["objetos.html", "Tudo É Objeto", {pronta: false}],
-      ["pipeline.html", "O Pipeline (|)", {pronta: false}],
-      ["get-member.html", "Get-Member: o que Tem no Objeto", {pronta: false}],
-      ["select-object.html", "Select-Object", {pronta: false}],
-      ["where-object.html", "Where-Object: Filtrando", {pronta: false}],
-      ["sort-object.html", "Sort-Object: Ordenando", {pronta: false}],
-      ["foreach-object.html", "ForEach-Object", {pronta: false}],
-      ["group-object.html", "Group-Object: Agrupando", {pronta: false}],
-      ["measure-object.html", "Measure-Object: Contando e Somando", {pronta: false}],
-      ["format-table.html", "Format-Table", {pronta: false}],
-      ["format-list.html", "Format-List", {pronta: false}],
-      ["out-string-out-file.html", "Out-File, Out-String e o Redirecionamento (>)", {pronta: false}]
+      ["objetos.html", "Tudo É Objeto"],
+      ["pipeline.html", "O Pipeline (|)"],
+      ["get-member.html", "Get-Member: o que Tem no Objeto"],
+      ["select-object.html", "Select-Object"],
+      ["where-object.html", "Where-Object: Filtrando"],
+      ["sort-object.html", "Sort-Object: Ordenando"],
+      ["foreach-object.html", "ForEach-Object"],
+      ["group-object.html", "Group-Object: Agrupando"],
+      ["measure-object.html", "Measure-Object: Contando e Somando"],
+      ["format-table.html", "Format-Table"],
+      ["format-list.html", "Format-List"],
+      ["out-string-out-file.html", "Out-File, Out-String e o Redirecionamento (>)"]
     ]},
     { grupo: "Coleções", itens: [
-      ["arrays.html", "Arrays (Listas)", {pronta: false}],
-      ["arrays-indices.html", "Índices e Fatias", {pronta: false}],
-      ["arrays-alterar.html", "Adicionando e Removendo Itens (List)", {pronta: false}],
-      ["hashtables.html", "Hashtables (@{})", {pronta: false}],
-      ["hashtables-percorrer.html", "Percorrendo uma Hashtable", {pronta: false}],
-      ["pscustomobject.html", "Seus Objetos ([pscustomobject])", {pronta: false}],
-      ["splatting.html", "Splatting (@parametros)", {pronta: false}]
+      ["arrays.html", "Arrays (Listas)"],
+      ["arrays-indices.html", "Índices e Fatias"],
+      ["arrays-alterar.html", "Adicionando e Removendo Itens (List)"],
+      ["hashtables.html", "Hashtables (@{})"],
+      ["hashtables-percorrer.html", "Percorrendo uma Hashtable"],
+      ["pscustomobject.html", "Seus Objetos ([pscustomobject])"],
+      ["splatting.html", "Splatting (@parametros)"]
     ]},
     { grupo: "Funções", itens: [
-      ["funcoes.html", "Funções (function)", {pronta: false}],
-      ["param.html", "Parâmetros (param)", {pronta: false}],
-      ["retorno.html", "O que uma Função Devolve", {pronta: false}],
-      ["cmdletbinding.html", "Funções Avançadas ([CmdletBinding])", {pronta: false}],
-      ["validacao.html", "Validando Parâmetros", {pronta: false}],
-      ["funcoes-pipeline.html", "Funções no Pipeline (begin, process, end)", {pronta: false}],
-      ["escopo.html", "Escopo das Variáveis", {pronta: false}],
-      ["ajuda-comentarios.html", "Ajuda nas Suas Funções", {pronta: false}]
+      ["funcoes.html", "Funções (function)"],
+      ["param.html", "Parâmetros (param)"],
+      ["retorno.html", "O que uma Função Devolve"],
+      ["cmdletbinding.html", "Funções Avançadas ([CmdletBinding])"],
+      ["validacao.html", "Validando Parâmetros"],
+      ["funcoes-pipeline.html", "Funções no Pipeline (begin, process, end)"],
+      ["escopo.html", "Escopo das Variáveis"],
+      ["ajuda-comentarios.html", "Ajuda nas Suas Funções"]
     ]},
     { grupo: "Scripts", itens: [
-      ["scripts.html", "Scripts (.ps1)", {pronta: false}],
-      ["execution-policy.html", "Política de Execução", {pronta: false}],
-      ["parametros-script.html", "Parâmetros de Script e $args", {pronta: false}],
-      ["dot-source.html", "Dot-Sourcing (. .\\arquivo.ps1)", {pronta: false}],
-      ["perfil.html", "O Perfil ($PROFILE)", {pronta: false}]
+      ["parametros-script.html", "Parâmetros de Script e $args"],
+      ["dot-source.html", "Dot-Sourcing (. .\\arquivo.ps1)"]
     ]},
     { grupo: "Erros", itens: [
-      ["erros.html", "Lendo uma Mensagem de Erro", {pronta: false}],
-      ["try-catch.html", "try, catch e finally", {pronta: false}],
-      ["erroraction.html", "-ErrorAction e $ErrorActionPreference", {pronta: false}],
-      ["throw.html", "throw: Lançando Erros", {pronta: false}],
-      ["error-variable.html", "$Error e -ErrorVariable", {pronta: false}]
+      ["erros.html", "Lendo uma Mensagem de Erro"],
+      ["try-catch.html", "try, catch e finally"],
+      ["erroraction.html", "-ErrorAction e $ErrorActionPreference"],
+      ["throw.html", "throw: Lançando Erros"],
+      ["error-variable.html", "$Error e -ErrorVariable"]
     ]},
     { grupo: "Dados e Textos", itens: [
-      ["csv.html", "CSV (Import-Csv e Export-Csv)", {pronta: false}],
-      ["json.html", "JSON (ConvertTo-Json e ConvertFrom-Json)", {pronta: false}],
-      ["xml.html", "XML", {pronta: false}],
-      ["get-date.html", "Datas e Horas (Get-Date)", {pronta: false}],
-      ["regex.html", "Expressões Regulares (-match, -replace)", {pronta: false}],
-      ["string-metodos.html", "Métodos de Texto (.Split, .Replace…)", {pronta: false}],
-      ["compress-archive.html", "Arquivos Zip (Compress-Archive)", {pronta: false}]
+      ["csv.html", "CSV (Import-Csv e Export-Csv)"],
+      ["json.html", "JSON (ConvertTo-Json e ConvertFrom-Json)"],
+      ["xml.html", "XML"],
+      ["get-date.html", "Datas e Horas (Get-Date)"],
+      ["regex.html", "Expressões Regulares (-match, -replace)"],
+      ["string-metodos.html", "Métodos de Texto (.Split, .Replace…)"]
     ]}
   ]},
   { id: "n3", nome: "Nível 3 · Avançado", curto: "Avançado", desc: "Administração e automação", grupos: [
     { grupo: "Módulos", itens: [
-      ["modulos.html", "Módulos (Import-Module)", {pronta: false}],
-      ["psgallery.html", "Instalando Módulos (PowerShell Gallery)", {pronta: false}],
-      ["modulos-proprios.html", "Criando seu Módulo (.psm1)", {pronta: false}]
+      ["modulos-proprios.html", "Criando seu Módulo (.psm1)"]
     ]},
     { grupo: "Administrando o Windows", itens: [
-      ["processos.html", "Processos (Get-Process e Stop-Process)", {pronta: false}],
-      ["start-process.html", "Abrindo Programas (Start-Process)", {pronta: false}],
       ["servicos.html", "Serviços (Get-Service)"],
-      ["variaveis-ambiente.html", "Variáveis de Ambiente ($env:)", {pronta: false}],
       ["registro.html", "O Registro do Windows"],
-      ["cim.html", "Informações do Computador (Get-CimInstance)", {pronta: false}],
-      ["eventos.html", "Logs de Eventos (Get-WinEvent)", {pronta: false}],
-      ["tarefas-agendadas.html", "Tarefas Agendadas", {pronta: false}],
-      ["permissoes.html", "Permissões (Get-Acl)", {pronta: false}],
       ["usuarios-locais.html", "Usuários e Grupos Locais"],
-      ["rede.html", "Rede (Test-Connection e Test-NetConnection)", {pronta: false}],
-      ["web.html", "Internet (Invoke-WebRequest e Invoke-RestMethod)", {pronta: false}]
+      ["web.html", "Internet (Invoke-WebRequest e Invoke-RestMethod)"]
     ]},
     { grupo: "Recursos Poderosos", itens: [
-      ["dotnet.html", "Usando o .NET ([Math], [DateTime])", {pronta: false}],
-      ["classes.html", "Classes", {pronta: false}],
-      ["enum.html", "Enum", {pronta: false}],
-      ["jobs.html", "Tarefas em Segundo Plano (Start-Job)", {pronta: false}],
-      ["foreach-parallel.html", "ForEach-Object -Parallel", {pronta: false}],
-      ["remoting.html", "PowerShell Remoto (Enter-PSSession e SSH)", {pronta: false}],
-      ["add-type.html", "C# Dentro do PowerShell (Add-Type)", {pronta: false}]
+      ["dotnet.html", "Usando o .NET ([Math], [DateTime])"],
+      ["classes.html", "Classes"],
+      ["enum.html", "Enum"],
+      ["jobs.html", "Tarefas em Segundo Plano (Start-Job)"],
+      ["foreach-parallel.html", "ForEach-Object -Parallel"],
+      ["add-type.html", "C# Dentro do PowerShell (Add-Type)"]
     ]},
     { grupo: "Boas Práticas", itens: [
-      ["estilo.html", "Estilo e Verbos Aprovados", {pronta: false}],
-      ["pester.html", "Testes com Pester", {pronta: false}],
-      ["depuracao.html", "Depurando (Set-PSBreakpoint)", {pronta: false}],
-      ["credenciais.html", "Senhas e Credenciais (SecureString)", {pronta: false}],
-      ["cmd-para-powershell.html", "Do cmd para o PowerShell", {pronta: false}],
-      ["bash-para-powershell.html", "Do Bash para o PowerShell", {pronta: false}],
-      ["novidades.html", "Novidades do PowerShell 7.7", {pronta: false}]
+      ["estilo.html", "Estilo e Verbos Aprovados"],
+      ["cmd-para-powershell.html", "Do cmd para o PowerShell"],
+      ["bash-para-powershell.html", "Do Bash para o PowerShell"],
+      ["novidades.html", "Novidades do PowerShell 7.7"]
     ]}
   ]},
   { id: "pj", nome: "Projetos", curto: "Projetos", desc: "Mão na massa", grupos: [
     { grupo: "Projetos", itens: [
-      ["projeto-organizador.html", "Projeto: Organizador de Downloads", {pronta: false}],
-      ["projeto-backup.html", "Projeto: Backup com Zip", {pronta: false}],
-      ["projeto-relatorio.html", "Projeto: Relatório de Arquivos em CSV", {pronta: false}],
-      ["projeto-renomear.html", "Projeto: Renomear Fotos em Lote", {pronta: false}],
-      ["projeto-tarefas.html", "Projeto: Lista de Tarefas (JSON)", {pronta: false}],
-      ["projeto-menu.html", "Projeto: Menu Interativo", {pronta: false}],
-      ["projeto-log.html", "Projeto: Analisador de Log", {pronta: false}],
-      ["projeto-monitor.html", "Projeto: Monitor de Serviços", {pronta: false}],
-      ["projeto-api.html", "Projeto: Consultando uma API (CEP)", {pronta: false}]
+      ["projeto-tarefas.html", "Projeto: Lista de Tarefas (JSON)"],
+      ["projeto-menu.html", "Projeto: Menu Interativo"],
+      ["projeto-log.html", "Projeto: Analisador de Log"],
+      ["projeto-api.html", "Projeto: Consultando uma API (CEP)"]
     ]}
   ]},
   { id: "ref", nome: "Referência", curto: "Referência", desc: "Consulta rápida", grupos: [
     { grupo: "Referência", itens: [
-      ["ref-cmdlets.html", "Cmdlets Mais Usados", {pronta: false}],
-      ["ref-verbos.html", "Verbos Aprovados", {pronta: false}],
-      ["ref-operadores.html", "Operadores", {pronta: false}],
-      ["ref-variaveis-automaticas.html", "Variáveis Automáticas", {pronta: false}],
-      ["ref-aliases.html", "Apelidos (Aliases)", {pronta: false}],
-      ["ref-formatacao.html", "Formatos do -f ({0:N2})", {pronta: false}],
-      ["ref-tipos.html", "Tipos ([int], [datetime]…)", {pronta: false}],
-      ["ref-cmd-bash.html", "cmd e Bash × PowerShell", {pronta: false}],
-      ["ref-erros.html", "Mensagens de Erro Comuns", {pronta: false}],
-      ["ref-atalhos.html", "Atalhos do Teclado", {pronta: false}]
+      ["ref-cmdlets.html", "Cmdlets Mais Usados"],
+      ["ref-verbos.html", "Verbos Aprovados"],
+      ["ref-operadores.html", "Operadores"],
+      ["ref-variaveis-automaticas.html", "Variáveis Automáticas"],
+      ["ref-aliases.html", "Apelidos (Aliases)"],
+      ["ref-formatacao.html", "Formatos do -f ({0:N2})"],
+      ["ref-tipos.html", "Tipos ([int], [datetime]…)"],
+      ["ref-cmd-bash.html", "cmd e Bash × PowerShell"],
+      ["ref-erros.html", "Mensagens de Erro Comuns"],
+      ["ref-atalhos.html", "Atalhos do Teclado"]
     ]}
   ]}
 ];
@@ -205,29 +181,19 @@ var NIVEIS = [
   var root = document.documentElement;
   var body = document.body;
   var atual = location.pathname.split("/").pop() || "index.html";
-  if (!document.getElementById("estilo-em-breve")) {
-    var estiloEmBreve = document.createElement("style");
-    estiloEmBreve.id = "estilo-em-breve";
-    estiloEmBreve.textContent = ".em-breve{color:var(--muted)} .sidebar span.em-breve{display:block;padding:3px 16px 3px 24px;font-size:14.5px;line-height:1.6}";
-    document.head.appendChild(estiloEmBreve);
-  }
-
-  function estaPronta(i) { return !(i[2] && i[2].pronta === false); }
-
   // Lista linear de páginas (para Anterior/Próximo) e localização da atual.
-  // O pager usa só as prontas: as {pronta: false} são puladas.
   var plano = [], aqui = null;
   NIVEIS.forEach(function (n) {
     n.grupos.forEach(function (g) {
       g.itens.forEach(function (i) {
-        var item = { href: i[0], titulo: i[1], nivel: n, grupo: g.grupo, pronta: estaPronta(i) };
+        var item = { href: i[0], titulo: i[1], nivel: n, grupo: g.grupo };
         plano.push(item);
         if (i[0] === atual) aqui = item;
       });
     });
   });
-  var planoNav = plano.filter(function (p) { return p.pronta; });
-  var pos = aqui && aqui.pronta ? planoNav.indexOf(aqui) : -1;
+  var planoNav = plano;
+  var pos = aqui ? planoNav.indexOf(aqui) : -1;
 
   function el(tag, attrs, html) {
     var e = document.createElement(tag);
@@ -243,12 +209,11 @@ var NIVEIS = [
     var primeira = null;
     n.grupos.forEach(function (g) {
       g.itens.forEach(function (i) {
-        if (!primeira && estaPronta(i)) primeira = i[0];
+        if (!primeira) primeira = i[0];
       });
     });
     var ativo = (aqui && aqui.nivel === n) ? " ativo" : "";
-    if (primeira) return '<a class="top-link' + ativo + '" href="' + primeira + '">' + n.curto + "</a>";
-    return '<span class="top-link em-breve' + ativo + '">' + n.curto + " (em breve)</span>";
+    return '<a class="top-link' + ativo + '" href="' + primeira + '">' + n.curto + "</a>";
   }).join("");
   var header = el("header", { "class": "topbar" },
     '<button class="icon-btn" id="menu-btn" aria-label="Abrir menu" aria-expanded="false">&#9776;</button>' +
@@ -271,8 +236,7 @@ var NIVEIS = [
       n.grupos.forEach(function (g) {
         html += '<div class="grupo"><h2>' + g.grupo + "</h2><ul>";
         g.itens.forEach(function (i) {
-          if (!estaPronta(i)) html += '<li><span class="em-breve">' + i[1] + " (em breve)</span></li>";
-          else html += '<li><a href="' + i[0] + '"' + (i[0] === atual ? ' class="active" aria-current="page"' : "") + ">" + i[1] + "</a></li>";
+          html += '<li><a href="' + i[0] + '"' + (i[0] === atual ? ' class="active" aria-current="page"' : "") + ">" + i[1] + "</a></li>";
         });
         html += "</ul></div>";
       });
@@ -332,29 +296,11 @@ var NIVEIS = [
     p.innerHTML = h;
   });
 
-  /* Links internos para páginas {pronta: false} viram span "(em breve)", sem 404. */
-  var naoProntas = {};
-  NIVEIS.forEach(function (n) {
-    n.grupos.forEach(function (g) {
-      g.itens.forEach(function (i) { if (!estaPronta(i)) naoProntas[i[0]] = true; });
-    });
-  });
-  document.querySelectorAll("a[href]").forEach(function (a) {
-    var href = a.getAttribute("href") || "";
-    if (/^(https?:|mailto:|javascript:|#|\/\/)/i.test(href)) return;
-    var dest = href.split("#")[0].split("?")[0].split("/").pop();
-    if (!naoProntas[dest]) return;
-    var s = document.createElement("span");
-    s.className = "em-breve";
-    s.innerHTML = a.innerHTML + " (em breve)";
-    a.parentNode.replaceChild(s, a);
-  });
-
   /* ---------- Rodapé ---------- */
   var content = document.querySelector(".content");
   if (content) {
     content.appendChild(el("footer", { "class": "site-footer" },
-      "Guia PowerShell · PowerShell 7.7 · Os exemplos rodam de verdade no seu navegador (o PowerShell 7 em WebAssembly) · Saídas conferidas no Windows e no Linux de verdade · Vale para Windows, Linux e macOS."));
+      "Guia PowerShell · PowerShell 7.7 · As saídas das aulas foram colhidas no PowerShell 7 de verdade · Os exercícios rodam num simulador de PowerShell no navegador"));
   }
 
   /* ---------- Tema ---------- */
@@ -520,9 +466,9 @@ var NIVEIS = [
         cmds[cmds.length - 1] += "\n" + mc[1];
         return;
       }
-      // o prompt do PowerShell ("PS C:\Users\ana> ", "PS /home/ana> "), a continuação dele (">> ")
+      // o prompt do PowerShell ("PS C:\Users\ana> ", "PS /home/ana> ", "PS> " das aulas colhidas sem pasta), a continuação dele (">> ")
       // e o do cmd.exe ("C:\Users\ana>dir"); "$ pwsh" (Linux) também liga o modo PowerShell
-      var ms = /^(PS (?:[A-Za-z]:\\|\/|[A-Za-z]+:)[^>]*>)(?: (.*)|())$/.exec(l) || (modoPS && /^(>>)(?: (.*)|())$/.exec(l)) || /^([A-Z]:\\[^>]*>)(.*)$/.exec(l);
+      var ms = /^(PS(?: (?:[A-Za-z]:\\|\/|[A-Za-z]+:)[^>]*)?>)(?: (.*)|())$/.exec(l) || (modoPS && /^(>>)(?: (.*)|())$/.exec(l)) || /^([A-Z]:\\[^>]*>)(.*)$/.exec(l);
       if (ms) { if (ms[1] !== ">>") { modoPS = true; cmds.push((ms[2] || "").replace(/\s*«.*$/, "")); } else if (cmds.length) cmds[cmds.length - 1] += "\n" + (ms[2] || "").replace(/\s*«.*$/, ""); }
       if (ms) {
         var cs = ms[2] || "", ns = "", is = cs.indexOf("«");
@@ -619,7 +565,7 @@ var NIVEIS = [
       if (!t.querySelector(".try-head")) t.insertBefore(el("p", { "class": "try-head" }, t.classList.contains("tryps") ? "Experimente: edite o código e clique em Rodar" : t.classList.contains("tryjshell") ? "Experimente no JShell" : t.classList.contains("tryscript") ? "Experimente: edite e rode o script" : "Experimente você mesmo"), t.firstChild);
     });
   }
-  // o editor (assets/pssim.js): o PowerShell 7 de verdade (em WebAssembly), carregado no primeiro Rodar
+  // o editor (assets/pssim.js): um simulador de PowerShell escrito em JavaScript (não é o PowerShell de verdade), carregado no primeiro Rodar
   // sem o pssim.js (ou sem o global dele), entra o modo "Rode no seu PowerShell" (assets/rode-local.js)
   if (document.querySelector(".tryps")) { var pss = el("script", { src: "assets/pssim.js" }); pss.onload = pss.onerror = function () { if (!window.PSSim && !window.pssim) body.appendChild(el("script", { src: "assets/rode-local.js" })); }; body.appendChild(pss); }
 

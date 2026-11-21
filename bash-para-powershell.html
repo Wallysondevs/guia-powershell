@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Do Bash para o PowerShell — equivalências para quem vem do Linux (guia) | Guia PowerShell</title>
+<meta name="description" content="Guia para quem vem do Bash: equivalentes no PowerShell 7 para ls, grep, cat, head, tail, wc, sort, uniq, cut, sed, awk, export, $?, pipes, if, for e funções, e por que o pipe passa objetos em vez de texto.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Do <span class="hl">Bash</span> para o PowerShell</h1>
+
+<p class="intro">Quem vem do Linux já pensa em pipeline: <code>cat | grep | sort | uniq -c</code>. No PowerShell, a ideia é a mesma, mas o que corre pelo cano são <strong>objetos</strong>, não linhas de texto. Isso elimina o <code>cut</code> e o <code>awk</code> na maior parte das vezes: você pede a propriedade pelo nome.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Os equivalentes dos comandos mais usados do Bash.</li>
+  <li>Como <code>grep</code>, <code>sort</code>, <code>uniq -c</code> e <code>wc -l</code> viram cmdlets.</li>
+  <li>Variáveis, <code>export</code>, <code>$?</code> e substituição de comando.</li>
+  <li><code>if</code>, <code>for</code> e funções lado a lado.</li>
+  <li>As pegadinhas: aspas, operadores de comparação e apelidos que não existem no Linux.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a esteira de peças inteiras</h2>
+
+<p>No Bash, o pipe é uma esteira de papel picado (texto), e cada comando precisa recortar o pedaço que quer. No PowerShell, a esteira leva peças inteiras (objetos com etiquetas), e cada comando pega a etiqueta que precisa.</p>
+
+<hr>
+
+<h2>1. Comandos do dia a dia</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Bash</th><th>PowerShell</th></tr>
+
+<tr><td><code>ls -la</code></td><td><code>Get-ChildItem -Force</code></td></tr>
+
+<tr><td><code>cd</code>, <code>pwd</code></td><td><code>Set-Location</code>, <code>Get-Location</code></td></tr>
+
+<tr><td><code>cat arq</code></td><td><code>Get-Content arq</code></td></tr>
+
+<tr><td><code>head -n 5 arq</code></td><td><code>Get-Content arq -TotalCount 5</code></td></tr>
+
+<tr><td><code>tail -n 5 arq</code> / <code>tail -f</code></td><td><code>Get-Content arq -Tail 5</code> / <code>-Wait</code></td></tr>
+
+<tr><td><code>grep padrão arq</code></td><td><code>Select-String padrão arq</code></td></tr>
+
+<tr><td><code>grep -v</code> / <code>grep -i</code></td><td><code>-NotMatch</code> / (já não diferencia maiúsculas; <code>-CaseSensitive</code> para diferenciar)</td></tr>
+
+<tr><td><code>wc -l</code></td><td><code>Measure-Object -Line</code> ou <code>(…).Count</code></td></tr>
+
+<tr><td><code>sort</code> / <code>sort -r</code></td><td><code>Sort-Object</code> / <code>Sort-Object -Descending</code></td></tr>
+
+<tr><td><code>uniq</code></td><td><code>Sort-Object -Unique</code> ou <code>Get-Unique</code></td></tr>
+
+<tr><td><code>uniq -c</code></td><td><code>Group-Object</code></td></tr>
+
+<tr><td><code>cut -d, -f2</code></td><td><code>(… -split ',')[1]</code> ou <code>Import-Csv</code> e a propriedade</td></tr>
+
+<tr><td><code>sed 's/a/b/g'</code></td><td><code>-replace 'a', 'b'</code></td></tr>
+
+<tr><td><code>find . -name '*.log'</code></td><td><code>Get-ChildItem -Recurse -Filter *.log</code></td></tr>
+
+<tr><td><code>which cmd</code></td><td><code>Get-Command cmd</code></td></tr>
+
+<tr><td><code>man cmd</code></td><td><code>Get-Help cmd</code></td></tr>
+
+<tr><td><code>ps aux</code> / <code>kill</code></td><td><code>Get-Process</code> / <code>Stop-Process</code></td></tr>
+
+<tr><td><code>curl</code></td><td><code>Invoke-WebRequest</code> / <code>Invoke-RestMethod</code></td></tr>
+
+<tr><td><code>touch arq</code></td><td><code>New-Item arq</code> (ou <code>$null &gt; arq</code>)</td></tr>
+
+<tr><td><code>echo texto</code></td><td><code>Write-Output "texto"</code> (ou só <code>"texto"</code>)</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>2. O pipeline lado a lado</h2>
+
+<p>Contar quantas vezes cada palavra aparece:</p>
+
+<pre><code># Bash
+cat frutas.txt | sort | uniq -c | sort -rn
+</code></pre>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $frutas = "uva", "maçã", "uva", "pera", "uva", "maçã"
+PS&gt; $frutas | Group-Object | Sort-Object Count -Descending | Select-Object Count, Name
+
+Count Name
+----- ----
+    3 uva
+    2 maçã
+    1 pera
+</pre>
+
+<p>Cortar a segunda coluna de um CSV:</p>
+
+<pre><code># Bash
+cut -d, -f2 dados.csv
+</code></pre>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "nome,cidade`nAna,Recife`nBeto,Natal" | ConvertFrom-Csv | ForEach-Object cidade
+Recife
+Natal
+</pre>
+
+<hr>
+
+<h2>3. Variáveis e ambiente</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Bash</th><th>PowerShell</th></tr>
+
+<tr><td><code>nome="Ana"</code></td><td><code>$nome = "Ana"</code> (espaços em volta do <code>=</code> podem)</td></tr>
+
+<tr><td><code>echo $nome</code></td><td><code>$nome</code></td></tr>
+
+<tr><td><code>export VAR=1</code></td><td><code>$env:VAR = "1"</code></td></tr>
+
+<tr><td><code>echo $HOME</code></td><td><code>$HOME</code></td></tr>
+
+<tr><td><code>$(comando)</code></td><td><code>$(comando)</code> dentro de aspas, ou <code>(comando)</code> fora delas</td></tr>
+
+<tr><td><code>$?</code> (0 = ok)</td><td><code>$?</code> (<code>True</code> = ok) e <code>$LASTEXITCODE</code> (código de programas)</td></tr>
+
+<tr><td><code>cmd1 &amp;&amp; cmd2</code></td><td><code>cmd1 &amp;&amp; cmd2</code> (PowerShell 7)</td></tr>
+
+<tr><td><code>cmd &amp;</code></td><td><code>cmd &amp;</code> (vira um <a href="jobs.html">job</a>)</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>4. Comparações: operadores com hífen</h2>
+
+<p>No PowerShell, <code>&gt;</code> e <code>&lt;</code> são <strong>redirecionamento</strong>, como no Bash. Para comparar, use operadores com hífen, parecidos com o <code>test</code> do Bash:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; 5 -gt 3
+True
+PS&gt; "abc" -eq "ABC"
+True
+PS&gt; "abc" -ceq "ABC"
+False
+PS&gt; "relatorio.log" -like "*.log"
+True
+</pre>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Bash (<code>[ ]</code>)</th><th>PowerShell</th></tr>
+
+<tr><td><code>-eq</code>, <code>-ne</code>, <code>-gt</code>, <code>-lt</code></td><td>Iguais: <code>-eq</code>, <code>-ne</code>, <code>-gt</code>, <code>-lt</code> (valem para texto também)</td></tr>
+
+<tr><td><code>=</code> / <code>!=</code> (texto)</td><td><code>-eq</code> / <code>-ne</code></td></tr>
+
+<tr><td><code>-z "$x"</code></td><td><code>[string]::IsNullOrEmpty($x)</code> ou <code>-not $x</code></td></tr>
+
+<tr><td><code>-f arq</code> / <code>-d pasta</code></td><td><code>Test-Path arq -PathType Leaf</code> / <code>-PathType Container</code></td></tr>
+
+<tr><td><code>=~</code></td><td><code>-match</code></td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>5. if, for e funções</h2>
+
+<pre><code># Bash
+for i in 1 2 3; do
+  if [ $i -gt 1 ]; then echo "maior: $i"; fi
+done
+saudar() { echo "Olá, $1"; }
+saudar Ana
+</code></pre>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; foreach ($i in 1, 2, 3) {
+&gt;&gt;   if ($i -gt 1) { "maior: $i" }
+&gt;&gt; }
+maior: 2
+maior: 3
+PS&gt; function Saudar { param($Nome) "Olá, $Nome" }
+PS&gt; Saudar Ana
+Olá, Ana
+</pre>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Aspas simples × duplas</strong>
+
+<p>Igual ao Bash: aspas duplas expandem variáveis (<code>"Olá, $nome"</code>), simples não (<code>'Olá, $nome'</code>). Mas o caractere de escape é a <strong>crase</strong> (`<code> </code>n `` para nova linha), não a barra invertida.</p>
+
+</div>
+
+<div class="cenario">
+<strong>ls, cat e rm no PowerShell do Linux</strong>
+
+<p>No Windows, <code>ls</code>, <code>cat</code> e <code>rm</code> são apelidos de cmdlets. No PowerShell instalado no Linux ou no macOS, esses apelidos não existem: <code>ls</code> chama o programa do sistema, que devolve texto. Em scripts que rodam nos dois, use os nomes completos (<code>Get-ChildItem</code>).</p>
+
+</div>
+
+<div class="cenario">
+<strong>Tratar a saída como texto</strong>
+
+<p>Hábito do Bash: <code>Get-Process | Select-String chrome</code>. Funciona, mas joga fora os objetos. Prefira <code>Get-Process -Name chrome</code> ou <code>Where-Object Name -like '*chrome*'</code>, e você continua com as propriedades (<code>CPU</code>, <code>Id</code>...).</p>
+
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. uniq -c</h3>
+<p>Complete o equivalente de <code>sort | uniq -c</code>:</p>
+<div class="ex-code">$lista | <input data-answer="Group-Object" aria-label="resposta"></div>
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. Em PowerShell, <code>5 &gt; 3</code> faz o quê?</p>
+
+<label><input type="radio" name="q2"> Devolve True</label>
+
+<label><input type="radio" name="q2"> Devolve False</label>
+
+<label><input type="radio" name="q2"> Grava 5 num arquivo chamado 3</label>
+
+<label><input type="radio" name="q2"> Dá erro</label>
+
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">3. Qual é o caractere de escape no PowerShell?</p>
+
+<label><input type="radio" name="q3"> \</label>
+
+<label><input type="radio" name="q3"> ` (crase)</label>
+
+<label><input type="radio" name="q3"> ^</label>
+
+<label><input type="radio" name="q3"> %</label>
+
+</div>
+
+<div class="tryps" data-goal="out:uva;;src:Group-Object;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> faça o equivalente de <code>sort | uniq -c | sort -rn | head -1</code> e mostre só o nome da fruta mais repetida.</p>
+
+<pre class="script" data-file="main.ps1">$frutas = "uva", "maçã", "uva", "pera", "uva", "maçã"
+$frutas | Sort-Object
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$frutas = "uva", "maçã", "uva", "pera", "uva", "maçã"
+$frutas | Group-Object | Sort-Object Count -Descending | Select-Object -First 1 -ExpandProperty Name
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>O pipeline do PowerShell leva objetos: troque <code>cut</code>/<code>awk</code> por propriedades.</li>
+  <li><code>grep</code> → <code>Select-String</code>; <code>uniq -c</code> → <code>Group-Object</code>; <code>wc -l</code> → <code>Measure-Object</code>.</li>
+  <li>Comparação com <code>-gt</code>, <code>-eq</code>, <code>-match</code>; <code>&gt;</code> é redirecionamento.</li>
+  <li>Escape com crase; em scripts para Linux, nomes completos em vez de apelidos.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

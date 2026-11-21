@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell — adicionando e removendo itens (+= e List) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a adicionar e remover itens de listas no PowerShell: o += dos arrays, por que ele fica lento, e a List do .NET com Add, Remove, Insert e Contains.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Adicionando e Removendo Itens (<span class="hl">List</span>)</h1>
+
+<p class="intro">O array do PowerShell tem tamanho fixo. O <code>+=</code> "acrescenta" criando uma lista nova a cada vez. Para listas que crescem e diminuem, existe a <strong>List</strong> do .NET, com <code>Add</code>, <code>Remove</code> e companhia.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A acrescentar com <code>+=</code> e o que acontece por trás.</li>
+  <li>A filtrar para "remover" de um array.</li>
+  <li>A criar uma <code>List</code> com <code>[System.Collections.Generic.List[string]]::new()</code>.</li>
+  <li>A usar <code>Add</code>, <code>Insert</code>, <code>Remove</code>, <code>RemoveAt</code> e <code>Contains</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a caixa de ovos e a sacola</h2>
+
+<p>O array é uma caixa de ovos: tem um número fixo de lugares. Para pôr mais um ovo, você precisa de uma caixa maior e passar todos para ela. A List é uma sacola: você vai pondo e tirando à vontade.</p>
+
+<hr>
+
+<h2>1. O <code>+=</code> no array</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $compras = "arroz", "feijão"
+PS&gt; $compras += "café"
+PS&gt; $compras -join ", "
+arroz, feijão, café
+</pre>
+
+<p>O <code>+=</code> parece acrescentar, mas cria um array <strong>novo</strong> com os itens antigos mais o novo. Com poucos itens, tudo bem. Com milhares, dentro de um laço, fica lento.</p>
+
+<hr>
+
+<h2>2. "Removendo" de um array: filtre</h2>
+
+<p>Arrays não têm "remover". O jeito é criar outro sem o item:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $compras = $compras | Where-Object { $_ -ne "feijão" }
+PS&gt; $compras -join ", "
+arroz, café
+</pre>
+
+<hr>
+
+<h2>3. A List do .NET</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $lista = [System.Collections.Generic.List[string]]::new()
+PS&gt; $lista.Add("arroz")
+PS&gt; $lista.Add("feijão")
+PS&gt; $lista.Add("café")
+PS&gt; $lista.Count
+3
+PS&gt; $lista
+arroz
+feijão
+café
+</pre>
+
+<dl class="anatomy">
+
+  <dt>[System.Collections.Generic.List[string]]</dt><dd>O tipo: uma List de textos (<code>string</code>). Para números, <code>List[int]</code>.</dd>
+
+  <dt></dt><dd>new() :: Cria uma List nova, vazia.</dd>
+
+  <dt>.Add("arroz")</dt><dd>Acrescenta no fim, sem criar outra lista.</dd>
+
+</dl>
+
+<hr>
+
+<h2>4. Inserir, remover, procurar</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $lista.Insert(0, "açúcar")
+PS&gt; $lista.Remove("feijão")
+True
+PS&gt; $lista.RemoveAt(0)
+PS&gt; $lista.Contains("café")
+True
+PS&gt; $lista -join ", "
+arroz, café
+</pre>
+
+<dl class="anatomy">
+
+  <dt>.Insert(0, "açúcar")</dt><dd>Põe na posição 0 (o começo).</dd>
+
+  <dt>.Remove("feijão")</dt><dd>Tira pelo valor. Devolve <code>True</code> se achou e tirou.</dd>
+
+  <dt>.RemoveAt(0)</dt><dd>Tira pela posição.</dd>
+
+  <dt>.Contains("café")</dt><dd>Tem esse item? <code>True</code> ou <code>False</code>.</dd>
+
+</dl>
+
+<div class="tryps" data-goal="out:pão, leite;;src:\.Add\(;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> a List começa vazia. Acrescente <code>pão</code> e <code>leite</code> com <code>.Add()</code> e mostre a lista junta por vírgula.</p>
+
+<pre class="script" data-file="main.ps1">$lista = [System.Collections.Generic.List[string]]::new()
+
+$lista -join ", "
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$lista = [System.Collections.Generic.List[string]]::new()
+$lista.Add("pão")
+$lista.Add("leite")
+$lista -join ", "
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Formas diferentes</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Forma</th><th>Como escreve</th><th>Quando usar</th></tr>
+
+<tr><td>Array com <code>+=</code></td><td><code>$a += "x"</code></td><td>Listas pequenas, poucos acréscimos.</td></tr>
+
+<tr><td><code>List[T]</code></td><td><code>$l.Add("x")</code></td><td>Listas que crescem num laço; remover e inserir.</td></tr>
+
+<tr><td>Guardar a saída do laço</td><td><code>$a = foreach ($i in 1..3) { $i * 2 }</code></td><td>Montar uma lista a partir de um laço, sem <code>+=</code>.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong><code>.Add()</code> num array comum</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $fixo = "a", "b"
+PS&gt; $fixo.Add("c")
+MethodInvocationException: Exception calling "Add" with "1" argument(s): "Collection was of a fixed size."
+</pre>
+
+<p>O array comum tem tamanho fixo (<code>Collection was of a fixed size</code>). Use <code>+=</code> ou uma List.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Tipo errado na List</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $numeros = [System.Collections.Generic.List[int]]::new()
+PS&gt; $numeros.Add("dez")
+MethodException: Cannot convert argument "item", with value: "dez", for "Add" to type "System.Int32": "Cannot convert value "dez" to type "System.Int32". Error: "The input string 'dez' was not in a correct format.""
+</pre>
+
+<p>A <code>List[int]</code> só aceita números inteiros.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>$a += "x"</code></td><td>Array: cria um novo com mais um item.</td></tr>
+
+<tr><td><code>$a = $a | Where-Object { $_ -ne "x" }</code></td><td>Array: "remove" filtrando.</td></tr>
+
+<tr><td><code>$l = [System.Collections.Generic.List[string]]::new()</code></td><td>List de textos, vazia.</td></tr>
+
+<tr><td><code>$l.Add("x")</code> / <code>$l.Insert(0, "x")</code></td><td>Acrescenta no fim / numa posição.</td></tr>
+
+<tr><td><code>$l.Remove("x")</code> / <code>$l.RemoveAt(0)</code></td><td>Tira pelo valor / pela posição.</td></tr>
+
+<tr><td><code>$l.Contains("x")</code></td><td>Tem o item?</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Acrescentar no array</h3>
+<p>Complete o operador que acrescenta um item ao array:</p>
+<div class="ex-code">$lista <input data-answer="+=" aria-label="resposta"> "novo"</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Por que o <code>+=</code> fica lento em listas grandes?</p>
+
+<label><input type="radio" name="q2"> Porque ordena a lista</label>
+
+<label><input type="radio" name="q2"> Porque cria uma lista nova a cada acréscimo</label>
+
+<label><input type="radio" name="q2"> Porque apaga a lista</label>
+
+<label><input type="radio" name="q2"> Porque converte tudo em texto</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. O que devolve <code>$lista.Contains("café")</code>?</p>
+
+<label><input type="radio" name="q3"> A posição do café</label>
+
+<label><input type="radio" name="q3"> O texto "café"</label>
+
+<label><input type="radio" name="q3"> <code>True</code> ou <code>False</code></label>
+
+<label><input type="radio" name="q3"> O número de cafés</label>
+
+</div>
+
+<div class="tryps" data-goal="out:arroz, café;;src:\.Remove\(;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> tire o <code>feijão</code> da List com <code>.Remove()</code> e mostre o que sobrou: <code>arroz, café</code>.</p>
+
+<pre class="script" data-file="main.ps1">$lista = [System.Collections.Generic.List[string]]::new()
+$lista.Add("arroz")
+$lista.Add("feijão")
+$lista.Add("café")
+$lista -join ", "
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$lista = [System.Collections.Generic.List[string]]::new()
+$lista.Add("arroz")
+$lista.Add("feijão")
+$lista.Add("café")
+$null = $lista.Remove("feijão")
+$lista -join ", "
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>O array tem tamanho fixo: <code>+=</code> cria um novo; para tirar, filtre.</li>
+  <li>A <code>List[T]</code> cresce e diminui: <code>Add</code>, <code>Insert</code>, <code>Remove</code>, <code>RemoveAt</code>, <code>Contains</code>.</li>
+  <li><code>.Add()</code> num array comum dá erro de tamanho fixo.</li>
+  <li>Para montar listas num laço, guarde a saída do laço ou use uma List.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

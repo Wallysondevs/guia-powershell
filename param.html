@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell param() — parâmetros com tipo, padrão e switch | Guia PowerShell</title>
+<meta name="description" content="Aprenda o bloco param() das funções do PowerShell: parâmetros com tipo, valor padrão, obrigatórios, switch e a ordem por posição, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Parâmetros (<span class="hl">param</span>)</h1>
+
+<p class="intro">O bloco <code>param()</code> é o jeito completo de dizer o que a sua função recebe: o nome, o tipo, o valor padrão e se é obrigatório. É ele que faz sua função se comportar como um cmdlet de verdade.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A declarar parâmetros com <code>param( ... )</code>.</li>
+  <li>A dar um tipo, como <code>[int]</code> ou <code>[string]</code>.</li>
+  <li>A dar um valor padrão.</li>
+  <li>A criar uma chave liga/desliga com <code>[switch]</code>.</li>
+  <li>A tornar um parâmetro obrigatório.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: o formulário com campos</h2>
+
+<p>Um formulário bem feito diz: "Nome (obrigatório)", "Idade (número)", "Cidade (se não preencher, fica Recife)", "[ ] Quero receber novidades". O <code>param()</code> é esse formulário: cada parâmetro é um campo, com as regras dele.</p>
+
+<hr>
+
+<h2>1. O bloco <code>param</code></h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Saudar {
+&gt;&gt;   param(
+&gt;&gt;     [string]$Nome,
+&gt;&gt;     [string]$Saudacao = "Olá"
+&gt;&gt;   )
+&gt;&gt;   "$Saudacao, $Nome!"
+&gt;&gt; }
+PS&gt; Saudar -Nome "Ana"
+Olá, Ana!
+PS&gt; Saudar -Nome "Beto" -Saudacao "Bom dia"
+Bom dia, Beto!
+PS&gt; Saudar "Caio" "Boa noite"
+Boa noite, Caio!
+</pre>
+
+<dl class="anatomy">
+
+  <dt>param( ... )</dt><dd>A primeira coisa dentro da função. Cada parâmetro separado por vírgula.</dd>
+
+  <dt>[string]$Nome</dt><dd>Um parâmetro do tipo texto.</dd>
+
+  <dt>$Saudacao = "Olá"</dt><dd>Valor padrão: usado quando ninguém passa esse parâmetro.</dd>
+
+  <dt>Saudar "Caio" "Boa noite"</dt><dd>Por posição: o primeiro valor vai para o primeiro parâmetro, e assim por diante.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. O tipo converte e confere</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Dobrar { param([int]$Numero) $Numero * 2 }
+PS&gt; Dobrar 21
+42
+PS&gt; Dobrar "21"
+42
+PS&gt; Dobrar 2.6
+6
+</pre>
+
+<p>Com <code>[int]</code>, o texto <code>"21"</code> foi convertido em número, e <code>2.6</code> foi arredondado para <code>3</code> antes da conta (3 × 2 = 6).</p>
+
+<hr>
+
+<h2>3. Liga/desliga: <code>[switch]</code></h2>
+
+<p>Um <code>[switch]</code> não recebe valor: só a presença dele já liga a opção:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Show-Preco {
+&gt;&gt;   param([double]$Valor, [switch]$ComDesconto)
+&gt;&gt;   if ($ComDesconto) { $Valor = $Valor * 0.9 }
+&gt;&gt;   "R$ {0:N2}" -f $Valor
+&gt;&gt; }
+PS&gt; Show-Preco 100
+R$ 100,00
+PS&gt; Show-Preco 100 -ComDesconto
+R$ 90,00
+</pre>
+
+<div class="tryps" data-goal="out:R$ 45,00;;src:\[switch\];;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> acrescente o <code>[switch]$Metade</code> e, se ele estiver ligado, divida o valor por 2. A chamada <code>Show-Valor 90 -Metade</code> deve mostrar <code>R$ 45,00</code>.</p>
+
+<pre class="script" data-file="main.ps1">function Show-Valor {
+    param([double]$Valor)
+    "R$ {0:N2}" -f $Valor
+}
+Show-Valor 90 -Metade
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Show-Valor {
+    param([double]$Valor, [switch]$Metade)
+    if ($Metade) { $Valor = $Valor / 2 }
+    "R$ {0:N2}" -f $Valor
+}
+Show-Valor 90 -Metade
+</pre>
+
+</div>
+
+<hr>
+
+<h2>4. Obrigatório</h2>
+
+<p>Com <code>[Parameter(Mandatory)]</code>, o parâmetro não pode faltar. No console, se você esquecer, o PowerShell <strong>pergunta</strong> o valor. Num script rodando sem ninguém para responder (<code>-NonInteractive</code>), ele dá erro:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Get-Cpf { param([Parameter(Mandatory)][string]$Numero) "CPF: $Numero" }
+PS&gt; Get-Cpf -Numero "000.000.000-00"
+CPF: 000.000.000-00
+</pre>
+
+<p>A aula <a href="cmdletbinding.html">Funções Avançadas</a> mostra o <code>[Parameter()]</code> com mais calma.</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Valor que não converte para o tipo</strong>
+
+<pre><code>Dobrar "vinte"
+</code></pre>
+
+<p>O <code>[int]</code> não consegue converter "vinte", e a função nem chega a rodar. O erro diz qual parâmetro falhou (<code>Numero</code>) e o motivo: o texto não está num formato de número.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Nome de parâmetro errado: sem erro, mas errado</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Saudar -Nmoe "Ana"
+Olá, !
+</pre>
+
+<p>Numa função simples, um nome de parâmetro desconhecido <strong>não dá erro</strong>: o <code>-Nmoe "Ana"</code> vai parar na variável automática <code>$args</code>, e o <code>$Nome</code> fica vazio. Por isso saiu <code>Olá, !</code>. Com <code>[CmdletBinding()]</code> (aula <a href="cmdletbinding.html">Funções Avançadas</a>), o PowerShell passa a recusar nomes errados. E com Tab, ele completa os nomes certos.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>param([string]$Nome)</code></td><td>Um parâmetro de texto.</td></tr>
+
+<tr><td><code>param($Cidade = "Recife")</code></td><td>Com valor padrão.</td></tr>
+
+<tr><td><code>param([switch]$Forcar)</code></td><td>Liga/desliga.</td></tr>
+
+<tr><td><code>param([Parameter(Mandatory)]$Id)</code></td><td>Obrigatório.</td></tr>
+
+<tr><td><code>Funcao "a" "b"</code></td><td>Valores por posição.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Valor padrão</h3>
+<p>Complete para a cidade valer "Recife" quando ninguém passar:</p>
+<div class="ex-code">param([string]$Cidade <input data-answer="= &quot;Recife&quot;|=&quot;Recife&quot;|= &#x27;Recife&#x27;" aria-label="resposta">)</div>
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. Como se chama uma função com um <code>[switch]$Verde</code> ligado?</p>
+
+<label><input type="radio" name="q2"> <code>Funcao -Verde $true $true</code></label>
+
+<label><input type="radio" name="q2"> <code>Funcao Verde</code></label>
+
+<label><input type="radio" name="q2"> <code>Funcao -Verde</code></label>
+
+<label><input type="radio" name="q2"> <code>Funcao [Verde]</code></label>
+
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">3. O que acontece com <code>[int]$n</code> ao receber <code>"7"</code>?</p>
+
+<label><input type="radio" name="q3"> Vira o número 7</label>
+
+<label><input type="radio" name="q3"> Dá erro</label>
+
+<label><input type="radio" name="q3"> Fica como texto "7"</label>
+
+<label><input type="radio" name="q3"> Vira 0</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Bem-vinda, Ana, de Recife!;;src:param\s*\(;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> complete o <code>param</code> com <code>$Nome</code> e <code>$Cidade</code> (padrão <code>"Recife"</code>) para que <code>Get-Boas -Nome "Ana"</code> mostre <code>Bem-vinda, Ana, de Recife!</code>.</p>
+
+<pre class="script" data-file="main.ps1">function Get-Boas {
+    "Bem-vinda, $Nome, de $Cidade!"
+}
+Get-Boas -Nome "Ana"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Get-Boas {
+    param([string]$Nome, [string]$Cidade = "Recife")
+    "Bem-vinda, $Nome, de $Cidade!"
+}
+Get-Boas -Nome "Ana"
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>param( ... )</code> declara os parâmetros, no começo da função.</li>
+  <li>Tipo (<code>[int]</code>, <code>[string]</code>) converte e confere; valor padrão com <code>=</code>.</li>
+  <li><code>[switch]</code> liga uma opção só por estar presente.</li>
+  <li><code>[Parameter(Mandatory)]</code> torna obrigatório.</li>
+  <li>Por posição, os valores seguem a ordem do <code>param</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

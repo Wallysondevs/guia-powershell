@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell: tudo é objeto — propriedades e métodos | Guia PowerShell</title>
+<meta name="description" content="Entenda por que no PowerShell tudo é objeto: propriedades, métodos, o tipo de cada coisa e como isso muda o jeito de trabalhar, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Tudo É <span class="hl">Objeto</span></h1>
+
+<p class="intro">No cmd e no Bash, o que um comando devolve é texto: linhas na tela. No PowerShell é diferente: o que vem é um <strong>objeto</strong>, uma "ficha" com campos que você pode ler um por um. Esta é a ideia mais importante do Nível 2, e o resto do nível se apoia nela.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que é um objeto: uma ficha com <strong>propriedades</strong> (dados) e <strong>métodos</strong> (ações).</li>
+  <li>A ler uma propriedade com o ponto: <code>$texto.Length</code>.</li>
+  <li>A chamar um método com parênteses: <code>$texto.ToUpper()</code>.</li>
+  <li>A descobrir o tipo de qualquer coisa com <code>.GetType()</code>.</li>
+  <li>Por que "objeto em vez de texto" deixa o trabalho mais fácil.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a ficha do cadastro</h2>
+
+<p>Pense na ficha de cadastro de uma loja. Ela tem campos: nome, cidade, idade. Você não precisa ler a ficha inteira e "procurar" a idade no meio do texto: basta olhar o campo <strong>idade</strong>. Os objetos do PowerShell são assim. Cada campo é uma <strong>propriedade</strong>, e algumas fichas também sabem fazer coisas, os <strong>métodos</strong>.</p>
+
+<hr>
+
+<h2>1. Até um texto é um objeto</h2>
+
+<p>Um texto simples já é um objeto. Ele tem a propriedade <code>Length</code> (o tamanho) e métodos como <code>ToUpper()</code> (tudo em maiúsculas):</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $nome = "Ana Souza"
+PS&gt; $nome.Length
+9
+PS&gt; $nome.ToUpper()
+ANA SOUZA
+PS&gt; $nome.Replace("Souza", "Lima")
+Ana Lima
+</pre>
+
+<dl class="anatomy">
+
+  <dt>$nome.Length</dt><dd>Uma <strong>propriedade</strong>: um dado que o objeto já tem. Sem parênteses.</dd>
+
+  <dt>$nome.ToUpper()</dt><dd>Um <strong>método</strong>: uma ação que o objeto sabe fazer. Sempre com parênteses, mesmo vazios.</dd>
+
+  <dt>.Replace("Souza", "Lima")</dt><dd>Um método que recebe valores entre os parênteses: o que trocar e pelo quê.</dd>
+
+</dl>
+
+<div class="tip">O texto original não mudou: <code>$nome.ToUpper()</code> devolve um texto novo. <code>$nome</code> continua <code>Ana Souza</code>.</div>
+
+<div class="tryps" data-goal="out:10;;src:\.Length;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> mostre quantas letras tem a palavra guardada em <code>$palavra</code>, usando a propriedade <code>Length</code>.</p>
+
+<pre class="script" data-file="main.ps1">$palavra = "PowerShell"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$palavra = "PowerShell"
+$palavra.Length
+</pre>
+
+</div>
+
+<hr>
+
+<h2>2. Qual é o tipo? <code>.GetType()</code></h2>
+
+<p>Todo objeto tem um <strong>tipo</strong>: o "modelo de ficha" de onde ele saiu. O método <code>GetType()</code> mostra qual é. A coluna <code>Name</code> é o nome curto do tipo:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "Ana".GetType().Name
+String
+PS&gt; (42).GetType().Name
+Int32
+PS&gt; (3.5).GetType().Name
+Double
+PS&gt; $true.GetType().Name
+Boolean
+PS&gt; (Get-Date).GetType().Name
+DateTime
+</pre>
+
+<dl class="anatomy">
+
+  <dt>String</dt><dd>Texto.</dd>
+
+  <dt>Int32</dt><dd>Número inteiro (o <code>[int]</code>).</dd>
+
+  <dt>Double</dt><dd>Número com casas decimais.</dd>
+
+  <dt>Boolean</dt><dd>Verdadeiro ou falso.</dd>
+
+  <dt>DateTime</dt><dd>Data e hora: o que o <code>Get-Date</code> devolve.</dd>
+
+  <dt>(42).GetType()</dt><dd>Os parênteses em volta do número são necessários: sem eles, o PowerShell leria <code>42.GetType</code> como um número mal escrito.</dd>
+
+</dl>
+
+<hr>
+
+<h2>3. Uma data é uma ficha cheia de campos</h2>
+
+<p>O <code>Get-Date</code> devolve um objeto <code>DateTime</code>. Em vez de recortar o texto da data, você pede o campo que quer:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $d = Get-Date -Year 2026 -Month 3 -Day 15 -Hour 9 -Minute 30 -Second 0
+PS&gt; $d.Day
+15
+PS&gt; $d.Month
+3
+PS&gt; $d.Year
+2026
+PS&gt; $d.DayOfWeek
+Sunday
+PS&gt; $d.AddDays(10).ToString("dd/MM/yyyy")
+25/03/2026
+</pre>
+
+<dl class="anatomy">
+
+  <dt>$d.Day, $d.Month, $d.Year</dt><dd>Propriedades: o dia, o mês e o ano, cada um num campo.</dd>
+
+  <dt>$d.DayOfWeek</dt><dd>O dia da semana. Repare que vem em inglês (<code>Sunday</code>): é um valor do .NET, não um texto traduzido.</dd>
+
+  <dt>.AddDays(10)</dt><dd>Um método que devolve uma <strong>nova</strong> data, 10 dias depois.</dd>
+
+  <dt>.ToString("dd/MM/yyyy")</dt><dd>Transforma a data em texto, no formato que você escolher.</dd>
+
+</dl>
+
+<hr>
+
+<h2>4. Objeto × texto: por que isso importa</h2>
+
+<p>No mundo do texto, para pegar "o terceiro pedaço" de uma linha você precisa recortar letras e torcer para o formato não mudar. Com objetos, você pede o campo pelo nome. Compare:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $linha = "Ana;Recife;30"
+PS&gt; $linha.Split(";")[2]
+30
+PS&gt; $pessoa = [pscustomobject]@{ Nome = "Ana"; Cidade = "Recife"; Idade = 30 }
+PS&gt; $pessoa.Idade
+30
+PS&gt; $pessoa
+
+Nome Cidade Idade
+---- ------ -----
+Ana  Recife    30
+</pre>
+
+<dl class="anatomy">
+
+  <dt>$linha.Split(";")[2]</dt><dd>Jeito "texto": cortar no <code>;</code> e pegar a terceira parte (a contagem começa no 0). Funciona, mas quebra se a ordem mudar.</dd>
+
+  <dt>[pscustomobject]@{ ... }</dt><dd>Cria um objeto seu, com os campos que você quiser. Você vai ver isso com calma na aula <a href="pscustomobject.html">Seus Objetos</a>.</dd>
+
+  <dt>$pessoa.Idade</dt><dd>Jeito "objeto": o campo tem nome. Não importa a ordem.</dd>
+
+  <dt>$pessoa</dt><dd>Quando um objeto vai para a tela, o PowerShell monta uma tabela com os campos.</dd>
+
+</dl>
+
+<p>Esse é o motivo de existir o <a href="pipeline.html">pipeline</a> do PowerShell: os comandos passam fichas inteiras de um para o outro, e não linhas de texto.</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Propriedade que não existe: nada aparece</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $nome = "Ana"
+PS&gt; $nome.Tamanho
+PS&gt; $nome.Length
+3
+</pre>
+
+<p>O PowerShell não reclama de uma propriedade que não existe: ele devolve <code>$null</code> (nada) e a tela fica em branco. Se uma propriedade "não mostrou nada", confira o nome. A aula <a href="get-member.html">Get-Member</a> mostra como ver a lista certa.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Método que não existe: aí sim é erro</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $nome.Maiusculas()
+InvalidOperation: Method invocation failed because [System.String] does not contain a method named 'Maiusculas'.
+</pre>
+
+<dl class="anatomy">
+
+  <dt>InvalidOperation</dt><dd>A categoria do erro: uma operação que não dá para fazer.</dd>
+
+  <dt>does not contain a method named 'Maiusculas'</dt><dd>O texto (<code>String</code>) não tem nenhum método com esse nome. O certo é <code>ToUpper()</code>.</dd>
+
+</dl>
+
+</div>
+
+<div class="cenario">
+<strong>Esquecer os parênteses do método</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $nome.ToUpper
+
+OverloadDefinitions
+-------------------
+string ToUpper()
+string ToUpper(cultureinfo culture)
+</pre>
+
+<p>Sem os parênteses, o PowerShell não roda o método: ele mostra a "assinatura" dele (o que o método recebe e o que devolve). Não é erro, mas também não é o que você queria. Coloque os parênteses: <code>$nome.ToUpper()</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>$obj.Propriedade</code></td><td>Lê um campo do objeto.</td></tr>
+
+<tr><td><code>$obj.Metodo()</code></td><td>Pede ao objeto para fazer algo (sempre com parênteses).</td></tr>
+
+<tr><td><code>$obj.Metodo(valor)</code></td><td>Método que recebe valores.</td></tr>
+
+<tr><td><code>$obj.GetType().Name</code></td><td>Mostra o tipo do objeto.</td></tr>
+
+<tr><td><code>(42).GetType()</code></td><td>Número precisa de parênteses antes do ponto.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Uma propriedade</h3>
+<p>Complete para mostrar o tamanho do texto:</p>
+<div class="ex-code">$cidade = "Salvador"; $cidade.<input data-answer="Length" aria-label="resposta"></div>
+</div>
+
+<div class="exercise">
+<h3>2. Um método</h3>
+<p>Complete o método que deixa tudo em minúsculas:</p>
+<div class="ex-code">"BOM DIA".<input data-answer="ToLower()" aria-label="resposta"></div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">3. O que diferencia um método de uma propriedade na hora de escrever?</p>
+
+<label><input type="radio" name="q3"> O método começa com <code>$</code></label>
+
+<label><input type="radio" name="q3"> O método leva parênteses, como <code>ToUpper()</code></label>
+
+<label><input type="radio" name="q3"> A propriedade leva parênteses</label>
+
+<label><input type="radio" name="q3"> Não há diferença</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">4. O que aparece ao rodar <code>"Ana".Idade</code>?</p>
+
+<label><input type="radio" name="q4"> Um erro vermelho</label>
+
+<label><input type="radio" name="q4"> O número 3</label>
+
+<label><input type="radio" name="q4"> Nada: a propriedade não existe e o resultado é <code>$null</code></label>
+
+<label><input type="radio" name="q4"> O texto "Idade"</label>
+
+</div>
+
+<div class="tryps" data-goal="out:LIMA;;src:\.ToUpper\(\);;src:\.Replace\(;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> a variável <code>$nome</code> tem <code>Ana Souza</code>. Troque <code>Souza</code> por <code>Lima</code> com <code>.Replace()</code> e mostre o resultado todo em maiúsculas com <code>.ToUpper()</code>: <code>ANA LIMA</code>.</p>
+
+<pre class="script" data-file="main.ps1">$nome = "Ana Souza"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$nome = "Ana Souza"
+$nome.Replace("Souza", "Lima").ToUpper()
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>No PowerShell, o que os comandos devolvem são <strong>objetos</strong>, não linhas de texto.</li>
+  <li>Propriedade = dado: <code>$obj.Length</code>. Método = ação, com parênteses: <code>$obj.ToUpper()</code>.</li>
+  <li><code>.GetType().Name</code> mostra o tipo: <code>String</code>, <code>Int32</code>, <code>Double</code>, <code>Boolean</code>, <code>DateTime</code>…</li>
+  <li>Propriedade inexistente devolve <code>$null</code> (tela vazia). Método inexistente dá erro.</li>
+  <li>Por ter campos com nome, um objeto não depende de recortar texto.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

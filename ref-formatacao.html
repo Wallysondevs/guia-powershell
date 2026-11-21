@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell: formatos do operador -f ({0:N2}, {0:C}, {0:P}) — referência | Guia PowerShell</title>
+<meta name="description" content="Referência dos formatos do operador -f e do ToString() no PowerShell 7: números (N2, F1, D5, P, C, E), alinhamento ({0,10}), datas (dd/MM/yyyy, HH:mm) e formatos personalizados, com saídas reais em português.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Formatos do <span class="hl">-f</span> ({0:N2})</h1>
+
+<p class="intro">O operador <code>-f</code> coloca valores dentro de um texto e formata cada um: casas decimais, moeda, porcentagem, datas. A formatação segue o idioma do sistema; os exemplos abaixo foram gerados com o idioma em português do Brasil. Veja a aula <a href="operador-formato.html">O Operador -f</a>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Os formatos de número mais usados.</li>
+  <li>Como alinhar colunas.</li>
+  <li>Os formatos de data e hora.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A forma geral</h2>
+
+<pre><code>"{índice,alinhamento:formato}" -f valor0, valor1, ...
+</code></pre>
+
+<hr>
+
+<h2>Números</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "{0:N2}" -f 1234.5
+1.234,50
+PS&gt; "{0:N0}" -f 1234.5
+1.234
+PS&gt; "{0:F1}" -f 3.14159
+3,1
+PS&gt; "{0:D5}" -f 42
+00042
+PS&gt; "{0:C}" -f 1234.5
+R$ 1.234,50
+PS&gt; "{0:P1}" -f 0.256
+25,6%
+PS&gt; "{0:E2}" -f 123456
+1,23E+005
+PS&gt; "{0:X}" -f 255
+FF
+</pre>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Formato</th><th>Nome</th><th>Faz</th></tr>
+
+<tr><td><code>N2</code></td><td>número</td><td>separador de milhar e 2 casas</td></tr>
+
+<tr><td><code>F1</code></td><td>fixo</td><td>1 casa, sem separador de milhar</td></tr>
+
+<tr><td><code>D5</code></td><td>decimal</td><td>inteiro com zeros à esquerda (5 dígitos)</td></tr>
+
+<tr><td><code>C</code></td><td>moeda</td><td>moeda do idioma (R$ no pt-BR)</td></tr>
+
+<tr><td><code>P1</code></td><td>porcentagem</td><td>multiplica por 100 e mostra %</td></tr>
+
+<tr><td><code>E2</code></td><td>científico</td><td>notação com expoente</td></tr>
+
+<tr><td><code>X</code></td><td>hexadecimal</td><td>base 16</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Personalizados</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "{0:0.00}" -f 7.5
+7,50
+PS&gt; "{0:000}" -f 7
+007
+PS&gt; "{0:#,##0.0}" -f 98765.432
+98.765,4
+PS&gt; "{0:0.0'%'}" -f 12.34
+12,3%
+</pre>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Símbolo</th><th>Significa</th></tr>
+
+<tr><td><code>0</code></td><td>dígito obrigatório (completa com zero)</td></tr>
+
+<tr><td><code>#</code></td><td>dígito opcional</td></tr>
+
+<tr><td><code>.</code></td><td>separador decimal (vira vírgula no pt-BR)</td></tr>
+
+<tr><td><code>,</code></td><td>separador de milhar (vira ponto no pt-BR)</td></tr>
+
+<tr><td><code>'texto'</code></td><td>texto fixo</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Alinhamento</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "[{0,8}]" -f "Ana"
+[     Ana]
+PS&gt; "[{0,-8}]" -f "Ana"
+[Ana     ]
+PS&gt; "{0,-10}{1,8:N2}" -f "Café", 18.9
+Café         18,90
+PS&gt; "{0,-10}{1,8:N2}" -f "Pão", 7.5
+Pão           7,50
+</pre>
+
+<p>Número positivo alinha à direita; negativo, à esquerda. Combine com formato: <code>{1,8:N2}</code>.</p>
+
+<hr>
+
+<h2>Datas e horas</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $d = [datetime]"2026-03-07 09:05:03"
+PS&gt; "{0:dd/MM/yyyy}" -f $d
+07/03/2026
+PS&gt; "{0:d}" -f $d
+07/03/2026
+PS&gt; "{0:HH:mm:ss}" -f $d
+09:05:03
+PS&gt; "{0:dddd, dd 'de' MMMM}" -f $d
+sábado, 07 de março
+PS&gt; "{0:yyyy-MM-dd_HHmm}" -f $d
+2026-03-07_0905
+PS&gt; "{0:ddd} {0:MMM}" -f $d
+sáb. mar.
+</pre>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Código</th><th>Significa</th></tr>
+
+<tr><td><code>d</code> / <code>dd</code></td><td>dia (7 / 07)</td></tr>
+
+<tr><td><code>ddd</code> / <code>dddd</code></td><td>dia da semana (sáb. / sábado)</td></tr>
+
+<tr><td><code>M</code> / <code>MM</code> / <code>MMM</code> / <code>MMMM</code></td><td>mês (3 / 03 / mar. / março)</td></tr>
+
+<tr><td><code>yy</code> / <code>yyyy</code></td><td>ano (26 / 2026)</td></tr>
+
+<tr><td><code>H</code> / <code>HH</code></td><td>hora 0–23 (9 / 09)</td></tr>
+
+<tr><td><code>h</code> / <code>hh</code></td><td>hora 1–12</td></tr>
+
+<tr><td><code>mm</code> / <code>ss</code></td><td>minutos / segundos</td></tr>
+
+<tr><td><code>tt</code></td><td>AM/PM</td></tr>
+
+<tr><td><code>d</code> (sozinho)</td><td>data curta do idioma</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Outros jeitos de formatar</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; (1234.5).ToString("N2")
+1.234,50
+PS&gt; (Get-Date $d -Format "dd/MM")
+07/03
+PS&gt; [string]::Format("{0} de {1}", 3, 10)
+3 de 10
+</pre>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>{0:N2}</code> número com 2 casas; <code>{0:C}</code> moeda; <code>{0:P}</code> porcentagem; <code>{0:D5}</code> zeros à esquerda.</li>
+  <li><code>{0,10}</code> alinha à direita, <code>{0,-10}</code> à esquerda.</li>
+  <li>Datas: <code>dd/MM/yyyy HH:mm</code> (mês é <code>MM</code>, minuto é <code>mm</code>).</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

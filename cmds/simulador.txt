@@ -1,4 +1,0 @@
-# simulador — comandos para colher no Windows (só leitura/demonstração)
-# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
-# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
-# (sem coleta no Windows: depende do editor wasm, que ainda não existe aqui)

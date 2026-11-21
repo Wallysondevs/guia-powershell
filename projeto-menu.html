@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projeto PowerShell: menu interativo no terminal (passo a passo) | Guia PowerShell</title>
+<meta name="description" content="Projeto prático em PowerShell 7: um menu interativo de terminal com Read-Host, switch, laço do/until, validação da opção e funções separadas para cada ação, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Projeto: <span class="hl">Menu Interativo</span></h1>
+
+<p class="intro">Scripts com menu são ótimos para quem não gosta de decorar comandos: a pessoa escolhe um número e o script faz o resto. Neste projeto você monta um menu de "utilidades" com opções numeradas, um <code>switch</code> para decidir o que fazer e um laço que só termina quando a pessoa escolhe "Sair".</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A desenhar um menu com <code>Write-Host</code> e cores.</li>
+  <li>A ler a escolha com <code>Read-Host</code> e validar.</li>
+  <li>A decidir a ação com <code>switch</code>.</li>
+  <li>A repetir até a pessoa sair, com <code>do { } until ()</code>.</li>
+  <li>A separar cada ação numa função, para testar sem o menu.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>O plano</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Peça</th><th>Papel</th></tr>
+
+<tr><td><code>Show-Menu</code></td><td>Desenha as opções na tela.</td></tr>
+
+<tr><td><code>Invoke-Opcao</code></td><td>Recebe a opção escolhida e chama a função certa.</td></tr>
+
+<tr><td>Uma função por ação</td><td><code>Get-Saudacao</code>, <code>Get-Tabuada</code>, <code>ConvertTo-Fahrenheit</code>.</td></tr>
+
+<tr><td>O laço</td><td>Mostra o menu, lê a opção, executa, repete até "0".</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>1. As ações</h2>
+
+<p>Primeiro as funções que fazem o trabalho. Elas não sabem nada sobre o menu, por isso dá para testar cada uma sozinha:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Get-Saudacao { param([int]$Hora)
+&gt;&gt;     if ($Hora -lt 12) { "Bom dia!" } elseif ($Hora -lt 18) { "Boa tarde!" } else { "Boa noite!" }
+&gt;&gt; }
+PS&gt; function Get-Tabuada { param([int]$Numero)
+&gt;&gt;     1..10 | ForEach-Object { "{0,2} x {1,2} = {2,3}" -f $Numero, $_, ($Numero * $_) }
+&gt;&gt; }
+PS&gt; function ConvertTo-Fahrenheit { param([double]$Celsius) "{0:N1} °C = {1:N1} °F" -f $Celsius, ($Celsius * 9 / 5 + 32) }
+PS&gt; Get-Saudacao -Hora 9
+Bom dia!
+PS&gt; Get-Tabuada 7 | Select-Object -First 3
+ 7 x  1 =   7
+ 7 x  2 =  14
+ 7 x  3 =  21
+PS&gt; ConvertTo-Fahrenheit 36.5
+36,5 °C = 97,7 °F
+</pre>
+
+<hr>
+
+<h2>2. Desenhando o menu</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Show-Menu {
+&gt;&gt;     Write-Host ""
+&gt;&gt;     Write-Host "===== UTILIDADES =====" -ForegroundColor Cyan
+&gt;&gt;     Write-Host " 1) Saudação"
+&gt;&gt;     Write-Host " 2) Tabuada"
+&gt;&gt;     Write-Host " 3) Celsius para Fahrenheit"
+&gt;&gt;     Write-Host " 0) Sair"
+&gt;&gt;     Write-Host "======================" -ForegroundColor Cyan
+&gt;&gt; }
+PS&gt; Show-Menu
+
+===== UTILIDADES =====
+ 1) Saudação
+ 2) Tabuada
+ 3) Celsius para Fahrenheit
+ 0) Sair
+======================
+</pre>
+
+<p>O <code>Write-Host</code> escreve direto na tela (com cor). Como o menu é só para os olhos, não para o pipeline, aqui o <code>Write-Host</code> é a escolha certa (veja <a href="write-host-output.html">Write-Host × Write-Output</a>).</p>
+
+<hr>
+
+<h2>3. Decidindo com switch</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Invoke-Opcao { param([string]$Opcao, [string]$Valor)
+&gt;&gt;     switch ($Opcao) {
+&gt;&gt;         "1" { Get-Saudacao -Hora ([int]$Valor) }
+&gt;&gt;         "2" { Get-Tabuada -Numero ([int]$Valor) }
+&gt;&gt;         "3" { ConvertTo-Fahrenheit -Celsius ([double]($Valor -replace ',', '.')) }
+&gt;&gt;         "0" { "Até logo!" }
+&gt;&gt;         default { "Opção inválida: '$Opcao'. Escolha 0, 1, 2 ou 3." }
+&gt;&gt;     }
+&gt;&gt; }
+PS&gt; Invoke-Opcao 1 "20"
+Boa noite!
+PS&gt; Invoke-Opcao 3 "25,5"
+25,5 °C = 77,9 °F
+PS&gt; Invoke-Opcao 9
+Opção inválida: '9'. Escolha 0, 1, 2 ou 3.
+</pre>
+
+<dl class="anatomy">
+
+  <dt>switch ($Opcao)</dt><dd>Compara a opção com cada caso. Veja <a href="switch.html">switch</a>.</dd>
+
+  <dt>default</dt><dd>Pega tudo que não combinou: é a validação da entrada.</dd>
+
+  <dt>($Valor -replace ',', '.')</dt><dd>Aceita "25,5" do jeito brasileiro antes de converter.</dd>
+
+</dl>
+
+<hr>
+
+<h2>4. O laço do menu</h2>
+
+<p>Agora o programa completo. Ele usa <code>Read-Host</code>, então rode no seu terminal:</p>
+
+<pre><code>do {
+    Show-Menu
+    $opcao = Read-Host "Escolha"
+    switch ($opcao) {
+        "1" { $valor = (Get-Date).Hour }
+        "2" { $valor = Read-Host "Número" }
+        "3" { $valor = Read-Host "Temperatura em °C" }
+        default { $valor = $null }
+    }
+    Invoke-Opcao $opcao $valor
+    if ($opcao -ne "0") { Read-Host "Enter para continuar" | Out-Null }
+} until ($opcao -eq "0")
+</code></pre>
+
+<dl class="anatomy">
+
+  <dt>do { } until (...)</dt><dd>Roda pelo menos uma vez e repete até a condição ser verdadeira. Veja <a href="while.html">while e do</a>.</dd>
+
+  <dt>Read-Host "Escolha"</dt><dd>Mostra <code>Escolha: </code> e espera a pessoa digitar + Enter. Sempre devolve texto.</dd>
+
+  <dt>Read-Host "Enter para continuar"</dt><dd>Uma pausa, para a pessoa ler o resultado antes de o menu aparecer de novo.</dd>
+
+</dl>
+
+<p>Para salvar como script, coloque as funções e o laço num arquivo <code>menu.ps1</code> e rode com <code>.\menu.ps1</code>.</p>
+
+<div class="tryps" data-goal="out:Opção inválida: &#x27;7&#x27;;;src:default;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> o <code>switch</code> abaixo não tem <code>default</code>. Acrescente um que mostre <code>Opção inválida: '7'...</code> e teste com a opção <code>7</code>.</p>
+
+<pre class="script" data-file="main.ps1">function Invoke-Opcao { param([string]$Opcao)
+    switch ($Opcao) {
+        "1" { "Saudação" }
+        "0" { "Até logo!" }
+    }
+}
+Invoke-Opcao 7
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Invoke-Opcao { param([string]$Opcao)
+    switch ($Opcao) {
+        "1" { "Saudação" }
+        "0" { "Até logo!" }
+        default { "Opção inválida: '$Opcao'. Escolha 0 ou 1." }
+    }
+}
+Invoke-Opcao 7
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Comparar a opção com número</strong>
+
+<p>O <code>Read-Host</code> devolve texto. <code>switch ($opcao) { 1 { ... } }</code> costuma funcionar porque o PowerShell converte, mas <code>" 1"</code> (com espaço) não combina. Use <code>$opcao = (Read-Host "Escolha").Trim()</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Laço infinito</strong>
+
+<p>Se a condição do <code>until</code> nunca fica verdadeira (por exemplo, comparando com <code>0</code> mas a opção de sair é <code>"s"</code>), o menu não termina. Use Ctrl+C para interromper e confira a condição.</p>
+
+</div>
+
+<hr>
+
+<h2>Desafios</h2>
+
+<ul>
+</ul>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">1. Por que usar <code>do { } until ()</code> no menu, e não <code>while</code>?</p>
+
+<label><input type="radio" name="q1"> Porque <code>while</code> não existe no PowerShell</label>
+
+<label><input type="radio" name="q1"> Porque é mais rápido</label>
+
+<label><input type="radio" name="q1"> Porque o menu precisa aparecer pelo menos uma vez antes de testar a condição</label>
+
+<label><input type="radio" name="q1"> Porque <code>until</code> lê o teclado</label>
+
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">2. Qual parte do <code>switch</code> trata opções inválidas?</p>
+
+<label><input type="radio" name="q2"> default</label>
+
+<label><input type="radio" name="q2"> else</label>
+
+<label><input type="radio" name="q2"> catch</label>
+
+<label><input type="radio" name="q2"> otherwise</label>
+
+</div>
+
+<div class="tryps" data-goal="out:7 x  3 =  21;;src:Get-Tabuada;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> chame <code>Invoke-Opcao</code> com a opção <code>2</code> e o valor <code>7</code>, e veja a tabuada do 7.</p>
+
+<pre class="script" data-file="main.ps1">function Get-Tabuada { param([int]$Numero)
+    1..10 | ForEach-Object { "{0,2} x {1,2} = {2,3}" -f $Numero, $_, ($Numero * $_) }
+}
+function Invoke-Opcao { param([string]$Opcao, [string]$Valor)
+    switch ($Opcao) {
+        "2" { Get-Tabuada -Numero ([int]$Valor) }
+        default { "Opção inválida" }
+    }
+}
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Get-Tabuada { param([int]$Numero)
+    1..10 | ForEach-Object { "{0,2} x {1,2} = {2,3}" -f $Numero, $_, ($Numero * $_) }
+}
+function Invoke-Opcao { param([string]$Opcao, [string]$Valor)
+    switch ($Opcao) {
+        "2" { Get-Tabuada -Numero ([int]$Valor) }
+        default { "Opção inválida" }
+    }
+}
+Invoke-Opcao 2 7
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Separe as ações em funções; o menu só chama.</li>
+  <li><code>Write-Host</code> desenha o menu; <code>Read-Host</code> lê a escolha (sempre texto).</li>
+  <li><code>switch</code> com <code>default</code> decide e valida.</li>
+  <li><code>do { } until ($opcao -eq "0")</code> repete até a pessoa sair.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

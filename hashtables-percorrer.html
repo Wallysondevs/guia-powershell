@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell — percorrendo uma hashtable (Keys, GetEnumerator) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a percorrer uma hashtable no PowerShell: laço nas chaves, GetEnumerator com Key e Value, ordenar por chave ou valor e filtrar pares, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Percorrendo uma <span class="hl">Hashtable</span></h1>
+
+<p class="intro">Uma hashtable no pipeline se comporta como <strong>um objeto só</strong>, e não como uma lista de pares. Para passar por cada chave e valor, você usa <code>.Keys</code> ou <code>.GetEnumerator()</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A percorrer as chaves com <code>foreach ($k in $h.Keys)</code>.</li>
+  <li>A percorrer os pares com <code>.GetEnumerator()</code>, usando <code>.Key</code> e <code>.Value</code>.</li>
+  <li>A ordenar os pares por chave ou por valor.</li>
+  <li>A filtrar os pares com <code>Where-Object</code>.</li>
+  <li>Por que <code>$h | ForEach-Object</code> roda uma vez só.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: ler a agenda inteira</h2>
+
+<p>Para ligar para todo mundo da agenda, você passa página por página: nome e telefone, nome e telefone. Percorrer a hashtable é isso: visitar cada par.</p>
+
+<p>Os exemplos usam este estoque:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $estoque = [ordered]@{ arroz = 12; feijao = 0; cafe = 40; acucar = 5 }
+</pre>
+
+<hr>
+
+<h2>1. Pelas chaves</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; foreach ($item in $estoque.Keys) { "$item -&gt; $($estoque[$item])" }
+arroz -&gt; 12
+feijao -&gt; 0
+cafe -&gt; 40
+acucar -&gt; 5
+</pre>
+
+<dl class="anatomy">
+
+  <dt>$estoque.Keys</dt><dd>A lista das chaves.</dd>
+
+  <dt>$estoque[$item]</dt><dd>O valor daquela chave. Aqui os colchetes são necessários, porque a chave está numa variável.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Pelos pares: <code>GetEnumerator()</code></h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $estoque.GetEnumerator() | ForEach-Object { "{0}: {1}" -f $_.Key, $_.Value }
+arroz: 12
+feijao: 0
+cafe: 40
+acucar: 5
+</pre>
+
+<dl class="anatomy">
+
+  <dt>.GetEnumerator()</dt><dd>Solta os pares, um por um, no pipeline.</dd>
+
+  <dt>$_.Key / $_.Value</dt><dd>A chave e o valor do par da vez.</dd>
+
+</dl>
+
+<div class="tryps" data-goal="out:arroz = 12;;out:cafe = 40;;src:GetEnumerator;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> mostre cada item no formato <code>arroz = 12</code>, usando <code>.GetEnumerator()</code>, <code>$_.Key</code> e <code>$_.Value</code>.</p>
+
+<pre class="script" data-file="main.ps1">$estoque = [ordered]@{ arroz = 12; cafe = 40 }
+$estoque
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$estoque = [ordered]@{ arroz = 12; cafe = 40 }
+$estoque.GetEnumerator() | ForEach-Object { "$($_.Key) = $($_.Value)" }
+</pre>
+
+</div>
+
+<hr>
+
+<h2>3. Ordenando e filtrando</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $estoque.GetEnumerator() | Sort-Object Value -Descending
+
+Name                           Value
+----                           -----
+cafe                           40
+arroz                          12
+acucar                         5
+feijao                         0
+PS&gt; $estoque.GetEnumerator() | Where-Object { $_.Value -eq 0 } | ForEach-Object Key
+feijao
+</pre>
+
+<p>O primeiro mostra do maior estoque para o menor. O segundo acha os itens em falta.</p>
+
+<hr>
+
+<h2>4. Somando os valores</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; ($estoque.Values | Measure-Object -Sum).Sum
+57
+</pre>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Mandar a hashtable direto para o pipeline</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $estoque | ForEach-Object { "volta" }
+volta
+</pre>
+
+<p>O bloco rodou <strong>uma vez só</strong>: a hashtable inteira passou como um objeto. Use <code>.GetEnumerator()</code> ou <code>.Keys</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Mudar a hashtable enquanto percorre</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $h = @{ a = 1; b = 2 }
+PS&gt; foreach ($k in $h.Keys) { $h[$k] = 0 }
+OperationStopped: Collection was modified; enumeration operation may not execute.
+</pre>
+
+<p>Mudar a hashtable dentro do laço que percorre as chaves dela quebra a enumeração. Percorra uma cópia das chaves: <code>foreach ($k in @($h.Keys)) { ... }</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>foreach ($k in $h.Keys) { $h[$k] }</code></td><td>Percorre pelas chaves.</td></tr>
+
+<tr><td><code>$h.GetEnumerator() | ForEach-Object { $_.Key; $_.Value }</code></td><td>Percorre pelos pares.</td></tr>
+
+<tr><td><code>... | Sort-Object Value</code></td><td>Ordena pelo valor.</td></tr>
+
+<tr><td><code>... | Sort-Object Key</code></td><td>Ordena pela chave.</td></tr>
+
+<tr><td><code>foreach ($k in @($h.Keys))</code></td><td>Cópia das chaves, para poder mudar a hashtable.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Os pares</h3>
+<p>Complete com o método que solta os pares:</p>
+<div class="ex-code">$h.<input data-answer="GetEnumerator()" aria-label="resposta"> | ForEach-Object { $_.Key }</div>
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">2. Quantas vezes roda <code>@{ a = 1; b = 2 } | ForEach-Object { "x" }</code>?</p>
+
+<label><input type="radio" name="q2"> Uma vez</label>
+
+<label><input type="radio" name="q2"> Duas vezes</label>
+
+<label><input type="radio" name="q2"> Nenhuma</label>
+
+<label><input type="radio" name="q2"> Dá erro</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. Dentro do <code>GetEnumerator() | ForEach-Object</code>, como se pega o valor do par?</p>
+
+<label><input type="radio" name="q3"> <code>$_.Valor</code></label>
+
+<label><input type="radio" name="q3"> <code>$_[1]</code></label>
+
+<label><input type="radio" name="q3"> <code>$_.Value</code></label>
+
+<label><input type="radio" name="q3"> <code>$Value</code></label>
+
+</div>
+
+<div class="tryps" data-goal="out:feijao;;src:Where-Object;;src:GetEnumerator;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> mostre o nome do item que está com estoque zerado, filtrando os pares com <code>Where-Object { $_.Value -eq 0 }</code>.</p>
+
+<pre class="script" data-file="main.ps1">$estoque = [ordered]@{ arroz = 12; feijao = 0; cafe = 40 }
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$estoque = [ordered]@{ arroz = 12; feijao = 0; cafe = 40 }
+$estoque.GetEnumerator() | Where-Object { $_.Value -eq 0 } | ForEach-Object { $_.Key }
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>No pipeline, a hashtable é um objeto só.</li>
+  <li>Percorra as chaves com <code>.Keys</code> ou os pares com <code>.GetEnumerator()</code>.</li>
+  <li>Cada par tem <code>.Key</code> e <code>.Value</code>; dá para ordenar e filtrar.</li>
+  <li>Para mudar a hashtable num laço, percorra uma cópia das chaves.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

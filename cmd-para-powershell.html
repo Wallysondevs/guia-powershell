@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Do cmd (Prompt de Comando) para o PowerShell — equivalências (guia) | Guia PowerShell</title>
+<meta name="description" content="Guia para quem vem do Prompt de Comando (cmd.exe): os equivalentes no PowerShell 7 para dir, cd, copy, del, type, set, echo, findstr, %VAR% e arquivos .bat, e as diferenças que mais confundem.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Do <span class="hl">cmd</span> para o PowerShell</h1>
+
+<p class="intro">Se você já usou o Prompt de Comando (o <code>cmd.exe</code>), boa parte vai parecer familiar: <code>dir</code>, <code>cd</code>, <code>copy</code> e <code>del</code> funcionam no PowerShell porque são <a href="aliases.html">apelidos</a> de cmdlets. Mas há diferenças importantes: variáveis, parâmetros com <code>/</code>, e o fato de o PowerShell trabalhar com objetos, não com texto.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Os equivalentes no PowerShell dos comandos mais usados do cmd.</li>
+  <li>Como variáveis de ambiente mudam (<code>%PATH%</code> vira <code>$env:PATH</code>).</li>
+  <li>Por que <code>dir /s</code> não funciona e o que usar no lugar.</li>
+  <li>Como rodar um <code>.bat</code> e comandos do cmd quando precisar.</li>
+  <li>O que muda em <code>&amp;&amp;</code>, <code>||</code>, redirecionamento e aspas.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: mudar de carro</h2>
+
+<p>Quem dirigia um carro manual e passa para um automático já sabe dirigir: volante, freio e pisca estão no mesmo lugar. Só o câmbio muda. Do cmd para o PowerShell é igual: os nomes básicos funcionam, mas o "câmbio" (objetos e parâmetros) é diferente.</p>
+
+<hr>
+
+<h2>1. Tabela de equivalências</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>cmd</th><th>PowerShell (nome completo)</th><th>Apelido que funciona</th></tr>
+
+<tr><td><code>dir</code></td><td><code>Get-ChildItem</code></td><td><code>dir</code>, <code>ls</code>, <code>gci</code></td></tr>
+
+<tr><td><code>dir /s</code></td><td><code>Get-ChildItem -Recurse</code></td><td><code>dir -r</code></td></tr>
+
+<tr><td><code>dir /a</code></td><td><code>Get-ChildItem -Force</code></td><td><code>dir -Force</code></td></tr>
+
+<tr><td><code>cd pasta</code></td><td><code>Set-Location pasta</code></td><td><code>cd</code>, <code>sl</code></td></tr>
+
+<tr><td><code>cd</code> (sozinho)</td><td><code>Get-Location</code></td><td><code>pwd</code>, <code>gl</code></td></tr>
+
+<tr><td><code>md pasta</code></td><td><code>New-Item -ItemType Directory pasta</code></td><td><code>md</code>, <code>mkdir</code></td></tr>
+
+<tr><td><code>copy a b</code></td><td><code>Copy-Item a b</code></td><td><code>copy</code>, <code>cp</code></td></tr>
+
+<tr><td><code>move a b</code></td><td><code>Move-Item a b</code></td><td><code>move</code>, <code>mv</code></td></tr>
+
+<tr><td><code>ren a b</code></td><td><code>Rename-Item a b</code></td><td><code>ren</code></td></tr>
+
+<tr><td><code>del arquivo</code></td><td><code>Remove-Item arquivo</code></td><td><code>del</code>, <code>rm</code></td></tr>
+
+<tr><td><code>rd /s pasta</code></td><td><code>Remove-Item pasta -Recurse</code></td><td><code>rd -r</code></td></tr>
+
+<tr><td><code>type arquivo</code></td><td><code>Get-Content arquivo</code></td><td><code>type</code>, <code>cat</code>, <code>gc</code></td></tr>
+
+<tr><td><code>echo texto</code></td><td><code>Write-Output "texto"</code></td><td><code>echo</code></td></tr>
+
+<tr><td><code>cls</code></td><td><code>Clear-Host</code></td><td><code>cls</code></td></tr>
+
+<tr><td><code>findstr texto arq</code></td><td><code>Select-String texto arq</code></td><td><code>sls</code></td></tr>
+
+<tr><td><code>set</code></td><td><code>Get-ChildItem Env:</code></td><td><code>dir env:</code></td></tr>
+
+<tr><td><code>tasklist</code></td><td><code>Get-Process</code></td><td><code>ps</code>, <code>gps</code></td></tr>
+
+<tr><td><code>taskkill /im x.exe</code></td><td><code>Stop-Process -Name x</code></td><td><code>kill</code></td></tr>
+
+<tr><td><code>where programa</code></td><td><code>Get-Command programa</code></td><td><code>gcm</code></td></tr>
+
+<tr><td><code>help comando</code></td><td><code>Get-Help comando</code></td><td><code>help</code></td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>2. Parâmetros: / vira -</h2>
+
+<p>No cmd, as opções usam barra: <code>dir /s /b</code>. No PowerShell, os parâmetros usam hífen e nome: <code>Get-ChildItem -Recurse -Name</code>. Como <code>dir</code> é só um apelido de <code>Get-ChildItem</code>, <code>dir /s</code> procura uma pasta chamada <code>s</code> e dá erro de caminho.</p>
+
+<pre><code>dir /s
+</code></pre>
+
+<hr>
+
+<h2>3. Variáveis</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>cmd</th><th>PowerShell</th></tr>
+
+<tr><td><code>set NOME=Ana</code></td><td><code>$nome = "Ana"</code> (variável da sessão)</td></tr>
+
+<tr><td><code>echo %NOME%</code></td><td><code>$nome</code></td></tr>
+
+<tr><td><code>echo %PATH%</code></td><td><code>$env:PATH</code></td></tr>
+
+<tr><td><code>set TEMP_DIR=C:\x</code></td><td><code>$env:TEMP_DIR = "C:\x"</code> (variável de ambiente)</td></tr>
+
+<tr><td><code>%USERPROFILE%</code></td><td><code>$HOME</code> ou <code>$env:USERPROFILE</code></td></tr>
+
+<tr><td><code>%ERRORLEVEL%</code></td><td><code>$LASTEXITCODE</code> (programas) e <code>$?</code> (sucesso do último comando)</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>4. Encadeando: && e ||</h2>
+
+<p>O PowerShell 7 aceita <code>&amp;&amp;</code> (rode o próximo se deu certo) e <code>||</code> (rode se deu errado), como o cmd:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Write-Output "primeiro" &amp;&amp; Write-Output "segundo"
+primeiro
+segundo
+PS&gt; Get-Item "nao-existe.txt" 2&gt;$null || Write-Output "o primeiro falhou"
+o primeiro falhou
+</pre>
+
+<dl class="anatomy">
+
+  <dt>&amp;&amp;</dt><dd>Só roda o segundo se o primeiro deu certo.</dd>
+
+  <dt>||</dt><dd>Só roda o segundo se o primeiro falhou.</dd>
+
+  <dt>2&gt;$null</dt><dd>Joga fora a mensagem de erro (o fluxo 2), como no cmd.</dd>
+
+</dl>
+
+<hr>
+
+<h2>5. Redirecionamento</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>cmd</th><th>PowerShell</th><th>Observação</th></tr>
+
+<tr><td><code>cmd &gt; arq.txt</code></td><td><code>comando &gt; arq.txt</code></td><td>Igual. Grava em UTF-8.</td></tr>
+
+<tr><td><code>cmd &gt;&gt; arq.txt</code></td><td><code>comando &gt;&gt; arq.txt</code></td><td>Acrescenta.</td></tr>
+
+<tr><td><code>cmd 2&gt; erros.txt</code></td><td><code>comando 2&gt; erros.txt</code></td><td>Só os erros.</td></tr>
+
+<tr><td><code>cmd &gt; nul</code></td><td><code>comando &gt; $null</code> ou <code>| Out-Null</code></td><td>Descarta.</td></tr>
+
+<tr><td><code>cmd 2&gt;&amp;1</code></td><td><code>comando 2&gt;&amp;1</code></td><td>Junta erros e saída.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>6. Rodando .bat e comandos do cmd</h2>
+
+<p>Arquivos <code>.bat</code> e <code>.cmd</code> rodam direto: <code>.\instalar.bat</code>. Os programas <code>.exe</code> (como <code>ipconfig</code>, <code>ping</code>, <code>robocopy</code>) também funcionam normalmente. E, se um comando só existe dentro do cmd (como <code>mklink</code> ou <code>assoc</code>), chame o cmd para rodá-lo:</p>
+
+<pre><code>cmd /c mklink /J atalho C:\pasta-real
+</code></pre>
+
+<hr>
+
+<h2>7. A grande diferença: objetos</h2>
+
+<p>No cmd, <code>dir</code> devolve texto, e para filtrar você corta o texto. No PowerShell, <code>Get-ChildItem</code> devolve objetos com propriedades (<code>Name</code>, <code>Length</code>, <code>LastWriteTime</code>), e você filtra pelo nome da propriedade:</p>
+
+<pre><code>Get-ChildItem -File | Where-Object Length -gt 1MB | Sort-Object Length -Descending | Select-Object Name, Length
+</code></pre>
+
+<p>Leia a aula <a href="objetos.html">Tudo É Objeto</a> para entender por que isso muda tudo.</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>copy *.txt pasta e a pasta não existe</strong>
+
+<p>No PowerShell, o <code>Copy-Item</code> não cria a pasta: ele grava cada <code>.txt</code> num <strong>arquivo</strong> chamado <code>pasta</code>, um por cima do outro, e no fim sobra só o conteúdo do último. Crie a pasta antes com <code>New-Item -ItemType Directory pasta</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Aspas e espaços</strong>
+
+<p>No PowerShell, um caminho com espaço precisa de aspas, e para <strong>rodar</strong> um programa num caminho entre aspas use o <code>&amp;</code> na frente: <code>&amp; "C:\Program Files\App\app.exe"</code>. Sem o <code>&amp;</code>, o PowerShell só mostra o texto.</p>
+
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. dir /s</h3>
+<p>Complete o equivalente de <code>dir /s</code>:</p>
+<div class="ex-code">Get-ChildItem <input data-answer="-Recurse" aria-label="resposta"></div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Como se escreve <code>%PATH%</code> no PowerShell?</p>
+
+<label><input type="radio" name="q2"> <code>%env:PATH%</code></label>
+
+<label><input type="radio" name="q2"> <code>$env:PATH</code></label>
+
+<label><input type="radio" name="q2"> <code>$PATH</code></label>
+
+<label><input type="radio" name="q2"> <code>env.PATH</code></label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. Para rodar um programa cujo caminho está entre aspas, use:</p>
+
+<label><input type="radio" name="q3"> <code>run "C:\..."</code></label>
+
+<label><input type="radio" name="q3"> <code>cmd "C:\..."</code></label>
+
+<label><input type="radio" name="q3"> <code>&amp; "C:\..."</code></label>
+
+<label><input type="radio" name="q3"> <code>start-path "C:\..."</code></label>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>dir</code>, <code>cd</code>, <code>copy</code>, <code>del</code>, <code>type</code> funcionam: são apelidos de cmdlets.</li>
+  <li>Opções com <code>/</code> viram parâmetros com <code>-</code> (<code>-Recurse</code>, <code>-Force</code>).</li>
+  <li><code>%VAR%</code> vira <code>$env:VAR</code>; <code>%ERRORLEVEL%</code> vira <code>$LASTEXITCODE</code>.</li>
+  <li><code>&amp;&amp;</code>, <code>||</code> e redirecionamentos funcionam no PowerShell 7.</li>
+  <li>A grande mudança: o PowerShell trabalha com objetos.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

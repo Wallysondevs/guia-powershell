@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell — ajuda nas suas funções (comment-based help) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a escrever a ajuda das suas funções com comentários .SYNOPSIS, .DESCRIPTION, .PARAMETER e .EXAMPLE, e a ler com Get-Help, como nos cmdlets oficiais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Ajuda nas Suas <span class="hl">Funções</span></h1>
+
+<p class="intro">O <code>Get-Help</code> (aula <a href="get-help.html">Get-Help</a>) não serve só para os cmdlets oficiais. Se você escrever um bloco de comentários especial na sua função, ele mostra a ajuda dela também, com resumo, parâmetros e exemplos.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A escrever o bloco <code>&amp;lt;# ... #&amp;gt;</code> com <code>.SYNOPSIS</code>, <code>.DESCRIPTION</code>, <code>.PARAMETER</code> e <code>.EXAMPLE</code>.</li>
+  <li>A ler a ajuda com <code>Get-Help</code>, <code>-Examples</code> e <code>-Parameter</code>.</li>
+  <li>Onde colocar o bloco de ajuda.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: o manual que vem na caixa</h2>
+
+<p>Todo aparelho vem com um manual: para que serve, como ligar, um exemplo de uso. Sem manual, só quem fez sabe usar. A ajuda em comentários é o manual da sua função, e fica junto com ela.</p>
+
+<hr>
+
+<h2>1. O bloco de ajuda</h2>
+
+<pre><code>function Get-Desconto {
+    &lt;#
+    .SYNOPSIS
+    Calcula o preço com desconto.
+
+    .DESCRIPTION
+    Recebe um preço e um percentual e devolve o preço final.
+
+    .PARAMETER Preco
+    O preço original, em reais.
+
+    .PARAMETER Percentual
+    Quanto de desconto, de 0 a 100. O padrão é 10.
+
+    .EXAMPLE
+    Get-Desconto -Preco 200 -Percentual 15
+    Devolve 170.
+    #&gt;
+    param([double]$Preco, [double]$Percentual = 10)
+    $Preco * (1 - $Percentual / 100)
+}
+</code></pre>
+
+<dl class="anatomy">
+
+  <dt>&lt;# ... #&gt;</dt><dd>Um comentário de várias linhas. Logo no começo da função, ele vira a ajuda.</dd>
+
+  <dt>.SYNOPSIS</dt><dd>O resumo de uma linha.</dd>
+
+  <dt>.DESCRIPTION</dt><dd>A explicação mais longa.</dd>
+
+  <dt>.PARAMETER Preco</dt><dd>A explicação de um parâmetro. Um <code>.PARAMETER</code> para cada um.</dd>
+
+  <dt>.EXAMPLE</dt><dd>Um exemplo: a primeira linha é o comando, as outras explicam.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Lendo a ajuda</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Get-Desconto {
+&gt;&gt;   &lt;#
+&gt;&gt;   .SYNOPSIS
+&gt;&gt;   Calcula o preço com desconto.
+&gt;&gt;   .DESCRIPTION
+&gt;&gt;   Recebe um preço e um percentual e devolve o preço final.
+&gt;&gt;   .PARAMETER Preco
+&gt;&gt;   O preço original, em reais.
+&gt;&gt;   .PARAMETER Percentual
+&gt;&gt;   Quanto de desconto, de 0 a 100. O padrão é 10.
+&gt;&gt;   .EXAMPLE
+&gt;&gt;   Get-Desconto -Preco 200 -Percentual 15
+&gt;&gt;   Devolve 170.
+&gt;&gt;   #&gt;
+&gt;&gt;   param([double]$Preco, [double]$Percentual = 10)
+&gt;&gt;   $Preco * (1 - $Percentual / 100)
+&gt;&gt; }
+PS&gt; Get-Desconto -Preco 200 -Percentual 15
+170
+PS&gt; (Get-Help Get-Desconto).Synopsis
+Calcula o preço com desconto.
+PS&gt; Get-Help Get-Desconto -Parameter Percentual
+
+-Percentual &lt;Double&gt;
+    Quanto de desconto, de 0 a 100. O padrão é 10.
+    
+    Required?                    false
+    Position?                    2
+    Default value                10
+    Accept pipeline input?       false
+    Aliases                      
+    Accept wildcard characters?  false
+    
+</pre>
+
+<hr>
+
+<h2>3. Só os exemplos</h2>
+
+<pre><code>Get-Help Get-Desconto -Examples
+</code></pre>
+
+<p>Com <code>-Examples</code>, o <code>Get-Help</code> mostra o nome, o resumo e cada <code>.EXAMPLE</code>, numerado. Num Windows em português, os títulos das seções saem traduzidos (<code>NOME</code>, por exemplo), como você viu na aula <a href="get-help.html">Get-Help</a>.</p>
+
+<div class="tryps" data-goal="out:Converte graus Celsius;;src:\.SYNOPSIS;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> escreva o bloco de ajuda com <code>.SYNOPSIS</code> dizendo <code>Converte graus Celsius em Fahrenheit.</code> e mostre o resumo com <code>(Get-Help ConvertTo-Fahrenheit).Synopsis</code>.</p>
+
+<pre class="script" data-file="main.ps1">function ConvertTo-Fahrenheit {
+    param([double]$Celsius)
+    $Celsius * 9 / 5 + 32
+}
+(Get-Help ConvertTo-Fahrenheit).Synopsis
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function ConvertTo-Fahrenheit {
+    &lt;#
+    .SYNOPSIS
+    Converte graus Celsius em Fahrenheit.
+    #&gt;
+    param([double]$Celsius)
+    $Celsius * 9 / 5 + 32
+}
+(Get-Help ConvertTo-Fahrenheit).Synopsis
+</pre>
+
+</div>
+
+<hr>
+
+<h2>4. Onde pode ficar</h2>
+
+<p>O bloco pode ficar em três lugares: logo depois da chave de abertura da função (como acima), logo antes da palavra <code>function</code>, ou no fim do corpo. O mais comum é dentro, no começo. Num script <code>.ps1</code>, o bloco no topo do arquivo vira a ajuda do script.</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Palavra-chave escrita errado: a ajuda some</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Get-Teste {
+&gt;&gt;   &lt;#
+&gt;&gt;   .RESUMO
+&gt;&gt;   Faz um teste.
+&gt;&gt;   #&gt;
+&gt;&gt;   param($x)
+&gt;&gt;   $x
+&gt;&gt; }
+PS&gt; (Get-Help Get-Teste).Synopsis
+
+Get-Teste [[-x] &lt;Object&gt;]
+</pre>
+
+<p>Com uma palavra-chave que não existe (<code>.RESUMO</code>), o bloco deixa de ser ajuda. O <code>Get-Help</code> mostra só o "esqueleto" com o nome e a sintaxe. As palavras-chave são em inglês: <code>.SYNOPSIS</code>, <code>.DESCRIPTION</code>, <code>.PARAMETER</code>, <code>.EXAMPLE</code>, <code>.NOTES</code>, <code>.LINK</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você escreve</th><th>Para quê</th></tr>
+
+<tr><td><code>.SYNOPSIS</code></td><td>Resumo de uma linha.</td></tr>
+
+<tr><td><code>.DESCRIPTION</code></td><td>Explicação longa.</td></tr>
+
+<tr><td><code>.PARAMETER Nome</code></td><td>Explica um parâmetro.</td></tr>
+
+<tr><td><code>.EXAMPLE</code></td><td>Um exemplo de uso (pode repetir).</td></tr>
+
+<tr><td><code>.NOTES</code></td><td>Observações, autor, versão.</td></tr>
+
+<tr><td><code>Get-Help F -Examples</code></td><td>Lê só os exemplos.</td></tr>
+
+<tr><td><code>Get-Help F -Parameter P</code></td><td>Lê a ajuda de um parâmetro.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. O resumo</h3>
+<p>Complete com a palavra-chave do resumo de uma linha:</p>
+<div class="ex-code">&lt;# .<input data-answer="SYNOPSIS" aria-label="resposta"> Mostra um oi. #&gt;</div>
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. Qual destes mostra só os exemplos da ajuda?</p>
+
+<label><input type="radio" name="q2"> <code>Get-Help F -Full</code></label>
+
+<label><input type="radio" name="q2"> <code>Get-Help F -Parameter Exemplo</code></label>
+
+<label><input type="radio" name="q2"> <code>Get-Help F -Examples</code></label>
+
+<label><input type="radio" name="q2"> <code>Get-Example F</code></label>
+
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">3. O que acontece se você escrever <code>.RESUMO</code> em vez de <code>.SYNOPSIS</code>?</p>
+
+<label><input type="radio" name="q3"> Funciona igual</label>
+
+<label><input type="radio" name="q3"> O bloco deixa de ser reconhecido como ajuda</label>
+
+<label><input type="radio" name="q3"> O PowerShell traduz sozinho</label>
+
+<label><input type="radio" name="q3"> Dá erro ao criar a função</label>
+
+</div>
+
+<div class="tryps" data-goal="outre:Mostra a soma;;src:\.SYNOPSIS;;src:\.EXAMPLE;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> escreva a ajuda da <code>Get-Soma</code> com <code>.SYNOPSIS</code> (<code>Mostra a soma de dois números.</code>) e um <code>.EXAMPLE</code>, e mostre o resumo.</p>
+
+<pre class="script" data-file="main.ps1">function Get-Soma {
+    param([int]$A, [int]$B)
+    $A + $B
+}
+(Get-Help Get-Soma).Synopsis
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Get-Soma {
+    &lt;#
+    .SYNOPSIS
+    Mostra a soma de dois números.
+    .EXAMPLE
+    Get-Soma 2 3
+    #&gt;
+    param([int]$A, [int]$B)
+    $A + $B
+}
+(Get-Help Get-Soma).Synopsis
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Um bloco <code>&amp;lt;# ... #&amp;gt;</code> com <code>.SYNOPSIS</code>, <code>.DESCRIPTION</code>, <code>.PARAMETER</code> e <code>.EXAMPLE</code> vira a ajuda da função.</li>
+  <li>O <code>Get-Help</code> lê como nos cmdlets: <code>-Examples</code>, <code>-Parameter</code>, <code>-Full</code>.</li>
+  <li>As palavras-chave são em inglês; escritas errado, a ajuda some.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

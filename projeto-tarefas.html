@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projeto PowerShell: lista de tarefas salva em JSON (passo a passo) | Guia PowerShell</title>
+<meta name="description" content="Projeto prático em PowerShell 7: uma lista de tarefas (to-do) com funções Add-Tarefa, Get-Tarefa, Complete-Tarefa e Remove-Tarefa, guardada num arquivo JSON, com objetos, validação e saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Projeto: <span class="hl">Lista de Tarefas</span> (JSON)</h1>
+
+<p class="intro">Neste projeto você constrói um pequeno gerenciador de tarefas de terminal. As tarefas ficam num arquivo <code>tarefas.json</code>, e quatro funções fazem o trabalho: adicionar, listar, concluir e remover. Ele junta o que você viu em <a href="funcoes.html">funções</a>, <a href="pscustomobject.html">objetos</a> e <a href="json.html">JSON</a>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A guardar uma lista de objetos num arquivo JSON e ler de volta.</li>
+  <li>A organizar o projeto em funções pequenas com verbos aprovados.</li>
+  <li>A gerar um número (Id) para cada tarefa.</li>
+  <li>A filtrar e formatar a lista.</li>
+  <li>A tratar o caso do arquivo que ainda não existe.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>O plano</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Função</th><th>O que faz</th></tr>
+
+<tr><td><code>Get-Tarefa</code></td><td>Lê o arquivo e devolve as tarefas (com filtro opcional de pendentes).</td></tr>
+
+<tr><td><code>Add-Tarefa</code></td><td>Cria uma tarefa com Id, título, prioridade e data.</td></tr>
+
+<tr><td><code>Complete-Tarefa</code></td><td>Marca uma tarefa como feita.</td></tr>
+
+<tr><td><code>Remove-Tarefa</code></td><td>Apaga uma tarefa pelo Id.</td></tr>
+
+</table>
+</div>
+
+<p>Todas usam duas funções internas: uma que lê o JSON e outra que grava.</p>
+
+<hr>
+
+<h2>1. Ler e gravar</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $Arquivo = "tarefas.json"
+PS&gt; function Read-Tarefas {
+&gt;&gt;     if (-not (Test-Path $Arquivo)) { return @() }
+&gt;&gt;     $dados = Get-Content $Arquivo -Raw | ConvertFrom-Json
+&gt;&gt;     return @($dados)
+&gt;&gt; }
+PS&gt; function Save-Tarefas { param([object[]]$Lista)
+&gt;&gt;     ConvertTo-Json -InputObject @($Lista) -Depth 3 | Set-Content $Arquivo
+&gt;&gt; }
+</pre>
+
+<dl class="anatomy">
+
+  <dt>if (-not (Test-Path $Arquivo))</dt><dd>Na primeira vez, o arquivo não existe: devolvemos uma lista vazia.</dd>
+
+  <dt>@(Read-Tarefas)</dt><dd>Quem chama também usa <code>@(...)</code>. Ao sair de uma função, um array é "desenrolado" no pipeline: uma lista com uma tarefa só chegaria como um objeto solto, e o <code>$lista + $nova</code> daria erro. O <code>@()</code> em volta da chamada garante que é sempre uma lista.</dd>
+
+  <dt>ConvertTo-Json -InputObject @($Lista)</dt><dd>Grava sempre como lista JSON (<code>[...]</code>), mesmo com zero ou um item.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Adicionar</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Add-Tarefa {
+&gt;&gt;     param(
+&gt;&gt;         [Parameter(Mandatory)][string]$Titulo,
+&gt;&gt;         [ValidateSet("Alta", "Media", "Baixa")][string]$Prioridade = "Media"
+&gt;&gt;     )
+&gt;&gt;     $lista = @(Read-Tarefas)
+&gt;&gt;     $proximo = if ($lista.Count) { ($lista | Measure-Object Id -Maximum).Maximum + 1 } else { 1 }
+&gt;&gt;     $nova = [pscustomobject]@{
+&gt;&gt;         Id         = [int]$proximo
+&gt;&gt;         Titulo     = $Titulo
+&gt;&gt;         Prioridade = $Prioridade
+&gt;&gt;         Feita      = $false
+&gt;&gt;         Criada     = "2026-11-21"
+&gt;&gt;     }
+&gt;&gt;     Save-Tarefas ($lista + $nova)
+&gt;&gt;     "Tarefa $($nova.Id) adicionada: $Titulo"
+&gt;&gt; }
+PS&gt; Add-Tarefa "Pagar a conta de luz" -Prioridade Alta
+Tarefa 1 adicionada: Pagar a conta de luz
+PS&gt; Add-Tarefa "Comprar café"
+Tarefa 2 adicionada: Comprar café
+PS&gt; Add-Tarefa "Estudar PowerShell" -Prioridade Alta
+Tarefa 3 adicionada: Estudar PowerShell
+</pre>
+
+<p>Para o exemplo ficar igual no seu computador, a data está fixa. No seu projeto, use <code>Criada = Get-Date -Format "yyyy-MM-dd"</code>.</p>
+
+<hr>
+
+<h2>3. Listar</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Get-Tarefa { param([switch]$Pendentes)
+&gt;&gt;     $lista = @(Read-Tarefas)
+&gt;&gt;     if ($Pendentes) { $lista = $lista | Where-Object { -not $_.Feita } }
+&gt;&gt;     $lista | Sort-Object @{ Expression = { @{ Alta = 1; Media = 2; Baixa = 3 }[$_.Prioridade] } }, Id
+&gt;&gt; }
+PS&gt; Get-Tarefa | Format-Table Id, Titulo, Prioridade, Feita
+
+Id Titulo               Prioridade Feita
+-- ------               ---------- -----
+ 1 Pagar a conta de luz Alta       False
+ 3 Estudar PowerShell   Alta       False
+ 2 Comprar café         Media      False
+</pre>
+
+<dl class="anatomy">
+
+  <dt>@{ Expression = { ... } }</dt><dd>Ordena por uma conta: Alta vira 1, Media 2, Baixa 3. Depois desempata pelo <code>Id</code>.</dd>
+
+</dl>
+
+<hr>
+
+<h2>4. Concluir e remover</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Complete-Tarefa { param([Parameter(Mandatory)][int]$Id)
+&gt;&gt;     $lista = @(Read-Tarefas)
+&gt;&gt;     $alvo = $lista | Where-Object Id -eq $Id
+&gt;&gt;     if (-not $alvo) { Write-Warning "Não existe tarefa $Id."; return }
+&gt;&gt;     $alvo.Feita = $true
+&gt;&gt;     Save-Tarefas $lista
+&gt;&gt;     "Concluída: $($alvo.Titulo)"
+&gt;&gt; }
+PS&gt; function Remove-Tarefa { param([Parameter(Mandatory)][int]$Id)
+&gt;&gt;     $lista = @(Read-Tarefas)
+&gt;&gt;     $resto = @($lista | Where-Object Id -ne $Id)
+&gt;&gt;     if ($resto.Count -eq $lista.Count) { Write-Warning "Não existe tarefa $Id."; return }
+&gt;&gt;     Save-Tarefas $resto
+&gt;&gt;     "Removida a tarefa $Id."
+&gt;&gt; }
+PS&gt; Complete-Tarefa 1
+Concluída: Pagar a conta de luz
+PS&gt; Remove-Tarefa 2
+Removida a tarefa 2.
+PS&gt; Get-Tarefa | Format-Table Id, Titulo, Prioridade, Feita
+
+Id Titulo               Prioridade Feita
+-- ------               ---------- -----
+ 1 Pagar a conta de luz Alta        True
+ 3 Estudar PowerShell   Alta       False
+PS&gt; Get-Tarefa -Pendentes | ForEach-Object Titulo
+Estudar PowerShell
+</pre>
+
+<hr>
+
+<h2>5. O arquivo por dentro</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-Content tarefas.json
+[
+  {
+    "Id": 1,
+    "Titulo": "Pagar a conta de luz",
+    "Prioridade": "Alta",
+    "Feita": true,
+    "Criada": "2026-11-21"
+  },
+  {
+    "Id": 3,
+    "Titulo": "Estudar PowerShell",
+    "Prioridade": "Alta",
+    "Feita": false,
+    "Criada": "2026-11-21"
+  }
+]
+</pre>
+
+<p>É texto comum: dá para abrir no Bloco de Notas, versionar com Git ou copiar para outro computador.</p>
+
+<hr>
+
+<h2>6. Juntando tudo num módulo</h2>
+
+<p>Coloque as seis funções num arquivo <code>Tarefas.psm1</code>, troque <code>$Arquivo</code> por <code>Join-Path $HOME "tarefas.json"</code> (assim a lista é a mesma de qualquer pasta) e importe no seu <span data-rascunho="perfil.html">perfil</span>. Veja <a href="modulos-proprios.html">Criando seu Módulo</a>.</p>
+
+<div class="tryps" data-goal="out:Tarefa 1 adicionada: Regar as plantas;;src:Add-Tarefa;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> as funções básicas já estão prontas. Adicione a tarefa <code>Regar as plantas</code>.</p>
+
+<pre class="script" data-file="main.ps1">$Arquivo = "tarefas.json"
+function Read-Tarefas { if (-not (Test-Path $Arquivo)) { return @() }; @(Get-Content $Arquivo -Raw | ConvertFrom-Json) }
+function Save-Tarefas { param([object[]]$Lista) ConvertTo-Json -InputObject @($Lista) -Depth 3 | Set-Content $Arquivo }
+function Add-Tarefa { param([string]$Titulo)
+    $lista = @(Read-Tarefas)
+    $nova = [pscustomobject]@{ Id = $lista.Count + 1; Titulo = $Titulo; Feita = $false }
+    Save-Tarefas ($lista + $nova)
+    "Tarefa $($nova.Id) adicionada: $Titulo"
+}
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$Arquivo = "tarefas.json"
+function Read-Tarefas { if (-not (Test-Path $Arquivo)) { return @() }; @(Get-Content $Arquivo -Raw | ConvertFrom-Json) }
+function Save-Tarefas { param([object[]]$Lista) ConvertTo-Json -InputObject @($Lista) -Depth 3 | Set-Content $Arquivo }
+function Add-Tarefa { param([string]$Titulo)
+    $lista = @(Read-Tarefas)
+    $nova = [pscustomobject]@{ Id = $lista.Count + 1; Titulo = $Titulo; Feita = $false }
+    Save-Tarefas ($lista + $nova)
+    "Tarefa $($nova.Id) adicionada: $Titulo"
+}
+Add-Tarefa "Regar as plantas"
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Desafios</h2>
+
+<ul>
+</ul>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">1. Por que <code>Read-Tarefas</code> devolve <code>@()</code> quando o arquivo não existe?</p>
+
+<label><input type="radio" name="q1"> Para dar erro</label>
+
+<label><input type="radio" name="q1"> Para o resto do código funcionar com uma lista vazia na primeira vez</label>
+
+<label><input type="radio" name="q1"> Para criar o arquivo</label>
+
+<label><input type="radio" name="q1"> Porque o JSON exige</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. Por que usar <code>ConvertTo-Json -InputObject @($Lista)</code> em vez de <code>$Lista | ConvertTo-Json</code>?</p>
+
+<label><input type="radio" name="q2"> É mais rápido</label>
+
+<label><input type="radio" name="q2"> Gera JSON colorido</label>
+
+<label><input type="radio" name="q2"> Garante que o arquivo é sempre uma lista <code>[...]</code>, mesmo com um item só</label>
+
+<label><input type="radio" name="q2"> Não há diferença</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Concluída: Comprar pão;;src:Complete-Tarefa;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> complete a função <code>Complete-Tarefa</code> para marcar <code>Feita = $true</code> na tarefa do Id pedido, gravar e mostrar <code>Concluída: </code> + o título. Depois conclua a tarefa 1.</p>
+
+<pre class="script" data-file="main.ps1">$Arquivo = "tarefas.json"
+function Read-Tarefas { if (-not (Test-Path $Arquivo)) { return @() }; @(Get-Content $Arquivo -Raw | ConvertFrom-Json) }
+function Save-Tarefas { param([object[]]$Lista) ConvertTo-Json -InputObject @($Lista) -Depth 3 | Set-Content $Arquivo }
+Save-Tarefas @([pscustomobject]@{ Id = 1; Titulo = "Comprar pão"; Feita = $false })
+function Complete-Tarefa { param([int]$Id)
+    $lista = @(Read-Tarefas)
+}
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$Arquivo = "tarefas.json"
+function Read-Tarefas { if (-not (Test-Path $Arquivo)) { return @() }; @(Get-Content $Arquivo -Raw | ConvertFrom-Json) }
+function Save-Tarefas { param([object[]]$Lista) ConvertTo-Json -InputObject @($Lista) -Depth 3 | Set-Content $Arquivo }
+Save-Tarefas @([pscustomobject]@{ Id = 1; Titulo = "Comprar pão"; Feita = $false })
+function Complete-Tarefa { param([int]$Id)
+    $lista = @(Read-Tarefas)
+    $alvo = $lista | Where-Object Id -eq $Id
+    $alvo.Feita = $true
+    Save-Tarefas $lista
+    "Concluída: $($alvo.Titulo)"
+}
+Complete-Tarefa 1
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>O estado do programa fica num arquivo JSON: ler, mudar e gravar.</li>
+  <li>Funções pequenas, cada uma com um verbo aprovado.</li>
+  <li><code>@()</code> e <code>-InputObject @(...)</code> evitam surpresas com zero ou um item.</li>
+  <li>O projeto vira módulo e entra no perfil para usar em qualquer pasta.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell XML — ler e alterar XML com [xml] e Select-Xml (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a trabalhar com XML no PowerShell 7: converter texto com [xml], navegar pelos elementos com o ponto, ler atributos, filtrar com XPath e Select-Xml, alterar valores e salvar, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">XML</span></h1>
+
+<p class="intro">XML é um formato de dados mais antigo que o JSON, ainda muito usado em arquivos de configuração, notas fiscais eletrônicas e relatórios de sistemas. O PowerShell transforma um XML num objeto que você percorre com o ponto, como pastas dentro de pastas.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Como é um documento XML (elementos e atributos).</li>
+  <li>A converter texto em XML com <code>[xml]</code>.</li>
+  <li>A navegar com o ponto e ler atributos.</li>
+  <li>A filtrar com XPath usando <code>Select-Xml</code>.</li>
+  <li>A alterar um valor e gerar o XML de novo.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: as caixas dentro de caixas</h2>
+
+<p>Uma mudança bem organizada tem caixas etiquetadas: a caixa "Cozinha" tem a caixa "Talheres", que tem os garfos. O XML é assim: cada <code>&lt;etiqueta&gt;</code> abre uma caixa e <code>&lt;/etiqueta&gt;</code> fecha. Dentro, vão outras caixas ou um valor.</p>
+
+<pre><code>&lt;loja nome="Padaria Central"&gt;
+  &lt;produto codigo="1"&gt;
+    &lt;nome&gt;Pão francês&lt;/nome&gt;
+    &lt;preco&gt;0.80&lt;/preco&gt;
+  &lt;/produto&gt;
+&lt;/loja&gt;
+</code></pre>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Parte</th><th>Exemplo</th><th>O que é</th></tr>
+
+<tr><td>Elemento</td><td><code>&lt;nome&gt;Pão francês&lt;/nome&gt;</code></td><td>Uma caixa com um valor.</td></tr>
+
+<tr><td>Atributo</td><td><code>codigo="1"</code></td><td>Uma etiqueta dentro da tag de abertura.</td></tr>
+
+<tr><td>Raiz</td><td><code>&lt;loja&gt;</code></td><td>A caixa que guarda todas as outras. Só existe uma.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>1. De texto para XML</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $texto = @'
+&gt;&gt; &lt;loja nome="Padaria Central"&gt;
+&gt;&gt;   &lt;produto codigo="1"&gt;&lt;nome&gt;Pão francês&lt;/nome&gt;&lt;preco&gt;0.80&lt;/preco&gt;&lt;/produto&gt;
+&gt;&gt;   &lt;produto codigo="2"&gt;&lt;nome&gt;Café 500g&lt;/nome&gt;&lt;preco&gt;18.90&lt;/preco&gt;&lt;/produto&gt;
+&gt;&gt;   &lt;produto codigo="3"&gt;&lt;nome&gt;Leite&lt;/nome&gt;&lt;preco&gt;5.20&lt;/preco&gt;&lt;/produto&gt;
+&gt;&gt; &lt;/loja&gt;
+&gt;&gt; '@
+PS&gt; $xml = [xml]$texto
+PS&gt; $xml.loja.nome
+Padaria Central
+PS&gt; $xml.loja.produto
+
+codigo nome        preco
+------ ----        -----
+1      Pão francês 0.80
+2      Café 500g   18.90
+3      Leite       5.20
+</pre>
+
+<dl class="anatomy">
+
+  <dt>[xml]$texto</dt><dd>Converte o texto num documento XML (<code>System.Xml.XmlDocument</code>).</dd>
+
+  <dt>$xml.loja</dt><dd>Entra na caixa <code>loja</code>.</dd>
+
+  <dt>.nome</dt><dd>Em <code>loja</code>, <code>nome</code> é um atributo (<code>nome="Padaria Central"</code>). O ponto lê atributos e elementos do mesmo jeito.</dd>
+
+  <dt>.produto</dt><dd>Como há vários <code>produto</code>, vem uma lista.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Navegando e filtrando</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $xml.loja.produto[1].nome
+Café 500g
+PS&gt; $xml.loja.produto | Where-Object { [double]$_.preco -gt 5 } | ForEach-Object nome
+Café 500g
+Leite
+PS&gt; $xml.loja.produto.nome
+Pão francês
+Café 500g
+Leite
+</pre>
+
+<p>Como no CSV, os valores vêm como texto. O XML usa ponto decimal (<code>18.90</code>), então o <code>[double]</code> converte direto.</p>
+
+<hr>
+
+<h2>3. XPath com Select-Xml</h2>
+
+<p>XPath é a "regex do XML": um caminho que encontra elementos. O <code>Select-Xml</code> aceita XPath:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Select-Xml -Xml $xml -XPath "//produto[@codigo='2']/nome" | ForEach-Object { $_.Node.InnerText }
+Café 500g
+PS&gt; $xml.SelectNodes("//preco").Count
+3
+</pre>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>XPath</th><th>Encontra</th></tr>
+
+<tr><td><code>//produto</code></td><td>Todos os <code>produto</code>, em qualquer nível.</td></tr>
+
+<tr><td><code>/loja/produto</code></td><td>Os <code>produto</code> logo abaixo da raiz <code>loja</code>.</td></tr>
+
+<tr><td><code>//produto[@codigo='2']</code></td><td>O <code>produto</code> com atributo <code>codigo</code> igual a 2.</td></tr>
+
+<tr><td><code>//produto/nome</code></td><td>Os <code>nome</code> dentro de <code>produto</code>.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>4. Alterando e salvando</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $xml.loja.produto[0].preco = "0.90"
+PS&gt; $novo = $xml.CreateElement("produto")
+PS&gt; $novo.SetAttribute("codigo", "4")
+PS&gt; $novo.InnerXml = "&lt;nome&gt;Manteiga&lt;/nome&gt;&lt;preco&gt;12.50&lt;/preco&gt;"
+PS&gt; $null = $xml.loja.AppendChild($novo)
+PS&gt; $xml.loja.produto.Count
+4
+PS&gt; $xml.OuterXml.Length -gt 0
+True
+</pre>
+
+<p>Para gravar num arquivo, use o método <code>Save</code> com um caminho completo, por exemplo <code>$xml.Save("$HOME\loja.xml")</code>. Para ler um arquivo: <code>$xml = [xml](Get-Content loja.xml -Raw)</code>.</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>XML mal formado</strong>
+
+<p>Se faltar fechar uma tag (<code>&lt;nome&gt;Leite</code> sem <code>&lt;/nome&gt;</code>), a conversão <code>[xml]</code> falha com uma mensagem dizendo a linha e a posição do problema. Confira se cada tag aberta foi fechada e se só existe uma raiz.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Maiúsculas no nome</strong>
+
+<p>No XML, <code>&lt;Nome&gt;</code> e <code>&lt;nome&gt;</code> são caixas diferentes. <code>$xml.loja.Produto</code> não encontra nada se a tag é <code>produto</code>. Escreva os nomes exatamente como estão no arquivo.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>[xml]$texto</code></td><td>Texto vira documento XML.</td></tr>
+
+<tr><td><code>[xml](Get-Content arq.xml -Raw)</code></td><td>Lê um arquivo XML.</td></tr>
+
+<tr><td><code>$xml.raiz.elemento</code></td><td>Navega pelos elementos.</td></tr>
+
+<tr><td><code>$no.atributo</code></td><td>Lê um atributo.</td></tr>
+
+<tr><td><code>Select-Xml -Xml $xml -XPath "//x"</code></td><td>Busca com XPath.</td></tr>
+
+<tr><td><code>$xml.Save("caminho")</code></td><td>Grava o XML.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Converter para XML</h3>
+<p>Complete para transformar o texto em XML:</p>
+<div class="ex-code">$doc = <input data-answer="[xml" aria-label="resposta">]$texto</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Em <code>&lt;produto codigo="1"&gt;</code>, o que é <code>codigo</code>?</p>
+
+<label><input type="radio" name="q2"> Um elemento</label>
+
+<label><input type="radio" name="q2"> Um atributo</label>
+
+<label><input type="radio" name="q2"> A raiz</label>
+
+<label><input type="radio" name="q2"> Um comentário</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. Qual XPath encontra todos os elementos <code>preco</code>, em qualquer nível?</p>
+
+<label><input type="radio" name="q3"> <code>/preco</code></label>
+
+<label><input type="radio" name="q3"> <code>preco[]</code></label>
+
+<label><input type="radio" name="q3"> <code>//preco</code></label>
+
+<label><input type="radio" name="q3"> <code>*preco*</code></label>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>[xml]</code> transforma texto num documento que você percorre com o ponto.</li>
+  <li>Atributos e elementos são lidos do mesmo jeito: <code>$no.nome</code>.</li>
+  <li><code>Select-Xml</code> e <code>SelectNodes</code> buscam com XPath (<code>//elemento</code>).</li>
+  <li>Os valores vêm como texto: converta antes de fazer contas.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -13,7 +13,7 @@
 // dar zero). O 404 de assets/pssim.js só é ignorado com --rode-local.
 // Menu montado; um h1.
 //
-// Se window.PSSim existir (contrato do Zeca):
+// Se window.PSSim existir (contrato do simulador):
 //   PSSim.caixas[i].testar("inicial"|"solucao") → {ok, metas, saida}
 //   missão = o inicial NÃO dá ok e a solução dá ok
 //   (se o script inicial já é a solução, os dois podem dar ok).

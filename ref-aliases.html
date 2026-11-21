@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell: apelidos (aliases) mais comuns — referência rápida | Guia PowerShell</title>
+<meta name="description" content="Referência dos apelidos (aliases) mais comuns do PowerShell 7 no Windows: ls, dir, cd, cat, cp, mv, rm, %, ?, select, sort, ft, fl, gm, gcm e outros, com o cmdlet de verdade por trás de cada um e como criar os seus.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Apelidos (<span class="hl">Aliases</span>)</h1>
+
+<p class="intro">Apelidos são atalhos para cmdlets: <code>dir</code> é o <code>Get-ChildItem</code>, <code>%</code> é o <code>ForEach-Object</code>. Use à vontade no terminal; em scripts, prefira o nome completo. Veja a aula <a href="aliases.html">Apelidos</a> para os detalhes.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Os apelidos mais comuns e o cmdlet de cada um.</li>
+  <li>Os apelidos que vêm do cmd e do Linux.</li>
+  <li>A descobrir e criar apelidos.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>Descobrindo</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; (Get-Alias %).Definition
+ForEach-Object
+PS&gt; (Get-Alias foreach).Definition
+ForEach-Object
+</pre>
+
+<p>Para ver todos os apelidos de um cmdlet, use <code>-Definition</code>:</p>
+
+<pre><code>Get-Alias -Definition Get-ChildItem
+</code></pre>
+
+<p>No Windows aparecem <code>dir</code>, <code>gci</code> e <code>ls</code>. No PowerShell instalado no Linux ou no macOS, <code>ls</code> (e outros, como <code>cat</code> e <code>rm</code>) não são apelidos: eles chamam os programas do próprio sistema. Cuidado também com <code>Get-Alias ?</code>: o <code>?</code> é curinga e lista todos os apelidos de uma letra.</p>
+
+<hr>
+
+<h2>Arquivos e pastas</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Apelido</th><th>Cmdlet</th></tr>
+
+<tr><td><code>dir</code>, <code>ls</code>, <code>gci</code></td><td><code>Get-ChildItem</code></td></tr>
+
+<tr><td><code>cd</code>, <code>sl</code>, <code>chdir</code></td><td><code>Set-Location</code></td></tr>
+
+<tr><td><code>pwd</code>, <code>gl</code></td><td><code>Get-Location</code></td></tr>
+
+<tr><td><code>md</code>, <code>mkdir</code></td><td><code>New-Item -ItemType Directory</code> (função <code>mkdir</code>)</td></tr>
+
+<tr><td><code>ni</code></td><td><code>New-Item</code></td></tr>
+
+<tr><td><code>copy</code>, <code>cp</code>, <code>cpi</code></td><td><code>Copy-Item</code></td></tr>
+
+<tr><td><code>move</code>, <code>mv</code>, <code>mi</code></td><td><code>Move-Item</code></td></tr>
+
+<tr><td><code>ren</code>, <code>rni</code></td><td><code>Rename-Item</code></td></tr>
+
+<tr><td><code>del</code>, <code>rm</code>, <code>erase</code>, <code>rd</code>, <code>ri</code>, <code>rmdir</code></td><td><code>Remove-Item</code></td></tr>
+
+<tr><td><code>cat</code>, <code>type</code>, <code>gc</code></td><td><code>Get-Content</code></td></tr>
+
+<tr><td><code>sc</code>, <code>ac</code></td><td><code>Set-Content</code>, <code>Add-Content</code> (<code>sc</code> só no Windows PowerShell 5.1)</td></tr>
+
+<tr><td><code>ii</code></td><td><code>Invoke-Item</code> (abre com o programa padrão)</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Pipeline e objetos</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Apelido</th><th>Cmdlet</th></tr>
+
+<tr><td><code>%</code>, <code>foreach</code></td><td><code>ForEach-Object</code></td></tr>
+
+<tr><td><code>?</code>, <code>where</code></td><td><code>Where-Object</code></td></tr>
+
+<tr><td><code>select</code></td><td><code>Select-Object</code></td></tr>
+
+<tr><td><code>sort</code></td><td><code>Sort-Object</code></td></tr>
+
+<tr><td><code>group</code></td><td><code>Group-Object</code></td></tr>
+
+<tr><td><code>measure</code></td><td><code>Measure-Object</code></td></tr>
+
+<tr><td><code>gm</code></td><td><code>Get-Member</code></td></tr>
+
+<tr><td><code>ft</code>, <code>fl</code>, <code>fw</code></td><td><code>Format-Table</code>, <code>Format-List</code>, <code>Format-Wide</code></td></tr>
+
+<tr><td><code>tee</code></td><td><code>Tee-Object</code></td></tr>
+
+<tr><td><code>sls</code></td><td><code>Select-String</code></td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Sistema e sessão</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Apelido</th><th>Cmdlet</th></tr>
+
+<tr><td><code>ps</code>, <code>gps</code></td><td><code>Get-Process</code></td></tr>
+
+<tr><td><code>kill</code>, <code>spps</code></td><td><code>Stop-Process</code></td></tr>
+
+<tr><td><code>gsv</code></td><td><code>Get-Service</code></td></tr>
+
+<tr><td><code>gcm</code></td><td><code>Get-Command</code></td></tr>
+
+<tr><td><code>help</code>, <code>man</code></td><td><code>Get-Help</code> (função <code>help</code>)</td></tr>
+
+<tr><td><code>h</code>, <code>history</code></td><td><code>Get-History</code></td></tr>
+
+<tr><td><code>r</code></td><td><code>Invoke-History</code> (repete um comando)</td></tr>
+
+<tr><td><code>cls</code>, <code>clear</code></td><td><code>Clear-Host</code></td></tr>
+
+<tr><td><code>echo</code>, <code>write</code></td><td><code>Write-Output</code></td></tr>
+
+<tr><td><code>iex</code></td><td><code>Invoke-Expression</code></td></tr>
+
+<tr><td><code>iwr</code>, <code>irm</code></td><td><code>Invoke-WebRequest</code>, <code>Invoke-RestMethod</code></td></tr>
+
+<tr><td><code>sleep</code></td><td><code>Start-Sleep</code></td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Criando os seus</h2>
+
+<pre><code>Set-Alias np notepad.exe
+Set-Alias -Name gerar -Value New-Relatorio
+</code></pre>
+
+<p>O apelido some quando você fecha o PowerShell. Para ter sempre, coloque o <code>Set-Alias</code> no seu <span data-rascunho="perfil.html">perfil</span>. Apelidos não aceitam parâmetros fixos; para isso, crie uma função.</p>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Apelidos são atalhos: ótimos no terminal, ruins em scripts.</li>
+  <li><code>Get-Alias nome</code> mostra o cmdlet; <code>Get-Alias -Definition Cmdlet</code> mostra os apelidos.</li>
+  <li>No Linux, <code>ls</code>, <code>cat</code>, <code>rm</code> e outros chamam os programas do sistema.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

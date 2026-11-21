@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Format-List — um campo por linha | Guia PowerShell</title>
+<meta name="description" content="Aprenda o Format-List: mostrar cada objeto com um campo por linha, escolher campos, ver todas as propriedades com * e quando preferir lista a tabela.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Format-List</span></h1>
+
+<p class="intro">A tabela é ótima para comparar muitos objetos lado a lado, mas fica apertada quando o objeto tem muitos campos ou valores compridos. O <code>Format-List</code> (apelido <code>fl</code>) mostra cada objeto como uma ficha, com <strong>um campo por linha</strong>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A mostrar objetos em lista com <code>Format-List</code>.</li>
+  <li>A escolher os campos da lista.</li>
+  <li>A ver todos os campos com <code>Format-List *</code>.</li>
+  <li>Quando o PowerShell escolhe lista ou tabela sozinho.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a ficha do paciente</h2>
+
+<p>A recepção do consultório tem uma <strong>tabela</strong> com os pacientes do dia: nome e horário. Mas quando o médico atende, ele quer a <strong>ficha</strong> de um paciente, com tudo, um dado embaixo do outro. A tabela é o <code>Format-Table</code>; a ficha é o <code>Format-List</code>.</p>
+
+<hr>
+
+<h2>1. A mesma coisa, em lista</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $cliente = [pscustomobject]@{ Nome = "Ana Souza"; Email = "ana@exemplo.com"; Cidade = "Recife"; Pontos = 1250 }
+PS&gt; $cliente | Format-List
+
+Nome   : Ana Souza
+Email  : ana@exemplo.com
+Cidade : Recife
+Pontos : 1250
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Nome : Ana Souza</dt><dd>Cada linha é um campo: o nome do campo, os dois-pontos e o valor.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Escolhendo os campos</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $cliente | Format-List Nome, Pontos
+
+Nome   : Ana Souza
+Pontos : 1250
+</pre>
+
+<hr>
+
+<h2>3. Quando o PowerShell escolhe sozinho</h2>
+
+<p>Se um objeto tem até 4 campos, o PowerShell mostra em tabela. Com 5 ou mais, ele passa para lista:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; [pscustomobject]@{ A = 1; B = 2; C = 3; D = 4 }
+
+A B C D
+- - - -
+1 2 3 4
+PS&gt; [pscustomobject]@{ A = 1; B = 2; C = 3; D = 4; E = 5 }
+
+A : 1
+B : 2
+C : 3
+D : 4
+E : 5
+</pre>
+
+<p>O <code>Format-Table</code> e o <code>Format-List</code> servem para você mandar no formato, em vez de deixar o PowerShell decidir.</p>
+
+<hr>
+
+<h2>4. Todos os campos: <code>Format-List *</code></h2>
+
+<p>Muitos objetos do .NET têm campos que não aparecem na exibição padrão. O <code>*</code> mostra todos. Veja uma data:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $d = Get-Date -Year 2026 -Month 3 -Day 15 -Hour 9 -Minute 30 -Second 0 -Millisecond 0
+PS&gt; $d | Format-List Day, Month, Year, DayOfWeek, DayOfYear, Hour, Minute
+
+Day       : 15
+Month     : 3
+Year      : 2026
+DayOfWeek : Sunday
+DayOfYear : 74
+Hour      : 9
+Minute    : 30
+</pre>
+
+<div class="tryps" data-goal="out:Pontos;;outre:Nome\s+: Ana;;src:Format-List;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> mostre o cliente em formato de lista, com <code>Format-List</code>.</p>
+
+<pre class="script" data-file="main.ps1">$cliente = [pscustomobject]@{ Nome = "Ana"; Cidade = "Recife"; Pontos = 1250 }
+$cliente
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$cliente = [pscustomobject]@{ Nome = "Ana"; Cidade = "Recife"; Pontos = 1250 }
+$cliente | Format-List
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Formatar e depois querer o campo</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $ficha = $cliente | Format-List
+PS&gt; $ficha.Nome
+</pre>
+
+<p>Igual ao <code>Format-Table</code>: o que sai do <code>Format-List</code> é desenho para a tela, não o objeto. <code>$ficha.Nome</code> não devolve nada. Guarde o objeto e formate só para mostrar.</p>
+
+</div>
+
+<hr>
+
+<h2>Formas diferentes: lista ou tabela?</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Situação</th><th>Use</th></tr>
+
+<tr><td>Muitos objetos, poucos campos</td><td><code>Format-Table</code></td></tr>
+
+<tr><td>Um objeto, muitos campos</td><td><code>Format-List</code></td></tr>
+
+<tr><td>Valores compridos que cortam na tabela</td><td><code>Format-List</code></td></tr>
+
+<tr><td>Quer ver tudo o que o objeto tem</td><td><code>Format-List *</code></td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. O apelido</h3>
+<p>Complete com o apelido do Format-List:</p>
+<div class="ex-code">$cliente | <input data-answer="fl|Format-List" aria-label="resposta"></div>
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">2. Com quantos campos um objeto seu passa a ser mostrado em lista automaticamente?</p>
+
+<label><input type="radio" name="q2"> 5 ou mais</label>
+
+<label><input type="radio" name="q2"> 2 ou mais</label>
+
+<label><input type="radio" name="q2"> 10 ou mais</label>
+
+<label><input type="radio" name="q2"> Nunca</label>
+
+</div>
+
+<div class="mc" data-answer="4">
+
+<p class="mc-q">3. O que faz <code>Format-List *</code>?</p>
+
+<label><input type="radio" name="q3"> Mostra só o primeiro campo</label>
+
+<label><input type="radio" name="q3"> Multiplica os valores</label>
+
+<label><input type="radio" name="q3"> Mostra a lista em ordem alfabética</label>
+
+<label><input type="radio" name="q3"> Mostra todos os campos do objeto</label>
+
+</div>
+
+<div class="tryps" data-goal="outre:Email\s+: ana@exemplo\.com;;src:Format-List\s+Nome,\s*Email;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> mostre só os campos <code>Nome</code> e <code>Email</code> do cliente, em lista.</p>
+
+<pre class="script" data-file="main.ps1">$cliente = [pscustomobject]@{ Nome = "Ana"; Email = "ana@exemplo.com"; Cidade = "Recife"; Pontos = 1250 }
+$cliente | Format-List
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$cliente = [pscustomobject]@{ Nome = "Ana"; Email = "ana@exemplo.com"; Cidade = "Recife"; Pontos = 1250 }
+$cliente | Format-List Nome, Email
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Format-List</code> (apelido <code>fl</code>) mostra um campo por linha.</li>
+  <li><code>Format-List A, B</code> escolhe os campos; <code>Format-List *</code> mostra todos.</li>
+  <li>Até 4 campos o padrão é tabela; com 5 ou mais, lista.</li>
+  <li>Como o <code>Format-Table</code>, é para a tela: use no fim.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

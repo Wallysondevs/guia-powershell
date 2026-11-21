@@ -1,7 +1,7 @@
 {
   "versao": 1,
-  "alvo": "Nível 1",
-  "total": 123,
+  "alvo": "Níveis 1, 2 e 3, projetos e referência",
+  "total": 229,
   "por_secao": {
     "Começando": 32,
     "Pastas e Arquivos": 33,
@@ -9,7 +9,18 @@
     "Operadores": 14,
     "Saída e Entrada": 8,
     "Decisões": 8,
-    "Repetições": 10
+    "Repetições": 10,
+    "O Pipeline e os Objetos": 24,
+    "Coleções": 14,
+    "Funções": 16,
+    "Scripts": 4,
+    "Erros": 10,
+    "Dados e Textos": 10,
+    "Módulos": 2,
+    "Administrando o Windows": 7,
+    "Recursos Poderosos": 10,
+    "Boas Práticas": 1,
+    "Projetos": 8
   },
   "comecando_e_pastas": 65,
   "pssim": {
@@ -5614,6 +5625,2789 @@
         "break"
       ],
       "etapa": "E8"
+    },
+    {
+      "id": "objetos-1",
+      "pagina": "objetos.html",
+      "titulo": "Tudo É Objeto",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:10;;src:\\.Length;;semerro",
+      "metas": [
+        "out:10",
+        "src:\\.Length",
+        "semerro"
+      ],
+      "task": "Experimente: mostre quantas letras tem a palavra guardada em $palavra, usando a propriedade Length.",
+      "script": "$palavra = \"PowerShell\"",
+      "solucao": "$palavra = \"PowerShell\"\n$palavra.Length",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "objetos-2",
+      "pagina": "objetos.html",
+      "titulo": "Tudo É Objeto",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:LIMA;;src:\\.ToUpper\\(\\);;src:\\.Replace\\(;;semerro",
+      "metas": [
+        "out:LIMA",
+        "src:\\.ToUpper\\(\\)",
+        "src:\\.Replace\\(",
+        "semerro"
+      ],
+      "task": "Missão final: a variável $nome tem Ana Souza. Troque Souza por Lima com .Replace() e mostre o resultado todo em maiúsculas com .ToUpper(): ANA LIMA.",
+      "script": "$nome = \"Ana Souza\"",
+      "solucao": "$nome = \"Ana Souza\"\n$nome.Replace(\"Souza\", \"Lima\").ToUpper()",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "pipeline-1",
+      "pagina": "pipeline.html",
+      "titulo": "O Pipeline (|)",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Arroz;;out:Café;;src:\\|\\s*Where-Object;;semerro",
+      "metas": [
+        "out:Arroz",
+        "out:Café",
+        "src:\\|\\s*Where-Object",
+        "semerro"
+      ],
+      "task": "Experimente: complete o pipeline para mostrar só os nomes dos produtos que custam menos de 30 (Arroz e Café).",
+      "script": "$produtos = @(\n    [pscustomobject]@{ Nome = \"Arroz\"; Preco = 25.9 }\n    [pscustomobject]@{ Nome = \"Café\"; Preco = 18.5 }\n    [pscustomobject]@{ Nome = \"Azeite\"; Preco = 42 }\n)\n$produtos | ForEach-Object { $_.Nome }",
+      "solucao": "$produtos = @(\n    [pscustomobject]@{ Nome = \"Arroz\"; Preco = 25.9 }\n    [pscustomobject]@{ Nome = \"Café\"; Preco = 18.5 }\n    [pscustomobject]@{ Nome = \"Azeite\"; Preco = 42 }\n)\n$produtos | Where-Object { $_.Preco -lt 30 } | ForEach-Object { $_.Nome }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Where-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "pipeline-2",
+      "pagina": "pipeline.html",
+      "titulo": "O Pipeline (|)",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:15;;out:30;;src:Where-Object;;src:ForEach-Object;;semerro",
+      "metas": [
+        "out:15",
+        "out:30",
+        "src:Where-Object",
+        "src:ForEach-Object",
+        "semerro"
+      ],
+      "task": "Missão final: dos números de 1 a 30, deixe passar só os múltiplos de 15 ($_ % 15 -eq 0) e mostre cada um. A saída deve ser 15 e 30.",
+      "script": "1..30",
+      "solucao": "1..30 | Where-Object { $_ % 15 -eq 0 } | ForEach-Object { $_ }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Where-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "get-member-1",
+      "pagina": "get-member.html",
+      "titulo": "Get-Member: o que Tem no Objeto",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Length;;src:Get-Member;;src:-MemberType\\s+Property;;semerro",
+      "metas": [
+        "out:Length",
+        "src:Get-Member",
+        "src:-MemberType\\s+Property",
+        "semerro"
+      ],
+      "task": "Experimente: o código lista tudo o que o texto \"PowerShell\" tem. Acrescente -MemberType Property para ver só as propriedades.",
+      "script": "\"PowerShell\" | Get-Member",
+      "solucao": "\"PowerShell\" | Get-Member -MemberType Property",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Member"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "get-member-2",
+      "pagina": "get-member.html",
+      "titulo": "Get-Member: o que Tem no Objeto",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:NoteProperty;;out:Sabor;;src:Get-Member;;semerro",
+      "metas": [
+        "out:NoteProperty",
+        "out:Sabor",
+        "src:Get-Member",
+        "semerro"
+      ],
+      "task": "Missão final: crie um [pscustomobject] com os campos Sabor = \"Uva\" e Preco = 8 e inspecione com o Get-Member. Na saída devem aparecer o campo Sabor e o tipo de membro NoteProperty.",
+      "script": "$suco = [pscustomobject]@{ Sabor = \"Uva\"; Preco = 8 }",
+      "solucao": "$suco = [pscustomobject]@{ Sabor = \"Uva\"; Preco = 8 }\n$suco | Get-Member",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Member"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "select-object-1",
+      "pagina": "select-object.html",
+      "titulo": "Select-Object",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Duda;;out:Ana;;src:-First\\s+2;;semerro",
+      "metas": [
+        "out:Duda",
+        "out:Ana",
+        "src:-First\\s+2",
+        "semerro"
+      ],
+      "task": "Experimente: as notas já estão ordenadas da maior para a menor. Complete com Select-Object -First 2 para ficar só com os dois melhores alunos.",
+      "script": "$turma = @(\n    [pscustomobject]@{ Nome = \"Duda\"; Nota = 10 }\n    [pscustomobject]@{ Nome = \"Ana\"; Nota = 9 }\n    [pscustomobject]@{ Nome = \"Caio\"; Nota = 8 }\n)\n$turma",
+      "solucao": "$turma = @(\n    [pscustomobject]@{ Nome = \"Duda\"; Nota = 10 }\n    [pscustomobject]@{ Nome = \"Ana\"; Nota = 9 }\n    [pscustomobject]@{ Nome = \"Caio\"; Nota = 8 }\n)\n$turma | Select-Object -First 2",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Select-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "select-object-2",
+      "pagina": "select-object.html",
+      "titulo": "Select-Object",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Recife;;out:Maceió;;src:-Unique;;semerro",
+      "metas": [
+        "out:Recife",
+        "out:Maceió",
+        "src:-Unique",
+        "semerro"
+      ],
+      "task": "Missão final: mostre cada cidade da lista uma vez só, na ordem em que aparecem: Recife, Natal e Maceió.",
+      "script": "$cidades = \"Recife\", \"Natal\", \"Recife\", \"Maceió\", \"Natal\"\n$cidades",
+      "solucao": "$cidades = \"Recife\", \"Natal\", \"Recife\", \"Maceió\", \"Natal\"\n$cidades | Select-Object -Unique",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Select-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "where-object-1",
+      "pagina": "where-object.html",
+      "titulo": "Where-Object: Filtrando",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Beto;;out:Davi;;src:Where-Object;;semerro",
+      "metas": [
+        "out:Beto",
+        "out:Davi",
+        "src:Where-Object",
+        "semerro"
+      ],
+      "task": "Experimente: filtre os pedidos que não foram pagos e mostre só o nome do cliente.",
+      "script": "$pedidos = @(\n    [pscustomobject]@{ Cliente = \"Ana\"; Pago = $true }\n    [pscustomobject]@{ Cliente = \"Beto\"; Pago = $false }\n    [pscustomobject]@{ Cliente = \"Davi\"; Pago = $false }\n)\n$pedidos | ForEach-Object { $_.Cliente }",
+      "solucao": "$pedidos = @(\n    [pscustomobject]@{ Cliente = \"Ana\"; Pago = $true }\n    [pscustomobject]@{ Cliente = \"Beto\"; Pago = $false }\n    [pscustomobject]@{ Cliente = \"Davi\"; Pago = $false }\n)\n$pedidos | Where-Object { -not $_.Pago } | ForEach-Object { $_.Cliente }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Where-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "where-object-2",
+      "pagina": "where-object.html",
+      "titulo": "Where-Object: Filtrando",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Carla;;src:-and;;src:Where-Object;;semerro",
+      "metas": [
+        "out:Carla",
+        "src:-and",
+        "src:Where-Object",
+        "semerro"
+      ],
+      "task": "Missão final: mostre o nome do cliente que pagou e gastou mais de 200. A resposta é Carla.",
+      "script": "$pedidos = @(\n    [pscustomobject]@{ Cliente = \"Ana\"; Total = 120; Pago = $true }\n    [pscustomobject]@{ Cliente = \"Carla\"; Total = 300; Pago = $true }\n    [pscustomobject]@{ Cliente = \"Davi\"; Total = 250; Pago = $false }\n)",
+      "solucao": "$pedidos = @(\n    [pscustomobject]@{ Cliente = \"Ana\"; Total = 120; Pago = $true }\n    [pscustomobject]@{ Cliente = \"Carla\"; Total = 300; Pago = $true }\n    [pscustomobject]@{ Cliente = \"Davi\"; Total = 250; Pago = $false }\n)\n$pedidos | Where-Object { $_.Pago -and $_.Total -gt 200 } | ForEach-Object { $_.Cliente }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Where-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "sort-object-1",
+      "pagina": "sort-object.html",
+      "titulo": "Sort-Object: Ordenando",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Duda;;src:Sort-Object;;src:-Descending;;src:-First\\s+1;;semerro",
+      "metas": [
+        "out:Duda",
+        "src:Sort-Object",
+        "src:-Descending",
+        "src:-First\\s+1",
+        "semerro"
+      ],
+      "task": "Experimente: mostre só o aluno com a maior nota: ordene por Nota com -Descending e pegue o primeiro com Select-Object -First 1.",
+      "script": "$turma = @(\n    [pscustomobject]@{ Nome = \"Beto\"; Nota = 6 }\n    [pscustomobject]@{ Nome = \"Duda\"; Nota = 10 }\n    [pscustomobject]@{ Nome = \"Caio\"; Nota = 8 }\n)\n$turma",
+      "solucao": "$turma = @(\n    [pscustomobject]@{ Nome = \"Beto\"; Nota = 6 }\n    [pscustomobject]@{ Nome = \"Duda\"; Nota = 10 }\n    [pscustomobject]@{ Nome = \"Caio\"; Nota = 8 }\n)\n$turma | Sort-Object Nota -Descending | Select-Object -First 1",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Select-Object",
+        "Sort-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "sort-object-2",
+      "pagina": "sort-object.html",
+      "titulo": "Sort-Object: Ordenando",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Arroz;;outre:Leite[\\s\\S]*Arroz[\\s\\S]*Café;;src:Sort-Object;;semerro",
+      "metas": [
+        "out:Arroz",
+        "outre:Leite[\\s\\S]*Arroz[\\s\\S]*Café",
+        "src:Sort-Object",
+        "semerro"
+      ],
+      "task": "Missão final: ordene os produtos do mais barato para o mais caro e mostre a lista. O Leite (5) deve vir primeiro, depois o Arroz (25) e por último o Café (32).",
+      "script": "$produtos = @(\n    [pscustomobject]@{ Nome = \"Café\"; Preco = 32 }\n    [pscustomobject]@{ Nome = \"Leite\"; Preco = 5 }\n    [pscustomobject]@{ Nome = \"Arroz\"; Preco = 25 }\n)\n$produtos",
+      "solucao": "$produtos = @(\n    [pscustomobject]@{ Nome = \"Café\"; Preco = 32 }\n    [pscustomobject]@{ Nome = \"Leite\"; Preco = 5 }\n    [pscustomobject]@{ Nome = \"Arroz\"; Preco = 25 }\n)\n$produtos | Sort-Object Preco",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Sort-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "foreach-object-1",
+      "pagina": "foreach-object.html",
+      "titulo": "ForEach-Object",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Olá, Ana!;;out:Olá, Beto!;;src:ForEach-Object;;semerro",
+      "metas": [
+        "out:Olá, Ana!",
+        "out:Olá, Beto!",
+        "src:ForEach-Object",
+        "semerro"
+      ],
+      "task": "Experimente: use o ForEach-Object para dizer Olá, Ana! e Olá, Beto!.",
+      "script": "\"Ana\", \"Beto\"",
+      "solucao": "\"Ana\", \"Beto\" | ForEach-Object { \"Olá, $_!\" }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "foreach-object-2",
+      "pagina": "foreach-object.html",
+      "titulo": "ForEach-Object",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Total: 60;;src:-Begin;;src:-End;;semerro",
+      "metas": [
+        "out:Total: 60",
+        "src:-Begin",
+        "src:-End",
+        "semerro"
+      ],
+      "task": "Missão final: some os números com ForEach-Object -Begin { } -Process { } -End { } e mostre Total: 60 no -End.",
+      "script": "10, 20, 30 | ForEach-Object -Process { $_ }",
+      "solucao": "10, 20, 30 | ForEach-Object -Begin { $soma = 0 } -Process { $soma += $_ } -End { \"Total: $soma\" }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "group-object-1",
+      "pagina": "group-object.html",
+      "titulo": "Group-Object: Agrupando",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Recife;;src:Group-Object;;semerro",
+      "metas": [
+        "out:Recife",
+        "src:Group-Object",
+        "semerro"
+      ],
+      "task": "Experimente: agrupe a lista de cidades com Group-Object para ver quantas vezes cada uma aparece.",
+      "script": "$cidades = \"Recife\", \"Natal\", \"Recife\", \"Recife\", \"Natal\"\n$cidades",
+      "solucao": "$cidades = \"Recife\", \"Natal\", \"Recife\", \"Recife\", \"Natal\"\n$cidades | Group-Object",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Group-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "group-object-2",
+      "pagina": "group-object.html",
+      "titulo": "Group-Object: Agrupando",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "outre:3\\s+pago;;src:Group-Object;;semerro",
+      "metas": [
+        "outre:3\\s+pago",
+        "src:Group-Object",
+        "semerro"
+      ],
+      "task": "Missão final: agrupe os pedidos pelo campo Status. A saída deve mostrar que há 3 pedidos com status pago.",
+      "script": "$pedidos = @(\n    [pscustomobject]@{ Id = 1; Status = \"pago\" }\n    [pscustomobject]@{ Id = 2; Status = \"pendente\" }\n    [pscustomobject]@{ Id = 3; Status = \"pago\" }\n    [pscustomobject]@{ Id = 4; Status = \"pago\" }\n)",
+      "solucao": "$pedidos = @(\n    [pscustomobject]@{ Id = 1; Status = \"pago\" }\n    [pscustomobject]@{ Id = 2; Status = \"pendente\" }\n    [pscustomobject]@{ Id = 3; Status = \"pago\" }\n    [pscustomobject]@{ Id = 4; Status = \"pago\" }\n)\n$pedidos | Group-Object Status",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Group-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "measure-object-1",
+      "pagina": "measure-object.html",
+      "titulo": "Measure-Object: Contando e Somando",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Soma: 545;;src:Measure-Object;;src:\\.Sum;;semerro",
+      "metas": [
+        "out:Soma: 545",
+        "src:Measure-Object",
+        "src:\\.Sum",
+        "semerro"
+      ],
+      "task": "Experimente: mostre Soma: 545 usando Measure-Object -Sum e o campo .Sum do resultado.",
+      "script": "$vendas = 120, 45, 300, 80\n$total = 0\n\"Soma: $total\"",
+      "solucao": "$vendas = 120, 45, 300, 80\n$total = ($vendas | Measure-Object -Sum).Sum\n\"Soma: $total\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Measure-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "measure-object-2",
+      "pagina": "measure-object.html",
+      "titulo": "Measure-Object: Contando e Somando",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Maior: 300;;src:-Maximum;;src:\\.Maximum;;semerro",
+      "metas": [
+        "out:Maior: 300",
+        "src:-Maximum",
+        "src:\\.Maximum",
+        "semerro"
+      ],
+      "task": "Missão final: mostre a maior venda no formato Maior: 300, usando Measure-Object -Maximum e o campo .Maximum.",
+      "script": "$vendas = 120, 45, 300, 80",
+      "solucao": "$vendas = 120, 45, 300, 80\n$maior = ($vendas | Measure-Object -Maximum).Maximum\n\"Maior: $maior\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Measure-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "format-table-1",
+      "pagina": "format-table.html",
+      "titulo": "Format-Table",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Nome;;out:Estoque;;src:Format-Table;;semerro",
+      "metas": [
+        "out:Nome",
+        "out:Estoque",
+        "src:Format-Table",
+        "semerro"
+      ],
+      "task": "Experimente: mostre os produtos numa tabela com só as colunas Nome e Estoque.",
+      "script": "$produtos = @(\n    [pscustomobject]@{ Nome = \"Café\"; Preco = 18.5; Estoque = 40 }\n    [pscustomobject]@{ Nome = \"Feijão\"; Preco = 9.75; Estoque = 0 }\n)\n$produtos",
+      "solucao": "$produtos = @(\n    [pscustomobject]@{ Nome = \"Café\"; Preco = 18.5; Estoque = 40 }\n    [pscustomobject]@{ Nome = \"Feijão\"; Preco = 9.75; Estoque = 0 }\n)\n$produtos | Format-Table Nome, Estoque",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Format-Table"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "format-table-2",
+      "pagina": "format-table.html",
+      "titulo": "Format-Table",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "outre:Café[\\s\\S]*Arroz[\\s\\S]*Feijão;;src:Sort-Object\\s+Categoria;;src:Format-Table\\s+Nome,\\s*Categoria;;semerro",
+      "metas": [
+        "outre:Café[\\s\\S]*Arroz[\\s\\S]*Feijão",
+        "src:Sort-Object\\s+Categoria",
+        "src:Format-Table\\s+Nome,\\s*Categoria",
+        "semerro"
+      ],
+      "task": "Missão final: ordene os produtos por Categoria (o Café, de Bebidas, vem primeiro) e mostre uma tabela só com as colunas Nome e Categoria.",
+      "script": "$produtos = @(\n    [pscustomobject]@{ Nome = \"Arroz\"; Categoria = \"Grãos\"; Preco = 25.9 }\n    [pscustomobject]@{ Nome = \"Café\"; Categoria = \"Bebidas\"; Preco = 18.5 }\n    [pscustomobject]@{ Nome = \"Feijão\"; Categoria = \"Grãos\"; Preco = 9.75 }\n)\n$produtos | Format-Table",
+      "solucao": "$produtos = @(\n    [pscustomobject]@{ Nome = \"Arroz\"; Categoria = \"Grãos\"; Preco = 25.9 }\n    [pscustomobject]@{ Nome = \"Café\"; Categoria = \"Bebidas\"; Preco = 18.5 }\n    [pscustomobject]@{ Nome = \"Feijão\"; Categoria = \"Grãos\"; Preco = 9.75 }\n)\n$produtos | Sort-Object Categoria | Format-Table Nome, Categoria",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Format-Table",
+        "Sort-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "format-list-1",
+      "pagina": "format-list.html",
+      "titulo": "Format-List",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Pontos;;outre:Nome\\s+: Ana;;src:Format-List;;semerro",
+      "metas": [
+        "out:Pontos",
+        "outre:Nome\\s+: Ana",
+        "src:Format-List",
+        "semerro"
+      ],
+      "task": "Experimente: mostre o cliente em formato de lista, com Format-List.",
+      "script": "$cliente = [pscustomobject]@{ Nome = \"Ana\"; Cidade = \"Recife\"; Pontos = 1250 }\n$cliente",
+      "solucao": "$cliente = [pscustomobject]@{ Nome = \"Ana\"; Cidade = \"Recife\"; Pontos = 1250 }\n$cliente | Format-List",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Format-List"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "format-list-2",
+      "pagina": "format-list.html",
+      "titulo": "Format-List",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "outre:Email\\s+: ana@exemplo\\.com;;src:Format-List\\s+Nome,\\s*Email;;semerro",
+      "metas": [
+        "outre:Email\\s+: ana@exemplo\\.com",
+        "src:Format-List\\s+Nome,\\s*Email",
+        "semerro"
+      ],
+      "task": "Missão final: mostre só os campos Nome e Email do cliente, em lista.",
+      "script": "$cliente = [pscustomobject]@{ Nome = \"Ana\"; Email = \"ana@exemplo.com\"; Cidade = \"Recife\"; Pontos = 1250 }\n$cliente | Format-List",
+      "solucao": "$cliente = [pscustomobject]@{ Nome = \"Ana\"; Email = \"ana@exemplo.com\"; Cidade = \"Recife\"; Pontos = 1250 }\n$cliente | Format-List Nome, Email",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Format-List"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "out-string-out-file-1",
+      "pagina": "out-string-out-file.html",
+      "titulo": "Out-File, Out-String e o Redirecionamento (>)",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:compra 1;;out:compra 2;;src:>>;;semerro",
+      "metas": [
+        "out:compra 1",
+        "out:compra 2",
+        "src:>>",
+        "semerro"
+      ],
+      "task": "Experimente: a primeira linha já está no arquivo. Use &gt;&gt; para acrescentar compra 2 sem apagar a primeira, e leia o arquivo no fim.",
+      "script": "\"compra 1\" > compras.txt\n\"compra 2\" > compras.txt\nGet-Content compras.txt",
+      "solucao": "\"compra 1\" > compras.txt\n\"compra 2\" >> compras.txt\nGet-Content compras.txt",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Content"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "out-string-out-file-2",
+      "pagina": "out-string-out-file.html",
+      "titulo": "Out-File, Out-String e o Redirecionamento (>)",
+      "secao": "O Pipeline e os Objetos",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Ana;;out:Beto;;src:Out-File;;semerro",
+      "metas": [
+        "out:Ana",
+        "out:Beto",
+        "src:Out-File",
+        "semerro"
+      ],
+      "task": "Missão final: salve a lista de nomes no arquivo nomes.txt com Out-File e depois mostre o conteúdo com Get-Content.",
+      "script": "$nomes = \"Ana\", \"Beto\"",
+      "solucao": "$nomes = \"Ana\", \"Beto\"\n$nomes | Out-File nomes.txt\nGet-Content nomes.txt",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Content",
+        "Out-File"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "arrays-1",
+      "pagina": "arrays.html",
+      "titulo": "Arrays (Listas)",
+      "secao": "Coleções",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:4;;src:\\.Count;;semerro",
+      "metas": [
+        "out:4",
+        "src:\\.Count",
+        "semerro"
+      ],
+      "task": "Experimente: crie a lista $cores com \"azul\", \"verde\", \"rosa\", \"preto\" e mostre quantos itens ela tem com .Count.",
+      "script": "$cores = \"azul\"",
+      "solucao": "$cores = \"azul\", \"verde\", \"rosa\", \"preto\"\n$cores.Count",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "arrays-2",
+      "pagina": "arrays.html",
+      "titulo": "Arrays (Listas)",
+      "secao": "Coleções",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Total: 6 itens;;src:\\+;;src:\\.Count;;semerro",
+      "metas": [
+        "out:Total: 6 itens",
+        "src:\\+",
+        "src:\\.Count",
+        "semerro"
+      ],
+      "task": "Missão final: junte a lista de frutas com a lista de legumes usando +, guarde em $feira e mostre Total: 6 itens.",
+      "script": "$frutas = \"maçã\", \"uva\", \"pera\"\n$legumes = \"cenoura\", \"batata\", \"abóbora\"\n$feira = $frutas\n\"Total: $($feira.Count) itens\"",
+      "solucao": "$frutas = \"maçã\", \"uva\", \"pera\"\n$legumes = \"cenoura\", \"batata\", \"abóbora\"\n$feira = $frutas + $legumes\n\"Total: $($feira.Count) itens\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "arrays-indices-1",
+      "pagina": "arrays-indices.html",
+      "titulo": "Índices e Fatias",
+      "secao": "Coleções",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:qui;;out:sex;;src:\\[-2\\.\\.-1\\]|\\[3\\.\\.4\\]|\\[3,\\s*4\\];;semerro",
+      "metas": [
+        "out:qui",
+        "out:sex",
+        "src:\\[-2\\.\\.-1\\]|\\[3\\.\\.4\\]|\\[3,\\s*4\\]",
+        "semerro"
+      ],
+      "task": "Experimente: mostre os dois últimos dias da lista (qui e sex) usando índices.",
+      "script": "$dias = \"seg\", \"ter\", \"qua\", \"qui\", \"sex\"\n$dias",
+      "solucao": "$dias = \"seg\", \"ter\", \"qua\", \"qui\", \"sex\"\n$dias[-2..-1]",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "arrays-indices-2",
+      "pagina": "arrays-indices.html",
+      "titulo": "Índices e Fatias",
+      "secao": "Coleções",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Ana;;out:Duda;;src:\\[0\\];;src:\\[-1\\];;semerro",
+      "metas": [
+        "out:Ana",
+        "out:Duda",
+        "src:\\[0\\]",
+        "src:\\[-1\\]",
+        "semerro"
+      ],
+      "task": "Missão final: mostre o primeiro (Ana) e o último (Duda) nome da fila, usando [0] e [-1].",
+      "script": "$fila = \"Ana\", \"Beto\", \"Caio\", \"Duda\"",
+      "solucao": "$fila = \"Ana\", \"Beto\", \"Caio\", \"Duda\"\n$fila[0]\n$fila[-1]",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "arrays-alterar-1",
+      "pagina": "arrays-alterar.html",
+      "titulo": "Adicionando e Removendo Itens (List)",
+      "secao": "Coleções",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:pão, leite;;src:\\.Add\\(;;semerro",
+      "metas": [
+        "out:pão, leite",
+        "src:\\.Add\\(",
+        "semerro"
+      ],
+      "task": "Experimente: a List começa vazia. Acrescente pão e leite com .Add() e mostre a lista junta por vírgula.",
+      "script": "$lista = [System.Collections.Generic.List[string]]::new()\n\n$lista -join \", \"",
+      "solucao": "$lista = [System.Collections.Generic.List[string]]::new()\n$lista.Add(\"pão\")\n$lista.Add(\"leite\")\n$lista -join \", \"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "arrays-alterar-2",
+      "pagina": "arrays-alterar.html",
+      "titulo": "Adicionando e Removendo Itens (List)",
+      "secao": "Coleções",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:arroz, café;;src:\\.Remove\\(;;semerro",
+      "metas": [
+        "out:arroz, café",
+        "src:\\.Remove\\(",
+        "semerro"
+      ],
+      "task": "Missão final: tire o feijão da List com .Remove() e mostre o que sobrou: arroz, café.",
+      "script": "$lista = [System.Collections.Generic.List[string]]::new()\n$lista.Add(\"arroz\")\n$lista.Add(\"feijão\")\n$lista.Add(\"café\")\n$lista -join \", \"",
+      "solucao": "$lista = [System.Collections.Generic.List[string]]::new()\n$lista.Add(\"arroz\")\n$lista.Add(\"feijão\")\n$lista.Add(\"café\")\n$null = $lista.Remove(\"feijão\")\n$lista -join \", \"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "hashtables-1",
+      "pagina": "hashtables.html",
+      "titulo": "Hashtables (@{})",
+      "secao": "Coleções",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Recife;;src:@\\{;;semerro",
+      "metas": [
+        "out:Recife",
+        "src:@\\{",
+        "semerro"
+      ],
+      "task": "Experimente: crie a hashtable $loja com as chaves Nome = \"Mercadinho\" e Cidade = \"Recife\" e mostre só a cidade.",
+      "script": "$loja = @{}",
+      "solucao": "$loja = @{ Nome = \"Mercadinho\"; Cidade = \"Recife\" }\n$loja.Cidade",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "hashtables-2",
+      "pagina": "hashtables.html",
+      "titulo": "Hashtables (@{})",
+      "secao": "Coleções",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Preço do café: 18;;src:\\.cafe\\s*=\\s*18|\\[\"cafe\"\\]\\s*=\\s*18;;semerro",
+      "metas": [
+        "out:Preço do café: 18",
+        "src:\\.cafe\\s*=\\s*18|\\[\"cafe\"\\]\\s*=\\s*18",
+        "semerro"
+      ],
+      "task": "Missão final: o café subiu. Troque o valor da chave cafe para 18 e mostre Preço do café: 18.",
+      "script": "$precos = @{ arroz = 25; cafe = 15 }\n\n\"Preço do café: $($precos.cafe)\"",
+      "solucao": "$precos = @{ arroz = 25; cafe = 15 }\n$precos.cafe = 18\n\"Preço do café: $($precos.cafe)\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "hashtables-percorrer-1",
+      "pagina": "hashtables-percorrer.html",
+      "titulo": "Percorrendo uma Hashtable",
+      "secao": "Coleções",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:arroz = 12;;out:cafe = 40;;src:GetEnumerator;;semerro",
+      "metas": [
+        "out:arroz = 12",
+        "out:cafe = 40",
+        "src:GetEnumerator",
+        "semerro"
+      ],
+      "task": "Experimente: mostre cada item no formato arroz = 12, usando .GetEnumerator(), $_.Key e $_.Value.",
+      "script": "$estoque = [ordered]@{ arroz = 12; cafe = 40 }\n$estoque",
+      "solucao": "$estoque = [ordered]@{ arroz = 12; cafe = 40 }\n$estoque.GetEnumerator() | ForEach-Object { \"$($_.Key) = $($_.Value)\" }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "hashtables-percorrer-2",
+      "pagina": "hashtables-percorrer.html",
+      "titulo": "Percorrendo uma Hashtable",
+      "secao": "Coleções",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:feijao;;src:Where-Object;;src:GetEnumerator;;semerro",
+      "metas": [
+        "out:feijao",
+        "src:Where-Object",
+        "src:GetEnumerator",
+        "semerro"
+      ],
+      "task": "Missão final: mostre o nome do item que está com estoque zerado, filtrando os pares com Where-Object { $_.Value -eq 0 }.",
+      "script": "$estoque = [ordered]@{ arroz = 12; feijao = 0; cafe = 40 }",
+      "solucao": "$estoque = [ordered]@{ arroz = 12; feijao = 0; cafe = 40 }\n$estoque.GetEnumerator() | Where-Object { $_.Value -eq 0 } | ForEach-Object { $_.Key }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Where-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "pscustomobject-1",
+      "pagina": "pscustomobject.html",
+      "titulo": "Seus Objetos ([pscustomobject])",
+      "secao": "Coleções",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Duda;;outre:Nome\\s+Idade;;src:\\[pscustomobject\\];;semerro",
+      "metas": [
+        "out:Duda",
+        "outre:Nome\\s+Idade",
+        "src:\\[pscustomobject\\]",
+        "semerro"
+      ],
+      "task": "Experimente: crie um objeto com Nome = \"Duda\" e Idade = 25 e mostre na tela.",
+      "script": "$pessoa = @{ Nome = \"Duda\" }",
+      "solucao": "$pessoa = [pscustomobject]@{ Nome = \"Duda\"; Idade = 25 }\n$pessoa",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "pscustomobject-2",
+      "pagina": "pscustomobject.html",
+      "titulo": "Seus Objetos ([pscustomobject])",
+      "secao": "Coleções",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Iracema;;outre:Vidas Secas[\\s\\S]*Dom Casmurro[\\s\\S]*Iracema;;src:Sort-Object;;semerro",
+      "metas": [
+        "out:Iracema",
+        "outre:Vidas Secas[\\s\\S]*Dom Casmurro[\\s\\S]*Iracema",
+        "src:Sort-Object",
+        "semerro"
+      ],
+      "task": "Missão final: mostre os livros do mais novo para o mais antigo (ordene por Ano com -Descending).",
+      "script": "$livros = @(\n    [pscustomobject]@{ Titulo = \"Dom Casmurro\"; Ano = 1899 }\n    [pscustomobject]@{ Titulo = \"Iracema\"; Ano = 1865 }\n    [pscustomobject]@{ Titulo = \"Vidas Secas\"; Ano = 1938 }\n)\n$livros",
+      "solucao": "$livros = @(\n    [pscustomobject]@{ Titulo = \"Dom Casmurro\"; Ano = 1899 }\n    [pscustomobject]@{ Titulo = \"Iracema\"; Ano = 1865 }\n    [pscustomobject]@{ Titulo = \"Vidas Secas\"; Ano = 1938 }\n)\n$livros | Sort-Object Ano -Descending",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Sort-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "splatting-1",
+      "pagina": "splatting.html",
+      "titulo": "Splatting (@parametros)",
+      "secao": "Coleções",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Olá, Ana!;;src:@msg\\b;;semerro",
+      "metas": [
+        "out:Olá, Ana!",
+        "src:@msg\\b",
+        "semerro"
+      ],
+      "task": "Experimente: a hashtable $msg já tem o parâmetro Object do Write-Output. Passe com splatting (@msg) para mostrar Olá, Ana!.",
+      "script": "$msg = @{ Object = \"Olá, Ana!\" }\nWrite-Output $msg",
+      "solucao": "$msg = @{ Object = \"Olá, Ana!\" }\nWrite-Output @msg",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "splatting-2",
+      "pagina": "splatting.html",
+      "titulo": "Splatting (@parametros)",
+      "secao": "Coleções",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Bom dia, Duda!;;src:@p\\b;;semerro",
+      "metas": [
+        "out:Bom dia, Duda!",
+        "src:@p\\b",
+        "semerro"
+      ],
+      "task": "Missão final: monte a hashtable $p com Nome = \"Duda\" e Saudacao = \"Bom dia\" e chame Saudar @p.",
+      "script": "function Saudar { param($Nome, $Saudacao = \"Olá\") \"$Saudacao, $Nome!\" }\n$p = @{}\nSaudar",
+      "solucao": "function Saudar { param($Nome, $Saudacao = \"Olá\") \"$Saudacao, $Nome!\" }\n$p = @{ Nome = \"Duda\"; Saudacao = \"Bom dia\" }\nSaudar @p",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "funcoes-1",
+      "pagina": "funcoes.html",
+      "titulo": "Funções (function)",
+      "secao": "Funções",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:O dobro de 21 é 42;;src:function\\s+\\S+;;semerro",
+      "metas": [
+        "out:O dobro de 21 é 42",
+        "src:function\\s+\\S+",
+        "semerro"
+      ],
+      "task": "Experimente: crie a função Dobro que recebe $n e mostra O dobro de 21 é 42 quando chamada com Dobro 21.",
+      "script": "\nDobro 21",
+      "solucao": "function Dobro($n) { \"O dobro de $n é $($n * 2)\" }\nDobro 21",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "funcoes-2",
+      "pagina": "funcoes.html",
+      "titulo": "Funções (function)",
+      "secao": "Funções",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Área: 12;;src:function\\s+Get-Area;;src:Get-Area\\s+3\\s+4;;semerro",
+      "metas": [
+        "out:Área: 12",
+        "src:function\\s+Get-Area",
+        "src:Get-Area\\s+3\\s+4",
+        "semerro"
+      ],
+      "task": "Missão final: crie Get-Area com os parâmetros $largura e $altura, que mostra Área: 12 ao ser chamada com Get-Area 3 4.",
+      "script": "Get-Area 3 4",
+      "solucao": "function Get-Area($largura, $altura) { \"Área: $($largura * $altura)\" }\nGet-Area 3 4",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Area"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "param-1",
+      "pagina": "param.html",
+      "titulo": "Parâmetros (param)",
+      "secao": "Funções",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:R$ 45,00;;src:\\[switch\\];;semerro",
+      "metas": [
+        "out:R$ 45,00",
+        "src:\\[switch\\]",
+        "semerro"
+      ],
+      "task": "Experimente: acrescente o [switch]$Metade e, se ele estiver ligado, divida o valor por 2. A chamada Show-Valor 90 -Metade deve mostrar R$ 45,00.",
+      "script": "function Show-Valor {\n    param([double]$Valor)\n    \"R$ {0:N2}\" -f $Valor\n}\nShow-Valor 90 -Metade",
+      "solucao": "function Show-Valor {\n    param([double]$Valor, [switch]$Metade)\n    if ($Metade) { $Valor = $Valor / 2 }\n    \"R$ {0:N2}\" -f $Valor\n}\nShow-Valor 90 -Metade",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Show-Valor"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "param-2",
+      "pagina": "param.html",
+      "titulo": "Parâmetros (param)",
+      "secao": "Funções",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Bem-vinda, Ana, de Recife!;;src:param\\s*\\(;;semerro",
+      "metas": [
+        "out:Bem-vinda, Ana, de Recife!",
+        "src:param\\s*\\(",
+        "semerro"
+      ],
+      "task": "Missão final: complete o param com $Nome e $Cidade (padrão \"Recife\") para que Get-Boas -Nome \"Ana\" mostre Bem-vinda, Ana, de Recife!.",
+      "script": "function Get-Boas {\n    \"Bem-vinda, $Nome, de $Cidade!\"\n}\nGet-Boas -Nome \"Ana\"",
+      "solucao": "function Get-Boas {\n    param([string]$Nome, [string]$Cidade = \"Recife\")\n    \"Bem-vinda, $Nome, de $Cidade!\"\n}\nGet-Boas -Nome \"Ana\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Boas"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "retorno-1",
+      "pagina": "retorno.html",
+      "titulo": "O que uma Função Devolve",
+      "secao": "Funções",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Resultado: 10;;src:\\$null\\s*=|Out-Null;;semerro",
+      "metas": [
+        "out:Resultado: 10",
+        "src:\\$null\\s*=|Out-Null",
+        "semerro"
+      ],
+      "task": "Experimente: a função devolve um \"lixo\" além do número. Jogue fora o resultado do .Add() com $null = para a saída ficar só Resultado: 10.",
+      "script": "function Get-Soma {\n    $log = [System.Collections.ArrayList]::new()\n    $log.Add(\"somando\")\n    return 4 + 6\n}\n\"Resultado: $(Get-Soma)\"",
+      "solucao": "function Get-Soma {\n    $log = [System.Collections.ArrayList]::new()\n    $null = $log.Add(\"somando\")\n    return 4 + 6\n}\n\"Resultado: $(Get-Soma)\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Soma"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "retorno-2",
+      "pagina": "retorno.html",
+      "titulo": "O que uma Função Devolve",
+      "secao": "Funções",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:aprovado;;src:return;;semerro",
+      "metas": [
+        "out:aprovado",
+        "src:return",
+        "semerro"
+      ],
+      "task": "Missão final: use return para a função Get-Situacao devolver aprovado quando a nota for 7 ou mais, e reprovado nos outros casos. Teste com Get-Situacao 8.",
+      "script": "function Get-Situacao($nota) {\n    \"reprovado\"\n}\nGet-Situacao 8",
+      "solucao": "function Get-Situacao($nota) {\n    if ($nota -ge 7) { return \"aprovado\" }\n    return \"reprovado\"\n}\nGet-Situacao 8",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Situacao"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "cmdletbinding-1",
+      "pagina": "cmdletbinding.html",
+      "titulo": "Funções Avançadas ([CmdletBinding])",
+      "secao": "Funções",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Calculando o dobro de 4;;src:\\[CmdletBinding\\(\\)\\];;src:-Verbose;;semerro",
+      "metas": [
+        "out:Calculando o dobro de 4",
+        "src:\\[CmdletBinding\\(\\)\\]",
+        "src:-Verbose",
+        "semerro"
+      ],
+      "task": "Experimente: a função tem um Write-Verbose, mas a mensagem não aparece. Transforme em função avançada com [CmdletBinding()] e chame com -Verbose.",
+      "script": "function Get-Dobro {\n    param([int]$N)\n    Write-Verbose \"Calculando o dobro de $N\"\n    $N * 2\n}\nGet-Dobro 4",
+      "solucao": "function Get-Dobro {\n    [CmdletBinding()]\n    param([int]$N)\n    Write-Verbose \"Calculando o dobro de $N\"\n    $N * 2\n}\nGet-Dobro 4 -Verbose",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Dobro",
+        "Write-Verbose"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "cmdletbinding-2",
+      "pagina": "cmdletbinding.html",
+      "titulo": "Funções Avançadas ([CmdletBinding])",
+      "secao": "Funções",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "src:SupportsShouldProcess;;src:ShouldProcess\\(;;semerro",
+      "metas": [
+        "src:SupportsShouldProcess",
+        "src:ShouldProcess\\(",
+        "semerro"
+      ],
+      "task": "Missão final: faça a função aceitar -WhatIf: acrescente SupportsShouldProcess ao [CmdletBinding()] e coloque a ação dentro de if ($PSCmdlet.ShouldProcess($Nome, \"Apagar\")). Com -WhatIf, a nota não pode ser apagada.",
+      "script": "function Remove-Nota {\n    [CmdletBinding()]\n    param([string]$Nome)\n    \"Nota $Nome apagada\"\n}\nRemove-Nota \"compras\" -WhatIf",
+      "solucao": "function Remove-Nota {\n    [CmdletBinding(SupportsShouldProcess)]\n    param([string]$Nome)\n    if ($PSCmdlet.ShouldProcess($Nome, \"Apagar\")) { \"Nota $Nome apagada\" }\n}\nRemove-Nota \"compras\" -WhatIf",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Remove-Nota"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "validacao-1",
+      "pagina": "validacao.html",
+      "titulo": "Validando Parâmetros",
+      "secao": "Funções",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Sabor: uva;;src:ValidateSet;;semerro",
+      "metas": [
+        "out:Sabor: uva",
+        "src:ValidateSet",
+        "semerro"
+      ],
+      "task": "Experimente: aceite só os sabores uva, laranja e limao com [ValidateSet()]. A chamada Get-Suco uva deve mostrar Sabor: uva.",
+      "script": "function Get-Suco {\n    param([string]$Sabor)\n    \"Sabor: $Sabor\"\n}\nGet-Suco uva",
+      "solucao": "function Get-Suco {\n    param([ValidateSet(\"uva\", \"laranja\", \"limao\")][string]$Sabor)\n    \"Sabor: $Sabor\"\n}\nGet-Suco uva",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Suco"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "validacao-2",
+      "pagina": "validacao.html",
+      "titulo": "Validando Parâmetros",
+      "secao": "Funções",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "outre:Nota 7 registrada;;src:ValidateRange\\(\\s*0\\s*,\\s*10\\s*\\);;semerro",
+      "metas": [
+        "outre:Nota 7 registrada",
+        "src:ValidateRange\\(\\s*0\\s*,\\s*10\\s*\\)",
+        "semerro"
+      ],
+      "task": "Missão final: proteja a função com [ValidateRange(0, 10)] e chame com a nota 7.",
+      "script": "function Set-Nota {\n    param([int]$Nota)\n    \"Nota $Nota registrada\"\n}",
+      "solucao": "function Set-Nota {\n    param([ValidateRange(0, 10)][int]$Nota)\n    \"Nota $Nota registrada\"\n}\nSet-Nota 7",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Set-Nota"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "funcoes-pipeline-1",
+      "pagina": "funcoes-pipeline.html",
+      "titulo": "Funções no Pipeline (begin, process, end)",
+      "secao": "Funções",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:ANA;;out:BETO;;src:process;;semerro",
+      "metas": [
+        "out:ANA",
+        "out:BETO",
+        "src:process",
+        "semerro"
+      ],
+      "task": "Experimente: a função só mostra o último nome. Coloque o trabalho dentro de um bloco process { } para tratar cada nome que chega.",
+      "script": "function ConvertTo-Maiuscula {\n    param([Parameter(ValueFromPipeline)][string]$Texto)\n    $Texto.ToUpper()\n}\n\"ana\", \"beto\" | ConvertTo-Maiuscula",
+      "solucao": "function ConvertTo-Maiuscula {\n    param([Parameter(ValueFromPipeline)][string]$Texto)\n    process { $Texto.ToUpper() }\n}\n\"ana\", \"beto\" | ConvertTo-Maiuscula",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "funcoes-pipeline-2",
+      "pagina": "funcoes-pipeline.html",
+      "titulo": "Funções no Pipeline (begin, process, end)",
+      "secao": "Funções",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Total: 60;;src:begin;;src:process;;src:end;;semerro",
+      "metas": [
+        "out:Total: 60",
+        "src:begin",
+        "src:process",
+        "src:end",
+        "semerro"
+      ],
+      "task": "Missão final: complete a função com begin, process e end para que 10, 20, 30 | Get-Total mostre Total: 60.",
+      "script": "function Get-Total {\n    param([Parameter(ValueFromPipeline)][int]$Valor)\n    \"Total: $Valor\"\n}\n10, 20, 30 | Get-Total",
+      "solucao": "function Get-Total {\n    param([Parameter(ValueFromPipeline)][int]$Valor)\n    begin { $soma = 0 }\n    process { $soma += $Valor }\n    end { \"Total: $soma\" }\n}\n10, 20, 30 | Get-Total",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Total"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "escopo-1",
+      "pagina": "escopo.html",
+      "titulo": "Escopo das Variáveis",
+      "secao": "Funções",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Total: 15;;src:return|\\$total\\s*=\\s*Add;;semerro",
+      "metas": [
+        "out:Total: 15",
+        "src:return|\\$total\\s*=\\s*Add",
+        "semerro"
+      ],
+      "task": "Experimente: a função soma, mas o $total de fora não muda. Em vez de mexer na variável de fora, faça a função devolver a soma e guarde: $total = Add-Valor $total 5.",
+      "script": "$total = 10\nfunction Add-Valor($atual, $mais) { $total = $atual + $mais }\nAdd-Valor $total 5\n\"Total: $total\"",
+      "solucao": "$total = 10\nfunction Add-Valor($atual, $mais) { return $atual + $mais }\n$total = Add-Valor $total 5\n\"Total: $total\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Add-Valor"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "escopo-2",
+      "pagina": "escopo.html",
+      "titulo": "Escopo das Variáveis",
+      "secao": "Funções",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:pontos: 3;;src:\\$script:pontos;;semerro",
+      "metas": [
+        "out:pontos: 3",
+        "src:\\$script:pontos",
+        "semerro"
+      ],
+      "task": "Missão final: faça o placar contar de verdade, usando $script:pontos dentro da função. Depois de três chamadas, deve aparecer pontos: 3.",
+      "script": "$pontos = 0\nfunction Add-Ponto { $pontos++ }\nAdd-Ponto; Add-Ponto; Add-Ponto\n\"pontos: $pontos\"",
+      "solucao": "$pontos = 0\nfunction Add-Ponto { $script:pontos++ }\nAdd-Ponto; Add-Ponto; Add-Ponto\n\"pontos: $pontos\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Add-Ponto"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "ajuda-comentarios-1",
+      "pagina": "ajuda-comentarios.html",
+      "titulo": "Ajuda nas Suas Funções",
+      "secao": "Funções",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Converte graus Celsius;;src:\\.SYNOPSIS;;semerro",
+      "metas": [
+        "out:Converte graus Celsius",
+        "src:\\.SYNOPSIS",
+        "semerro"
+      ],
+      "task": "Experimente: escreva o bloco de ajuda com .SYNOPSIS dizendo Converte graus Celsius em Fahrenheit. e mostre o resumo com (Get-Help ConvertTo-Fahrenheit).Synopsis.",
+      "script": "function ConvertTo-Fahrenheit {\n    param([double]$Celsius)\n    $Celsius * 9 / 5 + 32\n}\n(Get-Help ConvertTo-Fahrenheit).Synopsis",
+      "solucao": "function ConvertTo-Fahrenheit {\n    <#\n    .SYNOPSIS\n    Converte graus Celsius em Fahrenheit.\n    #>\n    param([double]$Celsius)\n    $Celsius * 9 / 5 + 32\n}\n(Get-Help ConvertTo-Fahrenheit).Synopsis",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Help"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "ajuda-comentarios-2",
+      "pagina": "ajuda-comentarios.html",
+      "titulo": "Ajuda nas Suas Funções",
+      "secao": "Funções",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "outre:Mostra a soma;;src:\\.SYNOPSIS;;src:\\.EXAMPLE;;semerro",
+      "metas": [
+        "outre:Mostra a soma",
+        "src:\\.SYNOPSIS",
+        "src:\\.EXAMPLE",
+        "semerro"
+      ],
+      "task": "Missão final: escreva a ajuda da Get-Soma com .SYNOPSIS (Mostra a soma de dois números.) e um .EXAMPLE, e mostre o resumo.",
+      "script": "function Get-Soma {\n    param([int]$A, [int]$B)\n    $A + $B\n}\n(Get-Help Get-Soma).Synopsis",
+      "solucao": "function Get-Soma {\n    <#\n    .SYNOPSIS\n    Mostra a soma de dois números.\n    .EXAMPLE\n    Get-Soma 2 3\n    #>\n    param([int]$A, [int]$B)\n    $A + $B\n}\n(Get-Help Get-Soma).Synopsis",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Help",
+        "Get-Soma"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "parametros-script-1",
+      "pagina": "parametros-script.html",
+      "titulo": "Parâmetros de Script e $args",
+      "secao": "Scripts",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Olá, Duda!;;out:Olá, Duda!;;src:-Vezes 2;;semerro",
+      "metas": [
+        "out:Olá, Duda!",
+        "out:Olá, Duda!",
+        "src:-Vezes 2",
+        "semerro"
+      ],
+      "task": "Experimente: o script já foi criado. Chame .\\saudar.ps1 com -Nome Duda e -Vezes 2.",
+      "script": "Set-Content saudar.ps1 'param([string]$Nome = \"visitante\", [int]$Vezes = 1)\n1..$Vezes | ForEach-Object { \"Olá, $Nome!\" }'\n.\\saudar.ps1",
+      "solucao": "Set-Content saudar.ps1 'param([string]$Nome = \"visitante\", [int]$Vezes = 1)\n1..$Vezes | ForEach-Object { \"Olá, $Nome!\" }'\n.\\saudar.ps1 -Nome Duda -Vezes 2",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Set-Content"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "parametros-script-2",
+      "pagina": "parametros-script.html",
+      "titulo": "Parâmetros de Script e $args",
+      "secao": "Scripts",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Total: 3 itens;;src:\\$args;;semerro",
+      "metas": [
+        "out:Total: 3 itens",
+        "src:\\$args",
+        "semerro"
+      ],
+      "task": "Missão final: grave em contar.ps1 um script que mostra Total:  + a quantidade de argumentos +  itens (use $args.Count). Depois rode com .\\contar.ps1 a b c.",
+      "script": "Set-Content contar.ps1 '\"Total: ? itens\"'\n.\\contar.ps1 a b c",
+      "solucao": "Set-Content contar.ps1 '\"Total: $($args.Count) itens\"'\n.\\contar.ps1 a b c",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Set-Content"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "dot-source-1",
+      "pagina": "dot-source.html",
+      "titulo": "Dot-Sourcing (. .\\arquivo.ps1)",
+      "secao": "Scripts",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:77,0 °F;;src:^\\. \\.\\\\;;semerro",
+      "metas": [
+        "out:77,0 °F",
+        "src:^\\. \\.\\\\",
+        "semerro"
+      ],
+      "task": "Experimente: o arquivo ferramentas.ps1 já existe. Carregue com dot-sourcing e chame Converter-Celsius 25.",
+      "script": "Set-Content ferramentas.ps1 'function Converter-Celsius { param([double]$C) \"{0:N1} °F\" -f ($C * 9 / 5 + 32) }'\n.\\ferramentas.ps1\nConverter-Celsius 25",
+      "solucao": "Set-Content ferramentas.ps1 'function Converter-Celsius { param([double]$C) \"{0:N1} °F\" -f ($C * 9 / 5 + 32) }'\n. .\\ferramentas.ps1\nConverter-Celsius 25",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Converter-Celsius",
+        "Set-Content"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "dot-source-2",
+      "pagina": "dot-source.html",
+      "titulo": "Dot-Sourcing (. .\\arquivo.ps1)",
+      "secao": "Scripts",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Olá do arquivo!;;src:^\\. \\.\\\\util\\.ps1;;semerro",
+      "metas": [
+        "out:Olá do arquivo!",
+        "src:^\\. \\.\\\\util\\.ps1",
+        "semerro"
+      ],
+      "task": "Missão final: o arquivo util.ps1 tem a função Dizer-Ola. Carregue com dot-sourcing e chame Dizer-Ola.",
+      "script": "Set-Content util.ps1 'function Dizer-Ola { \"Olá do arquivo!\" }'\nDizer-Ola",
+      "solucao": "Set-Content util.ps1 'function Dizer-Ola { \"Olá do arquivo!\" }'\n. .\\util.ps1\nDizer-Ola",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Dizer-Ola",
+        "Set-Content"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "erros-1",
+      "pagina": "erros.html",
+      "titulo": "Lendo uma Mensagem de Erro",
+      "secao": "Erros",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Attempted to divide by zero;;semerro",
+      "metas": [
+        "out:Attempted to divide by zero",
+        "semerro"
+      ],
+      "task": "Experimente: o código abaixo divide por zero e o erro aparece. Troque o divisor por 2 para dar 5, e depois volte para 0 e veja a mensagem. Para a missão, deixe a linha que mostra a mensagem guardada em $Error[0] funcionando: a saída precisa mostrar Attempted to divide by zero.",
+      "script": "$resultado = 10 / 2\n$resultado",
+      "solucao": "try { 10 / 0 } catch { }\n$Error[0].Exception.Message",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "erros-2",
+      "pagina": "erros.html",
+      "titulo": "Lendo uma Mensagem de Erro",
+      "secao": "Erros",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Cannot convert value;;src:\\$Error\\[0\\];;semerro",
+      "metas": [
+        "out:Cannot convert value",
+        "src:\\$Error\\[0\\]",
+        "semerro"
+      ],
+      "task": "Missão final: o try abaixo esconde o erro de [int]\"oito\". Depois dele, mostre só a mensagem do último erro, usando $Error[0].Exception.Message.",
+      "script": "try { [int]\"oito\" } catch { }",
+      "solucao": "try { [int]\"oito\" } catch { }\n$Error[0].Exception.Message",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "try-catch-1",
+      "pagina": "try-catch.html",
+      "titulo": "try, catch e finally",
+      "secao": "Erros",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Problema: Attempted to divide by zero.;;src:catch;;semerro",
+      "metas": [
+        "out:Problema: Attempted to divide by zero.",
+        "src:catch",
+        "semerro"
+      ],
+      "task": "Experimente: o código divide por zero sem proteção. Coloque a conta dentro de um try e, no catch, mostre Problema:  seguido da mensagem do erro.",
+      "script": "$total = 100\n$pessoas = 0\n$total / $pessoas",
+      "solucao": "$total = 100\n$pessoas = 0\ntry { $total / $pessoas } catch { \"Problema: $($_.Exception.Message)\" }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "try-catch-2",
+      "pagina": "try-catch.html",
+      "titulo": "try, catch e finally",
+      "secao": "Erros",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Valor inválido: abc;;out:Fim da leitura;;src:finally;;semerro",
+      "metas": [
+        "out:Valor inválido: abc",
+        "out:Fim da leitura",
+        "src:finally",
+        "semerro"
+      ],
+      "task": "Missão final: complete o código: tente converter $entrada com [int]; se der erro, mostre Valor inválido: abc; e, no finally, mostre Fim da leitura.",
+      "script": "$entrada = \"abc\"\n[int]$entrada",
+      "solucao": "$entrada = \"abc\"\ntry { [int]$entrada }\ncatch { \"Valor inválido: $entrada\" }\nfinally { \"Fim da leitura\" }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "erroraction-1",
+      "pagina": "erroraction.html",
+      "titulo": "-ErrorAction e $ErrorActionPreference",
+      "secao": "Erros",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Capturado: Item 'x' com problema.;;src:-ErrorAction Stop;;semerro",
+      "metas": [
+        "out:Capturado: Item 'x' com problema.",
+        "src:-ErrorAction Stop",
+        "semerro"
+      ],
+      "task": "Experimente: o catch abaixo não roda porque o erro não encerra. Acrescente -ErrorAction Stop na chamada para o catch mostrar a mensagem.",
+      "script": "function Testar-Item { [CmdletBinding()] param($nome) Write-Error \"Item '$nome' com problema.\" }\ntry { Testar-Item \"x\" } catch { \"Capturado: $($_.Exception.Message)\" }",
+      "solucao": "function Testar-Item { [CmdletBinding()] param($nome) Write-Error \"Item '$nome' com problema.\" }\ntry { Testar-Item \"x\" -ErrorAction Stop } catch { \"Capturado: $($_.Exception.Message)\" }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Testar-Item",
+        "Write-Error"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "erroraction-2",
+      "pagina": "erroraction.html",
+      "titulo": "-ErrorAction e $ErrorActionPreference",
+      "secao": "Erros",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Item 'a' ok;;out:Item 'c' ok;;src:SilentlyContinue;;semerro",
+      "metas": [
+        "out:Item 'a' ok",
+        "out:Item 'c' ok",
+        "src:SilentlyContinue",
+        "semerro"
+      ],
+      "task": "Missão final: processe \"a\", \"ruim\", \"c\" com Testar-Item, escondendo o erro do item ruim com -ErrorAction SilentlyContinue.",
+      "script": "function Testar-Item { [CmdletBinding()] param($nome)\n  if ($nome -eq \"ruim\") { Write-Error \"Item '$nome' com problema.\" } else { \"Item '$nome' ok\" }\n}\n\"a\", \"ruim\", \"c\" | ForEach-Object { Testar-Item $_ }",
+      "solucao": "function Testar-Item { [CmdletBinding()] param($nome)\n  if ($nome -eq \"ruim\") { Write-Error \"Item '$nome' com problema.\" } else { \"Item '$nome' ok\" }\n}\n\"a\", \"ruim\", \"c\" | ForEach-Object { Testar-Item $_ -ErrorAction SilentlyContinue }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Testar-Item",
+        "Write-Error"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "throw-1",
+      "pagina": "throw.html",
+      "titulo": "throw: Lançando Erros",
+      "secao": "Erros",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Aviso: Preço inválido: -3;;src:throw;;semerro",
+      "metas": [
+        "out:Aviso: Preço inválido: -3",
+        "src:throw",
+        "semerro"
+      ],
+      "task": "Experimente: complete a função Definir-Preco para lançar Preço inválido:  + o valor quando o preço for menor que zero. A chamada já está num try.",
+      "script": "function Definir-Preco { param([int]$Preco)\n  \"Preço: $Preco\"\n}\ntry { Definir-Preco -3 } catch { \"Aviso: $($_.Exception.Message)\" }",
+      "solucao": "function Definir-Preco { param([int]$Preco)\n  if ($Preco -lt 0) { throw \"Preço inválido: $Preco\" }\n  \"Preço: $Preco\"\n}\ntry { Definir-Preco -3 } catch { \"Aviso: $($_.Exception.Message)\" }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Definir-Preco"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "throw-2",
+      "pagina": "throw.html",
+      "titulo": "throw: Lançando Erros",
+      "secao": "Erros",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Erro: Nome vazio;;src:throw;;src:catch;;semerro",
+      "metas": [
+        "out:Erro: Nome vazio",
+        "src:throw",
+        "src:catch",
+        "semerro"
+      ],
+      "task": "Missão final: na função Saudar, lance Nome vazio quando $Nome estiver vazio. Depois chame Saudar \"\" dentro de um try e, no catch, mostre Erro:  + a mensagem.",
+      "script": "function Saudar { param([string]$Nome)\n  \"Olá, $Nome!\"\n}\nSaudar \"\"",
+      "solucao": "function Saudar { param([string]$Nome)\n  if (-not $Nome) { throw \"Nome vazio\" }\n  \"Olá, $Nome!\"\n}\ntry { Saudar \"\" } catch { \"Erro: $($_.Exception.Message)\" }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "error-variable-1",
+      "pagina": "error-variable.html",
+      "titulo": "$Error e -ErrorVariable",
+      "secao": "Erros",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Nota 15 acima de 10.;;src:-ErrorVariable;;semerro",
+      "metas": [
+        "out:Nota 15 acima de 10.",
+        "src:-ErrorVariable",
+        "semerro"
+      ],
+      "task": "Experimente: chame Testar-Nota 15 guardando o erro em erros (com -ErrorVariable e -ErrorAction SilentlyContinue), e mostre $erros[0].Exception.Message.",
+      "script": "function Testar-Nota { [CmdletBinding()] param([int]$Nota)\n  if ($Nota -gt 10) { Write-Error \"Nota $Nota acima de 10.\" } else { \"Nota $Nota ok\" }\n}\nTestar-Nota 15",
+      "solucao": "function Testar-Nota { [CmdletBinding()] param([int]$Nota)\n  if ($Nota -gt 10) { Write-Error \"Nota $Nota acima de 10.\" } else { \"Nota $Nota ok\" }\n}\nTestar-Nota 15 -ErrorVariable erros -ErrorAction SilentlyContinue\n$erros[0].Exception.Message",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Testar-Nota",
+        "Write-Error"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "error-variable-2",
+      "pagina": "error-variable.html",
+      "titulo": "$Error e -ErrorVariable",
+      "secao": "Erros",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Problemas: 2;;src:\\+ruins;;semerro",
+      "metas": [
+        "out:Problemas: 2",
+        "src:\\+ruins",
+        "semerro"
+      ],
+      "task": "Missão final: teste as notas 5, 12, 30 acumulando os erros em ruins (com +) e, no fim, mostre Problemas:  + a quantidade.",
+      "script": "function Testar-Nota { [CmdletBinding()] param([int]$Nota)\n  if ($Nota -gt 10) { Write-Error \"Nota $Nota acima de 10.\" } else { \"Nota $Nota ok\" }\n}\nforeach ($n in 5, 12, 30) {\n  Testar-Nota $n\n}",
+      "solucao": "function Testar-Nota { [CmdletBinding()] param([int]$Nota)\n  if ($Nota -gt 10) { Write-Error \"Nota $Nota acima de 10.\" } else { \"Nota $Nota ok\" }\n}\nforeach ($n in 5, 12, 30) {\n  Testar-Nota $n -ErrorVariable +ruins -ErrorAction SilentlyContinue\n}\n\"Problemas: $($ruins.Count)\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Testar-Nota",
+        "Write-Error"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "csv-1",
+      "pagina": "csv.html",
+      "titulo": "CSV (Import-Csv e Export-Csv)",
+      "secao": "Dados e Textos",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Ana;;src:Import-Csv;;semerro",
+      "metas": [
+        "out:Ana",
+        "src:Import-Csv",
+        "semerro"
+      ],
+      "task": "Experimente: o código grava um CSV com notas inteiras. Leia com Import-Csv e mostre só o Nome de quem tem nota maior ou igual a 9 (lembre do [int]).",
+      "script": "@(\n  [pscustomobject]@{ Nome = \"Ana\";  Nota = 10 }\n  [pscustomobject]@{ Nome = \"Beto\"; Nota = 6 }\n) | Export-Csv notas.csv",
+      "solucao": "@(\n  [pscustomobject]@{ Nome = \"Ana\";  Nota = 10 }\n  [pscustomobject]@{ Nome = \"Beto\"; Nota = 6 }\n) | Export-Csv notas.csv\nImport-Csv notas.csv | Where-Object { [int]$_.Nota -ge 9 } | ForEach-Object Nome",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Export-Csv",
+        "Import-Csv",
+        "Where-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "csv-2",
+      "pagina": "csv.html",
+      "titulo": "CSV (Import-Csv e Export-Csv)",
+      "secao": "Dados e Textos",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Total: 2050;;src:-Delimiter;;src:Measure-Object;;semerro",
+      "metas": [
+        "out:Total: 2050",
+        "src:-Delimiter",
+        "src:Measure-Object",
+        "semerro"
+      ],
+      "task": "Missão final: leia gastos.csv (que usa ;), some a coluna Valor e mostre Total:  seguido da soma.",
+      "script": "Set-Content gastos.csv \"Item;Valor`nAluguel;1200`nMercado;850\"",
+      "solucao": "Set-Content gastos.csv \"Item;Valor`nAluguel;1200`nMercado;850\"\n$soma = (Import-Csv gastos.csv -Delimiter ';' | ForEach-Object { [double]$_.Valor } | Measure-Object -Sum).Sum\n\"Total: $soma\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Import-Csv",
+        "Measure-Object",
+        "Set-Content"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "json-1",
+      "pagina": "json.html",
+      "titulo": "JSON (ConvertTo-Json e ConvertFrom-Json)",
+      "secao": "Dados e Textos",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:Recife;;src:ConvertFrom-Json;;semerro",
+      "metas": [
+        "out:Recife",
+        "src:ConvertFrom-Json",
+        "semerro"
+      ],
+      "task": "Experimente: transforme o texto de $texto em objeto com ConvertFrom-Json e mostre só a propriedade cidade.",
+      "script": "$texto = '{\"cidade\":\"Recife\",\"temperatura\":31.5}'\n$texto",
+      "solucao": "$texto = '{\"cidade\":\"Recife\",\"temperatura\":31.5}'\n($texto | ConvertFrom-Json).cidade",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "json-2",
+      "pagina": "json.html",
+      "titulo": "JSON (ConvertTo-Json e ConvertFrom-Json)",
+      "secao": "Dados e Textos",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Total: 31,6;;src:ConvertFrom-Json;;semerro",
+      "metas": [
+        "out:Total: 31,6",
+        "src:ConvertFrom-Json",
+        "semerro"
+      ],
+      "task": "Missão final: some o preco de todos os itens do JSON e mostre Total:  + a soma formatada com {0:N1} (o resultado é Total: 31,6).",
+      "script": "$json = '[{\"produto\":\"Café\",\"preco\":18.9},{\"produto\":\"Pão\",\"preco\":7.5},{\"produto\":\"Leite\",\"preco\":5.2}]'",
+      "solucao": "$json = '[{\"produto\":\"Café\",\"preco\":18.9},{\"produto\":\"Pão\",\"preco\":7.5},{\"produto\":\"Leite\",\"preco\":5.2}]'\n$soma = ($json | ConvertFrom-Json | Measure-Object preco -Sum).Sum\n\"Total: {0:N1}\" -f $soma",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Measure-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "get-date-1",
+      "pagina": "get-date.html",
+      "titulo": "Datas e Horas (Get-Date)",
+      "secao": "Dados e Textos",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:25/12/2026;;src:-Format;;semerro",
+      "metas": [
+        "out:25/12/2026",
+        "src:-Format",
+        "semerro"
+      ],
+      "task": "Experimente: mostre $natal no formato dia/mês/ano com Get-Date -Format.",
+      "script": "$natal = [datetime]\"2026-12-25\"\n$natal",
+      "solucao": "$natal = [datetime]\"2026-12-25\"\nGet-Date $natal -Format \"dd/MM/yyyy\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Date"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "get-date-2",
+      "pagina": "get-date.html",
+      "titulo": "Datas e Horas (Get-Date)",
+      "secao": "Dados e Textos",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:Faltam 10 dias.;;src:\\.Days;;semerro",
+      "metas": [
+        "out:Faltam 10 dias.",
+        "src:\\.Days",
+        "semerro"
+      ],
+      "task": "Missão final: calcule quantos dias faltam de $hoje até $prova e mostre Faltam 10 dias..",
+      "script": "$hoje = [datetime]\"2026-06-05\"\n$prova = [datetime]\"2026-06-15\"",
+      "solucao": "$hoje = [datetime]\"2026-06-05\"\n$prova = [datetime]\"2026-06-15\"\n$falta = $prova - $hoje\n\"Faltam $($falta.Days) dias.\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "regex-1",
+      "pagina": "regex.html",
+      "titulo": "Expressões Regulares (-match, -replace)",
+      "secao": "Dados e Textos",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:01310;;src:-match;;src:\\$Matches;;semerro",
+      "metas": [
+        "out:01310",
+        "src:-match",
+        "src:\\$Matches",
+        "semerro"
+      ],
+      "task": "Experimente: use -match com um grupo para capturar os 5 primeiros dígitos do CEP e mostre $Matches[1].",
+      "script": "$texto = \"Rua X, 100, CEP 01310-100\"",
+      "solucao": "$texto = \"Rua X, 100, CEP 01310-100\"\nif ($texto -match '(\\d{5})-\\d{3}') { $Matches[1] }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "regex-2",
+      "pagina": "regex.html",
+      "titulo": "Expressões Regulares (-match, -replace)",
+      "secao": "Dados e Textos",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:25/12/2026;;src:-replace;;semerro",
+      "metas": [
+        "out:25/12/2026",
+        "src:-replace",
+        "semerro"
+      ],
+      "task": "Missão final: com um único -replace e grupos, transforme 2026-12-25 em 25/12/2026.",
+      "script": "$data = \"2026-12-25\"\n$data",
+      "solucao": "$data = \"2026-12-25\"\n$data -replace '(\\d{4})-(\\d{2})-(\\d{2})', '$3/$2/$1'",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "string-metodos-1",
+      "pagina": "string-metodos.html",
+      "titulo": "Métodos de Texto (.Split, .Replace…)",
+      "secao": "Dados e Textos",
+      "nivel": "n2",
+      "n": 1,
+      "goal": "out:ANA;;src:\\.Substring\\(;;src:\\.ToUpper\\(;;semerro",
+      "metas": [
+        "out:ANA",
+        "src:\\.Substring\\(",
+        "src:\\.ToUpper\\(",
+        "semerro"
+      ],
+      "task": "Experimente: pegue as 3 primeiras letras de $nome com Substring e mostre em maiúsculas com ToUpper.",
+      "script": "$nome = \"anabela\"",
+      "solucao": "$nome = \"anabela\"\n$nome.Substring(0, 3).ToUpper()",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "string-metodos-2",
+      "pagina": "string-metodos.html",
+      "titulo": "Métodos de Texto (.Split, .Replace…)",
+      "secao": "Dados e Textos",
+      "nivel": "n2",
+      "n": 2,
+      "goal": "out:007;;src:\\.PadLeft\\(;;semerro",
+      "metas": [
+        "out:007",
+        "src:\\.PadLeft\\(",
+        "semerro"
+      ],
+      "task": "Missão final: transforme o número do agente \"7\" em 007 usando PadLeft.",
+      "script": "$agente = \"7\"\n$agente",
+      "solucao": "$agente = \"7\"\n$agente.PadLeft(3, \"0\")",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "modulos-proprios-1",
+      "pagina": "modulos-proprios.html",
+      "titulo": "Criando seu Módulo (.psm1)",
+      "secao": "Módulos",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "out:86;;src:Import-Module;;semerro",
+      "metas": [
+        "out:86",
+        "src:Import-Module",
+        "semerro"
+      ],
+      "task": "Experimente: o módulo já foi gravado. Importe .\\Conversor.psm1 e converta 30 °C com ConvertTo-Fahrenheit 30.",
+      "script": "Set-Content Conversor.psm1 'function ConvertTo-Fahrenheit { param([double]$Celsius) $Celsius * 9 / 5 + 32 }'\nConvertTo-Fahrenheit 30",
+      "solucao": "Set-Content Conversor.psm1 'function ConvertTo-Fahrenheit { param([double]$Celsius) $Celsius * 9 / 5 + 32 }'\nImport-Module .\\Conversor.psm1\nConvertTo-Fahrenheit 30",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Import-Module",
+        "Set-Content"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "modulos-proprios-2",
+      "pagina": "modulos-proprios.html",
+      "titulo": "Criando seu Módulo (.psm1)",
+      "secao": "Módulos",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "out:Olá, Ana!;;src:Import-Module;;semerro",
+      "metas": [
+        "out:Olá, Ana!",
+        "src:Import-Module",
+        "semerro"
+      ],
+      "task": "Missão final: grave em Saudacao.psm1 a função Get-Saudacao (com o parâmetro $Nome, devolvendo Olá, $Nome!), importe o módulo e chame Get-Saudacao -Nome Ana.",
+      "script": "Set-Content Saudacao.psm1 ''",
+      "solucao": "Set-Content Saudacao.psm1 'function Get-Saudacao { param($Nome) \"Olá, $Nome!\" }'\nImport-Module .\\Saudacao.psm1\nGet-Saudacao -Nome Ana",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Saudacao",
+        "Import-Module",
+        "Set-Content"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "servicos-1",
+      "pagina": "servicos.html",
+      "titulo": "Serviços (Get-Service)",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "src:Get-Service;;src:-Name;;src:Spooler;;semerro",
+      "metas": [
+        "src:Get-Service",
+        "src:-Name",
+        "src:Spooler",
+        "semerro"
+      ],
+      "task": "Experimente: neste guia a gente não roda o cmdlet (não vamos consultar o Spooler do Windows). Escreva, numa string, o comando que consulta o serviço Spooler pelo nome, e deixe o Write-Output mostrar a string.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'Get-Service -Name Spooler'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Service",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "servicos-2",
+      "pagina": "servicos.html",
+      "titulo": "Serviços (Get-Service)",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "src:Get-Service;;src:Spooler;;src:Select-Object;;src:StartType;;semerro",
+      "metas": [
+        "src:Get-Service",
+        "src:Spooler",
+        "src:Select-Object",
+        "src:StartType",
+        "semerro"
+      ],
+      "task": "Missão final: ainda numa string, escreva o comando que consulta o Spooler e seleciona Name, DisplayName, Status e StartType. Não chame o cmdlet: nada deve consultar serviços do Windows.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'Get-Service -Name Spooler | Select-Object Name, DisplayName, Status, StartType'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Service",
+        "Select-Object",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "registro-1",
+      "pagina": "registro.html",
+      "titulo": "O Registro do Windows",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "src:Get-PSDrive;;src:-PSProvider;;src:Registry;;semerro",
+      "metas": [
+        "src:Get-PSDrive",
+        "src:-PSProvider",
+        "src:Registry",
+        "semerro"
+      ],
+      "task": "Experimente: neste guia a gente não roda o cmdlet (não vamos consultar o Registro do Windows). Escreva, numa string, o comando que lista só os drives do provedor Registry, e deixe o Write-Output mostrar a string.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'Get-PSDrive -PSProvider Registry'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-PSDrive",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "registro-2",
+      "pagina": "registro.html",
+      "titulo": "O Registro do Windows",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "src:Remove-Item;;src:GuiaPowerShell;;src:-WhatIf;;semerro",
+      "metas": [
+        "src:Remove-Item",
+        "src:GuiaPowerShell",
+        "src:-WhatIf",
+        "semerro"
+      ],
+      "task": "Missão final: ainda numa string, escreva o comando que ensaia a remoção da chave de teste HKCU:\\Software\\GuiaPowerShell, com -Recurse e -WhatIf. Não chame o cmdlet: nada deve mexer no Registro.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = \"Remove-Item -Path 'HKCU:\\Software\\GuiaPowerShell' -Recurse -WhatIf\"\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Remove-Item",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "usuarios-locais-1",
+      "pagina": "usuarios-locais.html",
+      "titulo": "Usuários e Grupos Locais",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "src:Get-LocalUser;;src:-Name;;src:guia-teste;;semerro",
+      "metas": [
+        "src:Get-LocalUser",
+        "src:-Name",
+        "src:guia-teste",
+        "semerro"
+      ],
+      "task": "Experimente: neste guia a gente não roda o cmdlet (não vamos consultar contas do Windows). Escreva, numa string, o comando que consulta somente o usuário guia-teste pelo nome, e deixe o Write-Output mostrar a string.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = 'Get-LocalUser -Name \"guia-teste\"'\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-LocalUser",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "usuarios-locais-2",
+      "pagina": "usuarios-locais.html",
+      "titulo": "Usuários e Grupos Locais",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "src:Add-LocalGroupMember;;src:-Group;;src:Usuários;;src:-Member;;src:guia-teste;;semerro",
+      "metas": [
+        "src:Add-LocalGroupMember",
+        "src:-Group",
+        "src:Usuários",
+        "src:-Member",
+        "src:guia-teste",
+        "semerro"
+      ],
+      "task": "Missão final: ainda numa string, escreva o comando que coloca guia-teste somente no grupo Usuários. Não chame o cmdlet: nada deve criar nem alterar conta nenhuma.",
+      "script": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = ''\nWrite-Output $comando",
+      "solucao": "# Escreva o comando numa string. Não chame o cmdlet.\n$comando = \"Add-LocalGroupMember -Group 'Usuários' -Member 'guia-teste'\"\nWrite-Output $comando",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Add-LocalGroupMember",
+        "Write-Output"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "web-1",
+      "pagina": "web.html",
+      "titulo": "Internet (Invoke-WebRequest e Invoke-RestMethod)",
+      "secao": "Administrando o Windows",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "out:Avenida Paulista;;src:Invoke-RestMethod;;semerro",
+      "metas": [
+        "out:Avenida Paulista",
+        "src:Invoke-RestMethod",
+        "semerro"
+      ],
+      "task": "Experimente: no seu terminal, consulte o CEP 01310100 no ViaCEP e mostre só o logradouro. (Aqui no navegador a internet é simulada e devolve o mesmo resultado.)",
+      "script": "$url = \"https://viacep.com.br/ws/01310100/json/\"",
+      "solucao": "$url = \"https://viacep.com.br/ws/01310100/json/\"\n(Invoke-RestMethod $url).logradouro",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Invoke-RestMethod"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "dotnet-1",
+      "pagina": "dotnet.html",
+      "titulo": "Usando o .NET ([Math], [DateTime])",
+      "secao": "Recursos Poderosos",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "out:12;;src:\\[Math\\]::Sqrt;;semerro",
+      "metas": [
+        "out:12",
+        "src:\\[Math\\]::Sqrt",
+        "semerro"
+      ],
+      "task": "Experimente: calcule a raiz quadrada de 144 com [Math]::Sqrt.",
+      "script": "$numero = 144",
+      "solucao": "$numero = 144\n[Math]::Sqrt($numero)",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "dotnet-2",
+      "pagina": "dotnet.html",
+      "titulo": "Usando o .NET ([Math], [DateTime])",
+      "secao": "Recursos Poderosos",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "out:1024;;src:\\[Math\\]::Pow;;semerro",
+      "metas": [
+        "out:1024",
+        "src:\\[Math\\]::Pow",
+        "semerro"
+      ],
+      "task": "Missão final: calcule 2 elevado a 10 com [Math]::Pow.",
+      "script": "",
+      "solucao": "[Math]::Pow(2, 10)",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "classes-1",
+      "pagina": "classes.html",
+      "titulo": "Classes",
+      "secao": "Recursos Poderosos",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "out:Carla (média 8);;src:class;;semerro",
+      "metas": [
+        "out:Carla (média 8)",
+        "src:class",
+        "semerro"
+      ],
+      "task": "Experimente: crie a aluna Carla com as notas 7, 8 e 9 e mostre \"$carla\".",
+      "script": "class Aluno {\n    [string]$Nome\n    [double[]]$Notas\n    Aluno([string]$nome, [double[]]$notas) { $this.Nome = $nome; $this.Notas = $notas }\n    [double] Media() { return ($this.Notas | Measure-Object -Average).Average }\n    [string] ToString() { return \"$($this.Nome) (média $($this.Media()))\" }\n}",
+      "solucao": "class Aluno {\n    [string]$Nome\n    [double[]]$Notas\n    Aluno([string]$nome, [double[]]$notas) { $this.Nome = $nome; $this.Notas = $notas }\n    [double] Media() { return ($this.Notas | Measure-Object -Average).Average }\n    [string] ToString() { return \"$($this.Nome) (média $($this.Media()))\" }\n}\n$carla = [Aluno]::new(\"Carla\", @(7, 8, 9))\n\"$carla\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Measure-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "classes-2",
+      "pagina": "classes.html",
+      "titulo": "Classes",
+      "secao": "Recursos Poderosos",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "out:Rex: Au au!;;src:class Cachorro;;semerro",
+      "metas": [
+        "out:Rex: Au au!",
+        "src:class Cachorro",
+        "semerro"
+      ],
+      "task": "Missão final: complete a classe Cachorro com o método [string] Falar() que devolve \"$($this.Nome): Au au!\", crie o Rex e chame Falar().",
+      "script": "class Cachorro {\n    [string]$Nome\n    Cachorro([string]$nome) { $this.Nome = $nome }\n}",
+      "solucao": "class Cachorro {\n    [string]$Nome\n    Cachorro([string]$nome) { $this.Nome = $nome }\n    [string] Falar() { return \"$($this.Nome): Au au!\" }\n}\n[Cachorro]::new(\"Rex\").Falar()",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "enum-1",
+      "pagina": "enum.html",
+      "titulo": "Enum",
+      "secao": "Recursos Poderosos",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "out:Café G: R$ 9;;src:-Copo G;;semerro",
+      "metas": [
+        "out:Café G: R$ 9",
+        "src:-Copo G",
+        "semerro"
+      ],
+      "task": "Experimente: chame Pedir-Cafe pedindo o copo grande (G).",
+      "script": "enum Tamanho { P = 1; M = 2; G = 3 }\nfunction Pedir-Cafe { param([Tamanho]$Copo = \"M\")\n    $preco = @{ P = 5; M = 7; G = 9 }[$Copo.ToString()]\n    \"Café ${Copo}: R$ $preco\"\n}\nPedir-Cafe",
+      "solucao": "enum Tamanho { P = 1; M = 2; G = 3 }\nfunction Pedir-Cafe { param([Tamanho]$Copo = \"M\")\n    $preco = @{ P = 5; M = 7; G = 9 }[$Copo.ToString()]\n    \"Café ${Copo}: R$ $preco\"\n}\nPedir-Cafe -Copo G",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Pedir-Cafe"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "enum-2",
+      "pagina": "enum.html",
+      "titulo": "Enum",
+      "secao": "Recursos Poderosos",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "out:Pago;;src:enum Status;;semerro",
+      "metas": [
+        "out:Pago",
+        "src:enum Status",
+        "semerro"
+      ],
+      "task": "Missão final: crie o enum Status com Pendente, Pago e Cancelado e mostre [Status]1.",
+      "script": "",
+      "solucao": "enum Status { Pendente; Pago; Cancelado }\n[Status]1",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "jobs-1",
+      "pagina": "jobs.html",
+      "titulo": "Tarefas em Segundo Plano (Start-Job)",
+      "secao": "Recursos Poderosos",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "out:Tarefa pronta;;src:Start-Job;;src:Receive-Job;;semerro",
+      "metas": [
+        "out:Tarefa pronta",
+        "src:Start-Job",
+        "src:Receive-Job",
+        "semerro"
+      ],
+      "task": "Experimente: inicie um job que devolve Tarefa pronta e busque o resultado com Receive-Job -Wait.",
+      "script": "$job = $null",
+      "solucao": "$job = Start-Job { \"Tarefa pronta\" }\nReceive-Job $job -Wait",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Receive-Job",
+        "Start-Job"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "jobs-2",
+      "pagina": "jobs.html",
+      "titulo": "Tarefas em Segundo Plano (Start-Job)",
+      "secao": "Recursos Poderosos",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "out:Dobro: 42;;src:\\$using:;;semerro",
+      "metas": [
+        "out:Dobro: 42",
+        "src:\\$using:",
+        "semerro"
+      ],
+      "task": "Missão final: num job, use $using:n para devolver Dobro:  + o dobro de $n, e receba com -Wait -AutoRemoveJob.",
+      "script": "$n = 21\nStart-Job { \"Dobro: $($n * 2)\" } | Receive-Job -Wait -AutoRemoveJob",
+      "solucao": "$n = 21\nStart-Job { \"Dobro: $($using:n * 2)\" } | Receive-Job -Wait -AutoRemoveJob",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Receive-Job",
+        "Start-Job"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "foreach-parallel-1",
+      "pagina": "foreach-parallel.html",
+      "titulo": "ForEach-Object -Parallel",
+      "secao": "Recursos Poderosos",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "out:Olá, Ana;;src:-Parallel;;src:\\$using:saudacao;;semerro",
+      "metas": [
+        "out:Olá, Ana",
+        "src:-Parallel",
+        "src:\\$using:saudacao",
+        "semerro"
+      ],
+      "task": "Experimente: use -Parallel com $using:saudacao para mostrar Olá,  + cada nome.",
+      "script": "$saudacao = \"Olá\"\n\"Ana\", \"Beto\" | ForEach-Object { \"$saudacao, $_\" }",
+      "solucao": "$saudacao = \"Olá\"\n\"Ana\", \"Beto\" | ForEach-Object -Parallel { \"$using:saudacao, $_\" }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "foreach-parallel-2",
+      "pagina": "foreach-parallel.html",
+      "titulo": "ForEach-Object -Parallel",
+      "secao": "Recursos Poderosos",
+      "nivel": "n3",
+      "n": 2,
+      "goal": "out:Total: 55;;src:-Parallel;;src:Measure-Object;;semerro",
+      "metas": [
+        "out:Total: 55",
+        "src:-Parallel",
+        "src:Measure-Object",
+        "semerro"
+      ],
+      "task": "Missão final: devolva os números de 1 a 10 com -Parallel e some com Measure-Object no fim, mostrando Total: 55.",
+      "script": "$total = 0\n1..10 | ForEach-Object -Parallel { $total += $_ }\n\"Total: $total\"",
+      "solucao": "$soma = (1..10 | ForEach-Object -Parallel { $_ } | Measure-Object -Sum).Sum\n\"Total: $soma\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Measure-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "bash-para-powershell-1",
+      "pagina": "bash-para-powershell.html",
+      "titulo": "Do Bash para o PowerShell",
+      "secao": "Boas Práticas",
+      "nivel": "n3",
+      "n": 1,
+      "goal": "out:uva;;src:Group-Object;;semerro",
+      "metas": [
+        "out:uva",
+        "src:Group-Object",
+        "semerro"
+      ],
+      "task": "Experimente: faça o equivalente de sort | uniq -c | sort -rn | head -1 e mostre só o nome da fruta mais repetida.",
+      "script": "$frutas = \"uva\", \"maçã\", \"uva\", \"pera\", \"uva\", \"maçã\"\n$frutas | Sort-Object",
+      "solucao": "$frutas = \"uva\", \"maçã\", \"uva\", \"pera\", \"uva\", \"maçã\"\n$frutas | Group-Object | Sort-Object Count -Descending | Select-Object -First 1 -ExpandProperty Name",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Group-Object",
+        "Select-Object",
+        "Sort-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "projeto-tarefas-1",
+      "pagina": "projeto-tarefas.html",
+      "titulo": "Projeto: Lista de Tarefas (JSON)",
+      "secao": "Projetos",
+      "nivel": "pj",
+      "n": 1,
+      "goal": "out:Tarefa 1 adicionada: Regar as plantas;;src:Add-Tarefa;;semerro",
+      "metas": [
+        "out:Tarefa 1 adicionada: Regar as plantas",
+        "src:Add-Tarefa",
+        "semerro"
+      ],
+      "task": "Experimente: as funções básicas já estão prontas. Adicione a tarefa Regar as plantas.",
+      "script": "$Arquivo = \"tarefas.json\"\nfunction Read-Tarefas { if (-not (Test-Path $Arquivo)) { return @() }; @(Get-Content $Arquivo -Raw | ConvertFrom-Json) }\nfunction Save-Tarefas { param([object[]]$Lista) ConvertTo-Json -InputObject @($Lista) -Depth 3 | Set-Content $Arquivo }\nfunction Add-Tarefa { param([string]$Titulo)\n    $lista = @(Read-Tarefas)\n    $nova = [pscustomobject]@{ Id = $lista.Count + 1; Titulo = $Titulo; Feita = $false }\n    Save-Tarefas ($lista + $nova)\n    \"Tarefa $($nova.Id) adicionada: $Titulo\"\n}",
+      "solucao": "$Arquivo = \"tarefas.json\"\nfunction Read-Tarefas { if (-not (Test-Path $Arquivo)) { return @() }; @(Get-Content $Arquivo -Raw | ConvertFrom-Json) }\nfunction Save-Tarefas { param([object[]]$Lista) ConvertTo-Json -InputObject @($Lista) -Depth 3 | Set-Content $Arquivo }\nfunction Add-Tarefa { param([string]$Titulo)\n    $lista = @(Read-Tarefas)\n    $nova = [pscustomobject]@{ Id = $lista.Count + 1; Titulo = $Titulo; Feita = $false }\n    Save-Tarefas ($lista + $nova)\n    \"Tarefa $($nova.Id) adicionada: $Titulo\"\n}\nAdd-Tarefa \"Regar as plantas\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Add-Tarefa",
+        "Get-Content",
+        "Read-Tarefas",
+        "Save-Tarefas",
+        "Set-Content",
+        "Test-Path"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "projeto-tarefas-2",
+      "pagina": "projeto-tarefas.html",
+      "titulo": "Projeto: Lista de Tarefas (JSON)",
+      "secao": "Projetos",
+      "nivel": "pj",
+      "n": 2,
+      "goal": "out:Concluída: Comprar pão;;src:Complete-Tarefa;;semerro",
+      "metas": [
+        "out:Concluída: Comprar pão",
+        "src:Complete-Tarefa",
+        "semerro"
+      ],
+      "task": "Missão final: complete a função Complete-Tarefa para marcar Feita = $true na tarefa do Id pedido, gravar e mostrar Concluída:  + o título. Depois conclua a tarefa 1.",
+      "script": "$Arquivo = \"tarefas.json\"\nfunction Read-Tarefas { if (-not (Test-Path $Arquivo)) { return @() }; @(Get-Content $Arquivo -Raw | ConvertFrom-Json) }\nfunction Save-Tarefas { param([object[]]$Lista) ConvertTo-Json -InputObject @($Lista) -Depth 3 | Set-Content $Arquivo }\nSave-Tarefas @([pscustomobject]@{ Id = 1; Titulo = \"Comprar pão\"; Feita = $false })\nfunction Complete-Tarefa { param([int]$Id)\n    $lista = @(Read-Tarefas)\n}",
+      "solucao": "$Arquivo = \"tarefas.json\"\nfunction Read-Tarefas { if (-not (Test-Path $Arquivo)) { return @() }; @(Get-Content $Arquivo -Raw | ConvertFrom-Json) }\nfunction Save-Tarefas { param([object[]]$Lista) ConvertTo-Json -InputObject @($Lista) -Depth 3 | Set-Content $Arquivo }\nSave-Tarefas @([pscustomobject]@{ Id = 1; Titulo = \"Comprar pão\"; Feita = $false })\nfunction Complete-Tarefa { param([int]$Id)\n    $lista = @(Read-Tarefas)\n    $alvo = $lista | Where-Object Id -eq $Id\n    $alvo.Feita = $true\n    Save-Tarefas $lista\n    \"Concluída: $($alvo.Titulo)\"\n}\nComplete-Tarefa 1",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Complete-Tarefa",
+        "Get-Content",
+        "Read-Tarefas",
+        "Save-Tarefas",
+        "Set-Content",
+        "Test-Path",
+        "Where-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "projeto-menu-1",
+      "pagina": "projeto-menu.html",
+      "titulo": "Projeto: Menu Interativo",
+      "secao": "Projetos",
+      "nivel": "pj",
+      "n": 1,
+      "goal": "out:Opção inválida: '7';;src:default;;semerro",
+      "metas": [
+        "out:Opção inválida: '7'",
+        "src:default",
+        "semerro"
+      ],
+      "task": "Experimente: o switch abaixo não tem default. Acrescente um que mostre Opção inválida: '7'... e teste com a opção 7.",
+      "script": "function Invoke-Opcao { param([string]$Opcao)\n    switch ($Opcao) {\n        \"1\" { \"Saudação\" }\n        \"0\" { \"Até logo!\" }\n    }\n}\nInvoke-Opcao 7",
+      "solucao": "function Invoke-Opcao { param([string]$Opcao)\n    switch ($Opcao) {\n        \"1\" { \"Saudação\" }\n        \"0\" { \"Até logo!\" }\n        default { \"Opção inválida: '$Opcao'. Escolha 0 ou 1.\" }\n    }\n}\nInvoke-Opcao 7",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Invoke-Opcao"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "projeto-menu-2",
+      "pagina": "projeto-menu.html",
+      "titulo": "Projeto: Menu Interativo",
+      "secao": "Projetos",
+      "nivel": "pj",
+      "n": 2,
+      "goal": "out:7 x  3 =  21;;src:Get-Tabuada;;semerro",
+      "metas": [
+        "out:7 x  3 =  21",
+        "src:Get-Tabuada",
+        "semerro"
+      ],
+      "task": "Missão final: chame Invoke-Opcao com a opção 2 e o valor 7, e veja a tabuada do 7.",
+      "script": "function Get-Tabuada { param([int]$Numero)\n    1..10 | ForEach-Object { \"{0,2} x {1,2} = {2,3}\" -f $Numero, $_, ($Numero * $_) }\n}\nfunction Invoke-Opcao { param([string]$Opcao, [string]$Valor)\n    switch ($Opcao) {\n        \"2\" { Get-Tabuada -Numero ([int]$Valor) }\n        default { \"Opção inválida\" }\n    }\n}",
+      "solucao": "function Get-Tabuada { param([int]$Numero)\n    1..10 | ForEach-Object { \"{0,2} x {1,2} = {2,3}\" -f $Numero, $_, ($Numero * $_) }\n}\nfunction Invoke-Opcao { param([string]$Opcao, [string]$Valor)\n    switch ($Opcao) {\n        \"2\" { Get-Tabuada -Numero ([int]$Valor) }\n        default { \"Opção inválida\" }\n    }\n}\nInvoke-Opcao 2 7",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Get-Tabuada",
+        "Invoke-Opcao"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "projeto-log-1",
+      "pagina": "projeto-log.html",
+      "titulo": "Projeto: Analisador de Log",
+      "secao": "Projetos",
+      "nivel": "pj",
+      "n": 1,
+      "goal": "out:ERROR 2;;src:Group-Object;;semerro",
+      "metas": [
+        "out:ERROR 2",
+        "src:Group-Object",
+        "semerro"
+      ],
+      "task": "Experimente: os eventos já estão prontos. Agrupe por Nivel e mostre cada grupo como NIVEL quantidade (ex.: ERROR 2).",
+      "script": "$eventos = @(\n  [pscustomobject]@{ Nivel = \"INFO\";  Mensagem = \"Sistema iniciado\" }\n  [pscustomobject]@{ Nivel = \"ERROR\"; Mensagem = \"Falha no banco\" }\n  [pscustomobject]@{ Nivel = \"ERROR\"; Mensagem = \"Falha no banco\" }\n)",
+      "solucao": "$eventos = @(\n  [pscustomobject]@{ Nivel = \"INFO\";  Mensagem = \"Sistema iniciado\" }\n  [pscustomobject]@{ Nivel = \"ERROR\"; Mensagem = \"Falha no banco\" }\n  [pscustomobject]@{ Nivel = \"ERROR\"; Mensagem = \"Falha no banco\" }\n)\n$eventos | Group-Object Nivel | ForEach-Object { \"$($_.Name) $($_.Count)\" }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Group-Object"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "projeto-log-2",
+      "pagina": "projeto-log.html",
+      "titulo": "Projeto: Analisador de Log",
+      "secao": "Projetos",
+      "nivel": "pj",
+      "n": 2,
+      "goal": "out:Falha no banco;;src:-match;;semerro",
+      "metas": [
+        "out:Falha no banco",
+        "src:-match",
+        "semerro"
+      ],
+      "task": "Missão final: use -match com o grupo (?<msg>.+) para mostrar só a mensagem da linha de erro.",
+      "script": "$linha = \"2026-11-20 08:17:03 ERROR Falha no banco\"",
+      "solucao": "$linha = \"2026-11-20 08:17:03 ERROR Falha no banco\"\nif ($linha -match '^\\S+ \\S+ (?<nivel>\\w+)\\s+(?<msg>.+)$') { $Matches.msg }",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "projeto-api-1",
+      "pagina": "projeto-api.html",
+      "titulo": "Projeto: Consultando uma API (CEP)",
+      "secao": "Projetos",
+      "nivel": "pj",
+      "n": 1,
+      "goal": "out:Formato inválido;;src:-notmatch;;semerro",
+      "metas": [
+        "out:Formato inválido",
+        "src:-notmatch",
+        "semerro"
+      ],
+      "task": "Experimente: complete a validação: se o CEP limpo não tiver exatamente 8 dígitos, mostre Formato inválido.",
+      "script": "function Test-Cep { param([string]$Cep)\n    $limpo = $Cep -replace '\\D', ''\n    \"OK\"\n}\nTest-Cep \"123\"",
+      "solucao": "function Test-Cep { param([string]$Cep)\n    $limpo = $Cep -replace '\\D', ''\n    if ($limpo -notmatch '^\\d{8}$') { return \"Formato inválido\" }\n    \"OK\"\n}\nTest-Cep \"123\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Test-Cep"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
+    },
+    {
+      "id": "projeto-api-2",
+      "pagina": "projeto-api.html",
+      "titulo": "Projeto: Consultando uma API (CEP)",
+      "secao": "Projetos",
+      "nivel": "pj",
+      "n": 2,
+      "goal": "out:São Paulo/SP;;src:Invoke-RestMethod;;semerro",
+      "metas": [
+        "out:São Paulo/SP",
+        "src:Invoke-RestMethod",
+        "semerro"
+      ],
+      "task": "Missão final: no seu terminal, consulte o CEP 01310100 e mostre Cidade/UF (ex.: São Paulo/SP). Aqui no navegador a internet é simulada e devolve o mesmo resultado.",
+      "script": "$r = $null",
+      "solucao": "$r = Invoke-RestMethod \"https://viacep.com.br/ws/01310100/json/\"\n\"$($r.localidade)/$($r.uf)\"",
+      "script_file": "main.ps1",
+      "solucao_file": "main.ps1",
+      "inicial_igual_solucao": false,
+      "cmdlets": [
+        "Invoke-RestMethod"
+      ],
+      "aliases": [],
+      "recursos": [],
+      "etapa": "pwsh-7.7"
     }
   ]
 }

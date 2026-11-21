@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Invoke-RestMethod e Invoke-WebRequest — consumindo APIs (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a acessar a internet com o PowerShell 7: Invoke-RestMethod para APIs JSON (consulta de CEP), Invoke-WebRequest para páginas e downloads, parâmetros na URL, POST com corpo JSON e tratamento de erros, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Internet (<span class="hl">Invoke-WebRequest</span> e Invoke-RestMethod)</h1>
+
+<p class="intro">Muitos serviços da internet têm uma <strong>API</strong>: um endereço que devolve dados em vez de uma página bonita. O <code>Invoke-RestMethod</code> busca esses dados e já entrega um objeto pronto. O <code>Invoke-WebRequest</code> traz a resposta completa, com código de status e cabeçalhos.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A consultar uma API com <code>Invoke-RestMethod</code> (o CEP, pelo ViaCEP).</li>
+  <li>A montar a URL com variáveis e parâmetros.</li>
+  <li>A ver o status e os cabeçalhos com <code>Invoke-WebRequest</code>.</li>
+  <li>A enviar dados (POST) em JSON.</li>
+  <li>A tratar erros de rede com <code>try/catch</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: o balcão de informações</h2>
+
+<p>Você vai ao balcão e pergunta "qual o endereço do CEP 01310-100?". A atendente consulta e entrega um papel com a resposta organizada. A API é o balcão; o <code>Invoke-RestMethod</code> faz a pergunta e entrega o papel já como objeto.</p>
+
+<hr>
+
+<h2>1. Consultando um CEP</h2>
+
+<p>O ViaCEP é um serviço gratuito: você coloca o CEP na URL e ele devolve JSON.</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $cep = Invoke-RestMethod "https://viacep.com.br/ws/01310100/json/"
+PS&gt; $cep.logradouro
+Avenida Paulista
+PS&gt; $cep.bairro
+Bela Vista
+PS&gt; "$($cep.localidade)/$($cep.uf)"
+São Paulo/SP
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Invoke-RestMethod</dt><dd>Faz a requisição e, se a resposta for JSON, já converte para objeto (como o <code>ConvertFrom-Json</code>).</dd>
+
+  <dt>"https://viacep.com.br/ws/01310100/json/"</dt><dd>A URL: o CEP vai no meio, sem traço.</dd>
+
+  <dt>$cep.logradouro</dt><dd>Cada campo do JSON vira uma propriedade.</dd>
+
+</dl>
+
+<p>Veja só os campos principais:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $cep | Select-Object cep, logradouro, bairro, localidade, uf
+
+cep        : 01310-100
+logradouro : Avenida Paulista
+bairro     : Bela Vista
+localidade : São Paulo
+uf         : SP
+</pre>
+
+<hr>
+
+<h2>2. Montando a URL com variáveis</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Get-Cep { param([string]$Numero)
+&gt;&gt;   $limpo = $Numero -replace '\D', ''
+&gt;&gt;   Invoke-RestMethod "https://viacep.com.br/ws/$limpo/json/"
+&gt;&gt; }
+PS&gt; (Get-Cep "20040-020").localidade
+Rio de Janeiro
+</pre>
+
+<p>Quando a URL tem parâmetros depois do <code>?</code>, use o <code>-Body</code> com uma hashtable num GET: o PowerShell monta o <code>?chave=valor&amp;...</code> para você, com os acentos e espaços codificados.</p>
+
+<hr>
+
+<h2>3. A resposta completa: Invoke-WebRequest</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $r = Invoke-WebRequest "https://viacep.com.br/ws/01310100/json/"
+PS&gt; $r.StatusCode
+200
+PS&gt; $r.Headers["Content-Type"]
+application/json; charset=utf-8
+PS&gt; $r.Content.Length -gt 0
+True
+PS&gt; ($r.Content | ConvertFrom-Json).uf
+SP
+</pre>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Propriedade</th><th>O que tem</th></tr>
+
+<tr><td><code>StatusCode</code></td><td>O código da resposta: 200 é sucesso, 404 é "não encontrado", 500 é erro no servidor.</td></tr>
+
+<tr><td><code>Headers</code></td><td>Os cabeçalhos (tipo do conteúdo, tamanho...).</td></tr>
+
+<tr><td><code>Content</code></td><td>O corpo da resposta como texto.</td></tr>
+
+</table>
+</div>
+
+<p>Para baixar um arquivo, use <code>Invoke-WebRequest URL -OutFile nome.ext</code>.</p>
+
+<hr>
+
+<h2>4. Enviando dados (POST)</h2>
+
+<p>Para criar algo numa API, você envia um corpo em JSON com o método POST. O site <code>httpbin.org</code> devolve o que recebeu, ótimo para testar:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $dados = @{ nome = "Ana"; curso = "PowerShell" } | ConvertTo-Json
+PS&gt; $resp = Invoke-RestMethod "https://httpbin.org/post" -Method Post -Body $dados -ContentType "application/json"
+PS&gt; $resp.json.nome
+Ana
+PS&gt; $resp.json.curso
+PowerShell
+</pre>
+
+<hr>
+
+<h2>5. Quando dá erro na rede</h2>
+
+<p>Um CEP inexistente no ViaCEP não dá erro de rede: a API responde com o campo <code>erro</code>. Já uma URL errada dá erro HTTP, que você trata com <code>try/catch</code>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; (Invoke-RestMethod "https://viacep.com.br/ws/99999999/json/").erro
+true
+PS&gt; try { Invoke-RestMethod "https://httpbin.org/status/404" } catch { "Falhou com status $($_.Exception.Response.StatusCode.value__)" }
+Falhou com status 404
+</pre>
+
+<div class="tryps" data-goal="out:Avenida Paulista;;src:Invoke-RestMethod;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> no seu terminal, consulte o CEP <code>01310100</code> no ViaCEP e mostre só o <code>logradouro</code>. (Aqui no navegador a internet é simulada e devolve o mesmo resultado.)</p>
+
+<pre class="script" data-file="main.ps1">$url = "https://viacep.com.br/ws/01310100/json/"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$url = "https://viacep.com.br/ws/01310100/json/"
+(Invoke-RestMethod $url).logradouro
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Firewall, proxy ou sem internet</strong>
+
+<p>Se o computador não alcança o site, o erro fala de nome não resolvido ou de tempo esgotado. Teste o endereço no navegador e veja a aula de <span data-rascunho="rede.html">Rede</span>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Esquecer o -ContentType no POST</strong>
+
+<p>Muitas APIs só entendem o corpo se você disser que ele é JSON: <code>-ContentType "application/json"</code>. Sem isso, a API pode responder que os campos vieram vazios.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Invoke-RestMethod URL</code></td><td>Busca dados (JSON vira objeto).</td></tr>
+
+<tr><td><code>Invoke-WebRequest URL</code></td><td>Resposta completa (StatusCode, Headers, Content).</td></tr>
+
+<tr><td><code>-OutFile arq</code></td><td>Salva a resposta num arquivo (download).</td></tr>
+
+<tr><td><code>-Method Post -Body $json -ContentType "application/json"</code></td><td>Envia dados.</td></tr>
+
+<tr><td><code>-Headers @{ Authorization = "Bearer $token" }</code></td><td>Envia cabeçalhos (chaves de API).</td></tr>
+
+<tr><td><code>-TimeoutSec 10</code></td><td>Desiste depois de 10 segundos.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. O cmdlet certo para APIs</h3>
+<p>Complete:</p>
+<div class="ex-code"><input data-answer="Invoke-RestMethod" aria-label="resposta"> "https://viacep.com.br/ws/01310100/json/"</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Qual código de status significa sucesso?</p>
+
+<label><input type="radio" name="q2"> 404</label>
+
+<label><input type="radio" name="q2"> 200</label>
+
+<label><input type="radio" name="q2"> 500</label>
+
+<label><input type="radio" name="q2"> 301</label>
+
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">3. Para baixar um arquivo com o <code>Invoke-WebRequest</code>, use:</p>
+
+<label><input type="radio" name="q3"> <code>-OutFile</code></label>
+
+<label><input type="radio" name="q3"> <code>-Save</code></label>
+
+<label><input type="radio" name="q3"> <code>-Download</code></label>
+
+<label><input type="radio" name="q3"> <code>&gt; arquivo</code></label>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Invoke-RestMethod</code> consulta APIs e já converte o JSON em objeto.</li>
+  <li><code>Invoke-WebRequest</code> traz status, cabeçalhos e conteúdo; <code>-OutFile</code> baixa arquivos.</li>
+  <li>POST: <code>-Method Post -Body (ConvertTo-Json) -ContentType "application/json"</code>.</li>
+  <li>Erros de rede e HTTP: <code>try/catch</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

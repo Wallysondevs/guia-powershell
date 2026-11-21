@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Get-Date — datas e horas, formatar, somar dias (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda datas e horas no PowerShell 7: Get-Date, criar uma data, formatar com -Format, somar dias com AddDays, diferença entre datas (TimeSpan) e dia da semana em português, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Datas e Horas (<span class="hl">Get-Date</span>)</h1>
+
+<p class="intro">Quantos dias faltam para o Natal? Que dia da semana cai o seu aniversário? Qual a data daqui a 90 dias? O <code>Get-Date</code> e os objetos <code>DateTime</code> respondem tudo isso, e com os nomes em português.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A pegar a data e hora de agora e criar uma data qualquer.</li>
+  <li>A formatar datas com <code>-Format</code> (<code>dd/MM/yyyy</code>, <code>HH:mm</code>...).</li>
+  <li>A somar e subtrair dias, meses e horas.</li>
+  <li>A calcular a diferença entre duas datas.</li>
+  <li>A ler partes da data: dia, mês, ano, dia da semana.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: o calendário de parede</h2>
+
+<p>Um calendário sabe quantos dias tem cada mês, quando é ano bissexto e em que dia da semana cai cada data. O objeto <code>DateTime</code> é um calendário dentro do PowerShell: você pede "30 dias depois de hoje" e ele faz a conta certa, virando o mês se precisar.</p>
+
+<hr>
+
+<h2>1. Agora</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-Date
+
+sábado, 21 de novembro de 2026 09:52:46
+</pre>
+
+<p>A data aparece no formato do seu idioma. Como é um objeto, você pega as partes com o ponto:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $agora = Get-Date
+PS&gt; $agora.Year
+2026
+PS&gt; $agora.DayOfYear
+325
+</pre>
+
+<hr>
+
+<h2>2. Uma data qualquer</h2>
+
+<p>Para os exemplos ficarem iguais no seu computador, a partir daqui vamos usar datas fixas:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $natal = Get-Date -Year 2026 -Month 12 -Day 25 -Hour 0 -Minute 0 -Second 0
+PS&gt; $natal
+
+sexta-feira, 25 de dezembro de 2026 00:00:00
+PS&gt; [datetime]"2026-03-15"
+
+domingo, 15 de março de 2026 00:00:00
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Get-Date -Year 2026 -Month 12 -Day 25</dt><dd>Cria a data a partir das partes. O que você não informar vem de "agora", por isso zeramos a hora.</dd>
+
+  <dt>[datetime]"2026-03-15"</dt><dd>Converte um texto em data. Use o formato <code>ano-mês-dia</code>, que nunca dá confusão.</dd>
+
+</dl>
+
+<hr>
+
+<h2>3. Formatando</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $natal = [datetime]"2026-12-25 20:30"
+PS&gt; Get-Date $natal -Format "dd/MM/yyyy"
+25/12/2026
+PS&gt; Get-Date $natal -Format "dd/MM/yyyy HH:mm"
+25/12/2026 20:30
+PS&gt; Get-Date $natal -Format "dddd, d 'de' MMMM 'de' yyyy"
+sexta-feira, 25 de dezembro de 2026
+PS&gt; $natal.ToString("yyyy-MM-dd")
+2026-12-25
+PS&gt; "Ceia: {0:HH'h'mm}" -f $natal
+Ceia: 20h30
+</pre>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Código</th><th>Significa</th><th>Exemplo</th></tr>
+
+<tr><td><code>dd</code></td><td>dia com 2 dígitos</td><td>25</td></tr>
+
+<tr><td><code>MM</code></td><td>mês com 2 dígitos (maiúsculo!)</td><td>12</td></tr>
+
+<tr><td><code>MMMM</code></td><td>nome do mês</td><td>dezembro</td></tr>
+
+<tr><td><code>yyyy</code></td><td>ano com 4 dígitos</td><td>2026</td></tr>
+
+<tr><td><code>HH</code></td><td>hora de 0 a 23</td><td>20</td></tr>
+
+<tr><td><code>mm</code></td><td>minutos (minúsculo!)</td><td>30</td></tr>
+
+<tr><td><code>ss</code></td><td>segundos</td><td>00</td></tr>
+
+<tr><td><code>dddd</code></td><td>dia da semana</td><td>sexta-feira</td></tr>
+
+</table>
+</div>
+
+<p>Para nomes de arquivo, o formato <code>yyyy-MM-dd</code> é o melhor: os arquivos ficam em ordem de data quando ordenados pelo nome.</p>
+
+<div class="tryps" data-goal="out:25/12/2026;;src:-Format;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> mostre <code>$natal</code> no formato dia/mês/ano com <code>Get-Date -Format</code>.</p>
+
+<pre class="script" data-file="main.ps1">$natal = [datetime]"2026-12-25"
+$natal
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$natal = [datetime]"2026-12-25"
+Get-Date $natal -Format "dd/MM/yyyy"
+</pre>
+
+</div>
+
+<hr>
+
+<h2>4. Somando e subtraindo</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $d = [datetime]"2026-01-31"
+PS&gt; $d.AddDays(1).ToString("dd/MM/yyyy")
+01/02/2026
+PS&gt; $d.AddMonths(1).ToString("dd/MM/yyyy")
+28/02/2026
+PS&gt; $d.AddDays(-45).ToString("dd/MM/yyyy")
+17/12/2025
+PS&gt; $d.AddHours(36).ToString("dd/MM/yyyy HH:mm")
+01/02/2026 12:00
+</pre>
+
+<p>Repare no <code>AddMonths(1)</code>: 31 de janeiro mais um mês vira 28 de fevereiro, porque fevereiro de 2026 não tem dia 31.</p>
+
+<hr>
+
+<h2>5. Diferença entre datas</h2>
+
+<p>Subtrair uma data da outra dá um <code>TimeSpan</code> (um intervalo):</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $inicio = [datetime]"2026-11-21"
+PS&gt; $natal = [datetime]"2026-12-25"
+PS&gt; $falta = $natal - $inicio
+PS&gt; $falta.Days
+34
+PS&gt; "Faltam $($falta.Days) dias para o Natal."
+Faltam 34 dias para o Natal.
+PS&gt; (New-TimeSpan -Start $inicio -End $natal).TotalHours
+816
+</pre>
+
+<hr>
+
+<h2>6. Dia da semana</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $aniver = [datetime]"2026-08-14"
+PS&gt; $aniver.DayOfWeek
+Friday
+PS&gt; Get-Date $aniver -Format dddd
+sexta-feira
+PS&gt; $aniver.DayOfWeek -in "Saturday", "Sunday"
+False
+</pre>
+
+<p>A propriedade <code>DayOfWeek</code> vem sempre em inglês (é um valor fixo do .NET, bom para comparar). Para mostrar em português, use o formato <code>dddd</code>.</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>mm em vez de MM</strong>
+
+<p><code>-Format "dd/mm/yyyy"</code> mostra os <strong>minutos</strong> no lugar do mês. Mês é <code>MM</code> (maiúsculo); minuto é <code>mm</code> (minúsculo).</p>
+
+</div>
+
+<div class="cenario">
+<strong>Data ambígua em texto</strong>
+
+<p><code>[datetime]"03/04/2026"</code> usa o formato americano (mês/dia) e vira 4 de março. Para não errar, escreva <code>"2026-04-03"</code> ou crie a data com <code>Get-Date -Year -Month -Day</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Get-Date</code></td><td>Agora.</td></tr>
+
+<tr><td><code>[datetime]"2026-12-25"</code></td><td>Cria uma data a partir de texto.</td></tr>
+
+<tr><td><code>Get-Date $d -Format "dd/MM/yyyy"</code></td><td>Formata.</td></tr>
+
+<tr><td><code>$d.AddDays(10)</code></td><td>Soma 10 dias (use negativo para voltar).</td></tr>
+
+<tr><td><code>$d2 - $d1</code></td><td>Diferença (TimeSpan); <code>.Days</code> = dias.</td></tr>
+
+<tr><td><code>$d.DayOfWeek</code></td><td>Dia da semana (inglês, para comparar).</td></tr>
+
+<tr><td><code>Get-Date $d -Format dddd</code></td><td>Dia da semana em português.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. O mês</h3>
+<p>Complete o formato para mostrar o mês com dois dígitos:</p>
+<div class="ex-code">Get-Date -Format "dd/<input data-answer="MM" aria-label="resposta">/yyyy"</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. O que <code>[datetime]"2026-01-31"</code> com <code>.AddMonths(1)</code> dá?</p>
+
+<label><input type="radio" name="q2"> 31/02/2026</label>
+
+<label><input type="radio" name="q2"> 28/02/2026</label>
+
+<label><input type="radio" name="q2"> 01/03/2026</label>
+
+<label><input type="radio" name="q2"> Um erro</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. O que você ganha ao subtrair duas datas?</p>
+
+<label><input type="radio" name="q3"> Um número inteiro</label>
+
+<label><input type="radio" name="q3"> Um texto</label>
+
+<label><input type="radio" name="q3"> Um TimeSpan</label>
+
+<label><input type="radio" name="q3"> Uma data</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Faltam 10 dias.;;src:\.Days;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> calcule quantos dias faltam de <code>$hoje</code> até <code>$prova</code> e mostre <code>Faltam 10 dias.</code>.</p>
+
+<pre class="script" data-file="main.ps1">$hoje = [datetime]"2026-06-05"
+$prova = [datetime]"2026-06-15"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$hoje = [datetime]"2026-06-05"
+$prova = [datetime]"2026-06-15"
+$falta = $prova - $hoje
+"Faltam $($falta.Days) dias."
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Get-Date</code> dá o agora; <code>[datetime]"aaaa-mm-dd"</code> cria uma data.</li>
+  <li><code>-Format</code> com <code>dd</code>, <code>MM</code>, <code>yyyy</code>, <code>HH</code>, <code>mm</code> formata como você quiser.</li>
+  <li><code>AddDays</code>, <code>AddMonths</code>, <code>AddHours</code> fazem as contas de calendário.</li>
+  <li>Data menos data = TimeSpan, com <code>.Days</code>, <code>.TotalHours</code>...</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

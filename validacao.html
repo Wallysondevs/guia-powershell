@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell — validando parâmetros (ValidateSet, ValidateRange…) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a validar parâmetros no PowerShell: ValidateSet, ValidateRange, ValidateLength, ValidatePattern, ValidateNotNullOrEmpty e ValidateScript, com as mensagens de erro reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Validando <span class="hl">Parâmetros</span></h1>
+
+<p class="intro">Em vez de encher a função de <code>if</code> para conferir os valores, você pode colocar a regra no próprio parâmetro. O PowerShell confere <strong>antes</strong> de rodar a função e recusa o que não serve, com uma mensagem clara.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A aceitar só alguns valores com <code>[ValidateSet()]</code> (e ganhar Tab de brinde).</li>
+  <li>A limitar números com <code>[ValidateRange()]</code>.</li>
+  <li>A limitar o tamanho de um texto com <code>[ValidateLength()]</code>.</li>
+  <li>A exigir um formato com <code>[ValidatePattern()]</code>.</li>
+  <li>A recusar vazio com <code>[ValidateNotNullOrEmpty()]</code> e a criar sua regra com <code>[ValidateScript()]</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: o porteiro</h2>
+
+<p>O porteiro do prédio confere o documento antes de deixar entrar. Se não serve, a pessoa nem chega ao elevador. Os atributos <code>Validate</code> são porteiros dos parâmetros: a função só roda se todos os valores passarem.</p>
+
+<hr>
+
+<h2>1. <code>[ValidateSet()]</code>: só da lista</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Set-Tamanho {
+&gt;&gt;   param([ValidateSet("P", "M", "G")][string]$Tamanho)
+&gt;&gt;   "Camiseta tamanho $Tamanho"
+&gt;&gt; }
+PS&gt; Set-Tamanho M
+Camiseta tamanho M
+</pre>
+
+<pre><code>Set-Tamanho GG
+</code></pre>
+
+<dl class="anatomy">
+
+  <dt>[ValidateSet("P", "M", "G")]</dt><dd>Só aceita um desses valores (sem diferenciar maiúsculas).</dd>
+
+  <dt>Set-Tamanho GG</dt><dd>Recusado antes de a função rodar. A mensagem de erro diz o parâmetro (<code>Tamanho</code>) e lista os valores que servem: <code>P;M;G</code>.</dd>
+
+</dl>
+
+<p>De brinde: no console, <code>Set-Tamanho </code> + Tab passa pelos valores <code>P</code>, <code>M</code> e <code>G</code>.</p>
+
+<hr>
+
+<h2>2. <code>[ValidateRange()]</code>: números num intervalo</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Set-Nota { param([ValidateRange(0, 10)][int]$Nota) "Nota $Nota registrada" }
+PS&gt; Set-Nota 8
+Nota 8 registrada
+</pre>
+
+<pre><code>Set-Nota 11
+</code></pre>
+
+<p>O <code>11</code> é recusado: a mensagem diz que ele é maior que o máximo permitido, <code>10</code>.</p>
+
+<hr>
+
+<h2>3. <code>[ValidateLength()]</code> e <code>[ValidatePattern()]</code></h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function New-Login {
+&gt;&gt;   param(
+&gt;&gt;     [ValidateLength(3, 12)]
+&gt;&gt;     [ValidatePattern("^[a-z0-9]+$")]
+&gt;&gt;     [string]$Login
+&gt;&gt;   )
+&gt;&gt;   "Login $Login criado"
+&gt;&gt; }
+PS&gt; New-Login ana2026
+Login ana2026 criado
+</pre>
+
+<pre><code>New-Login an
+New-Login "Ana Souza"
+</code></pre>
+
+<p>O <code>an</code> é recusado por ser curto demais (2 caracteres, o mínimo é 3). O <code>"Ana Souza"</code> tem tamanho bom, mas é recusado pelo formato: tem maiúscula e espaço.</p>
+
+<dl class="anatomy">
+
+  <dt>[ValidateLength(3, 12)]</dt><dd>Entre 3 e 12 caracteres.</dd>
+
+  <dt>[ValidatePattern("^[a-z0-9]+$")]</dt><dd>Só letras minúsculas e números, do começo ao fim (aula <a href="regex.html">Expressões Regulares</a>).</dd>
+
+</dl>
+
+<div class="tryps" data-goal="out:Sabor: uva;;src:ValidateSet;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> aceite só os sabores <code>uva</code>, <code>laranja</code> e <code>limao</code> com <code>[ValidateSet()]</code>. A chamada <code>Get-Suco uva</code> deve mostrar <code>Sabor: uva</code>.</p>
+
+<pre class="script" data-file="main.ps1">function Get-Suco {
+    param([string]$Sabor)
+    "Sabor: $Sabor"
+}
+Get-Suco uva
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Get-Suco {
+    param([ValidateSet("uva", "laranja", "limao")][string]$Sabor)
+    "Sabor: $Sabor"
+}
+Get-Suco uva
+</pre>
+
+</div>
+
+<hr>
+
+<h2>4. Vazio não: <code>[ValidateNotNullOrEmpty()]</code></h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Send-Recado { param([ValidateNotNullOrEmpty()][string]$Texto) "Enviado: $Texto" }
+PS&gt; Send-Recado "Chego às 8"
+Enviado: Chego às 8
+</pre>
+
+<pre><code>Send-Recado ""
+</code></pre>
+
+<p>O texto vazio é recusado com um erro dizendo que o argumento é nulo ou vazio.</p>
+
+<hr>
+
+<h2>5. Sua regra: <code>[ValidateScript()]</code></h2>
+
+<p>Para regras que nenhum atributo pronto cobre, escreva um bloco que devolve <code>True</code> ou <code>False</code>. Dentro dele, <code>$_</code> é o valor recebido:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Set-Par { param([ValidateScript({ $_ % 2 -eq 0 })][int]$Numero) "Par: $Numero" }
+PS&gt; Set-Par 4
+Par: 4
+</pre>
+
+<pre><code>Set-Par 5
+</code></pre>
+
+<p>Com o <code>5</code>, a mensagem de erro mostra o próprio bloco que falhou, o que não é muito amigável. No PowerShell 7 dá para trocar por uma mensagem sua com <code>ErrorMessage</code>, onde <code>{0}</code> vira o valor recebido:</p>
+
+<pre><code>function Set-Par2 { param([ValidateScript({ $_ % 2 -eq 0 }, ErrorMessage = "{0} não é par")][int]$Numero) "Par: $Numero" }
+Set-Par2 7
+</code></pre>
+
+<p>Agora o erro termina com a sua frase: <code>7 não é par</code>.</p>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Atributo</th><th>Aceita só</th></tr>
+
+<tr><td><code>[ValidateSet("a", "b")]</code></td><td>Valores da lista.</td></tr>
+
+<tr><td><code>[ValidateRange(1, 10)]</code></td><td>Números de 1 a 10.</td></tr>
+
+<tr><td><code>[ValidateLength(3, 12)]</code></td><td>Textos de 3 a 12 letras.</td></tr>
+
+<tr><td><code>[ValidatePattern("^\d+$")]</code></td><td>Textos que casam com a regex.</td></tr>
+
+<tr><td><code>[ValidateNotNullOrEmpty()]</code></td><td>Qualquer coisa, menos vazio.</td></tr>
+
+<tr><td><code>[ValidateScript({ ... })]</code></td><td>O que o bloco aprovar.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. De 1 a 5</h3>
+<p>Complete o atributo para aceitar só de 1 a 5:</p>
+<div class="ex-code">param([ <input data-answer="ValidateRange(1, 5)|ValidateRange(1,5)" aria-label="resposta"> ][int]$Estrelas)</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Quando o PowerShell confere os atributos <code>Validate</code>?</p>
+
+<label><input type="radio" name="q2"> Depois que a função termina</label>
+
+<label><input type="radio" name="q2"> Antes de rodar o corpo da função</label>
+
+<label><input type="radio" name="q2"> Só se você chamar <code>Test-Parameter</code></label>
+
+<label><input type="radio" name="q2"> Nunca</label>
+
+</div>
+
+<div class="mc" data-answer="4">
+
+<p class="mc-q">3. Dentro do <code>[ValidateScript({ ... })]</code>, como se chama o valor recebido?</p>
+
+<label><input type="radio" name="q3"> <code>$valor</code></label>
+
+<label><input type="radio" name="q3"> <code>$args</code></label>
+
+<label><input type="radio" name="q3"> <code>$this</code></label>
+
+<label><input type="radio" name="q3"> <code>$_</code></label>
+
+</div>
+
+<div class="tryps" data-goal="outre:Nota 7 registrada;;src:ValidateRange\(\s*0\s*,\s*10\s*\);;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> proteja a função com <code>[ValidateRange(0, 10)]</code> e chame com a nota <code>7</code>.</p>
+
+<pre class="script" data-file="main.ps1">function Set-Nota {
+    param([int]$Nota)
+    "Nota $Nota registrada"
+}
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Set-Nota {
+    param([ValidateRange(0, 10)][int]$Nota)
+    "Nota $Nota registrada"
+}
+Set-Nota 7
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Atributos <code>Validate</code> conferem os valores antes da função rodar.</li>
+  <li><code>ValidateSet</code> (lista), <code>ValidateRange</code> (números), <code>ValidateLength</code> (tamanho), <code>ValidatePattern</code> (formato).</li>
+  <li><code>ValidateNotNullOrEmpty</code> recusa vazio; <code>ValidateScript</code> aplica sua regra.</li>
+  <li>A mensagem de erro já diz o que estava errado.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

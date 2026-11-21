@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Add-Type — escrevendo C# dentro do PowerShell (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda Add-Type no PowerShell 7: compilar uma classe C# na hora com -TypeDefinition, chamar métodos estáticos e de instância, -MemberDefinition, carregar assemblies e cuidados de uso, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>C# Dentro do PowerShell (<span class="hl">Add-Type</span>)</h1>
+
+<p class="intro">Às vezes você encontra a solução pronta em C# (a linguagem do .NET) ou precisa de um trecho muito rápido. Com <code>Add-Type</code>, o PowerShell compila esse código na hora e o tipo novo fica disponível, como qualquer <code>[Math]</code> ou <code>[DateTime]</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A compilar uma classe C# com <code>Add-Type -TypeDefinition</code>.</li>
+  <li>A chamar métodos estáticos e criar objetos do tipo novo.</li>
+  <li>A usar <code>-MemberDefinition</code> para métodos soltos.</li>
+  <li>A carregar uma biblioteca do .NET com <code>-AssemblyName</code>.</li>
+  <li>Os limites: o tipo não pode ser mudado na mesma sessão.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: o tradutor na reunião</h2>
+
+<p>Numa reunião com um colega que só fala inglês, um tradutor traduz o que ele diz na hora. O <code>Add-Type</code> é o tradutor: você entrega o texto em C# e ele "traduz" (compila) para algo que o PowerShell usa.</p>
+
+<hr>
+
+<h2>1. Uma classe C#</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Add-Type -TypeDefinition @'
+&gt;&gt; public static class Calculadora
+&gt;&gt; {
+&gt;&gt;     public static int Somar(int a, int b) { return a + b; }
+&gt;&gt;     public static double Media(double[] valores)
+&gt;&gt;     {
+&gt;&gt;         double soma = 0;
+&gt;&gt;         foreach (var v in valores) soma += v;
+&gt;&gt;         return soma / valores.Length;
+&gt;&gt;     }
+&gt;&gt; }
+&gt;&gt; '@
+PS&gt; [Calculadora]::Somar(20, 22)
+42
+PS&gt; [Calculadora]::Media(@(7, 8, 10))
+8,33333333333333
+</pre>
+
+<dl class="anatomy">
+
+  <dt>-TypeDefinition @'...'@</dt><dd>O código C# numa here-string de aspas simples (assim o <code>$</code> não é interpretado).</dd>
+
+  <dt>public static class</dt><dd>Uma classe estática: você usa direto com <code>::</code>, sem criar objeto.</dd>
+
+  <dt>[Calculadora]</dt><dd>Somar(20, 22) :: Chamada igual à de qualquer tipo do .NET.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Objetos de uma classe C#</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Add-Type -TypeDefinition @'
+&gt;&gt; public class Contador
+&gt;&gt; {
+&gt;&gt;     public int Valor { get; private set; }
+&gt;&gt;     public void Mais() { Valor++; }
+&gt;&gt; }
+&gt;&gt; '@
+PS&gt; $c = [Contador]::new()
+PS&gt; $c.Mais(); $c.Mais(); $c.Mais()
+PS&gt; $c.Valor
+3
+</pre>
+
+<hr>
+
+<h2>3. Métodos soltos: -MemberDefinition</h2>
+
+<p>Para um ou dois métodos, o <code>-MemberDefinition</code> cria a classe para você. Você escolhe o nome e um "sobrenome" (namespace):</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $tipo = Add-Type -Name Texto -Namespace Util -PassThru -MemberDefinition @'
+&gt;&gt; public static string Inverter(string s)
+&gt;&gt; {
+&gt;&gt;     char[] c = s.ToCharArray();
+&gt;&gt;     System.Array.Reverse(c);
+&gt;&gt;     return new string(c);
+&gt;&gt; }
+&gt;&gt; '@
+PS&gt; [Util.Texto]::Inverter("PowerShell")
+llehSrewoP
+PS&gt; $tipo.FullName
+Util.Texto
+</pre>
+
+<hr>
+
+<h2>4. Carregando uma biblioteca do .NET</h2>
+
+<p>Algumas partes do .NET não vêm carregadas. O <code>-AssemblyName</code> carrega:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Add-Type -AssemblyName System.Web
+PS&gt; [System.Web.HttpUtility]::UrlEncode("café com pão")
+caf%c3%a9+com+p%c3%a3o
+PS&gt; [System.Web.HttpUtility]::HtmlEncode("&lt;b&gt;negrito&lt;/b&gt;")
+&amp;lt;b&amp;gt;negrito&amp;lt;/b&amp;gt;
+</pre>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Mudei o C# e rodei de novo</strong>
+
+<p>Um tipo compilado não pode ser trocado na mesma sessão. Rodar <code>Add-Type</code> de novo com o código diferente dá erro dizendo que o tipo já existe. Feche e abra o PowerShell (ou mude o nome da classe enquanto testa).</p>
+
+</div>
+
+<div class="cenario">
+<strong>Erro de compilação</strong>
+
+<p>Se o C# tiver erro (um <code>;</code> esquecido, um tipo errado), o <code>Add-Type</code> mostra a linha e a mensagem do compilador. Lembre: C# diferencia maiúsculas (<code>string</code> ≠ <code>String</code> em alguns lugares, <code>Length</code> ≠ <code>length</code>) e toda instrução termina com <code>;</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Usar Add-Type quando o PowerShell já resolve</strong>
+
+<p>Antes de escrever C#, veja se uma <a href="classes.html">classe do PowerShell</a> ou um tipo pronto do .NET (veja <a href="dotnet.html">Usando o .NET</a>) já resolvem. C# compensa para trechos que precisam de muita velocidade ou quando o exemplo pronto já está em C#.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Add-Type -TypeDefinition $cs</code></td><td>Compila uma ou mais classes C#.</td></tr>
+
+<tr><td><code>Add-Type -Name N -Namespace NS -MemberDefinition $m</code></td><td>Cria <code>[NS.N]</code> com os métodos.</td></tr>
+
+<tr><td><code>-PassThru</code></td><td>Devolve o tipo criado.</td></tr>
+
+<tr><td><code>Add-Type -AssemblyName System.Web</code></td><td>Carrega uma biblioteca do .NET.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Compilar a classe</h3>
+<p>Complete o parâmetro:</p>
+<div class="ex-code">Add-Type <input data-answer="-TypeDefinition" aria-label="resposta"> $codigoCSharp</div>
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. Por que usar here-string com aspas simples (<code>@'...'@</code>) para o código C#?</p>
+
+<label><input type="radio" name="q2"> Porque o C# exige</label>
+
+<label><input type="radio" name="q2"> Para ficar colorido</label>
+
+<label><input type="radio" name="q2"> Para o PowerShell não interpretar <code>$</code> e crases dentro do código</label>
+
+<label><input type="radio" name="q2"> Não faz diferença</label>
+
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">3. O que acontece ao rodar <code>Add-Type</code> de novo com a classe modificada, na mesma sessão?</p>
+
+<label><input type="radio" name="q3"> A classe é atualizada</label>
+
+<label><input type="radio" name="q3"> Dá erro: o tipo já existe</label>
+
+<label><input type="radio" name="q3"> O PowerShell pergunta qual usar</label>
+
+<label><input type="radio" name="q3"> Cria uma cópia</label>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Add-Type -TypeDefinition</code> compila C# e cria tipos novos na sessão.</li>
+  <li>Use os tipos como qualquer tipo do .NET: <code>[Tipo]::Metodo()</code> e <code>::new()</code>.</li>
+  <li><code>-MemberDefinition</code> cria métodos soltos; <code>-AssemblyName</code> carrega bibliotecas.</li>
+  <li>Tipo compilado não muda na mesma sessão: abra outra para testar mudanças.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

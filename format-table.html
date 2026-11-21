@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Format-Table — mostrando objetos em tabela | Guia PowerShell</title>
+<meta name="description" content="Aprenda o Format-Table: escolher colunas, ajustar a largura com -AutoSize, agrupar com -GroupBy, colunas calculadas e por que ele deve ser o último comando do pipeline.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Format-Table</span></h1>
+
+<p class="intro">Quando um comando devolve objetos, o PowerShell decide sozinho como mostrar: em tabela ou em lista. O <code>Format-Table</code> (apelido <code>ft</code>) manda mostrar em <strong>tabela</strong>, com as colunas e a largura que você escolher.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A escolher as colunas da tabela.</li>
+  <li>A ajustar a largura das colunas com <code>-AutoSize</code>.</li>
+  <li>A separar a tabela em blocos com <code>-GroupBy</code>.</li>
+  <li>A criar uma coluna calculada com rótulo e alinhamento.</li>
+  <li>Por que o <code>Format-Table</code> vai sempre no <strong>fim</strong> do pipeline.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a vitrine</h2>
+
+<p>O <code>Format-Table</code> é a vitrine da loja: ele arruma os produtos para alguém <strong>olhar</strong>. Depois que estão na vitrine, não dá mais para mexer neles como antes. Por isso ele é a última coisa que você faz.</p>
+
+<p>Os exemplos usam esta lista:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $produtos = @(
+&gt;&gt;   [pscustomobject]@{ Nome = "Arroz integral"; Categoria = "Grãos"; Preco = 25.9; Estoque = 12 }
+&gt;&gt;   [pscustomobject]@{ Nome = "Café"; Categoria = "Bebidas"; Preco = 18.5; Estoque = 40 }
+&gt;&gt;   [pscustomobject]@{ Nome = "Feijão"; Categoria = "Grãos"; Preco = 9.75; Estoque = 0 }
+&gt;&gt; )
+</pre>
+
+<hr>
+
+<h2>1. Escolhendo as colunas</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $produtos | Format-Table Nome, Preco
+
+Nome            Preco
+----            -----
+Arroz integral 25,900
+Café           18,500
+Feijão          9,750
+</pre>
+
+<hr>
+
+<h2>2. <code>-AutoSize</code>: largura do tamanho do conteúdo</h2>
+
+<p>Sem opções, o PowerShell pode deixar espaços largos. O <code>-AutoSize</code> calcula a largura de cada coluna pelo maior valor:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $produtos | Format-Table Nome, Categoria, Estoque -AutoSize
+
+Nome           Categoria Estoque
+----           --------- -------
+Arroz integral Grãos          12
+Café           Bebidas        40
+Feijão         Grãos           0
+</pre>
+
+<hr>
+
+<h2>3. Separando em blocos: <code>-GroupBy</code></h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $produtos | Sort-Object Categoria | Format-Table Nome, Preco -GroupBy Categoria
+
+   Categoria: Bebidas
+
+Nome  Preco
+----  -----
+Café 18,500
+
+   Categoria: Grãos
+
+Nome            Preco
+----            -----
+Arroz integral 25,900
+Feijão          9,750
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Sort-Object Categoria</dt><dd>Ordene antes. O <code>-GroupBy</code> começa um bloco novo cada vez que o valor muda.</dd>
+
+  <dt>-GroupBy Categoria</dt><dd>Um título para cada categoria, com a sua tabelinha.</dd>
+
+</dl>
+
+<hr>
+
+<h2>4. Coluna calculada</h2>
+
+<p>Igual ao <a href="select-object.html">Select-Object</a>, dá para criar uma coluna com <code>@{ Label = ...; Expression = { ... } }</code>. No <code>Format-Table</code> também existe <code>Align</code>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $produtos | Format-Table Nome, @{ Label = "Preço"; Expression = { "R$ {0:N2}" -f $_.Preco }; Align = "Right" }
+
+Nome              Preço
+----              -----
+Arroz integral R$ 25,90
+Café           R$ 18,50
+Feijão          R$ 9,75
+</pre>
+
+<div class="tryps" data-goal="out:Nome;;out:Estoque;;src:Format-Table;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> mostre os produtos numa tabela com só as colunas <code>Nome</code> e <code>Estoque</code>.</p>
+
+<pre class="script" data-file="main.ps1">$produtos = @(
+    [pscustomobject]@{ Nome = "Café"; Preco = 18.5; Estoque = 40 }
+    [pscustomobject]@{ Nome = "Feijão"; Preco = 9.75; Estoque = 0 }
+)
+$produtos
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$produtos = @(
+    [pscustomobject]@{ Nome = "Café"; Preco = 18.5; Estoque = 40 }
+    [pscustomobject]@{ Nome = "Feijão"; Preco = 9.75; Estoque = 0 }
+)
+$produtos | Format-Table Nome, Estoque
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado: formatar no meio do pipeline</h2>
+
+<div class="cenario">
+<strong>Depois do <code>Format-Table</code>, não há mais objetos</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $produtos | Format-Table Nome, Preco | Sort-Object Preco
+
+Nome            Preco
+----            -----
+Arroz integral 25,900
+Café           18,500
+Feijão          9,750
+</pre>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $produtos | Format-Table | Select-Object -First 1
+</pre>
+
+<p>O <code>Format-Table</code> transforma os objetos em "instruções de desenho" para a tela. O que sai dele já não tem os campos <code>Nome</code> e <code>Preco</code>. No primeiro exemplo, o <code>Sort-Object</code> não tinha o que ordenar e a tabela saiu na ordem original (o mais caro primeiro). No segundo, o <code>Select-Object -First 1</code> pegou só a primeira instrução de desenho, e a tela ficou em branco. A regra é: <strong>filtre, ordene e escolha antes; formate por último</strong>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Guardar o resultado numa variável</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $t = $produtos | Format-Table
+PS&gt; $t[0].GetType().Name
+FormatStartData
+</pre>
+
+<p>O que foi guardado não são produtos, são pedaços de formatação. Guarde os objetos (<code>$t = $produtos</code>) e formate só na hora de mostrar.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Format-Table A, B</code></td><td>Tabela só com A e B.</td></tr>
+
+<tr><td><code>ft A, B</code></td><td>O mesmo, com o apelido.</td></tr>
+
+<tr><td><code>-AutoSize</code></td><td>Largura pelo conteúdo.</td></tr>
+
+<tr><td><code>-GroupBy Campo</code></td><td>Um bloco por valor (ordene antes).</td></tr>
+
+<tr><td><code>@{ Label = "X"; Expression = { } }</code></td><td>Coluna calculada.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. O apelido</h3>
+<p>Complete com o apelido do Format-Table:</p>
+<div class="ex-code">$produtos | <input data-answer="ft|Format-Table" aria-label="resposta"> Nome</div>
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. Onde o <code>Format-Table</code> deve ficar no pipeline?</p>
+
+<label><input type="radio" name="q2"> No começo</label>
+
+<label><input type="radio" name="q2"> No meio, antes do <code>Sort-Object</code></label>
+
+<label><input type="radio" name="q2"> No fim, depois de filtrar e ordenar</label>
+
+<label><input type="radio" name="q2"> Tanto faz</label>
+
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">3. O que faz o <code>-AutoSize</code>?</p>
+
+<label><input type="radio" name="q3"> Ordena as colunas</label>
+
+<label><input type="radio" name="q3"> Ajusta a largura das colunas pelo conteúdo</label>
+
+<label><input type="radio" name="q3"> Mostra só as colunas pequenas</label>
+
+<label><input type="radio" name="q3"> Aumenta a letra</label>
+
+</div>
+
+<div class="tryps" data-goal="outre:Café[\s\S]*Arroz[\s\S]*Feijão;;src:Sort-Object\s+Categoria;;src:Format-Table\s+Nome,\s*Categoria;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> ordene os produtos por <code>Categoria</code> (o <code>Café</code>, de Bebidas, vem primeiro) e mostre uma tabela só com as colunas <code>Nome</code> e <code>Categoria</code>.</p>
+
+<pre class="script" data-file="main.ps1">$produtos = @(
+    [pscustomobject]@{ Nome = "Arroz"; Categoria = "Grãos"; Preco = 25.9 }
+    [pscustomobject]@{ Nome = "Café"; Categoria = "Bebidas"; Preco = 18.5 }
+    [pscustomobject]@{ Nome = "Feijão"; Categoria = "Grãos"; Preco = 9.75 }
+)
+$produtos | Format-Table
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$produtos = @(
+    [pscustomobject]@{ Nome = "Arroz"; Categoria = "Grãos"; Preco = 25.9 }
+    [pscustomobject]@{ Nome = "Café"; Categoria = "Bebidas"; Preco = 18.5 }
+    [pscustomobject]@{ Nome = "Feijão"; Categoria = "Grãos"; Preco = 9.75 }
+)
+$produtos | Sort-Object Categoria | Format-Table Nome, Categoria
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Format-Table</code> (apelido <code>ft</code>) mostra objetos em tabela, com as colunas que você escolher.</li>
+  <li><code>-AutoSize</code> ajusta a largura; <code>-GroupBy</code> separa em blocos (ordene antes).</li>
+  <li>Coluna calculada: <code>@{ Label = "X"; Expression = { ... } }</code>.</li>
+  <li>O <code>Format-Table</code> é para os olhos: use sempre no <strong>fim</strong> do pipeline.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

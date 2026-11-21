@@ -1,6 +1,0 @@
-# index — comandos para colher no Windows (só leitura/demonstração)
-# Formato: "## rótulo" = nome do bloco na aula; "# shell: pwsh|powershell" vale até o próximo "# shell:".
-# Linhas com "#ERRO" são erros de propósito (precisamos da mensagem real). Anonimizar antes de usar.
-# shell: pwsh
-## versão para o selo da capa
-$PSVersionTable.PSVersion

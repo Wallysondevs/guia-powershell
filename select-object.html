@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Select-Object — escolhendo campos e os primeiros itens | Guia PowerShell</title>
+<meta name="description" content="Aprenda o Select-Object: escolher só algumas propriedades, pegar os primeiros ou os últimos itens, tirar repetidos e criar colunas calculadas, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Select-Object</span></h1>
+
+<p class="intro">Um objeto pode ter muitos campos, e uma lista pode ter muitos itens. O <code>Select-Object</code> (apelido <code>select</code>) é a tesoura: escolhe <strong>quais colunas</strong> ficam e <strong>quantos itens</strong> passam.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A escolher colunas com <code>-Property</code>.</li>
+  <li>A pegar os primeiros e os últimos com <code>-First</code> e <code>-Last</code>.</li>
+  <li>A tirar os repetidos com <code>-Unique</code>.</li>
+  <li>A tirar o valor "puro" de um campo com <code>-ExpandProperty</code>.</li>
+  <li>A criar uma coluna calculada com <code>@{ Name = ...; Expression = { ... } }</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a tesoura da planilha</h2>
+
+<p>Imagine uma planilha com dez colunas, mas você só quer imprimir o nome e o telefone das cinco primeiras pessoas. Você esconde as outras colunas e corta as linhas que sobram. É isso que o <code>Select-Object</code> faz.</p>
+
+<p>Nesta aula, a lista de exemplo é esta turma:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $turma = @(
+&gt;&gt;   [pscustomobject]@{ Nome = "Ana"; Cidade = "Recife"; Nota = 9 }
+&gt;&gt;   [pscustomobject]@{ Nome = "Beto"; Cidade = "Natal"; Nota = 6 }
+&gt;&gt;   [pscustomobject]@{ Nome = "Caio"; Cidade = "Recife"; Nota = 8 }
+&gt;&gt;   [pscustomobject]@{ Nome = "Duda"; Cidade = "Maceió"; Nota = 10 }
+&gt;&gt; )
+PS&gt; $turma
+
+Nome Cidade Nota
+---- ------ ----
+Ana  Recife    9
+Beto Natal     6
+Caio Recife    8
+Duda Maceió   10
+</pre>
+
+<hr>
+
+<h2>1. Escolhendo colunas</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $turma | Select-Object Nome, Nota
+
+Nome Nota
+---- ----
+Ana     9
+Beto    6
+Caio    8
+Duda   10
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Select-Object</dt><dd>A tesoura.</dd>
+
+  <dt>Nome, Nota</dt><dd>As colunas que ficam, separadas por vírgula. É o parâmetro <code>-Property</code>, que pode ficar implícito.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Os primeiros e os últimos</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $turma | Select-Object -First 2
+
+Nome Cidade Nota
+---- ------ ----
+Ana  Recife    9
+Beto Natal     6
+PS&gt; $turma | Select-Object -Last 1 -Property Nome
+
+Nome
+----
+Duda
+</pre>
+
+<dl class="anatomy">
+
+  <dt>-First 2</dt><dd>Só os 2 primeiros itens que chegarem.</dd>
+
+  <dt>-Last 1</dt><dd>Só o último. Dá para juntar com <code>-Property</code> para escolher a coluna.</dd>
+
+</dl>
+
+<p>Junto com o <code>Sort-Object</code> (aula <a href="sort-object.html">Sort-Object</a>), isso vira um "top 3": ordene e pegue os primeiros.</p>
+
+<div class="tryps" data-goal="out:Duda;;out:Ana;;src:-First\s+2;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> as notas já estão ordenadas da maior para a menor. Complete com <code>Select-Object -First 2</code> para ficar só com os dois melhores alunos.</p>
+
+<pre class="script" data-file="main.ps1">$turma = @(
+    [pscustomobject]@{ Nome = "Duda"; Nota = 10 }
+    [pscustomobject]@{ Nome = "Ana"; Nota = 9 }
+    [pscustomobject]@{ Nome = "Caio"; Nota = 8 }
+)
+$turma
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$turma = @(
+    [pscustomobject]@{ Nome = "Duda"; Nota = 10 }
+    [pscustomobject]@{ Nome = "Ana"; Nota = 9 }
+    [pscustomobject]@{ Nome = "Caio"; Nota = 8 }
+)
+$turma | Select-Object -First 2
+</pre>
+
+</div>
+
+<hr>
+
+<h2>3. Tirando os repetidos: <code>-Unique</code></h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "Recife", "Natal", "Recife", "Maceió", "Natal" | Select-Object -Unique
+Recife
+Natal
+Maceió
+</pre>
+
+<p>O <code>-Unique</code> deixa passar cada valor só na primeira vez que ele aparece, e mantém a ordem original.</p>
+
+<hr>
+
+<h2>4. Só o valor: <code>-ExpandProperty</code></h2>
+
+<p>Compare as duas formas. A primeira devolve objetos com uma coluna (por isso vem com cabeçalho). A segunda devolve só os textos:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $turma | Select-Object -Property Nome
+
+Nome
+----
+Ana
+Beto
+Caio
+Duda
+PS&gt; $turma | Select-Object -ExpandProperty Nome
+Ana
+Beto
+Caio
+Duda
+</pre>
+
+<dl class="anatomy">
+
+  <dt>-Property Nome</dt><dd>Devolve fichas com um campo <code>Nome</code>. Na tela, vira uma tabela de uma coluna.</dd>
+
+  <dt>-ExpandProperty Nome</dt><dd>Abre a ficha e devolve o valor de dentro: os textos <code>Ana</code>, <code>Beto</code>… Use quando você quer uma lista simples.</dd>
+
+</dl>
+
+<hr>
+
+<h2>5. Coluna calculada</h2>
+
+<p>Dá para criar uma coluna nova, calculada a partir das outras. Você passa uma hashtable com o nome da coluna e um bloco que calcula o valor:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $turma | Select-Object Nome, @{ Name = "Situação"; Expression = { if ($_.Nota -ge 7) { "aprovado" } else { "recuperação" } } }
+
+Nome Situação
+---- --------
+Ana  aprovado
+Beto recuperação
+Caio aprovado
+Duda aprovado
+</pre>
+
+<dl class="anatomy">
+
+  <dt>@{ ... }</dt><dd>Uma hashtable (aula <a href="hashtables.html">Hashtables</a>) que descreve a coluna.</dd>
+
+  <dt>Name = "Situação"</dt><dd>O título da coluna nova.</dd>
+
+  <dt>Expression = { ... }</dt><dd>O bloco que calcula o valor para cada item. Dentro dele, <code>$_</code> é o item da vez.</dd>
+
+</dl>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Coluna com nome errado: a coluna vem vazia</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $turma | Select-Object Nome, Idade
+
+Nome Idade
+---- -----
+Ana  
+Beto 
+Caio 
+Duda 
+</pre>
+
+<p>Não existe <code>Idade</code> na turma, mas o PowerShell não dá erro: ele cria a coluna e deixa vazia. Se uma coluna aparecer em branco, confira o nome com o <a href="get-member.html">Get-Member</a>.</p>
+
+</div>
+
+<div class="cenario">
+<strong><code>-ExpandProperty</code> com um campo que não existe</strong>
+
+<pre><code>$turma | Select-Object -ExpandProperty Idade
+</code></pre>
+
+<p>Com <code>-ExpandProperty</code>, aí sim é erro: ele precisa abrir um campo que existe. A mensagem diz que a propriedade <code>Idade</code> não foi encontrada, e aparece uma vez para cada item da lista (aqui, quatro vezes).</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Select-Object A, B</code></td><td>Fica só com as colunas A e B.</td></tr>
+
+<tr><td><code>-First 3</code> / <code>-Last 3</code></td><td>Os 3 primeiros / os 3 últimos.</td></tr>
+
+<tr><td><code>-Skip 2</code></td><td>Pula os 2 primeiros.</td></tr>
+
+<tr><td><code>-Unique</code></td><td>Tira os repetidos.</td></tr>
+
+<tr><td><code>-ExpandProperty A</code></td><td>Devolve só os valores do campo A.</td></tr>
+
+<tr><td><code>@{ Name = "X"; Expression = { ... } }</code></td><td>Coluna calculada.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Os três primeiros</h3>
+<p>Complete para pegar só os 3 primeiros números:</p>
+<div class="ex-code">1..10 | Select-Object <input data-answer="-First 3" aria-label="resposta"></div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Qual opção devolve só os textos dos nomes, sem cabeçalho?</p>
+
+<label><input type="radio" name="q2"> <code>Select-Object -Property Nome</code></label>
+
+<label><input type="radio" name="q2"> <code>Select-Object -ExpandProperty Nome</code></label>
+
+<label><input type="radio" name="q2"> <code>Select-Object -First Nome</code></label>
+
+<label><input type="radio" name="q2"> <code>Select-Object Nome -Unique</code></label>
+
+</div>
+
+<div class="mc" data-answer="4">
+
+<p class="mc-q">3. O que acontece com <code>Select-Object Nome, Telefone</code> se não existir o campo <code>Telefone</code>?</p>
+
+<label><input type="radio" name="q3"> Dá erro e para tudo</label>
+
+<label><input type="radio" name="q3"> O <code>Telefone</code> é ignorado e some da tabela</label>
+
+<label><input type="radio" name="q3"> O PowerShell pergunta o telefone</label>
+
+<label><input type="radio" name="q3"> A coluna <code>Telefone</code> aparece vazia</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Recife;;out:Maceió;;src:-Unique;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> mostre cada cidade da lista <strong>uma vez só</strong>, na ordem em que aparecem: <code>Recife</code>, <code>Natal</code> e <code>Maceió</code>.</p>
+
+<pre class="script" data-file="main.ps1">$cidades = "Recife", "Natal", "Recife", "Maceió", "Natal"
+$cidades
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$cidades = "Recife", "Natal", "Recife", "Maceió", "Natal"
+$cidades | Select-Object -Unique
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Select-Object</code> escolhe colunas (<code>Nome, Nota</code>) e quantidade de itens (<code>-First</code>, <code>-Last</code>, <code>-Skip</code>).</li>
+  <li><code>-Unique</code> tira os repetidos.</li>
+  <li><code>-ExpandProperty</code> devolve só os valores de um campo.</li>
+  <li>Coluna calculada: <code>@{ Name = "X"; Expression = { ... } }</code>.</li>
+  <li>Nome de coluna errado não dá erro: a coluna vem vazia.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Out-File, Out-String e o redirecionamento (&gt;) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a salvar a saída num arquivo com Out-File e &gt;, acrescentar com &gt;&gt;, transformar a saída em texto com Out-String e mandar para o nada com Out-Null.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Out-File</span>, Out-String e o Redirecionamento (&gt;)</h1>
+
+<p class="intro">Tudo o que aparece na tela pode ir para um arquivo. O <code>Out-File</code> e o sinal <code>&amp;gt;</code> salvam a saída exatamente como você vê. O <code>Out-String</code> transforma a saída num texto só, e o <code>Out-Null</code> joga fora o que você não quer ver.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A salvar a saída num arquivo com <code>Out-File</code> e com <code>&amp;gt;</code>.</li>
+  <li>A acrescentar no fim do arquivo com <code>-Append</code> e <code>&amp;gt;&amp;gt;</code>.</li>
+  <li>A diferença entre <code>Out-File</code> e <code>Set-Content</code>.</li>
+  <li>A transformar a saída em texto com <code>Out-String</code>.</li>
+  <li>A esconder uma saída com <code>Out-Null</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a impressora</h2>
+
+<p>O <code>Out-File</code> é como apertar "imprimir" na tela: o arquivo fica igual ao que você veria, com tabela, espaços e tudo. Ele não guarda o objeto, guarda o desenho.</p>
+
+<hr>
+
+<h2>1. Salvando a tela num arquivo</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $turma = @(
+&gt;&gt;   [pscustomobject]@{ Nome = "Ana"; Nota = 9 }
+&gt;&gt;   [pscustomobject]@{ Nome = "Beto"; Nota = 6 }
+&gt;&gt; )
+PS&gt; $turma | Out-File notas.txt
+PS&gt; Get-Content notas.txt
+
+Nome Nota
+---- ----
+Ana     9
+Beto    6
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Out-File notas.txt</dt><dd>Salva no arquivo <code>notas.txt</code>, na pasta atual. Se o arquivo existir, ele é <strong>substituído</strong>.</dd>
+
+  <dt>Get-Content notas.txt</dt><dd>Lê o arquivo de volta (aula <a href="get-content.html">Get-Content</a>). Repare que a tabela foi salva como ela aparece na tela.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. O atalho <code>&amp;gt;</code> e o <code>&amp;gt;&amp;gt;</code></h2>
+
+<p>O <code>&amp;gt;</code> é o mesmo que <code>| Out-File</code>. O <code>&amp;gt;&amp;gt;</code> acrescenta no fim, igual ao <code>Out-File -Append</code>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "linha 1" &gt; log.txt
+PS&gt; "linha 2" &gt;&gt; log.txt
+PS&gt; "linha 3" | Out-File log.txt -Append
+PS&gt; Get-Content log.txt
+linha 1
+linha 2
+linha 3
+</pre>
+
+<div class="tryps" data-goal="out:compra 1;;out:compra 2;;src:&gt;&gt;;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> a primeira linha já está no arquivo. Use <code>&amp;gt;&amp;gt;</code> para acrescentar <code>compra 2</code> sem apagar a primeira, e leia o arquivo no fim.</p>
+
+<pre class="script" data-file="main.ps1">"compra 1" &gt; compras.txt
+"compra 2" &gt; compras.txt
+Get-Content compras.txt
+</pre>
+
+<pre class="solucao" data-file="main.ps1">"compra 1" &gt; compras.txt
+"compra 2" &gt;&gt; compras.txt
+Get-Content compras.txt
+</pre>
+
+</div>
+
+<hr>
+
+<h2>3. <code>Out-File</code> × <code>Set-Content</code></h2>
+
+<p>O <code>Set-Content</code> (aula <a href="set-content.html">Set-Content</a>) grava o <strong>valor</strong> de cada objeto convertido em texto. O <code>Out-File</code> grava o <strong>desenho</strong> da tela. Com objetos, a diferença aparece:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $turma | Set-Content dados.txt
+PS&gt; Get-Content dados.txt
+@{Nome=Ana; Nota=9}
+@{Nome=Beto; Nota=6}
+</pre>
+
+<p>O <code>Set-Content</code> gravou cada objeto no "jeito texto" deles (<code>@{Nome=Ana; Nota=9}</code>). Para dados que você vai ler depois com outro programa, prefira <a href="csv.html">CSV</a> ou <a href="json.html">JSON</a>.</p>
+
+<hr>
+
+<h2>4. <code>Out-String</code>: a tela num texto só</h2>
+
+<p>O <code>Out-String</code> faz o mesmo desenho que iria para a tela, mas devolve um <strong>texto</strong> que você pode guardar numa variável:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $texto = $turma | Out-String
+PS&gt; $texto.GetType().Name
+String
+PS&gt; $texto.Contains("Beto")
+True
+</pre>
+
+<p>Útil para mandar uma tabela por e-mail ou procurar algo no que seria mostrado.</p>
+
+<hr>
+
+<h2>5. <code>Out-Null</code>: jogar fora</h2>
+
+<p>Alguns comandos devolvem coisas que você não quer ver. Mande para o <code>Out-Null</code>, ou atribua a <code>$null</code>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $lista = [System.Collections.ArrayList]::new()
+PS&gt; $lista.Add("a")
+0
+PS&gt; $lista.Add("b") | Out-Null
+PS&gt; $null = $lista.Add("c")
+PS&gt; $lista.Count
+3
+</pre>
+
+<p>O <code>.Add()</code> da <code>ArrayList</code> devolve a posição do item (o <code>0</code> que apareceu). Com <code>Out-Null</code> ou <code>$null =</code>, a tela fica limpa.</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Usar <code>&amp;gt;</code> quando queria <code>&amp;gt;&amp;gt;</code></strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "primeira" &gt; diario.txt
+PS&gt; "segunda" &gt; diario.txt
+PS&gt; Get-Content diario.txt
+segunda
+</pre>
+
+<p>O <code>&amp;gt;</code> substitui o arquivo inteiro. A linha "primeira" sumiu. Para acrescentar, use <code>&amp;gt;&amp;gt;</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Tabela cortada no arquivo</strong>
+
+<p>O <code>Out-File</code> respeita a largura da tela: colunas compridas podem ser cortadas com <code>…</code>. Use <code>-Width</code> para dar mais espaço:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; [pscustomobject]@{ Texto = "x" * 100 } | Out-File largo.txt -Width 200
+PS&gt; (Get-Content largo.txt)[3].Length
+100
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>... | Out-File a.txt</code></td><td>Salva a saída (substitui o arquivo).</td></tr>
+
+<tr><td><code>... &gt; a.txt</code></td><td>O mesmo, mais curto.</td></tr>
+
+<tr><td><code>... | Out-File a.txt -Append</code></td><td>Acrescenta no fim.</td></tr>
+
+<tr><td><code>... &gt;&gt; a.txt</code></td><td>O mesmo, mais curto.</td></tr>
+
+<tr><td><code>... | Out-String</code></td><td>A saída vira um texto só.</td></tr>
+
+<tr><td><code>... | Out-Null</code></td><td>Joga a saída fora.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Acrescentar</h3>
+<p>Complete para acrescentar uma linha sem apagar o arquivo:</p>
+<div class="ex-code">"mais uma" <input data-answer="&gt;&gt;" aria-label="resposta"> log.txt</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Qual a diferença entre <code>&amp;gt;</code> e <code>&amp;gt;&amp;gt;</code>?</p>
+
+<label><input type="radio" name="q2"> Nenhuma</label>
+
+<label><input type="radio" name="q2"> <code>&amp;gt;</code> substitui o arquivo; <code>&amp;gt;&amp;gt;</code> acrescenta no fim</label>
+
+<label><input type="radio" name="q2"> <code>&amp;gt;</code> acrescenta; <code>&amp;gt;&amp;gt;</code> substitui</label>
+
+<label><input type="radio" name="q2"> <code>&amp;gt;&amp;gt;</code> salva duas vezes</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. O que o <code>Out-String</code> devolve?</p>
+
+<label><input type="radio" name="q3"> Um arquivo</label>
+
+<label><input type="radio" name="q3"> Os objetos originais</label>
+
+<label><input type="radio" name="q3"> Um texto com o desenho que iria para a tela</label>
+
+<label><input type="radio" name="q3"> Nada</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Ana;;out:Beto;;src:Out-File;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> salve a lista de nomes no arquivo <code>nomes.txt</code> com <code>Out-File</code> e depois mostre o conteúdo com <code>Get-Content</code>.</p>
+
+<pre class="script" data-file="main.ps1">$nomes = "Ana", "Beto"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$nomes = "Ana", "Beto"
+$nomes | Out-File nomes.txt
+Get-Content nomes.txt
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Out-File</code> e <code>&amp;gt;</code> salvam a saída como ela aparece na tela (e substituem o arquivo).</li>
+  <li><code>-Append</code> e <code>&amp;gt;&amp;gt;</code> acrescentam no fim.</li>
+  <li><code>Set-Content</code> grava o valor; <code>Out-File</code> grava o desenho.</li>
+  <li><code>Out-String</code> devolve a tela como texto; <code>Out-Null</code> e <code>$null =</code> jogam fora.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

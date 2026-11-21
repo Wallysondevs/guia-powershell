@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell — o que uma função devolve (return e saída) | Guia PowerShell</title>
+<meta name="description" content="Entenda o que uma função do PowerShell devolve: toda saída não capturada vira retorno, o return encerra a função, e como evitar lixo no resultado com $null e Out-Null.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>O que uma <span class="hl">Função</span> Devolve</h1>
+
+<p class="intro">Em muitas linguagens, a função devolve só o que vem depois do <code>return</code>. No PowerShell é diferente: <strong>tudo</strong> o que a função solta e ninguém guarda vira resultado. Isso surpreende quem vem de outras linguagens.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Que toda saída "solta" dentro da função vira retorno.</li>
+  <li>Que o <code>return</code> encerra a função (e pode devolver um valor).</li>
+  <li>A evitar lixo no resultado com <code>$null =</code> e <code>Out-Null</code>.</li>
+  <li>Que várias saídas viram uma lista.</li>
+  <li>A diferença entre <code>Write-Host</code> e saída de verdade.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: o que cai na esteira</h2>
+
+<p>Imagine a função como uma máquina em cima de uma esteira. Qualquer coisa que cair da máquina vai para a esteira, mesmo que você não quisesse. O <code>return</code> é o botão de desligar a máquina.</p>
+
+<hr>
+
+<h2>1. Sem <code>return</code>, também devolve</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Get-Dobro($n) { $n * 2 }
+PS&gt; $r = Get-Dobro 5
+PS&gt; $r
+10
+</pre>
+
+<p>O <code>$n * 2</code> não foi guardado em lugar nenhum dentro da função, então ele "caiu na esteira" e virou o resultado.</p>
+
+<hr>
+
+<h2>2. Várias saídas viram lista</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Get-Info { "linha 1"; "linha 2"; 42 }
+PS&gt; $x = Get-Info
+PS&gt; $x.Count
+3
+PS&gt; $x[2]
+42
+</pre>
+
+<hr>
+
+<h2>3. O <code>return</code> encerra</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Test-Idade($idade) {
+&gt;&gt;   if ($idade -lt 0) { return "idade inválida" }
+&gt;&gt;   if ($idade -ge 18) { return "maior de idade" }
+&gt;&gt;   "menor de idade"
+&gt;&gt; }
+PS&gt; Test-Idade 20
+maior de idade
+PS&gt; Test-Idade 10
+menor de idade
+PS&gt; Test-Idade -3
+idade inválida
+</pre>
+
+<dl class="anatomy">
+
+  <dt>return "..."</dt><dd>Devolve o valor e sai da função na hora. As linhas de baixo não rodam.</dd>
+
+  <dt>"menor de idade"</dt><dd>Só chega aqui quem não saiu antes.</dd>
+
+</dl>
+
+<hr>
+
+<h2>4. O lixo que vaza</h2>
+
+<p>Alguns métodos devolvem valores que você não pediu. Dentro de uma função, eles vão parar no resultado:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function New-Lista {
+&gt;&gt;   $l = [System.Collections.ArrayList]::new()
+&gt;&gt;   $l.Add("a")
+&gt;&gt;   $l.Add("b")
+&gt;&gt;   return $l
+&gt;&gt; }
+PS&gt; $r = New-Lista
+PS&gt; $r
+0
+1
+a
+b
+</pre>
+
+<p>Os <code>0</code> e <code>1</code> são as posições que o <code>.Add()</code> devolveu, e vieram misturados com a lista. Corrija jogando fora com <code>$null =</code> ou <code>| Out-Null</code>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function New-Lista2 {
+&gt;&gt;   $l = [System.Collections.ArrayList]::new()
+&gt;&gt;   $null = $l.Add("a")
+&gt;&gt;   $l.Add("b") | Out-Null
+&gt;&gt;   return $l
+&gt;&gt; }
+PS&gt; New-Lista2
+a
+b
+</pre>
+
+<div class="tryps" data-goal="out:Resultado: 10;;src:\$null\s*=|Out-Null;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> a função devolve um "lixo" além do número. Jogue fora o resultado do <code>.Add()</code> com <code>$null =</code> para a saída ficar só <code>Resultado: 10</code>.</p>
+
+<pre class="script" data-file="main.ps1">function Get-Soma {
+    $log = [System.Collections.ArrayList]::new()
+    $log.Add("somando")
+    return 4 + 6
+}
+"Resultado: $(Get-Soma)"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Get-Soma {
+    $log = [System.Collections.ArrayList]::new()
+    $null = $log.Add("somando")
+    return 4 + 6
+}
+"Resultado: $(Get-Soma)"
+</pre>
+
+</div>
+
+<hr>
+
+<h2>5. <code>Write-Host</code> não é retorno</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Get-Total { Write-Host "calculando..."; 100 }
+PS&gt; $t = Get-Total
+calculando...
+PS&gt; "t vale $t"
+t vale 100
+</pre>
+
+<p>O <code>Write-Host</code> vai direto para a tela, sem passar pela esteira. Por isso <code>$t</code> ficou só com <code>100</code>. Use o <code>Write-Host</code> para mensagens e a saída normal para o resultado (aula <a href="write-host-output.html">Write-Host × Write-Output</a>).</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Achar que o <code>return</code> é a única saída</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Get-Nome { "debug: entrei"; return "Ana" }
+PS&gt; "Nome: $(Get-Nome)"
+Nome: debug: entrei Ana
+</pre>
+
+<p>A linha de debug virou parte do resultado. Troque por <code>Write-Verbose</code> ou <code>Write-Host</code>, ou tire.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>function F { 42 }</code></td><td>Devolve 42 (sem <code>return</code>).</td></tr>
+
+<tr><td><code>return $x</code></td><td>Devolve e sai da função.</td></tr>
+
+<tr><td><code>return</code></td><td>Só sai.</td></tr>
+
+<tr><td><code>$null = $l.Add(1)</code></td><td>Joga fora a saída.</td></tr>
+
+<tr><td><code>... | Out-Null</code></td><td>Também joga fora.</td></tr>
+
+<tr><td><code>Write-Host "msg"</code></td><td>Mostra na tela, não entra no resultado.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Sair da função</h3>
+<p>Complete com a palavra que encerra a função e devolve o valor:</p>
+<div class="ex-code">function F { <input data-answer="return" aria-label="resposta"> 10 }</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. O que devolve <code>function F { "a"; "b" }</code>?</p>
+
+<label><input type="radio" name="q2"> Só "b"</label>
+
+<label><input type="radio" name="q2"> Uma lista com "a" e "b"</label>
+
+<label><input type="radio" name="q2"> Só "a"</label>
+
+<label><input type="radio" name="q2"> Nada, falta o <code>return</code></label>
+
+</div>
+
+<div class="mc" data-answer="4">
+
+<p class="mc-q">3. Qual destes NÃO entra no resultado da função?</p>
+
+<label><input type="radio" name="q3"> <code>"texto"</code></label>
+
+<label><input type="radio" name="q3"> <code>42</code></label>
+
+<label><input type="radio" name="q3"> <code>Write-Output "x"</code></label>
+
+<label><input type="radio" name="q3"> <code>Write-Host "x"</code></label>
+
+</div>
+
+<div class="tryps" data-goal="out:aprovado;;src:return;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> use <code>return</code> para a função <code>Get-Situacao</code> devolver <code>aprovado</code> quando a nota for 7 ou mais, e <code>reprovado</code> nos outros casos. Teste com <code>Get-Situacao 8</code>.</p>
+
+<pre class="script" data-file="main.ps1">function Get-Situacao($nota) {
+    "reprovado"
+}
+Get-Situacao 8
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Get-Situacao($nota) {
+    if ($nota -ge 7) { return "aprovado" }
+    return "reprovado"
+}
+Get-Situacao 8
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Toda saída não guardada dentro da função vira resultado.</li>
+  <li>Várias saídas viram uma lista.</li>
+  <li><code>return</code> devolve e sai; o que vem depois não roda.</li>
+  <li>Jogue fora o que não quer com <code>$null =</code> ou <code>| Out-Null</code>.</li>
+  <li><code>Write-Host</code> vai para a tela e não entra no resultado.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

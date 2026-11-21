@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell: operadores — referência rápida (-eq, -like, -match, -and, -f) | Guia PowerShell</title>
+<meta name="description" content="Referência rápida de todos os operadores do PowerShell 7: aritméticos, atribuição, comparação, texto (-like, -match, -replace, -split, -join), lógicos, tipo (-is, -as), coleção (-in, -contains), ternário, ?? e redirecionamento.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Operadores</span></h1>
+
+<p class="intro">Todos os operadores do PowerShell numa página só, com um exemplo de cada. Lembre: na comparação de textos, o PowerShell ignora maiúsculas por padrão; coloque um <code>c</code> na frente (<code>-ceq</code>, <code>-clike</code>) para diferenciar.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Os operadores agrupados por tipo.</li>
+  <li>O resultado de cada um, com exemplos reais.</li>
+  <li>As versões que diferenciam maiúsculas (<code>-c...</code>).</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>Aritméticos e atribuição</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Operador</th><th>Exemplo</th><th>Resultado</th></tr>
+
+<tr><td><code>+ - * /</code></td><td><code>7 / 2</code></td><td><code>3,5</code></td></tr>
+
+<tr><td><code>%</code> (resto)</td><td><code>7 % 2</code></td><td><code>1</code></td></tr>
+
+<tr><td><code>=</code></td><td><code>$x = 5</code></td><td>guarda 5</td></tr>
+
+<tr><td><code>+= -= *= /=</code></td><td><code>$x += 2</code></td><td>soma 2 ao que já tinha</td></tr>
+
+<tr><td><code>++ --</code></td><td><code>$i++</code></td><td>soma 1</td></tr>
+
+</table>
+</div>
+
+<p>Veja <a href="operadores-aritmeticos.html">Operadores Aritméticos</a> e <a href="atribuicao.html">Atribuição</a>.</p>
+
+<hr>
+
+<h2>Comparação</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; 5 -eq 5
+True
+PS&gt; "abc" -ne "ABC"
+False
+PS&gt; 10 -gt 9
+True
+PS&gt; "Maria" -like "Ma*"
+True
+PS&gt; "Pedido 123" -match '\d+'
+True
+PS&gt; 1, 2, 3 -contains 2
+True
+PS&gt; "uva" -in "maçã", "uva"
+True
+</pre>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Operador</th><th>Significa</th></tr>
+
+<tr><td><code>-eq</code> / <code>-ne</code></td><td>igual / diferente</td></tr>
+
+<tr><td><code>-gt</code> / <code>-ge</code></td><td>maior / maior ou igual</td></tr>
+
+<tr><td><code>-lt</code> / <code>-le</code></td><td>menor / menor ou igual</td></tr>
+
+<tr><td><code>-like</code> / <code>-notlike</code></td><td>combina com curinga (<code>*</code>, <code>?</code>)</td></tr>
+
+<tr><td><code>-match</code> / <code>-notmatch</code></td><td>combina com regex (preenche <code>$Matches</code>)</td></tr>
+
+<tr><td><code>-contains</code> / <code>-notcontains</code></td><td>a lista contém o valor</td></tr>
+
+<tr><td><code>-in</code> / <code>-notin</code></td><td>o valor está na lista</td></tr>
+
+<tr><td><code>-ceq</code>, <code>-clike</code>, <code>-cmatch</code>...</td><td>versões que diferenciam maiúsculas</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Texto</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "a-b-c" -replace '-', '/'
+a/b/c
+PS&gt; "a,b,c" -split ','
+a
+b
+c
+PS&gt; "x", "y" -join " + "
+x + y
+PS&gt; "{0} tem {1} anos" -f "Ana", 30
+Ana tem 30 anos
+</pre>
+
+<p>Veja <a href="regex.html">Expressões Regulares</a> e <a href="operador-formato.html">o operador -f</a>.</p>
+
+<hr>
+
+<h2>Lógicos</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Operador</th><th>Exemplo</th><th>Resultado</th></tr>
+
+<tr><td><code>-and</code></td><td><code>$true -and $false</code></td><td><code>False</code></td></tr>
+
+<tr><td><code>-or</code></td><td><code>$true -or $false</code></td><td><code>True</code></td></tr>
+
+<tr><td><code>-not</code> ou <code>!</code></td><td><code>-not $true</code></td><td><code>False</code></td></tr>
+
+<tr><td><code>-xor</code></td><td><code>$true -xor $true</code></td><td><code>False</code></td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Tipos</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; 42 -is [int]
+True
+PS&gt; "42" -as [int]
+42
+PS&gt; "abc" -as [int]
+</pre>
+
+<p><code>-as</code> tenta converter e devolve <code>$null</code> se não der, sem erro.</p>
+
+<hr>
+
+<h2>Nulos, ternário e encadeamento (PowerShell 7)</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $nome = $null
+PS&gt; $nome ?? "visitante"
+visitante
+PS&gt; $idade = 20
+PS&gt; $idade -ge 18 ? "maior" : "menor"
+maior
+</pre>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Operador</th><th>Significa</th></tr>
+
+<tr><td><code>a ?? b</code></td><td><code>a</code>, ou <code>b</code> se <code>a</code> for nulo</td></tr>
+
+<tr><td><code>$x ??= valor</code></td><td>atribui só se <code>$x</code> for nulo</td></tr>
+
+<tr><td><code>cond ? sim : não</code></td><td>ternário</td></tr>
+
+<tr><td><code>$obj?.Propriedade</code></td><td>acesso que não falha se <code>$obj</code> for nulo (escreva <code>${obj}?.Prop</code>)</td></tr>
+
+<tr><td><code>cmd1 &amp;&amp; cmd2</code> / <code>cmd1 || cmd2</code></td><td>roda se deu certo / se falhou</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Outros</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Operador</th><th>Para quê</th></tr>
+
+<tr><td><code>..</code></td><td>intervalo: <code>1..5</code></td></tr>
+
+<tr><td><code>,</code></td><td>cria array: <code>1, 2, 3</code></td></tr>
+
+<tr><td><code>|</code></td><td>pipeline</td></tr>
+
+<tr><td><code>.</code> / <code>::</code></td><td>membro / membro estático</td></tr>
+
+<tr><td><code>&amp;</code></td><td>executa um comando ou bloco: <code>&amp; "C:\app.exe"</code></td></tr>
+
+<tr><td><code>&gt; &gt;&gt; 2&gt; 2&gt;&amp;1</code></td><td>redirecionamento</td></tr>
+
+<tr><td><code>$( )</code> / <code>@( )</code></td><td>subexpressão / sempre array</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Comparação usa letras com hífen (<code>-eq</code>, <code>-gt</code>); <code>&gt;</code> é redirecionamento.</li>
+  <li>Texto: <code>-like</code> (curinga), <code>-match</code>/<code>-replace</code>/<code>-split</code> (regex), <code>-join</code>, <code>-f</code>.</li>
+  <li>PowerShell 7: <code>??</code>, <code>??=</code>, <code>? :</code>, <code>&amp;&amp;</code>, <code>||</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

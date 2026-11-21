@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Start-Job — tarefas em segundo plano (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda jobs no PowerShell 7: Start-Job para rodar em segundo plano, Get-Job, Wait-Job, Receive-Job, passar argumentos, Start-ThreadJob mais leve e o operador &amp; no fim da linha, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Tarefas em Segundo Plano (<span class="hl">Start-Job</span>)</h1>
+
+<p class="intro">Alguns comandos demoram: copiar muitos arquivos, consultar vários sites, gerar um relatório grande. Um <strong>job</strong> roda esse trabalho em segundo plano enquanto você continua usando o terminal, e depois você busca o resultado.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A iniciar um job com <code>Start-Job</code>.</li>
+  <li>A ver o estado com <code>Get-Job</code> e esperar com <code>Wait-Job</code>.</li>
+  <li>A buscar o resultado com <code>Receive-Job</code>.</li>
+  <li>A passar valores para dentro do job.</li>
+  <li>O <code>Start-ThreadJob</code> (mais leve) e o <code>&amp;</code> no fim da linha.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a máquina de lavar</h2>
+
+<p>Você liga a máquina de lavar e vai fazer outra coisa. Quando ela apita, você volta e tira a roupa. O <code>Start-Job</code> liga a máquina; o <code>Receive-Job</code> tira a roupa.</p>
+
+<hr>
+
+<h2>1. O primeiro job</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $job = Start-Job -ScriptBlock { Start-Sleep -Seconds 2; "Relatório pronto: $(1..100 | Measure-Object -Sum | ForEach-Object Sum)" }
+PS&gt; $job.State
+Running
+PS&gt; $job | Wait-Job | Out-Null
+PS&gt; $job.State
+Completed
+PS&gt; Receive-Job $job
+Relatório pronto: 5050
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Start-Job -ScriptBlock { }</dt><dd>Roda o bloco num processo separado do PowerShell, em segundo plano.</dd>
+
+  <dt>.State</dt><dd><code>Running</code> (rodando), <code>Completed</code> (terminou), <code>Failed</code> (deu erro)...</dd>
+
+  <dt>Wait-Job</dt><dd>Espera o job terminar (trava o terminal até lá).</dd>
+
+  <dt>Receive-Job</dt><dd>Entrega o que o job produziu.</dd>
+
+</dl>
+
+<p>O job é um processo separado: ele não enxerga as variáveis da sua sessão, e o que ele mostra só aparece quando você pede com <code>Receive-Job</code>.</p>
+
+<hr>
+
+<h2>2. Vários jobs ao mesmo tempo</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $jobs = 1..3 | ForEach-Object { Start-Job -ScriptBlock { param($n) Start-Sleep -Seconds 1; "Tarefa ${n}: ok" } -ArgumentList $_ }
+PS&gt; $jobs | Wait-Job | Receive-Job
+Tarefa 1: ok
+Tarefa 2: ok
+Tarefa 3: ok
+PS&gt; $jobs | Select-Object Name, State, HasMoreData
+
+Name State     HasMoreData
+---- -----     -----------
+Job3 Completed       False
+Job5 Completed       False
+Job7 Completed       False
+</pre>
+
+<dl class="anatomy">
+
+  <dt>-ArgumentList $_</dt><dd>Passa valores para o <code>param()</code> do bloco. É o jeito de levar dados da sua sessão para o job.</dd>
+
+  <dt>HasMoreData</dt><dd><code>False</code> depois do <code>Receive-Job</code>: o resultado foi entregue e saiu do job.</dd>
+
+</dl>
+
+<hr>
+
+<h2>3. $using: em vez de -ArgumentList</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $cidade = "Recife"
+PS&gt; Start-Job { "Previsão para $using:cidade" } | Receive-Job -Wait -AutoRemoveJob
+Previsão para Recife
+</pre>
+
+<dl class="anatomy">
+
+  <dt>$using:cidade</dt><dd>Leva o valor da variável <code>$cidade</code> da sua sessão para dentro do job.</dd>
+
+  <dt>-Wait -AutoRemoveJob</dt><dd>Espera, entrega o resultado e já remove o job da lista. Ótimo para scripts.</dd>
+
+</dl>
+
+<hr>
+
+<h2>4. Limpando</h2>
+
+<p>Jobs terminados continuam na lista até você remover:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; (Get-Job).Count
+4
+PS&gt; Get-Job | Remove-Job
+PS&gt; (Get-Job).Count
+0
+</pre>
+
+<hr>
+
+<h2>5. Start-ThreadJob e o & no fim</h2>
+
+<p>O <code>Start-Job</code> cria um processo novo do PowerShell, o que é pesado. O <code>Start-ThreadJob</code> roda numa <em>thread</em> do mesmo processo: começa muito mais rápido e funciona com os mesmos <code>Wait-Job</code> e <code>Receive-Job</code>.</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Start-ThreadJob { 21 * 2 } | Receive-Job -Wait -AutoRemoveJob
+42
+</pre>
+
+<p>Atalho: um <code>&amp;</code> no fim de um comando vira um job, como no Bash:</p>
+
+<pre><code>Get-ChildItem C:\ -Recurse -Filter *.log &amp;
+</code></pre>
+
+<div class="tryps" data-goal="out:Tarefa pronta;;src:Start-Job;;src:Receive-Job;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> inicie um job que devolve <code>Tarefa pronta</code> e busque o resultado com <code>Receive-Job -Wait</code>.</p>
+
+<pre class="script" data-file="main.ps1">$job = $null
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$job = Start-Job { "Tarefa pronta" }
+Receive-Job $job -Wait
+</pre>
+
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>A variável vazia dentro do job</strong>
+
+<p><code>$x = 5; Start-Job { $x * 2 }</code> não devolve nada, porque lá dentro o <code>$x</code> está vazio: o job não vê a sua sessão. Use <code>$using:x</code> ou <code>-ArgumentList</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Receive-Job duas vezes</strong>
+
+<p>O resultado sai do job na primeira leitura. Um segundo <code>Receive-Job</code> volta vazio. Guarde numa variável: <code>$r = Receive-Job $job</code>, ou use <code>-Keep</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>O erro "sumiu"</strong>
+
+<p>Se o job der erro, o estado fica <code>Failed</code> (ou <code>Completed</code> com erros que não encerram) e a mensagem só aparece no <code>Receive-Job</code>. Sempre receba o resultado e confira o <code>State</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Start-Job { ... }</code></td><td>Inicia em segundo plano (processo separado).</td></tr>
+
+<tr><td><code>Start-ThreadJob { ... }</code></td><td>Inicia numa thread (mais leve).</td></tr>
+
+<tr><td><code>Get-Job</code></td><td>Lista os jobs.</td></tr>
+
+<tr><td><code>Wait-Job $j</code></td><td>Espera terminar.</td></tr>
+
+<tr><td><code>Receive-Job $j</code></td><td>Pega o resultado (<code>-Wait</code> espera antes).</td></tr>
+
+<tr><td><code>Remove-Job $j</code></td><td>Remove da lista.</td></tr>
+
+<tr><td><code>$using:var</code> / <code>-ArgumentList</code></td><td>Leva valores para o job.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Pegar o resultado</h3>
+<p>Complete:</p>
+<div class="ex-code"><input data-answer="Receive-Job" aria-label="resposta"> $job -Wait</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Por que <code>$x</code> fica vazio dentro de um <code>Start-Job</code>?</p>
+
+<label><input type="radio" name="q2"> Porque jobs não aceitam variáveis</label>
+
+<label><input type="radio" name="q2"> Porque o job roda em outro processo, que não vê a sua sessão</label>
+
+<label><input type="radio" name="q2"> Porque faltou o Wait-Job</label>
+
+<label><input type="radio" name="q2"> Porque o job foi removido</label>
+
+</div>
+
+<div class="mc" data-answer="4">
+
+<p class="mc-q">3. Qual é mais leve?</p>
+
+<label><input type="radio" name="q3"> Start-Job</label>
+
+<label><input type="radio" name="q3"> Start-Process</label>
+
+<label><input type="radio" name="q3"> Invoke-Command</label>
+
+<label><input type="radio" name="q3"> Start-ThreadJob</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Dobro: 42;;src:\$using:;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> num job, use <code>$using:n</code> para devolver <code>Dobro: </code> + o dobro de <code>$n</code>, e receba com <code>-Wait -AutoRemoveJob</code>.</p>
+
+<pre class="script" data-file="main.ps1">$n = 21
+Start-Job { "Dobro: $($n * 2)" } | Receive-Job -Wait -AutoRemoveJob
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$n = 21
+Start-Job { "Dobro: $($using:n * 2)" } | Receive-Job -Wait -AutoRemoveJob
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Start-Job</code> roda em segundo plano; <code>Receive-Job</code> traz o resultado.</li>
+  <li><code>Get-Job</code>, <code>Wait-Job</code> e <code>Remove-Job</code> controlam a lista.</li>
+  <li>O job não vê suas variáveis: use <code>$using:</code> ou <code>-ArgumentList</code>.</li>
+  <li><code>Start-ThreadJob</code> é a opção leve.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

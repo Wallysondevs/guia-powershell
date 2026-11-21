@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell: variáveis automáticas ($_, $PSItem, $args, $Error...) — referência | Guia PowerShell</title>
+<meta name="description" content="Referência rápida das variáveis automáticas do PowerShell 7: $_, $PSItem, $args, $input, $Matches, $Error, $?, $LASTEXITCODE, $HOME, $PSScriptRoot, $PSVersionTable, $true, $false, $null e as variáveis de preferência.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Variáveis Automáticas</span></h1>
+
+<p class="intro">São variáveis que o próprio PowerShell cria e preenche. Você só lê (não atribua valores a elas, com exceção das de preferência). Veja também a aula <a href="variaveis-automaticas.html">Variáveis Automáticas</a>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>As variáveis automáticas mais usadas e o que guardam.</li>
+  <li>As variáveis de preferência, que mudam o comportamento.</li>
+  <li>Onde cada uma aparece neste guia.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>As mais usadas</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Variável</th><th>O que guarda</th></tr>
+
+<tr><td><code>$_</code> ou <code>$PSItem</code></td><td>O item atual no pipeline (<code>ForEach-Object</code>, <code>Where-Object</code>) e o erro dentro do <code>catch</code>.</td></tr>
+
+<tr><td><code>$args</code></td><td>Argumentos sem parâmetro declarado (funções e scripts).</td></tr>
+
+<tr><td><code>$input</code></td><td>Tudo que veio pelo pipeline, numa função sem <code>process</code>.</td></tr>
+
+<tr><td><code>$Matches</code></td><td>O resultado do último <code>-match</code> que deu <code>True</code>.</td></tr>
+
+<tr><td><code>$Error</code></td><td>Lista de erros da sessão (o mais recente em <code>[0]</code>).</td></tr>
+
+<tr><td><code>$?</code></td><td><code>True</code> se o último comando deu certo.</td></tr>
+
+<tr><td><code>$LASTEXITCODE</code></td><td>Código de saída do último programa externo (<code>0</code> = sucesso).</td></tr>
+
+<tr><td><code>$true</code> / <code>$false</code> / <code>$null</code></td><td>Verdadeiro, falso e "nada".</td></tr>
+
+<tr><td><code>$this</code></td><td>O próprio objeto, dentro de uma classe.</td></tr>
+
+<tr><td><code>$PSCmdlet</code></td><td>O objeto da função avançada (<code>ShouldProcess</code>, <code>WriteVerbose</code>...).</td></tr>
+
+<tr><td><code>$PSBoundParameters</code></td><td>Hashtable com os parâmetros que foram passados de verdade.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Caminhos e ambiente</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Variável</th><th>O que guarda</th></tr>
+
+<tr><td><code>$HOME</code></td><td>A pasta do usuário (no Windows, <code>C:\Users\seu-nome</code>).</td></tr>
+
+<tr><td><code>$PWD</code></td><td>A pasta atual (um objeto; <code>$PWD.Path</code> é o texto).</td></tr>
+
+<tr><td><code>$PSScriptRoot</code></td><td>A pasta onde está o script que está rodando.</td></tr>
+
+<tr><td><code>$PSCommandPath</code></td><td>O caminho completo do script que está rodando.</td></tr>
+
+<tr><td><code>$PROFILE</code></td><td>O caminho do arquivo de perfil.</td></tr>
+
+<tr><td><code>$PSHOME</code></td><td>A pasta onde o PowerShell está instalado.</td></tr>
+
+<tr><td><code>$env:NOME</code></td><td>Variáveis de ambiente (<code>$env:PATH</code>, <code>$env:USERNAME</code>).</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Versão e sistema</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $PSVersionTable.PSVersion.Major
+7
+PS&gt; $PSVersionTable.PSEdition
+Core
+</pre>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Variável</th><th>O que guarda</th></tr>
+
+<tr><td><code>$PSVersionTable</code></td><td>Versão do PowerShell e detalhes.</td></tr>
+
+<tr><td><code>$IsWindows</code> / <code>$IsLinux</code> / <code>$IsMacOS</code></td><td><code>True</code> no sistema em que está rodando.</td></tr>
+
+<tr><td><code>$PID</code></td><td>O número do processo do PowerShell atual.</td></tr>
+
+<tr><td><code>$Host</code></td><td>Informações do programa que hospeda o PowerShell (o console).</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Preferências (essas você pode mudar)</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Variável</th><th>Padrão</th><th>Muda o quê</th></tr>
+
+<tr><td><code>$ErrorActionPreference</code></td><td><code>Continue</code></td><td>O que fazer com erros (veja <a href="erroraction.html">-ErrorAction</a>).</td></tr>
+
+<tr><td><code>$WarningPreference</code></td><td><code>Continue</code></td><td>Mostrar avisos (<code>Write-Warning</code>).</td></tr>
+
+<tr><td><code>$VerbosePreference</code></td><td><code>SilentlyContinue</code></td><td>Mostrar <code>Write-Verbose</code>.</td></tr>
+
+<tr><td><code>$DebugPreference</code></td><td><code>SilentlyContinue</code></td><td>Mostrar <code>Write-Debug</code>.</td></tr>
+
+<tr><td><code>$InformationPreference</code></td><td><code>SilentlyContinue</code></td><td>Mostrar <code>Write-Information</code>.</td></tr>
+
+<tr><td><code>$ProgressPreference</code></td><td><code>Continue</code></td><td>Mostrar barras de progresso (desligar acelera downloads).</td></tr>
+
+<tr><td><code>$ConfirmPreference</code></td><td><code>High</code></td><td>Quando pedir confirmação.</td></tr>
+
+<tr><td><code>$OFS</code></td><td>(espaço)</td><td>Separador ao transformar um array em texto.</td></tr>
+
+<tr><td><code>$FormatEnumerationLimit</code></td><td><code>4</code></td><td>Quantos itens de uma lista aparecem nas tabelas antes do <code>…</code>.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>$_</code> é o item atual; <code>$args</code> e <code>$input</code> recebem dados; <code>$Matches</code> e <code>$Error</code> guardam resultados.</li>
+  <li><code>$HOME</code>, <code>$PSScriptRoot</code> e <code>$env:</code> ajudam com caminhos.</li>
+  <li>As variáveis <code>...Preference</code> mudam o comportamento da sessão.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

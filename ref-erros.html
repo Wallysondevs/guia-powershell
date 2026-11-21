@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell: mensagens de erro comuns e como resolver (referência) | Guia PowerShell</title>
+<meta name="description" content="Referência das mensagens de erro mais comuns do PowerShell 7 no Windows em português: termo não reconhecido, caminho não encontrado, parâmetro não encontrado, conversão de valor, método inexistente, divisão por zero, índice fora do array, execution policy e erros de sintaxe, com a causa e a solução.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Mensagens de <span class="hl">Erro</span> Comuns</h1>
+
+<p class="intro">Consulte esta página quando aparecer um erro em vermelho. As mensagens abaixo são do PowerShell 7 num Windows em português: algumas aparecem traduzidas e outras em inglês, porque vêm de partes do .NET que não são traduzidas. Onde está <code>...</code>, a mensagem mostra o nome, o valor ou o caminho do seu caso. Se a sua aparecer no outro idioma, o sentido é o mesmo. Para aprender a ler qualquer erro, veja <a href="erros.html">Lendo uma Mensagem de Erro</a>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que cada mensagem comum quer dizer.</li>
+  <li>A causa mais provável de cada uma.</li>
+  <li>Como resolver.</li>
+</ul>
+</div>
+
+
+
+<hr>
+
+<h2>Comandos e parâmetros</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Mensagem</th><th>Causa provável</th><th>Solução</th></tr>
+
+<tr><td><code>O termo "..." não é reconhecido como um nome de um cmdlet, função, arquivo de script ou programa executável.</code></td><td>Nome digitado errado, módulo não carregado, ou script da pasta atual sem <code>.\</code>.</td><td>Confira a grafia com <code>Get-Command *parte*</code>; para scripts, use <code>.\script.ps1</code>.</td></tr>
+
+<tr><td><code>Não foi possível encontrar um parâmetro correspondente ao nome de parâmetro '...'.</code></td><td>O parâmetro não existe nesse comando (às vezes é de outro cmdlet).</td><td><code>Get-Help comando -Parameter *</code> lista os parâmetros.</td></tr>
+
+<tr><td><code>O parâmetro não pode ser processado porque o nome do parâmetro '...' é ambíguo. As possíveis correspondências incluem: ...</code></td><td>Abreviou demais o parâmetro (<code>-P</code> pode ser <code>-Path</code> ou <code>-ProgressAction</code>).</td><td>Escreva mais letras ou o nome completo.</td></tr>
+
+<tr><td><code>Não foi possível encontrar um parâmetro posicional que aceite o argumento '...'.</code></td><td>Sobrou um valor solto, muitas vezes um texto com espaço sem aspas.</td><td>Coloque aspas: <code>cd "Meus Documentos"</code>.</td></tr>
+
+<tr><td><code>Não é possível associar o parâmetro '...'. Cannot convert value "..." to type "..."</code></td><td>O valor não serve para o tipo do parâmetro (texto onde precisava de número, cor que não existe).</td><td>Confira o tipo em <code>Get-Help comando -Parameter Nome</code>.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Arquivos e caminhos</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Mensagem</th><th>Causa provável</th><th>Solução</th></tr>
+
+<tr><td><code>Não é possível localizar o caminho '...' porque ele não existe.</code></td><td>Arquivo ou pasta não existe, ou você está em outra pasta.</td><td><code>Get-Location</code> para ver onde está; <code>Test-Path</code> antes de usar.</td></tr>
+
+<tr><td><code>Could not find a part of the path '...'.</code></td><td>Uma das pastas do caminho não existe (ao gravar um arquivo).</td><td>Crie a pasta antes: <code>New-Item -ItemType Directory</code>.</td></tr>
+
+<tr><td><code>The file '...' already exists.</code></td><td><code>New-Item</code> de um arquivo que já existe.</td><td>Use <code>-Force</code> para substituir, ou outro nome.</td></tr>
+
+<tr><td><code>Não é possível criar um arquivo já existente.</code></td><td><code>Rename-Item</code>/<code>Move-Item</code> para um nome que já existe.</td><td>Escolha outro nome ou apague o antigo antes.</td></tr>
+
+<tr><td><code>Cannot find drive. A drive with the name '...' does not exist.</code></td><td>Letra de unidade que não existe (<code>Z:</code>).</td><td><code>Get-PSDrive</code> lista as unidades.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Valores, tipos e objetos</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Mensagem</th><th>Causa provável</th><th>Solução</th></tr>
+
+<tr><td><code>Cannot convert value "..." to type "System.Int32". Error: "The input string '...' was not in a correct format."</code></td><td>Converter texto que não é número (<code>[int]"abc"</code>).</td><td>Confira o valor; use <code>-as [int]</code> para testar sem erro.</td></tr>
+
+<tr><td><code>Cannot convert value "..." to type "System.DateTime".</code></td><td>Texto que não é uma data reconhecida.</td><td>Use o formato <code>aaaa-mm-dd</code>.</td></tr>
+
+<tr><td><code>Method invocation failed because [...] does not contain a method named '...'.</code></td><td>Método digitado errado ou que não existe naquele tipo (ou o valor é uma lista, não um item).</td><td><code>$valor | Get-Member -MemberType Method</code>.</td></tr>
+
+<tr><td><code>You cannot call a method on a null-valued expression.</code></td><td>A variável está vazia (<code>$null</code>) e você chamou um método nela.</td><td>Confira de onde vem o valor; teste com <code>if ($x)</code>.</td></tr>
+
+<tr><td><code>Attempted to divide by zero.</code></td><td>Divisão por zero.</td><td>Teste o divisor antes de dividir.</td></tr>
+
+<tr><td><code>Index was outside the bounds of the array.</code></td><td>Posição que não existe (com o modo estrito ligado; sem ele, vem <code>$null</code>).</td><td>Confira <code>.Count</code>; o último é <code>[-1]</code>.</td></tr>
+
+<tr><td><code>The variable '$...' cannot be retrieved because it has not been set.</code></td><td>Variável nunca criada (com o modo estrito).</td><td>Crie a variável antes ou corrija o nome.</td></tr>
+
+<tr><td><code>Error formatting a string: Format specifier was invalid.</code></td><td>Formato inválido no <code>-f</code> (por exemplo <code>{0:Q}</code>).</td><td>Veja os formatos em <a href="ref-formatacao.html">Formatos do -f</a>.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Sintaxe</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Mensagem</th><th>Causa provável</th><th>Solução</th></tr>
+
+<tr><td><code>Missing closing '}' in statement block or type definition.</code></td><td>Abriu <code>{</code> e não fechou.</td><td>Conte as chaves; o editor VS Code destaca o par.</td></tr>
+
+<tr><td><code>Missing '(' after 'if' in if statement.</code></td><td><code>if $x -gt 1</code> sem parênteses.</td><td><code>if ($x -gt 1) { }</code>.</td></tr>
+
+<tr><td><code>Missing statement block after if ( condition ).</code></td><td>Faltou o <code>{ }</code> depois da condição.</td><td><code>if (...) { comandos }</code>.</td></tr>
+
+<tr><td><code>Unexpected token '...' in expression or statement.</code></td><td>Operador digitado errado (<code>-eg</code>), vírgula ou aspas sobrando.</td><td>Olhe a posição marcada com <code>~~~</code>.</td></tr>
+
+<tr><td><code>The string is missing the terminator: ".</code></td><td>Aspas abertas e não fechadas.</td><td>Feche as aspas; cuidado com aspas "curvas" copiadas da internet.</td></tr>
+
+<tr><td><code>Variable reference is not valid. ':' was not followed by a valid variable name character.</code></td><td><code>"$nome: texto"</code> — o <code>:</code> grudado na variável.</td><td><code>"${nome}: texto"</code> ou <code>"$($nome): texto"</code>.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Scripts e permissões</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Mensagem</th><th>Causa provável</th><th>Solução</th></tr>
+
+<tr><td><code>... cannot be loaded because running scripts is disabled on this system.</code> (ou a mesma frase em português)</td><td>A política de execução não deixa rodar scripts.</td><td><code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code> (veja <span data-rascunho="execution-policy.html">Política de Execução</span>).</td></tr>
+
+<tr><td><code>Access to the path '...' is denied.</code> / <code>Acesso negado</code></td><td>Sem permissão: pasta do sistema, arquivo aberto em outro programa ou precisa de administrador.</td><td>Feche o programa que usa o arquivo; abra o PowerShell como administrador só se for mesmo necessário.</td></tr>
+
+<tr><td><code>O PowerShell está no modo NonInteractive. A funcionalidade de Leitura e Prompt não está disponível.</code></td><td>O comando quis perguntar algo (confirmação ou <code>Read-Host</code>) numa sessão sem teclado (agendada, automática).</td><td>Passe tudo por parâmetro e use <code>-Confirm:$false</code> ou <code>-Force</code> quando for seguro.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Leia a categoria e a frase inteira: a mensagem quase sempre diz o que corrigir.</li>
+  <li>"Não é reconhecido" = nome errado; "não foi possível encontrar um parâmetro" = parâmetro errado.</li>
+  <li>"Cannot convert value" = tipo errado; "null-valued expression" = variável vazia.</li>
+  <li>Erros de sintaxe mostram a posição com <code>~~~</code>: olhe ali.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

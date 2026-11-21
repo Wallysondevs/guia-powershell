@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Novidades do PowerShell 7.7 — o que mudou (guia) | Guia PowerShell</title>
+<meta name="description" content="Conheça as novidades do PowerShell 7.7, construído no .NET 11: New-TemporaryDirectory, Join-Path -Extension, Format-Table -ExcludeProperty, New-Guid com UUID v7, ToRegex e as mudanças que podem afetar seus scripts, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Novidades do <span class="hl">PowerShell 7.7</span></h1>
+
+<p class="intro">O PowerShell 7.7 é a versão estável lançada em novembro de 2026, construída sobre o .NET 11. Ela traz cmdlets e parâmetros novos, correções de comportamento e reforços de segurança. Aqui estão as novidades que mais afetam o uso no dia a dia, testadas na versão 7.7.0.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A conferir a sua versão do PowerShell.</li>
+  <li>Os cmdlets e parâmetros novos do 7.7.</li>
+  <li>A mudança no <code>New-Guid</code> (UUID versão 7).</li>
+  <li>O que pode quebrar em scripts antigos.</li>
+  <li>Onde ler a lista completa de mudanças.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a atualização do celular</h2>
+
+<p>Uma atualização do celular traz uns recursos novos, conserta defeitos e às vezes muda um botão de lugar. O 7.7 é assim: vale saber o que ganhou e o que mudou de lugar.</p>
+
+<hr>
+
+<h2>1. Qual é a minha versão?</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $PSVersionTable.PSVersion.ToString()
+7.7.0
+PS&gt; $PSVersionTable.PSVersion.Major
+7
+PS&gt; $PSVersionTable.PSVersion.Minor
+7
+</pre>
+
+<p>Se o seu mostrar um número menor, veja a aula <a href="instalar.html">Instalando o PowerShell 7</a> para atualizar.</p>
+
+<hr>
+
+<h2>2. Format-Table e Format-List com -ExcludeProperty</h2>
+
+<p>Agora dá para dizer o que <strong>não</strong> mostrar, em vez de listar tudo o que quer ver:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $produto = [pscustomobject]@{ Nome = "Café"; Preco = 18.9; CodigoInterno = "X-99"; Estoque = 40 }
+PS&gt; $produto | Format-Table -ExcludeProperty CodigoInterno
+
+Nome  Preco Estoque
+----  ----- -------
+Café 18,900      40
+</pre>
+
+<hr>
+
+<h2>3. Join-Path -Extension</h2>
+
+<p>O <code>Join-Path</code> ganhou <code>-Extension</code>, que coloca (ou troca) a extensão do arquivo ao montar o caminho:</p>
+
+<pre><code>Join-Path relatorios vendas -Extension .csv
+Join-Path relatorios vendas.txt -Extension .csv
+</code></pre>
+
+<p>O resultado é o caminho com a barra do sistema (<code>relatorios\vendas.csv</code> no Windows).</p>
+
+<hr>
+
+<h2>4. New-TemporaryDirectory</h2>
+
+<p>Cria uma pasta temporária com nome único e devolve o objeto da pasta, ótimo para scripts que precisam de um lugar descartável:</p>
+
+<pre><code>$tmp = New-TemporaryDirectory
+# ... trabalhar dentro de $tmp ...
+Remove-Item $tmp -Recurse
+</code></pre>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; (Get-Command New-TemporaryDirectory).Name
+New-TemporaryDirectory
+</pre>
+
+<hr>
+
+<h2>5. New-Guid agora gera UUID versão 7</h2>
+
+<p>O <code>New-Guid</code> passou a gerar GUIDs da <strong>versão 7</strong>, que começam pela data e hora: GUIDs criados em sequência ficam em ordem. O formato do texto não muda.</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; (New-Guid).Version
+7
+PS&gt; ([guid]::NewGuid()).Version
+4
+</pre>
+
+<p>Se o seu script precisa de um GUID totalmente aleatório (versão 4), use <code>[guid]::NewGuid()</code>.</p>
+
+<hr>
+
+<h2>6. WildcardPattern.ToRegex()</h2>
+
+<p>Os curingas do PowerShell (<code>*</code>, <code>?</code>) podem ser convertidos em expressão regular:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; [WildcardPattern]::new("relatorio-*.csv").ToRegex().ToString()
+^relatorio-.*\.csv$
+</pre>
+
+<hr>
+
+<h2>7. Mudanças que podem afetar scripts</h2>
+
+<ul>
+</ul>
+
+<hr>
+
+<h2>8. Outras melhorias</h2>
+
+<ul>
+</ul>
+
+<p>A lista completa está no documento "What's New in PowerShell 7.7", da Microsoft, e no CHANGELOG do projeto no GitHub.</p>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. A versão</h3>
+<p>Complete para ver a versão:</p>
+<div class="ex-code">$PSVersionTable.<input data-answer="PSVersion" aria-label="resposta"></div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Para um GUID totalmente aleatório no 7.7, use:</p>
+
+<label><input type="radio" name="q2"> <code>New-Guid</code></label>
+
+<label><input type="radio" name="q2"> <code>[guid]::NewGuid()</code></label>
+
+<label><input type="radio" name="q2"> <code>New-Guid -Random</code></label>
+
+<label><input type="radio" name="q2"> <code>Get-Random -Guid</code></label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. O que o <code>-ExcludeProperty</code> do <code>Format-Table</code> faz?</p>
+
+<label><input type="radio" name="q3"> Apaga a propriedade do objeto</label>
+
+<label><input type="radio" name="q3"> Mostra só aquela propriedade</label>
+
+<label><input type="radio" name="q3"> Esconde aquela propriedade na tabela</label>
+
+<label><input type="radio" name="q3"> Ordena pela propriedade</label>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>O 7.7 roda no .NET 11 e traz <code>New-TemporaryDirectory</code>, <code>Join-Path -Extension</code> e <code>-ExcludeProperty</code> nos <code>Format-*</code>.</li>
+  <li><code>New-Guid</code> agora gera UUID v7; para aleatório, <code>[guid]::NewGuid()</code>.</li>
+  <li>Confira scripts que capturam <code>PSArgumentNullException</code> ou passam <code>-Property</code> vazio.</li>
+  <li>Veja sua versão com <code>$PSVersionTable.PSVersion</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

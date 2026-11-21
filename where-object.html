@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Where-Object — filtrando objetos no pipeline | Guia PowerShell</title>
+<meta name="description" content="Aprenda a filtrar com o Where-Object: condições com $_, várias condições com -and e -or, a forma curta e o método .Where(), com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Where-Object</span>: Filtrando</h1>
+
+<p class="intro">O <code>Where-Object</code> (apelidos <code>where</code> e <code>?</code>) é a peneira do pipeline: cada objeto que chega é testado, e só passa quem cumpre a condição. É o comando de filtro mais usado do PowerShell.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A filtrar com um bloco de condição: <code>Where-Object { $_.Campo -gt 10 }</code>.</li>
+  <li>A juntar condições com <code>-and</code> e <code>-or</code>.</li>
+  <li>A filtrar texto com <code>-like</code> e <code>-match</code>.</li>
+  <li>A forma curta: <code>Where-Object Campo -gt 10</code>.</li>
+  <li>O método <code>.Where()</code>, para listas que já estão numa variável.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a peneira</h2>
+
+<p>Na peneira, o que é pequeno passa e o que é grande fica. No <code>Where-Object</code>, você escreve a regra da peneira, e o PowerShell aplica a regra a cada objeto. Quem dá <code>True</code> passa; quem dá <code>False</code> fica para trás.</p>
+
+<p>Os exemplos usam esta lista de pedidos:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $pedidos = @(
+&gt;&gt;   [pscustomobject]@{ Id = 1; Cliente = "Ana"; Total = 120; Pago = $true }
+&gt;&gt;   [pscustomobject]@{ Id = 2; Cliente = "Beto"; Total = 45; Pago = $false }
+&gt;&gt;   [pscustomobject]@{ Id = 3; Cliente = "Carla"; Total = 300; Pago = $true }
+&gt;&gt;   [pscustomobject]@{ Id = 4; Cliente = "Davi"; Total = 80; Pago = $false }
+&gt;&gt; )
+</pre>
+
+<hr>
+
+<h2>1. Uma condição</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $pedidos | Where-Object { $_.Total -gt 100 }
+
+Id Cliente Total Pago
+-- ------- ----- ----
+ 1 Ana       120 True
+ 3 Carla     300 True
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Where-Object</dt><dd>A peneira.</dd>
+
+  <dt>{ $_.Total -gt 100 }</dt><dd>A regra: o campo <code>Total</code> do pedido da vez é maior que 100? Os pedidos 1 e 3 passam.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Várias condições: <code>-and</code> e <code>-or</code></h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $pedidos | Where-Object { $_.Pago -and $_.Total -gt 200 }
+
+Id Cliente Total Pago
+-- ------- ----- ----
+ 3 Carla     300 True
+PS&gt; $pedidos | Where-Object { -not $_.Pago -or $_.Total -lt 50 } | Select-Object Id, Cliente
+
+Id Cliente
+-- -------
+ 2 Beto
+ 4 Davi
+</pre>
+
+<dl class="anatomy">
+
+  <dt>$_.Pago -and $_.Total -gt 200</dt><dd>As duas coisas precisam ser verdade: pago <strong>e</strong> acima de 200. Só o pedido 3.</dd>
+
+  <dt>-not $_.Pago -or ...</dt><dd>Basta uma: não pago <strong>ou</strong> abaixo de 50. Veja a aula <a href="operadores-logicos.html">-and, -or e -not</a>.</dd>
+
+</dl>
+
+<div class="tryps" data-goal="out:Beto;;out:Davi;;src:Where-Object;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> filtre os pedidos que <strong>não</strong> foram pagos e mostre só o nome do cliente.</p>
+
+<pre class="script" data-file="main.ps1">$pedidos = @(
+    [pscustomobject]@{ Cliente = "Ana"; Pago = $true }
+    [pscustomobject]@{ Cliente = "Beto"; Pago = $false }
+    [pscustomobject]@{ Cliente = "Davi"; Pago = $false }
+)
+$pedidos | ForEach-Object { $_.Cliente }
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$pedidos = @(
+    [pscustomobject]@{ Cliente = "Ana"; Pago = $true }
+    [pscustomobject]@{ Cliente = "Beto"; Pago = $false }
+    [pscustomobject]@{ Cliente = "Davi"; Pago = $false }
+)
+$pedidos | Where-Object { -not $_.Pago } | ForEach-Object { $_.Cliente }
+</pre>
+
+</div>
+
+<hr>
+
+<h2>3. Filtrando texto</h2>
+
+<p>Com <code>-like</code> (curinga) e <code>-match</code> (expressão regular), a peneira olha para o texto (aula <a href="operadores-texto.html">Comparando Textos</a>):</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $frutas = "maçã", "melancia", "banana", "manga", "uva"
+PS&gt; $frutas | Where-Object { $_ -like "m*" }
+maçã
+melancia
+manga
+PS&gt; $frutas | Where-Object { $_ -match "an" }
+melancia
+banana
+manga
+</pre>
+
+<hr>
+
+<h2>4. A forma curta</h2>
+
+<p>Para uma condição simples, dá para escrever sem as chaves e sem o <code>$_</code>: o nome do campo, o operador e o valor:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $pedidos | Where-Object Total -lt 100 | Select-Object Id, Total
+
+Id Total
+-- -----
+ 2    45
+ 4    80
+</pre>
+
+<p>A forma curta não aceita <code>-and</code>/<code>-or</code>. Quando precisar de mais de uma condição, volte para as chaves.</p>
+
+<hr>
+
+<h2>5. O método <code>.Where()</code></h2>
+
+<p>Se a lista já está numa variável, existe também o método <code>.Where()</code>. Ele faz a mesma peneira e é mais rápido em listas grandes:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; (1..10).Where({ $_ % 3 -eq 0 })
+3
+6
+9
+</pre>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Usar <code>=</code> em vez de <code>-eq</code></strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $pedidos | Where-Object { $_.Cliente = "Ana" }
+PS&gt; $pedidos | Select-Object Id, Cliente
+
+Id Cliente
+-- -------
+ 1 Ana
+ 2 Ana
+ 3 Ana
+ 4 Ana
+</pre>
+
+<p>Esse erro é traiçoeiro porque <strong>não aparece mensagem nenhuma</strong>. O <code>=</code> não compara: ele <strong>atribui</strong>. A "condição" trocou o cliente de todos os pedidos para <code>Ana</code>, e como uma atribuição não devolve nada, nenhum pedido passou pela peneira. Para comparar, use <code>-eq</code>: <code>{ $_.Cliente -eq "Ana" }</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Nenhum item passou</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $pedidos | Where-Object { $_.Total -gt 1000 }
+</pre>
+
+<p>Se ninguém cumpre a regra, a saída fica vazia, sem erro. Não é defeito: a peneira simplesmente não deixou nada passar.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Where-Object { $_.A -gt 10 }</code></td><td>Só os que têm A maior que 10.</td></tr>
+
+<tr><td><code>{ cond1 -and cond2 }</code></td><td>As duas precisam ser verdade.</td></tr>
+
+<tr><td><code>{ cond1 -or cond2 }</code></td><td>Basta uma.</td></tr>
+
+<tr><td><code>{ $_ -like "m*" }</code></td><td>Texto que começa com m.</td></tr>
+
+<tr><td><code>Where-Object A -gt 10</code></td><td>Forma curta (uma condição só).</td></tr>
+
+<tr><td><code>$lista.Where({ ... })</code></td><td>Método, para listas em variável.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. O comparador</h3>
+<p>Complete para deixar passar só os números maiores que 5:</p>
+<div class="ex-code">1..10 | Where-Object { $_ <input data-answer="-gt" aria-label="resposta"> 5 }</div>
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. O que sai de <code>1..6 | Where-Object { $_ % 2 -eq 0 }</code>?</p>
+
+<label><input type="radio" name="q2"> 1, 3, 5</label>
+
+<label><input type="radio" name="q2"> Nada</label>
+
+<label><input type="radio" name="q2"> 2, 4, 6</label>
+
+<label><input type="radio" name="q2"> 1, 2, 3, 4, 5, 6</label>
+
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">3. Para comparar igualdade dentro do <code>Where-Object</code>, o certo é:</p>
+
+<label><input type="radio" name="q3"> <code>-eq</code></label>
+
+<label><input type="radio" name="q3"> <code>=</code></label>
+
+<label><input type="radio" name="q3"> <code>==</code></label>
+
+<label><input type="radio" name="q3"> <code>-is</code></label>
+
+</div>
+
+<div class="tryps" data-goal="out:Carla;;src:-and;;src:Where-Object;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> mostre o nome do cliente que pagou <strong>e</strong> gastou mais de 200. A resposta é <code>Carla</code>.</p>
+
+<pre class="script" data-file="main.ps1">$pedidos = @(
+    [pscustomobject]@{ Cliente = "Ana"; Total = 120; Pago = $true }
+    [pscustomobject]@{ Cliente = "Carla"; Total = 300; Pago = $true }
+    [pscustomobject]@{ Cliente = "Davi"; Total = 250; Pago = $false }
+)
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$pedidos = @(
+    [pscustomobject]@{ Cliente = "Ana"; Total = 120; Pago = $true }
+    [pscustomobject]@{ Cliente = "Carla"; Total = 300; Pago = $true }
+    [pscustomobject]@{ Cliente = "Davi"; Total = 250; Pago = $false }
+)
+$pedidos | Where-Object { $_.Pago -and $_.Total -gt 200 } | ForEach-Object { $_.Cliente }
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Where-Object { condição }</code> deixa passar só quem dá <code>True</code>.</li>
+  <li><code>$_</code> é o objeto da vez; <code>$_.Campo</code> é um campo dele.</li>
+  <li>Junte regras com <code>-and</code> e <code>-or</code>; inverta com <code>-not</code>.</li>
+  <li>Forma curta para uma condição: <code>Where-Object Campo -gt 10</code>.</li>
+  <li>Para comparar, <code>-eq</code>, nunca <code>=</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

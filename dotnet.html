@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell e o .NET — [Math], [DateTime], métodos estáticos e ::new() | Guia PowerShell</title>
+<meta name="description" content="Aprenda a usar o .NET dentro do PowerShell 7: classes como [Math], [DateTime], [string], [guid] e [System.IO.Path], métodos estáticos com ::, criar objetos com ::new() e descobrir membros com Get-Member -Static, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Usando o <span class="hl">.NET</span> ([Math], [DateTime])</h1>
+
+<p class="intro">O PowerShell é construído em cima do <strong>.NET</strong>, uma enorme biblioteca de ferramentas da Microsoft. Tudo o que existe lá você pode usar direto no terminal: contas da <code>[Math]</code>, datas da <code>[DateTime]</code>, caminhos da <code>[System.IO.Path]</code> e milhares de outras.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que são os colchetes <code>[Tipo]</code> e o operador <code>::</code>.</li>
+  <li>A usar métodos estáticos como <code>[Math]::Round()</code>.</li>
+  <li>A ler propriedades estáticas como <code>[Math]::PI</code> e <code>[int]::MaxValue</code>.</li>
+  <li>A criar objetos com <code>::new()</code>.</li>
+  <li>A descobrir o que um tipo oferece com <code>Get-Member -Static</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a biblioteca da cidade</h2>
+
+<p>Você não precisa escrever um livro de matemática para fazer uma raiz quadrada: vai até a biblioteca e pega o livro pronto. O .NET é essa biblioteca. <code>[Math]</code> é a estante de matemática, e <code>::</code> é o jeito de pegar um livro (um método) dessa estante.</p>
+
+<hr>
+
+<h2>1. Métodos estáticos com ::</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; [Math]::Round(2.567, 2)
+2,57
+PS&gt; [Math]::Sqrt(144)
+12
+PS&gt; [Math]::Pow(2, 10)
+1024
+PS&gt; [Math]::Max(17, 42)
+42
+PS&gt; [Math]::Floor(7.9)
+7
+PS&gt; [Math]::Ceiling(7.1)
+8
+</pre>
+
+<dl class="anatomy">
+
+  <dt>[Math]</dt><dd>O tipo (a "estante"). O nome completo é <code>System.Math</code>; o <code>System.</code> pode ser omitido.</dd>
+
+  <dt></dt><dd>:: Acessa algo <strong>estático</strong>: que pertence ao tipo, não a um objeto específico.</dd>
+
+  <dt>Round(2.567, 2)</dt><dd>O método e seus argumentos, entre parênteses e separados por vírgula.</dd>
+
+</dl>
+
+<p>Atenção: o <code>[Math]::Round</code> usa o "arredondamento bancário" quando o número está bem no meio: <code>[Math]::Round(2.5)</code> dá <code>2</code>, e <code>[Math]::Round(3.5)</code> dá <code>4</code> (vai para o par mais próximo).</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; [Math]::Round(2.5)
+2
+PS&gt; [Math]::Round(3.5)
+4
+PS&gt; [Math]::Round(2.5, [MidpointRounding]::AwayFromZero)
+3
+</pre>
+
+<hr>
+
+<h2>2. Propriedades estáticas</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; [Math]::PI
+3,14159265358979
+PS&gt; [int]::MaxValue
+2147483647
+PS&gt; [string]::Empty.Length
+0
+PS&gt; [datetime]::new(2026, 12, 25).DayOfWeek
+Friday
+</pre>
+
+<div class="tryps" data-goal="out:12;;src:\[Math\]::Sqrt;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> calcule a raiz quadrada de 144 com <code>[Math]::Sqrt</code>.</p>
+
+<pre class="script" data-file="main.ps1">$numero = 144
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$numero = 144
+[Math]::Sqrt($numero)
+</pre>
+
+</div>
+
+<hr>
+
+<h2>3. Ferramentas úteis do dia a dia</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; [string]::IsNullOrWhiteSpace("   ")
+True
+PS&gt; [System.IO.Path]::GetExtension("relatorio.final.xlsx")
+.xlsx
+PS&gt; [System.IO.Path]::GetFileNameWithoutExtension("foto-praia.jpg")
+foto-praia
+PS&gt; [System.IO.Path]::ChangeExtension("notas.txt", ".csv")
+notas.csv
+PS&gt; [datetime]::DaysInMonth(2028, 2)
+29
+PS&gt; [datetime]::IsLeapYear(2028)
+True
+PS&gt; [char]::IsDigit("7")
+True
+</pre>
+
+<hr>
+
+<h2>4. Criando objetos com ::new()</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $sb = [System.Text.StringBuilder]::new()
+PS&gt; $null = $sb.Append("Olá")
+PS&gt; $null = $sb.Append(", mundo!")
+PS&gt; $sb.ToString()
+Olá, mundo!
+PS&gt; $lista = [System.Collections.Generic.List[string]]::new()
+PS&gt; $lista.Add("café")
+PS&gt; $lista.Count
+1
+PS&gt; [timespan]::new(1, 30, 0).TotalMinutes
+90
+</pre>
+
+<dl class="anatomy">
+
+  <dt></dt><dd>new() :: Chama o construtor do tipo e cria um objeto novo. Os argumentos dependem do tipo.</dd>
+
+  <dt>$null = ...</dt><dd>Joga fora o que o método devolve (o <code>Append</code> devolve o próprio StringBuilder, que poluiria a tela).</dd>
+
+</dl>
+
+<hr>
+
+<h2>5. Descobrindo o que um tipo tem</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; [Math] | Get-Member -Static -MemberType Method | Select-Object -First 6 -ExpandProperty Name
+Abs
+Acos
+Acosh
+Asin
+Asinh
+Atan
+</pre>
+
+<p>Quer saber os argumentos de um método? Escreva o nome sem os parênteses:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; [Math]::Round
+
+OverloadDefinitions
+-------------------
+static decimal Round(decimal d)
+static decimal Round(decimal d, int decimals)
+static decimal Round(decimal d, System.MidpointRounding mode)
+static decimal Round(decimal d, int decimals, System.MidpointRounding mode)
+static double Round(double a)
+static double Round(double value, int digits)
+static double Round(double value, System.MidpointRounding mode)
+static double Round(double value, int digits, System.MidpointRounding mode)
+</pre>
+
+<p>Cada linha é uma forma (sobrecarga) de chamar o método, com os tipos de cada argumento.</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Chamar com espaço, como cmdlet</strong>
+
+<p><code>[Math]::Round 2.567 2</code> não funciona. Métodos do .NET usam parênteses e vírgulas: <code>[Math]::Round(2.567, 2)</code>. O espaço entre os argumentos é coisa de cmdlet.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Ponto em vez de ::</strong>
+
+<p><code>[Math].Sqrt(9)</code> procura um método no <em>objeto tipo</em>, não na estante. Para métodos estáticos, use sempre <code>::</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>[Math]::Round(x, 2)</code></td><td>Arredonda com 2 casas.</td></tr>
+
+<tr><td><code>[Math]::Sqrt(x)</code> / <code>::Pow(x, y)</code></td><td>Raiz / potência.</td></tr>
+
+<tr><td><code>[Math]::PI</code></td><td>Propriedade estática.</td></tr>
+
+<tr><td><code>[Tipo]::new(...)</code></td><td>Cria um objeto.</td></tr>
+
+<tr><td><code>[string]::IsNullOrWhiteSpace($t)</code></td><td>Texto vazio ou só espaços?</td></tr>
+
+<tr><td><code>[System.IO.Path]::GetExtension($n)</code></td><td>Extensão de um nome de arquivo.</td></tr>
+
+<tr><td><code>[Tipo] | Get-Member -Static</code></td><td>Lista o que o tipo oferece.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Estático</h3>
+<p>Complete o operador:</p>
+<div class="ex-code">[Math]<input data-answer="::" aria-label="resposta">Max(3, 9)</div>
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. Quanto dá <code>[Math]::Round(2.5)</code>?</p>
+
+<label><input type="radio" name="q2"> 3</label>
+
+<label><input type="radio" name="q2"> 2,5</label>
+
+<label><input type="radio" name="q2"> 2</label>
+
+<label><input type="radio" name="q2"> Erro</label>
+
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">3. Como criar um objeto novo de um tipo do .NET?</p>
+
+<label><input type="radio" name="q3"> <code>[Tipo]::new()</code></label>
+
+<label><input type="radio" name="q3"> <code>new [Tipo]</code></label>
+
+<label><input type="radio" name="q3"> <code>[Tipo].Create</code></label>
+
+<label><input type="radio" name="q3"> <code>Get-Tipo</code></label>
+
+</div>
+
+<div class="tryps" data-goal="out:1024;;src:\[Math\]::Pow;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> calcule 2 elevado a 10 com <code>[Math]::Pow</code>.</p>
+
+<pre class="script" data-file="main.ps1">
+</pre>
+
+<pre class="solucao" data-file="main.ps1">[Math]::Pow(2, 10)
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>[Tipo]::Membro</code> usa métodos e propriedades estáticas do .NET.</li>
+  <li><code>[Math]</code>, <code>[datetime]</code>, <code>[string]</code>, <code>[System.IO.Path]</code> resolvem muita coisa pronta.</li>
+  <li><code>::new()</code> cria objetos (StringBuilder, List, TimeSpan...).</li>
+  <li><code>Get-Member -Static</code> e o nome do método sem <code>()</code> mostram o que existe.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell try, catch e finally — tratando erros (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda try, catch e finally no PowerShell 7: capturar erros, ler $_ dentro do catch, catch por tipo de exceção e o bloco finally que sempre roda, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">try</span>, catch e finally</h1>
+
+<p class="intro">Com <code>try</code> e <code>catch</code> você avisa o PowerShell: "tente fazer isto; se der errado, faça aquilo em vez de mostrar o erro em vermelho". E o <code>finally</code> roda no fim, dando certo ou errado.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A estrutura <code>try { } catch { } finally { }</code>.</li>
+  <li>A usar <code>$_</code> dentro do <code>catch</code> para ler o erro.</li>
+  <li>A ter um <code>catch</code> diferente para cada tipo de erro.</li>
+  <li>O que o <code>finally</code> garante.</li>
+  <li>Por que alguns erros "passam reto" pelo <code>catch</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a rede do trapezista</h2>
+
+<p>O trapezista tenta o salto (<code>try</code>). Se escorregar, cai na rede (<code>catch</code>) em vez de no chão. E, dando certo ou errado, no fim ele agradece ao público (<code>finally</code>).</p>
+
+<hr>
+
+<h2>1. O básico</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; try {
+&gt;&gt;   $r = 10 / 0
+&gt;&gt;   "Esta linha não roda"
+&gt;&gt; }
+&gt;&gt; catch {
+&gt;&gt;   "Deu erro, mas eu tratei."
+&gt;&gt; }
+Deu erro, mas eu tratei.
+</pre>
+
+<dl class="anatomy">
+
+  <dt>try { ... }</dt><dd>O código que pode dar erro.</dd>
+
+  <dt>catch { ... }</dt><dd>Roda só se algo no <code>try</code> der um erro que encerra. O resto do <code>try</code>, depois do erro, é pulado.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Lendo o erro com $_</h2>
+
+<p>Dentro do <code>catch</code>, a variável <code>$_</code> é o erro que aconteceu:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; try { [int]"dez" }
+&gt;&gt; catch { "Não consegui converter. Motivo: $($_.Exception.Message)" }
+Não consegui converter. Motivo: Cannot convert value "dez" to type "System.Int32". Error: "The input string 'dez' was not in a correct format."
+</pre>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; try { 1 / 0 } catch { $_.Exception.GetType().Name }
+RuntimeException
+</pre>
+
+<div class="tryps" data-goal="out:Problema: Attempted to divide by zero.;;src:catch;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> o código divide por zero sem proteção. Coloque a conta dentro de um <code>try</code> e, no <code>catch</code>, mostre <code>Problema: </code> seguido da mensagem do erro.</p>
+
+<pre class="script" data-file="main.ps1">$total = 100
+$pessoas = 0
+$total / $pessoas
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$total = 100
+$pessoas = 0
+try { $total / $pessoas } catch { "Problema: $($_.Exception.Message)" }
+</pre>
+
+</div>
+
+<hr>
+
+<h2>3. finally: sempre roda</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Dividir { param([int]$a, [int]$b)
+&gt;&gt;   try { $a / $b }
+&gt;&gt;   catch { "Erro: não dá para dividir por zero." }
+&gt;&gt;   finally { "--- conta encerrada ---" }
+&gt;&gt; }
+PS&gt; Dividir 10 2
+5
+--- conta encerrada ---
+PS&gt; Dividir 10 0
+Erro: não dá para dividir por zero.
+--- conta encerrada ---
+</pre>
+
+<p>Use o <code>finally</code> para arrumar a casa: fechar uma conexão, apagar um arquivo temporário, mostrar uma mensagem de fim.</p>
+
+<hr>
+
+<h2>4. Um catch para cada tipo</h2>
+
+<p>Você pode escrever o tipo da exceção depois do <code>catch</code>. O primeiro que combinar é o que roda:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Testar { param($valor)
+&gt;&gt;   try { 100 / [int]$valor }
+&gt;&gt;   catch [System.DivideByZeroException] { "Zero não vale." }
+&gt;&gt;   catch [System.Management.Automation.RuntimeException] { "Isso não é número." }
+&gt;&gt;   catch { "Outro erro qualquer." }
+&gt;&gt; }
+PS&gt; Testar 4
+25
+PS&gt; Testar 0
+Zero não vale.
+PS&gt; Testar "abc"
+Isso não é número.
+</pre>
+
+<p>O PowerShell embrulha a divisão por zero numa exceção que "contém" a <code>DivideByZeroException</code>, por isso o primeiro <code>catch</code> pega. Deixe sempre um <code>catch</code> sem tipo por último, para o que você não previu.</p>
+
+<hr>
+
+<h2>5. Erros que passam reto</h2>
+
+<p>O <code>catch</code> só pega erros que <strong>encerram</strong>. Muitos cmdlets, quando falham num item, dão um erro que <em>não</em> encerra: o erro aparece em vermelho e o <code>catch</code> nem fica sabendo. A solução é pedir <code>-ErrorAction Stop</code> ao comando, que transforma o erro em um que encerra. Isso está na aula <a href="erroraction.html">-ErrorAction</a>.</p>
+
+<pre><code>try { Get-Item "nao-existe.txt" } catch { "Peguei!" }
+try { Get-Item "nao-existe.txt" -ErrorAction Stop } catch { "Peguei!" }
+</code></pre>
+
+<p>No primeiro, o erro do <code>Get-Item</code> aparece normalmente e o <code>catch</code> não roda. No segundo, com <code>-ErrorAction Stop</code>, aparece só <code>Peguei!</code>.</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Esperar que o resto do try rode depois do erro</strong>
+
+<p>Quando um erro acontece no meio do <code>try</code>, o PowerShell pula direto para o <code>catch</code>. As linhas que vinham depois do erro, dentro do <code>try</code>, <strong>não</strong> rodam. Se uma linha precisa rodar sempre, coloque no <code>finally</code> ou depois do bloco todo.</p>
+
+</div>
+
+<div class="cenario">
+<strong>catch vazio</strong>
+
+<p>Um <code>catch { }</code> vazio engole o erro em silêncio, e você nunca vai saber que algo deu errado. No mínimo, mostre a mensagem: <code>catch { Write-Warning $_.Exception.Message }</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>try { } catch { }</code></td><td>Tenta; se der erro que encerra, roda o catch.</td></tr>
+
+<tr><td><code>$_</code> (no catch)</td><td>O erro capturado.</td></tr>
+
+<tr><td><code>$_.Exception.Message</code></td><td>O texto do erro.</td></tr>
+
+<tr><td><code>catch [Tipo] { }</code></td><td>Pega só aquele tipo de exceção.</td></tr>
+
+<tr><td><code>finally { }</code></td><td>Roda sempre, com ou sem erro.</td></tr>
+
+<tr><td><code>-ErrorAction Stop</code></td><td>Faz o erro de um cmdlet poder ser pego pelo catch.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. A variável do catch</h3>
+<p>Complete para mostrar a mensagem do erro:</p>
+<div class="ex-code">catch { $<input data-answer="_" aria-label="resposta">.Exception.Message }</div>
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. Qual bloco roda sempre, com ou sem erro?</p>
+
+<label><input type="radio" name="q2"> try</label>
+
+<label><input type="radio" name="q2"> catch</label>
+
+<label><input type="radio" name="q2"> finally</label>
+
+<label><input type="radio" name="q2"> else</label>
+
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">3. Se a 1ª linha de um <code>try</code> der erro, a 2ª linha do <code>try</code>...</p>
+
+<label><input type="radio" name="q3"> roda depois do catch</label>
+
+<label><input type="radio" name="q3"> não roda</label>
+
+<label><input type="radio" name="q3"> roda antes do catch</label>
+
+<label><input type="radio" name="q3"> roda duas vezes</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Valor inválido: abc;;out:Fim da leitura;;src:finally;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> complete o código: tente converter <code>$entrada</code> com <code>[int]</code>; se der erro, mostre <code>Valor inválido: abc</code>; e, no <code>finally</code>, mostre <code>Fim da leitura</code>.</p>
+
+<pre class="script" data-file="main.ps1">$entrada = "abc"
+[int]$entrada
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$entrada = "abc"
+try { [int]$entrada }
+catch { "Valor inválido: $entrada" }
+finally { "Fim da leitura" }
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>try</code> tenta, <code>catch</code> trata, <code>finally</code> sempre roda.</li>
+  <li>No <code>catch</code>, <code>$_</code> é o erro e <code>$_.Exception.Message</code> é o texto dele.</li>
+  <li>Dá para ter um <code>catch</code> por tipo de exceção; deixe um genérico no fim.</li>
+  <li>O <code>catch</code> só pega erros que encerram: use <code>-ErrorAction Stop</code> nos cmdlets.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

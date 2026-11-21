@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell dot-sourcing — . .\arquivo.ps1 (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda dot-sourcing no PowerShell 7: rodar um script no escopo atual com &quot;. .\arquivo.ps1&quot; para trazer funções e variáveis, a diferença para rodar normal e quando usar módulos, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Dot-Sourcing</span> (. .\arquivo.ps1)</h1>
+
+<p class="intro">Quando você roda um script do jeito normal, tudo o que ele cria (variáveis e funções) some quando ele termina. Com um ponto e um espaço na frente, o script roda <strong>dentro</strong> da sua sessão e deixa as funções e variáveis para você usar.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A diferença entre <code>.\script.ps1</code> e <code>. .\script.ps1</code>.</li>
+  <li>A guardar funções num arquivo e carregar com dot-sourcing.</li>
+  <li>Por que as variáveis "somem" depois de um script normal.</li>
+  <li>Como usar isso no seu <span data-rascunho="perfil.html">perfil</span>.</li>
+  <li>Quando é melhor criar um <a href="modulos-proprios.html">módulo</a>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: visitar ou se mudar</h2>
+
+<p>Rodar um script do jeito normal é como <strong>visitar</strong> a casa de alguém: você usa tudo lá dentro, mas, quando vai embora, não leva nada. Dot-sourcing é <strong>se mudar</strong> com a mudança: o que o script cria passa a morar na sua sessão.</p>
+
+<hr>
+
+<h2>1. Um arquivo de ferramentas</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Set-Content ferramentas.ps1 @'
+&gt;&gt; $versao = "1.2"
+&gt;&gt; function Converter-Celsius { param([double]$C) "{0:N1} °F" -f ($C * 9 / 5 + 32) }
+&gt;&gt; '@
+</pre>
+
+<hr>
+
+<h2>2. Rodando do jeito normal</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; .\ferramentas.ps1
+PS&gt; "Versão: [$versao]"
+Versão: []
+PS&gt; Get-Command Converter-Celsius -ErrorAction SilentlyContinue | Measure-Object | Select-Object -ExpandProperty Count
+0
+</pre>
+
+<p>O script rodou, mas a variável <code>$versao</code> está vazia e a função não existe (a contagem dá <code>0</code>): tudo ficou no escopo do script, que acabou.</p>
+
+<hr>
+
+<h2>3. Com dot-sourcing</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; . .\ferramentas.ps1
+PS&gt; "Versão: [$versao]"
+Versão: [1.2]
+PS&gt; Converter-Celsius 25
+77,0 °F
+</pre>
+
+<dl class="anatomy">
+
+  <dt>.</dt><dd>O ponto: "rode no escopo atual".</dd>
+
+  <dt>(espaço)</dt><dd>Obrigatório entre o ponto e o caminho.</dd>
+
+  <dt>.\ferramentas.ps1</dt><dd>O caminho do script, como sempre.</dd>
+
+</dl>
+
+<div class="tryps" data-goal="out:77,0 °F;;src:^\. \.\\;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> o arquivo <code>ferramentas.ps1</code> já existe. Carregue com dot-sourcing e chame <code>Converter-Celsius 25</code>.</p>
+
+<pre class="script" data-file="main.ps1">Set-Content ferramentas.ps1 'function Converter-Celsius { param([double]$C) "{0:N1} °F" -f ($C * 9 / 5 + 32) }'
+.\ferramentas.ps1
+Converter-Celsius 25
+</pre>
+
+<pre class="solucao" data-file="main.ps1">Set-Content ferramentas.ps1 'function Converter-Celsius { param([double]$C) "{0:N1} °F" -f ($C * 9 / 5 + 32) }'
+. .\ferramentas.ps1
+Converter-Celsius 25
+</pre>
+
+</div>
+
+<hr>
+
+<h2>4. Uso comum: o perfil</h2>
+
+<p>O seu <span data-rascunho="perfil.html">perfil</span> (<code>$PROFILE</code>) é carregado toda vez que o PowerShell abre. É um ótimo lugar para uma linha como esta, que traz suas ferramentas para toda sessão:</p>
+
+<pre><code>. "$HOME\Documentos\ps\ferramentas.ps1"
+</code></pre>
+
+<hr>
+
+<h2>5. Dot-sourcing ou módulo?</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Use</th><th>Quando</th></tr>
+
+<tr><td>Dot-sourcing</td><td>Poucas funções, uso pessoal, carregar rápido no perfil.</td></tr>
+
+<tr><td>Módulo (<code>.psm1</code>)</td><td>Muitas funções, compartilhar com outras pessoas, controlar o que fica visível. Veja <a href="modulos-proprios.html">Criando seu Módulo</a>.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Esquecer o espaço depois do ponto</strong>
+
+<p><code>..\ferramentas.ps1</code> (sem espaço) é outra coisa: o <code>..</code> significa "a pasta de cima". O PowerShell vai procurar o arquivo na pasta pai. Escreva <code>. .\ferramentas.ps1</code>, com espaço.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Dot-sourcing de um script que faz coisas</strong>
+
+<p>Com dot-sourcing, o script também <strong>executa</strong> tudo o que tem fora das funções, e as variáveis dele podem sobrescrever as suas (uma <code>$total</code> dele troca a sua <code>$total</code>). Arquivos para dot-sourcing devem conter só funções e valores de configuração.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>.\script.ps1</code></td><td>Roda no escopo do script; nada fica depois.</td></tr>
+
+<tr><td><code>. .\script.ps1</code></td><td>Roda no escopo atual; funções e variáveis ficam.</td></tr>
+
+<tr><td><code>. "$HOME\caminho\arq.ps1"</code></td><td>Dot-sourcing com caminho completo.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. O ponto e o espaço</h3>
+<p>Complete o comando para carregar as funções:</p>
+<div class="ex-code"><input data-answer="." aria-label="resposta"> .\funcoes.ps1</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Depois de <code>.\script.ps1</code> (sem o ponto na frente), as funções criadas pelo script...</p>
+
+<label><input type="radio" name="q2"> ficam disponíveis na sessão</label>
+
+<label><input type="radio" name="q2"> somem quando o script termina</label>
+
+<label><input type="radio" name="q2"> viram um módulo</label>
+
+<label><input type="radio" name="q2"> são salvas no perfil</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. O que <code>..\x.ps1</code> significa?</p>
+
+<label><input type="radio" name="q3"> Dot-sourcing do x.ps1</label>
+
+<label><input type="radio" name="q3"> Rodar x.ps1 duas vezes</label>
+
+<label><input type="radio" name="q3"> O arquivo x.ps1 na pasta de cima</label>
+
+<label><input type="radio" name="q3"> Um erro de sintaxe</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Olá do arquivo!;;src:^\. \.\\util\.ps1;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> o arquivo <code>util.ps1</code> tem a função <code>Dizer-Ola</code>. Carregue com dot-sourcing e chame <code>Dizer-Ola</code>.</p>
+
+<pre class="script" data-file="main.ps1">Set-Content util.ps1 'function Dizer-Ola { "Olá do arquivo!" }'
+Dizer-Ola
+</pre>
+
+<pre class="solucao" data-file="main.ps1">Set-Content util.ps1 'function Dizer-Ola { "Olá do arquivo!" }'
+. .\util.ps1
+Dizer-Ola
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>. .\arquivo.ps1</code> roda o script dentro da sua sessão.</li>
+  <li>Funções e variáveis criadas pelo script continuam existindo.</li>
+  <li>Ótimo para carregar ferramentas no perfil.</li>
+  <li>Para muitas funções ou para compartilhar, prefira um módulo.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

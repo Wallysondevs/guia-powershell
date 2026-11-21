@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell parâmetros de script — param() e $args em arquivos .ps1 | Guia PowerShell</title>
+<meta name="description" content="Aprenda a receber parâmetros num script .ps1 do PowerShell 7: o bloco param() no topo do arquivo, valores padrão, tipos, Mandatory, switches e a variável $args, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Parâmetros de <span class="hl">Script</span> e $args</h1>
+
+<p class="intro">Um script fica muito mais útil quando você pode mudar o que ele faz sem editar o arquivo. É só colocar um bloco <code>param()</code> na primeira linha: o script passa a aceitar parâmetros, igualzinho a uma <a href="param.html">função</a>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A colocar <code>param()</code> no topo de um arquivo <code>.ps1</code>.</li>
+  <li>A chamar o script com <code>-Nome valor</code> e por posição.</li>
+  <li>A dar tipos, valores padrão e switches aos parâmetros do script.</li>
+  <li>A ler argumentos soltos com <code>$args</code>.</li>
+  <li>Onde o <code>param()</code> precisa ficar para funcionar.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a receita com espaços em branco</h2>
+
+<p>Uma receita que diz "bata <em>__</em> ovos com <em>__</em> xícaras de açúcar" serve para um bolo pequeno ou grande. Os espaços em branco são os parâmetros: o script é o mesmo, você só preenche os valores na hora de usar.</p>
+
+<hr>
+
+<h2>1. Um script com param()</h2>
+
+<p>Vamos criar o arquivo <code>saudar.ps1</code> na pasta atual. O <code>Set-Content</code> grava o texto entre <code>@'</code> e <code>'@</code> (uma <a href="here-strings.html">here-string</a>):</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Set-Content saudar.ps1 @'
+&gt;&gt; param(
+&gt;&gt;     [string]$Nome = "visitante",
+&gt;&gt;     [int]$Vezes = 1
+&gt;&gt; )
+&gt;&gt; 1..$Vezes | ForEach-Object { "Olá, $Nome!" }
+&gt;&gt; '@
+</pre>
+
+<p>Agora rode o script de três jeitos:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; .\saudar.ps1
+Olá, visitante!
+PS&gt; .\saudar.ps1 -Nome Ana -Vezes 2
+Olá, Ana!
+Olá, Ana!
+PS&gt; .\saudar.ps1 Beto 3
+Olá, Beto!
+Olá, Beto!
+Olá, Beto!
+</pre>
+
+<dl class="anatomy">
+
+  <dt>.\saudar.ps1</dt><dd>Roda o script que está na pasta atual. O <code>.\</code> é obrigatório: o PowerShell não roda scripts da pasta atual só pelo nome.</dd>
+
+  <dt>-Nome Ana</dt><dd>Preenche o parâmetro <code>$Nome</code>.</dd>
+
+  <dt>Beto 3</dt><dd>Sem nomes, os valores entram na ordem em que os parâmetros foram declarados.</dd>
+
+</dl>
+
+<p>Se o Windows recusar o script com uma mensagem sobre <em>execution policy</em>, veja a aula <span data-rascunho="execution-policy.html">Política de Execução</span>.</p>
+
+<div class="tryps" data-goal="out:Olá, Duda!;;out:Olá, Duda!;;src:-Vezes 2;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> o script já foi criado. Chame <code>.\saudar.ps1</code> com <code>-Nome Duda</code> e <code>-Vezes 2</code>.</p>
+
+<pre class="script" data-file="main.ps1">Set-Content saudar.ps1 'param([string]$Nome = "visitante", [int]$Vezes = 1)
+1..$Vezes | ForEach-Object { "Olá, $Nome!" }'
+.\saudar.ps1
+</pre>
+
+<pre class="solucao" data-file="main.ps1">Set-Content saudar.ps1 'param([string]$Nome = "visitante", [int]$Vezes = 1)
+1..$Vezes | ForEach-Object { "Olá, $Nome!" }'
+.\saudar.ps1 -Nome Duda -Vezes 2
+</pre>
+
+</div>
+
+<hr>
+
+<h2>2. Switch e Mandatory</h2>
+
+<p>Tudo o que você aprendeu em <a href="param.html">param</a> e <a href="validacao.html">validação</a> vale aqui: <code>[switch]</code>, <code>[Parameter(Mandatory)]</code>, <code>[ValidateSet()]</code>...</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Set-Content conta.ps1 @'
+&gt;&gt; param(
+&gt;&gt;     [Parameter(Mandatory)][double]$Valor,
+&gt;&gt;     [ValidateSet("BRL", "USD")][string]$Moeda = "BRL",
+&gt;&gt;     [switch]$Gorjeta
+&gt;&gt; )
+&gt;&gt; if ($Gorjeta) { $Valor = $Valor * 1.1 }
+&gt;&gt; "{0} {1:N2}" -f $Moeda, $Valor
+&gt;&gt; '@
+PS&gt; .\conta.ps1 -Valor 80
+BRL 80,00
+PS&gt; .\conta.ps1 -Valor 80 -Gorjeta
+BRL 88,00
+PS&gt; .\conta.ps1 -Valor 15.5 -Moeda USD
+USD 15,50
+</pre>
+
+<p>O <code>{1:N2}</code> formata com duas casas e a vírgula do português (veja <a href="operador-formato.html">o operador -f</a>). Se você esquecer o <code>-Valor</code>, que é <code>Mandatory</code>, o PowerShell pergunta o valor antes de rodar.</p>
+
+<hr>
+
+<h2>3. $args: o que sobrou</h2>
+
+<p>Um script <strong>sem</strong> <code>param()</code> recebe tudo em <code>$args</code>, uma lista com os argumentos na ordem:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Set-Content lista.ps1 @'
+&gt;&gt; "Recebi $($args.Count) argumento(s)."
+&gt;&gt; foreach ($a in $args) { "- $a" }
+&gt;&gt; '@
+PS&gt; .\lista.ps1 maçã uva "pão de queijo"
+Recebi 3 argumento(s).
+- maçã
+- uva
+- pão de queijo
+</pre>
+
+<p>Use <code>$args</code> só em scripts bem pequenos. Com <code>param()</code> você ganha nomes, tipos, valores padrão e ajuda automática.</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>param() fora da primeira linha</strong>
+
+<p>O bloco <code>param()</code> precisa ser a primeira instrução do arquivo. Comentários e linhas em branco antes dele podem; um comando antes dele, não. Com um comando antes, o PowerShell trata <code>param</code> como um comando desconhecido e os parâmetros não funcionam.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Esquecer o .\</strong>
+
+<p>Digitar só <code>saudar.ps1</code> não funciona, mesmo estando na pasta certa: o PowerShell só procura comandos nas pastas do sistema. Escreva <code>.\saudar.ps1</code> (ou o caminho completo).</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você escreve</th><th>O que faz</th></tr>
+
+<tr><td><code>param([string]$Nome = "x")</code> (1ª linha)</td><td>Parâmetro com tipo e valor padrão.</td></tr>
+
+<tr><td><code>.\script.ps1 -Nome Ana</code></td><td>Passa por nome.</td></tr>
+
+<tr><td><code>.\script.ps1 Ana</code></td><td>Passa por posição.</td></tr>
+
+<tr><td><code>[switch]$Opcao</code></td><td>Liga/desliga: <code>-Opcao</code>.</td></tr>
+
+<tr><td><code>[Parameter(Mandatory)]</code></td><td>Obrigatório; pergunta se faltar.</td></tr>
+
+<tr><td><code>$args</code></td><td>Argumentos sem parâmetro declarado.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Rodar da pasta atual</h3>
+<p>Complete para rodar o script da pasta atual:</p>
+<div class="ex-code"><input data-answer=".\" aria-label="resposta">relatorio.ps1</div>
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">2. Onde o bloco <code>param()</code> deve ficar num script?</p>
+
+<label><input type="radio" name="q2"> Na primeira instrução do arquivo</label>
+
+<label><input type="radio" name="q2"> No fim do arquivo</label>
+
+<label><input type="radio" name="q2"> Em qualquer lugar</label>
+
+<label><input type="radio" name="q2"> Dentro de uma função chamada Main</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. Num script sem <code>param()</code>, onde ficam os argumentos?</p>
+
+<label><input type="radio" name="q3"> <code>$input</code></label>
+
+<label><input type="radio" name="q3"> <code>$params</code></label>
+
+<label><input type="radio" name="q3"> <code>$args</code></label>
+
+<label><input type="radio" name="q3"> <code>$_</code></label>
+
+</div>
+
+<div class="tryps" data-goal="out:Total: 3 itens;;src:\$args;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> grave em <code>contar.ps1</code> um script que mostra <code>Total: </code> + a quantidade de argumentos + <code> itens</code> (use <code>$args.Count</code>). Depois rode com <code>.\contar.ps1 a b c</code>.</p>
+
+<pre class="script" data-file="main.ps1">Set-Content contar.ps1 '"Total: ? itens"'
+.\contar.ps1 a b c
+</pre>
+
+<pre class="solucao" data-file="main.ps1">Set-Content contar.ps1 '"Total: $($args.Count) itens"'
+.\contar.ps1 a b c
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>param()</code> na primeira linha transforma o script num comando com parâmetros.</li>
+  <li>Chame com <code>.\script.ps1 -Param valor</code> ou por posição.</li>
+  <li>Tipos, padrões, <code>[switch]</code> e <code>Mandatory</code> funcionam como nas funções.</li>
+  <li><code>$args</code> guarda os argumentos quando não há <code>param()</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

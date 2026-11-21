@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Arrays — listas de valores | Guia PowerShell</title>
+<meta name="description" content="Aprenda a criar arrays (listas) no PowerShell: com vírgulas, com @(), com intervalos, contar itens, misturar tipos e juntar listas, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Arrays</span> (Listas)</h1>
+
+<p class="intro">Um <strong>array</strong> é uma lista: uma variável só que guarda vários valores em fila. Você já usou listas no <code>foreach</code>; nesta aula você aprende a criar, contar e juntar listas do jeito certo.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A criar uma lista com vírgulas: <code>$frutas = "maçã", "uva"</code>.</li>
+  <li>A criar com <code>@()</code>, inclusive a lista vazia e a lista de um item só.</li>
+  <li>A contar os itens com <code>.Count</code>.</li>
+  <li>A juntar duas listas com <code>+</code>.</li>
+  <li>Que o resultado de um comando com vários itens vira um array sozinho.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a fila de cadeiras</h2>
+
+<p>Pense numa fileira de cadeiras numeradas num auditório. Cada cadeira guarda uma pessoa, e a fileira inteira tem um nome ("fileira B"). O array é a fileira; cada valor é uma pessoa sentada numa cadeira.</p>
+
+<hr>
+
+<h2>1. Criando com vírgulas</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $frutas = "maçã", "banana", "uva"
+PS&gt; $frutas
+maçã
+banana
+uva
+PS&gt; $frutas.Count
+3
+PS&gt; $frutas.GetType().Name
+Object[]
+</pre>
+
+<dl class="anatomy">
+
+  <dt>"maçã", "banana", "uva"</dt><dd>As vírgulas criam a lista. Cada valor vira um item.</dd>
+
+  <dt>.Count</dt><dd>Quantos itens a lista tem.</dd>
+
+  <dt>Object[]</dt><dd>O tipo de um array comum: <code>[]</code> quer dizer "lista de", e <code>Object</code> quer dizer que cabe qualquer coisa.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Criando com <code>@()</code></h2>
+
+<p>O <code>@( )</code> também cria um array. Ele é o jeito certo de criar uma lista <strong>vazia</strong> ou de <strong>um item só</strong>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $vazia = @()
+PS&gt; $vazia.Count
+0
+PS&gt; $um = @("só eu")
+PS&gt; $um.Count
+1
+PS&gt; $numeros = @(
+&gt;&gt;   10
+&gt;&gt;   20
+&gt;&gt;   30
+&gt;&gt; )
+PS&gt; $numeros.Count
+3
+</pre>
+
+<dl class="anatomy">
+
+  <dt>@()</dt><dd>Lista vazia, com zero itens.</dd>
+
+  <dt>@("só eu")</dt><dd>Lista de um item. Sem o <code>@()</code>, seria só um texto, não uma lista.</dd>
+
+  <dt>@( um por linha )</dt><dd>Dentro do <code>@()</code>, cada linha vira um item. Fica bom para listas compridas.</dd>
+
+</dl>
+
+<hr>
+
+<h2>3. Intervalos de números</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $dias = 1..7
+PS&gt; $dias -join " "
+1 2 3 4 5 6 7
+PS&gt; $contagem = 5..1
+PS&gt; $contagem -join " "
+5 4 3 2 1
+</pre>
+
+<div class="tryps" data-goal="out:4;;src:\.Count;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> crie a lista <code>$cores</code> com <code>"azul", "verde", "rosa", "preto"</code> e mostre quantos itens ela tem com <code>.Count</code>.</p>
+
+<pre class="script" data-file="main.ps1">$cores = "azul"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$cores = "azul", "verde", "rosa", "preto"
+$cores.Count
+</pre>
+
+</div>
+
+<hr>
+
+<h2>4. Misturando tipos e juntando listas</h2>
+
+<p>Um array comum aceita valores de tipos diferentes. E o <code>+</code> junta duas listas numa nova:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $mistura = "Ana", 30, $true
+PS&gt; $mistura | ForEach-Object { $_.GetType().Name }
+String
+Int32
+Boolean
+PS&gt; $a = 1, 2
+PS&gt; $b = 3, 4
+PS&gt; $a + $b
+1
+2
+3
+4
+</pre>
+
+<hr>
+
+<h2>5. Comandos devolvem arrays</h2>
+
+<p>Quando um comando solta vários itens e você guarda numa variável, ela vira um array sozinha:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $pares = 1..10 | Where-Object { $_ % 2 -eq 0 }
+PS&gt; $pares.Count
+5
+PS&gt; $pares.GetType().Name
+Object[]
+</pre>
+
+<p>Cuidado: se o comando soltar <strong>um</strong> item só, a variável recebe o item, não uma lista. Para garantir uma lista, coloque tudo dentro de <code>@( )</code>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $um = 1..10 | Where-Object { $_ -eq 7 }
+PS&gt; $um.GetType().Name
+Int32
+PS&gt; $lista = @(1..10 | Where-Object { $_ -eq 7 })
+PS&gt; $lista.GetType().Name
+Object[]
+</pre>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Esquecer a vírgula</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $frutas = "maçã" "banana"
+ParserError: 
+Line |
+   1 |  $frutas = "maçã" "banana"
+     |                   ~~~~~~~~
+     | Unexpected token '"banana"' in expression or statement.
+</pre>
+
+<p>Sem vírgula, o PowerShell não sabe o que fazer com o segundo texto e para na leitura: <code>Unexpected token</code>. Separe os itens com vírgula.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Tipo fixo não aceita outro tipo</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; [int[]]$idades = 30, 25
+PS&gt; $idades += "trinta"
+MetadataError: Cannot convert value "trinta" to type "System.Int32". Error: "The input string 'trinta' was not in a correct format."
+</pre>
+
+<p>Com <code>[int[]]</code> na frente, a lista só aceita números inteiros. O texto "trinta" não dá para converter.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>$a = 1, 2, 3</code></td><td>Lista com 3 itens.</td></tr>
+
+<tr><td><code>$a = @()</code></td><td>Lista vazia.</td></tr>
+
+<tr><td><code>$a = @("x")</code></td><td>Lista de um item só.</td></tr>
+
+<tr><td><code>$a = 1..10</code></td><td>Os números de 1 a 10.</td></tr>
+
+<tr><td><code>$a.Count</code></td><td>Quantos itens.</td></tr>
+
+<tr><td><code>$a + $b</code></td><td>Junta duas listas.</td></tr>
+
+<tr><td><code>[int[]]$a = 1, 2</code></td><td>Lista só de inteiros.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. A lista vazia</h3>
+<p>Complete para criar uma lista vazia:</p>
+<div class="ex-code">$tarefas = <input data-answer="@()" aria-label="resposta"></div>
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. Quantos itens tem <code>$x = 1..4 + 10</code>?</p>
+
+<label><input type="radio" name="q2"> 2</label>
+
+<label><input type="radio" name="q2"> 4</label>
+
+<label><input type="radio" name="q2"> 5</label>
+
+<label><input type="radio" name="q2"> 10</label>
+
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">3. Para que serve o <code>@( )</code> em volta de um comando?</p>
+
+<label><input type="radio" name="q3"> Para deixar o comando mais rápido</label>
+
+<label><input type="radio" name="q3"> Para garantir que o resultado seja uma lista, mesmo com um item só</label>
+
+<label><input type="radio" name="q3"> Para apagar a lista</label>
+
+<label><input type="radio" name="q3"> Para ordenar a lista</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Total: 6 itens;;src:\+;;src:\.Count;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> junte a lista de frutas com a lista de legumes usando <code>+</code>, guarde em <code>$feira</code> e mostre <code>Total: 6 itens</code>.</p>
+
+<pre class="script" data-file="main.ps1">$frutas = "maçã", "uva", "pera"
+$legumes = "cenoura", "batata", "abóbora"
+$feira = $frutas
+"Total: $($feira.Count) itens"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$frutas = "maçã", "uva", "pera"
+$legumes = "cenoura", "batata", "abóbora"
+$feira = $frutas + $legumes
+"Total: $($feira.Count) itens"
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Array é uma lista: <code>$a = 1, 2, 3</code>.</li>
+  <li><code>@()</code> cria a lista vazia; <code>@("x")</code> a lista de um item; <code>@( comando )</code> garante lista.</li>
+  <li><code>.Count</code> conta os itens; <code>+</code> junta listas.</li>
+  <li>Um array comum aceita tipos misturados; <code>[int[]]</code> aceita só inteiros.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

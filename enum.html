@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell enum — listas de opções com nome (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda enum no PowerShell 7: criar uma lista fixa de opções com nome, converter de texto e número, usar em parâmetros, listar os valores e combinar opções com [Flags()], com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Enum</span></h1>
+
+<p class="intro">Um <code>enum</code> é uma lista fixa de opções com nome: tamanhos P, M e G; status Pendente, Pago e Cancelado. Com ele, o PowerShell recusa valores que não estão na lista e ainda completa os nomes com a tecla Tab.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A criar um <code>enum</code> com valores e números.</li>
+  <li>A converter texto e número em um valor do enum.</li>
+  <li>A usar o enum como tipo de parâmetro.</li>
+  <li>A listar todas as opções.</li>
+  <li>A combinar opções com <code>[Flags()]</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: o cardápio de tamanhos</h2>
+
+<p>Na lanchonete, o copo é P, M ou G. Ninguém pede "copo médio-grandinho". O enum é esse cardápio fechado: só vale o que está na lista.</p>
+
+<hr>
+
+<h2>1. Criando um enum</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; enum Tamanho {
+&gt;&gt;     P = 1
+&gt;&gt;     M = 2
+&gt;&gt;     G = 3
+&gt;&gt; }
+PS&gt; [Tamanho]::M
+M
+PS&gt; [int][Tamanho]::G
+3
+</pre>
+
+<dl class="anatomy">
+
+  <dt>enum Tamanho { }</dt><dd>Cria o tipo <code>[Tamanho]</code>.</dd>
+
+  <dt>P = 1</dt><dd>Cada nome tem um número por trás. Sem o <code>= 1</code>, a contagem começa em 0.</dd>
+
+  <dt>[int][Tamanho]</dt><dd>G :: Converte o valor para o número dele.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Convertendo</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; [Tamanho]"G"
+G
+PS&gt; [Tamanho]2
+M
+PS&gt; [Tamanho]"m"
+M
+</pre>
+
+<p>Texto e número viram o valor do enum, sem diferenciar maiúsculas. Um nome fora da lista dá erro, e é isso que você quer: o erro aparece logo, antes de o dado errado se espalhar.</p>
+
+<hr>
+
+<h2>3. No parâmetro de uma função</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Pedir-Cafe { param([Tamanho]$Copo = "M")
+&gt;&gt;     $preco = @{ P = 5; M = 7; G = 9 }[$Copo.ToString()]
+&gt;&gt;     "Café ${Copo}: R$ $preco"
+&gt;&gt; }
+PS&gt; Pedir-Cafe -Copo G
+Café G: R$ 9
+PS&gt; Pedir-Cafe
+Café M: R$ 7
+</pre>
+
+<p>No terminal, depois de <code>-Copo </code>, a tecla Tab mostra <code>P</code>, <code>M</code> e <code>G</code>.</p>
+
+<div class="tryps" data-goal="out:Café G: R$ 9;;src:-Copo G;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> chame <code>Pedir-Cafe</code> pedindo o copo grande (<code>G</code>).</p>
+
+<pre class="script" data-file="main.ps1">enum Tamanho { P = 1; M = 2; G = 3 }
+function Pedir-Cafe { param([Tamanho]$Copo = "M")
+    $preco = @{ P = 5; M = 7; G = 9 }[$Copo.ToString()]
+    "Café ${Copo}: R$ $preco"
+}
+Pedir-Cafe
+</pre>
+
+<pre class="solucao" data-file="main.ps1">enum Tamanho { P = 1; M = 2; G = 3 }
+function Pedir-Cafe { param([Tamanho]$Copo = "M")
+    $preco = @{ P = 5; M = 7; G = 9 }[$Copo.ToString()]
+    "Café ${Copo}: R$ $preco"
+}
+Pedir-Cafe -Copo G
+</pre>
+
+</div>
+
+<hr>
+
+<h2>4. Listando as opções</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; [enum]::GetNames([Tamanho])
+P
+M
+G
+PS&gt; [enum]::GetValues([Tamanho]) | ForEach-Object { "{0} = {1}" -f $_, [int]$_ }
+P = 1
+M = 2
+G = 3
+</pre>
+
+<hr>
+
+<h2>5. Várias opções ao mesmo tempo: [Flags()]</h2>
+
+<p>Com <code>[Flags()]</code>, um valor pode juntar várias opções. Use números que são potências de 2 (1, 2, 4, 8...):</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; [Flags()] enum Dias {
+&gt;&gt;     Seg = 1
+&gt;&gt;     Ter = 2
+&gt;&gt;     Qua = 4
+&gt;&gt;     Qui = 8
+&gt;&gt;     Sex = 16
+&gt;&gt; }
+PS&gt; $aulas = [Dias]"Seg, Qua, Sex"
+PS&gt; $aulas
+Seg, Qua, Sex
+PS&gt; $aulas.HasFlag([Dias]::Qua)
+True
+PS&gt; $aulas.HasFlag([Dias]::Ter)
+False
+PS&gt; [int]$aulas
+21
+</pre>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Valor fora da lista</strong>
+
+<p><code>[Tamanho]"GG"</code> dá erro de conversão, e a mensagem lista os nomes válidos. Leia o fim da mensagem: está lá o que você pode usar.</p>
+
+</div>
+
+<div class="cenario">
+<strong>O dois-pontos depois da variável</strong>
+
+<p>Em <code>"Café $Copo: ..."</code>, o PowerShell entende <code>$Copo:</code> como o começo de um nome com unidade (como <code>$env:</code>) e a função nem é criada: dá um erro de sintaxe dizendo que o <code>:</code> não foi seguido de um nome válido. Use <code>"Café ${Copo}: ..."</code> ou <code>"Café $($Copo): ..."</code> (veja <a href="interpolacao.html">interpolação</a>).</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você escreve</th><th>O que faz</th></tr>
+
+<tr><td><code>enum Nome { A = 1; B = 2 }</code></td><td>Cria o enum.</td></tr>
+
+<tr><td><code>[Nome]::A</code></td><td>Um valor.</td></tr>
+
+<tr><td><code>[Nome]"A"</code> / <code>[Nome]1</code></td><td>Converte texto ou número.</td></tr>
+
+<tr><td><code>[int][Nome]::A</code></td><td>O número por trás.</td></tr>
+
+<tr><td><code>[enum]::GetNames([Nome])</code></td><td>Lista os nomes.</td></tr>
+
+<tr><td><code>[Flags()] enum ...</code></td><td>Permite combinar opções.</td></tr>
+
+<tr><td><code>$v.HasFlag([Nome]::A)</code></td><td>A combinação tem esta opção?</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Lista de nomes</h3>
+<p>Complete para listar os nomes do enum:</p>
+<div class="ex-code">[enum]::<input data-answer="GetNames" aria-label="resposta">([Tamanho])</div>
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">2. Sem números escritos, por onde começa a contagem de um enum?</p>
+
+<label><input type="radio" name="q2"> 0</label>
+
+<label><input type="radio" name="q2"> 1</label>
+
+<label><input type="radio" name="q2"> 1</label>
+
+<label><input type="radio" name="q2"> Não há números</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. Num <code>[Flags()] enum</code>, que números usar?</p>
+
+<label><input type="radio" name="q3"> 1, 2, 3, 4</label>
+
+<label><input type="radio" name="q3"> 10, 20, 30</label>
+
+<label><input type="radio" name="q3"> 1, 2, 4, 8</label>
+
+<label><input type="radio" name="q3"> Qualquer um</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Pago;;src:enum Status;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> crie o <code>enum Status</code> com <code>Pendente</code>, <code>Pago</code> e <code>Cancelado</code> e mostre <code>[Status]1</code>.</p>
+
+<pre class="script" data-file="main.ps1">
+</pre>
+
+<pre class="solucao" data-file="main.ps1">enum Status { Pendente; Pago; Cancelado }
+[Status]1
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>enum</code> cria uma lista fechada de opções com nome.</li>
+  <li>Texto e número convertem para o enum; valor fora da lista dá erro.</li>
+  <li>Como tipo de parâmetro, valida a entrada e completa com Tab.</li>
+  <li><code>[Flags()]</code> permite combinar opções (potências de 2).</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

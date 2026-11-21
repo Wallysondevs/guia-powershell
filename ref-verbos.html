@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell: verbos aprovados (Get-Verb) — referência rápida | Guia PowerShell</title>
+<meta name="description" content="Referência dos verbos aprovados do PowerShell 7 (Get-Verb) por grupo: Common, Data, Lifecycle, Diagnostic, Communications e Security, com o significado de cada um e qual escolher para suas funções.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Verbos</span> Aprovados</h1>
+
+<p class="intro">Todo cmdlet e toda função bem feita começam com um verbo da lista oficial. Esta página mostra os mais usados, por grupo, e ajuda a escolher o verbo certo para as suas funções (veja também <a href="estilo.html">Estilo e Verbos Aprovados</a>).</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A consultar a lista completa com <code>Get-Verb</code>.</li>
+  <li>Os verbos mais comuns de cada grupo.</li>
+  <li>Os pares que confundem (<code>New</code> × <code>Add</code>, <code>Set</code> × <code>Update</code>...).</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A lista completa</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; (Get-Verb).Count
+100
+PS&gt; Get-Verb -Group Security | Select-Object Verb, AliasPrefix
+
+Verb      AliasPrefix
+----      -----------
+Block     bl
+Grant     gr
+Protect   pt
+Revoke    rk
+Unblock   ul
+Unprotect up
+</pre>
+
+<p><code>Get-Verb</code> lista os verbos com o grupo e a descrição (em inglês). Para conferir um verbo: <code>Get-Verb -Verb Calcular</code> (sem resultado = não é aprovado).</p>
+
+<hr>
+
+<h2>Common (os mais usados)</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Verbo</th><th>Use para</th></tr>
+
+<tr><td><code>Get</code></td><td>Ler, buscar.</td></tr>
+
+<tr><td><code>Set</code></td><td>Alterar algo que existe (ou criar, se não existir).</td></tr>
+
+<tr><td><code>New</code></td><td>Criar algo novo.</td></tr>
+
+<tr><td><code>Add</code></td><td>Acrescentar a algo que já existe (item numa lista).</td></tr>
+
+<tr><td><code>Remove</code></td><td>Apagar.</td></tr>
+
+<tr><td><code>Clear</code></td><td>Esvaziar, mantendo o recipiente.</td></tr>
+
+<tr><td><code>Copy</code> / <code>Move</code> / <code>Rename</code></td><td>Copiar / mover / renomear.</td></tr>
+
+<tr><td><code>Show</code> / <code>Hide</code></td><td>Mostrar / esconder.</td></tr>
+
+<tr><td><code>Find</code> / <code>Search</code></td><td>Procurar.</td></tr>
+
+<tr><td><code>Format</code></td><td>Arrumar a apresentação.</td></tr>
+
+<tr><td><code>Join</code> / <code>Split</code></td><td>Juntar / separar.</td></tr>
+
+<tr><td><code>Select</code></td><td>Escolher.</td></tr>
+
+<tr><td><code>Open</code> / <code>Close</code></td><td>Abrir / fechar.</td></tr>
+
+<tr><td><code>Enter</code> / <code>Exit</code></td><td>Entrar / sair de um contexto.</td></tr>
+
+<tr><td><code>Reset</code> / <code>Undo</code> / <code>Redo</code></td><td>Voltar ao padrão / desfazer / refazer.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Data</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Verbo</th><th>Use para</th></tr>
+
+<tr><td><code>ConvertTo</code> / <code>ConvertFrom</code></td><td>Converter para / de um formato.</td></tr>
+
+<tr><td><code>Export</code> / <code>Import</code></td><td>Gravar em / ler de um arquivo.</td></tr>
+
+<tr><td><code>Save</code> / <code>Restore</code></td><td>Guardar / recuperar um estado.</td></tr>
+
+<tr><td><code>Update</code></td><td>Atualizar com dados mais novos.</td></tr>
+
+<tr><td><code>Merge</code> / <code>Compare</code></td><td>Juntar / comparar.</td></tr>
+
+<tr><td><code>Backup</code> / <code>Sync</code> / <code>Publish</code></td><td>Backup / sincronizar / publicar.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Lifecycle</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Verbo</th><th>Use para</th></tr>
+
+<tr><td><code>Start</code> / <code>Stop</code></td><td>Iniciar / parar.</td></tr>
+
+<tr><td><code>Restart</code> / <code>Suspend</code> / <code>Resume</code></td><td>Reiniciar / pausar / continuar.</td></tr>
+
+<tr><td><code>Install</code> / <code>Uninstall</code></td><td>Instalar / desinstalar.</td></tr>
+
+<tr><td><code>Enable</code> / <code>Disable</code></td><td>Ligar / desligar.</td></tr>
+
+<tr><td><code>Invoke</code></td><td>Executar uma ação.</td></tr>
+
+<tr><td><code>Wait</code></td><td>Esperar.</td></tr>
+
+<tr><td><code>Complete</code> / <code>Confirm</code> / <code>Approve</code></td><td>Concluir / confirmar / aprovar.</td></tr>
+
+<tr><td><code>Register</code> / <code>Unregister</code></td><td>Registrar / cancelar registro.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Diagnostic, Communications e Security</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Verbo</th><th>Grupo</th><th>Use para</th></tr>
+
+<tr><td><code>Test</code></td><td>Diagnostic</td><td>Verificar; devolve <code>True</code>/<code>False</code>.</td></tr>
+
+<tr><td><code>Measure</code></td><td>Diagnostic</td><td>Medir.</td></tr>
+
+<tr><td><code>Debug</code> / <code>Trace</code> / <code>Repair</code></td><td>Diagnostic</td><td>Depurar / rastrear / consertar.</td></tr>
+
+<tr><td><code>Send</code> / <code>Receive</code></td><td>Communications</td><td>Enviar / receber.</td></tr>
+
+<tr><td><code>Connect</code> / <code>Disconnect</code></td><td>Communications</td><td>Conectar / desconectar.</td></tr>
+
+<tr><td><code>Read</code> / <code>Write</code></td><td>Communications</td><td>Ler / escrever num fluxo.</td></tr>
+
+<tr><td><code>Protect</code> / <code>Unprotect</code></td><td>Security</td><td>Proteger / desproteger (criptografia).</td></tr>
+
+<tr><td><code>Grant</code> / <code>Revoke</code> / <code>Block</code> / <code>Unblock</code></td><td>Security</td><td>Permissões.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Pares que confundem</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Em dúvida entre</th><th>Regra</th></tr>
+
+<tr><td><code>New</code> × <code>Add</code></td><td><code>New</code> cria algo independente; <code>Add</code> coloca algo dentro de outra coisa.</td></tr>
+
+<tr><td><code>Set</code> × <code>Update</code></td><td><code>Set</code> grava o valor que você deu; <code>Update</code> busca o valor mais recente.</td></tr>
+
+<tr><td><code>Remove</code> × <code>Clear</code></td><td><code>Remove</code> apaga o item; <code>Clear</code> esvazia o conteúdo e mantém o item.</td></tr>
+
+<tr><td><code>Get</code> × <code>Find</code> × <code>Search</code></td><td><code>Get</code> quando você sabe o que quer; <code>Find</code>/<code>Search</code> para procurar.</td></tr>
+
+<tr><td><code>Start</code> × <code>Invoke</code></td><td><code>Start</code> inicia algo que continua rodando; <code>Invoke</code> executa e termina.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Get-Verb</code> é a lista oficial; verbos fora dela geram aviso em módulos.</li>
+  <li><code>Get</code>, <code>Set</code>, <code>New</code>, <code>Remove</code>, <code>Test</code> cobrem a maioria das funções.</li>
+  <li>O verbo diz o que acontece; o substantivo (singular) diz com o quê.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

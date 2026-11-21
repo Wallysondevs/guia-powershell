@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell JSON — ConvertTo-Json e ConvertFrom-Json (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda JSON no PowerShell 7: transformar objetos em JSON com ConvertTo-Json, ler JSON com ConvertFrom-Json, -Depth para dados aninhados, -AsHashtable e salvar configurações em arquivo, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">JSON</span> (ConvertTo-Json e ConvertFrom-Json)</h1>
+
+<p class="intro">JSON é o formato de dados da internet: APIs, arquivos de configuração e aplicativos falam JSON. No PowerShell, dois cmdlets fazem a ponte: <code>ConvertTo-Json</code> transforma objetos em texto JSON e <code>ConvertFrom-Json</code> transforma o texto de volta em objetos.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>Como é um texto JSON (chaves, colchetes, aspas).</li>
+  <li>A transformar objetos e hashtables em JSON.</li>
+  <li>A ler JSON e navegar nas propriedades.</li>
+  <li>O parâmetro <code>-Depth</code> para dados com vários níveis.</li>
+  <li>A salvar e carregar uma configuração em arquivo <code>.json</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a ficha de cadastro</h2>
+
+<p>Uma ficha de cadastro tem campos com nome e valor: "nome: Ana", "idade: 30", "telefones: (dois números)". O JSON escreve essa ficha de um jeito que qualquer programa, em qualquer linguagem, consegue ler.</p>
+
+<pre><code>{
+  "nome": "Ana",
+  "idade": 30,
+  "telefones": ["11 9999-0000", "11 3333-0000"]
+}
+</code></pre>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>No JSON</th><th>Vira no PowerShell</th></tr>
+
+<tr><td><code>{ "chave": valor }</code></td><td>Um objeto (<code>PSCustomObject</code>) com a propriedade <code>chave</code>.</td></tr>
+
+<tr><td><code>[ 1, 2, 3 ]</code></td><td>Um array.</td></tr>
+
+<tr><td><code>"texto"</code></td><td>string.</td></tr>
+
+<tr><td><code>30</code> / <code>9.5</code></td><td>Número.</td></tr>
+
+<tr><td><code>true</code> / <code>false</code> / <code>null</code></td><td><code>$true</code> / <code>$false</code> / <code>$null</code>.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>1. De objeto para JSON</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $pessoa = [pscustomobject]@{ Nome = "Ana"; Idade = 30; Ativa = $true }
+PS&gt; $pessoa | ConvertTo-Json
+{
+  "Nome": "Ana",
+  "Idade": 30,
+  "Ativa": true
+}
+PS&gt; $pessoa | ConvertTo-Json -Compress
+{"Nome":"Ana","Idade":30,"Ativa":true}
+</pre>
+
+<dl class="anatomy">
+
+  <dt>ConvertTo-Json</dt><dd>Gera o texto JSON, com recuo para ler fácil.</dd>
+
+  <dt>-Compress</dt><dd>Tudo numa linha só, sem espaços (bom para enviar a uma API).</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. De JSON para objeto</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $texto = '{"cidade":"Recife","temperatura":31.5,"bairros":["Boa Viagem","Casa Forte"]}'
+PS&gt; $clima = $texto | ConvertFrom-Json
+PS&gt; $clima
+
+cidade temperatura bairros
+------ ----------- -------
+Recife      31,500 {Boa Viagem, Casa Forte}
+PS&gt; $clima.cidade
+Recife
+PS&gt; $clima.bairros[1]
+Casa Forte
+</pre>
+
+<p>Agora é um objeto normal: dá para filtrar, ordenar e usar <code>Get-Member</code>. Na tabela, o PowerShell mostra os números com casas decimais vindos do JSON com três casas (<code>31,500</code>), mas o valor continua sendo <code>31,5</code>.</p>
+
+<div class="tryps" data-goal="out:Recife;;src:ConvertFrom-Json;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> transforme o texto de <code>$texto</code> em objeto com <code>ConvertFrom-Json</code> e mostre só a propriedade <code>cidade</code>.</p>
+
+<pre class="script" data-file="main.ps1">$texto = '{"cidade":"Recife","temperatura":31.5}'
+$texto
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$texto = '{"cidade":"Recife","temperatura":31.5}'
+($texto | ConvertFrom-Json).cidade
+</pre>
+
+</div>
+
+<hr>
+
+<h2>3. Listas de objetos</h2>
+
+<p>Um array JSON vira vários objetos no pipeline:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $json = '[{"produto":"Café","preco":18.9},{"produto":"Pão","preco":7.5},{"produto":"Leite","preco":5.2}]'
+PS&gt; $itens = $json | ConvertFrom-Json
+PS&gt; $itens | Sort-Object preco
+
+produto  preco
+-------  -----
+Leite    5,200
+Pão      7,500
+Café    18,900
+PS&gt; ($itens | Measure-Object preco -Sum).Sum
+31,6
+</pre>
+
+<hr>
+
+<h2>4. Dados aninhados e o -Depth</h2>
+
+<p>Por padrão, o <code>ConvertTo-Json</code> só desce <strong>2 níveis</strong>. Além disso, ele escreve o objeto como texto e avisa:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $pedido = @{ cliente = @{ nome = "Ana"; endereco = @{ cidade = "Recife"; uf = "PE" } } }
+PS&gt; $pedido | ConvertTo-Json -Depth 5
+{
+  "cliente": {
+    "nome": "Ana",
+    "endereco": {
+      "cidade": "Recife",
+      "uf": "PE"
+    }
+  }
+}
+</pre>
+
+<p>Sem o <code>-Depth 5</code>, o <code>endereco</code> sairia como o texto <code>System.Collections.Hashtable</code>. Sempre que tiver dados dentro de dados, use <code>-Depth</code> com folga.</p>
+
+<hr>
+
+<h2>5. Salvando uma configuração</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $config = [ordered]@{ tema = "escuro"; idioma = "pt-BR"; fonte = 14 }
+PS&gt; $config | ConvertTo-Json | Set-Content config.json
+PS&gt; Get-Content config.json
+{
+  "tema": "escuro",
+  "idioma": "pt-BR",
+  "fonte": 14
+}
+PS&gt; $lida = Get-Content config.json -Raw | ConvertFrom-Json
+PS&gt; "Fonte: $($lida.fonte)"
+Fonte: 14
+</pre>
+
+<dl class="anatomy">
+
+  <dt>[ordered]@{...}</dt><dd>A hashtable ordenada mantém as chaves na ordem em que você escreveu.</dd>
+
+  <dt>Get-Content -Raw</dt><dd>Lê o arquivo inteiro como um texto só (o <code>ConvertFrom-Json</code> precisa do JSON completo).</dd>
+
+</dl>
+
+<hr>
+
+<h2>6. -AsHashtable</h2>
+
+<p>Prefere uma hashtable em vez de objeto? Use <code>-AsHashtable</code>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $h = '{"a":1,"b":2}' | ConvertFrom-Json -AsHashtable
+PS&gt; $h["b"]
+2
+PS&gt; $h.GetType().Name
+OrderedHashtable
+</pre>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Esquecer o -Raw</strong>
+
+<p><code>Get-Content config.json | ConvertFrom-Json</code> lê linha por linha. No PowerShell 7 isso costuma funcionar, porque o cmdlet junta as linhas, mas o <code>-Raw</code> deixa claro que é um texto só e é mais rápido. Use sempre.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Aspas simples no JSON</strong>
+
+<p>JSON só aceita aspas <strong>duplas</strong>: <code>{'nome':'Ana'}</code> não é JSON válido para outros programas. Por isso, no PowerShell, guarde o JSON entre aspas simples por fora: <code>'{"nome":"Ana"}'</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>$obj | ConvertTo-Json</code></td><td>Objeto para JSON.</td></tr>
+
+<tr><td><code>-Compress</code></td><td>JSON numa linha só.</td></tr>
+
+<tr><td><code>-Depth 5</code></td><td>Desce mais níveis.</td></tr>
+
+<tr><td><code>$texto | ConvertFrom-Json</code></td><td>JSON para objeto.</td></tr>
+
+<tr><td><code>-AsHashtable</code></td><td>JSON para hashtable.</td></tr>
+
+<tr><td><code>Get-Content arq.json -Raw | ConvertFrom-Json</code></td><td>Lê um arquivo JSON.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Ler um arquivo JSON</h3>
+<p>Complete:</p>
+<div class="ex-code">Get-Content dados.json <input data-answer="-Raw" aria-label="resposta"> | ConvertFrom-Json</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Quantos níveis o <code>ConvertTo-Json</code> desce por padrão?</p>
+
+<label><input type="radio" name="q2"> 1</label>
+
+<label><input type="radio" name="q2"> 2</label>
+
+<label><input type="radio" name="q2"> 5</label>
+
+<label><input type="radio" name="q2"> todos</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. O que <code>[1, 2, 3]</code> vira com <code>ConvertFrom-Json</code>?</p>
+
+<label><input type="radio" name="q3"> Uma string</label>
+
+<label><input type="radio" name="q3"> Uma hashtable</label>
+
+<label><input type="radio" name="q3"> Números (um array)</label>
+
+<label><input type="radio" name="q3"> Um erro</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Total: 31,6;;src:ConvertFrom-Json;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> some o <code>preco</code> de todos os itens do JSON e mostre <code>Total: </code> + a soma formatada com <code>{0:N1}</code> (o resultado é <code>Total: 31,6</code>).</p>
+
+<pre class="script" data-file="main.ps1">$json = '[{"produto":"Café","preco":18.9},{"produto":"Pão","preco":7.5},{"produto":"Leite","preco":5.2}]'
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$json = '[{"produto":"Café","preco":18.9},{"produto":"Pão","preco":7.5},{"produto":"Leite","preco":5.2}]'
+$soma = ($json | ConvertFrom-Json | Measure-Object preco -Sum).Sum
+"Total: {0:N1}" -f $soma
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>ConvertTo-Json</code> transforma objetos em JSON; <code>ConvertFrom-Json</code> faz o caminho de volta.</li>
+  <li>Objeto JSON vira <code>PSCustomObject</code>; array vira lista.</li>
+  <li>Use <code>-Depth</code> para dados aninhados e <code>-Compress</code> para uma linha só.</li>
+  <li>Arquivo JSON: <code>Set-Content</code> para gravar, <code>Get-Content -Raw</code> para ler.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

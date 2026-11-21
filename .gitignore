@@ -2,6 +2,8 @@ _saidas-brutas/
 tools/proibido.txt
 *.bak
 _saidas-anon/
+_rascunhos/
+__pycache__/
+*.pyc
 
-# quadro interno de trabalho, não publicar
-QUADRO.md
+cmds/

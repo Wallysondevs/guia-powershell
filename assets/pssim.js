@@ -200,8 +200,14 @@
     "system.io.file": "System.IO.File", "io.file": "System.IO.File", "system.io.directory": "System.IO.Directory", convert: "System.Convert", "system.convert": "System.Convert",
     "char[]": "System.Char[]", "double[]": "System.Double[]", "object": "System.Object", sbyte: "System.SByte", uint: "System.UInt32", short: "System.Int16"
   };
+  var TIPOS_USUARIO = {}, SESSAO_ATUAL = null; // enum e class criados no código da pessoa
+  function tipoUsuario(nome) { return TIPOS_USUARIO[lc(String(nome)).replace(/\s+/g, "")] || null; }
   function typeFull(name) {
     var k = lc(name).replace(/\s+/g, "");
+    if (TIPOS_USUARIO[k]) return TIPOS_USUARIO[k].name;
+    var g = /^(?:system\.collections\.generic\.|collections\.generic\.)?list\[(.+)\]$/.exec(k);
+    if (g) { var el = typeFull(g[1]); return el ? "System.Collections.Generic.List[" + el + "]" : null; }
+    if (k === "system.collections.arraylist" || k === "collections.arraylist") return "System.Collections.ArrayList";
     return TIPOS[k] || TIPOS["system." + k] || null;
   }
   function typeOf(v) {
@@ -209,7 +215,7 @@
     if (typeof v === "string") return "System.String";
     if (typeof v === "number") return isInt(v) ? (Math.abs(v) <= 2147483647 ? "System.Int32" : "System.Int64") : "System.Double";
     if (typeof v === "boolean") return "System.Boolean";
-    if (isArr(v)) return "System.Object[]";
+    if (isArr(v)) return v.__lista ? (v.__lista === "System.Collections.ArrayList" ? v.__lista : "System.Collections.Generic.List`1") : "System.Object[]";
     if (v instanceof PSHash) return v.ordered ? "System.Collections.Specialized.OrderedDictionary" : "System.Collections.Hashtable";
     if (v instanceof PSDate) return "System.DateTime";
     if (v instanceof ScriptBlock) return "System.Management.Automation.ScriptBlock";
@@ -272,6 +278,8 @@
 
   // [tipo]valor
   function convertTo(full, v) {
+    var ut = tipoUsuario(full);
+    if (ut) return ut.kind === "enum" ? enumConv(ut, v) : SESSAO_ATUAL.classConv(ut, v);
     switch (full) {
       case "System.Int32": case "System.Int64": case "System.Byte": case "System.Int16": case "System.UInt32": case "System.SByte":
         if (isArr(v) && v.length !== 1) throw convFail(v, full);
@@ -326,6 +334,8 @@
     throw new PSErr('Cannot convert value "' + s + '" to type "System.ConsoleColor". Error: "Unable to match the identifier name ' + s + ' to a valid enumerator name. Specify one of the following enumerator names and try again:\n' + CORES.join(", ") + '"', "InvalidArgument");
   }
   function isType(v, full) {
+    var utI = tipoUsuario(full);
+    if (utI && v instanceof PSObj && v.__classe) { for (var c = v.__classe; c; c = c.baseDef) if (c === utI) return true; return false; }
     if (full === "System.Object") return v !== null && v !== undefined;
     if (full === "System.Array" || full === "System.Object[]") return isArr(v);
     if (full === "System.Management.Automation.PSObject") return v !== null && v !== undefined;
@@ -500,7 +510,11 @@
     if (this.c() === ":" && isIdS(this.c(1))) {
       var m = /^:(\w+)/.exec(this.s.slice(this.i)); label = m[1]; this.i += m[0].length; this.ws();
     }
+    var mFlags = /^\[\s*Flags\s*\(\s*\)\s*\]\s*(?=enum\b)/i.exec(this.s.slice(this.i)), flagsEnum = false;
+    if (mFlags) { this.i += mFlags[0].length; flagsEnum = true; }
     var w = this.word();
+    if (w === "enum") { var stE = this.enumStmt(p); stE.flags = flagsEnum; return stE; }
+    if (w === "class") return this.classStmt(p);
     if (w && KW[w]) {
       var st = this.keywordStmt(w, p);
       if (st) { if (label) st.label = label; return st; }
@@ -521,6 +535,61 @@
     if (this.c() !== ")") this.fail("Missing closing ')' after expression in '" + kwName + "' statement.", this.i);
     var close = this.i; this.i++;
     return { e: e, close: close, open: open };
+  };
+  PP.ident = function () {
+    var m = /^[A-Za-z_][\w.]*/.exec(this.s.slice(this.i));
+    if (!m) this.fail("Missing name.", this.i);
+    this.i += m[0].length; return m[0];
+  };
+  PP.enumStmt = function (p) {
+    this.kw("enum"); this.ws(); var nome = this.ident(), itens = [], prox = 0; this.wsn();
+    if (this.c() !== "{") this.fail("Missing opening '{' in enum definition.", this.i);
+    this.i++;
+    for (;;) {
+      this.wsn(); while (this.c() === ";") { this.i++; this.wsn(); }
+      if (this.c() === "}") { this.i++; break; }
+      if (this.eof()) this.fail("Missing closing '}' in statement block or type definition.", p);
+      var n = this.ident(); this.ws();
+      if (this.c() === "=") { this.i++; this.ws(); var mn = /^-?(0x[0-9a-f]+|\d+)/i.exec(this.s.slice(this.i)); if (!mn) this.fail("Enumerator value must be a constant value.", this.i); this.i += mn[0].length; prox = Number(mn[0]); }
+      itens.push({ name: n, num: prox }); prox++;
+    }
+    return { t: "enumdef", name: nome, itens: itens };
+  };
+  PP.classStmt = function (p) {
+    this.kw("class"); this.ws(); var nome = this.ident(), base = null; this.ws();
+    if (this.c() === ":") { this.i++; this.ws(); base = this.ident(); }
+    this.wsn();
+    if (this.c() !== "{") this.fail("Missing opening '{' in class definition.", this.i);
+    this.i++;
+    var def = { t: "classdef", name: nome, base: base, props: [], ctors: [], methods: [] };
+    for (;;) {
+      this.wsn(); while (this.c() === ";") { this.i++; this.wsn(); }
+      if (this.c() === "}") { this.i++; break; }
+      if (this.eof()) this.fail("Missing closing '}' in statement block or type definition.", p);
+      if (this.c() === "#") { while (!this.eof() && this.c() !== "\n") this.i++; continue; }
+      var estatico = false, w;
+      while ((w = this.word()) === "static" || w === "hidden") { this.kw(w); this.ws(); if (w === "static") estatico = true; }
+      var tipo = null, mt = /^\[([^\[\]]*(?:\[[^\]]*\])?)\]/.exec(this.s.slice(this.i));
+      if (mt) { tipo = mt[1]; this.i += mt[0].length; this.ws(); }
+      if (this.c() === "$") {
+        var mv = /^\$(\w+)/.exec(this.s.slice(this.i)); this.i += mv[0].length; this.ws();
+        var dv = null; if (this.c() === "=") { this.i++; this.ws(); dv = this.expr(true); }
+        def.props.push({ name: mv[1], type: tipo, def: dv, stat: estatico });
+        continue;
+      }
+      var nm = this.ident(); this.ws();
+      if (this.c() !== "(") this.fail("Missing '(' in method definition.", this.i);
+      this.i++; var ps = this.paramList(")"), baseArgs = null; this.ws();
+      if (this.c() === ":" && !tipo) {
+        this.i++; this.ws(); this.kw("base"); this.ws(); if (this.c() !== "(") this.fail("Missing '('.", this.i);
+        this.i++; baseArgs = [];
+        for (;;) { this.wsn(); if (this.c() === ")") { this.i++; break; } baseArgs.push(this.expr(true)); this.wsn(); if (this.c() === ",") this.i++; }
+      }
+      var corpo = this.block("Missing function body in method definition.");
+      if (!tipo && lc(nm) === lc(nome)) def.ctors.push({ params: ps, body: corpo, baseArgs: baseArgs });
+      else def.methods.push({ name: nm, ret: tipo, params: ps, body: corpo, stat: estatico });
+    }
+    return def;
   };
   PP.keywordStmt = function (w, p) {
     var s = this, kwEnd;
@@ -633,6 +702,7 @@
         if (s.c() !== "{") s.fail("Missing function body in function declaration.", s.i);
         var fsrc = s.i, fb = s.scriptBlock();
         if (params) fb.params = params;
+        fb.fonte = s.s.slice(p, s.i);
         return { t: "function", name: nm[0], sb: fb, p: p };
       }
       case "break": case "continue": {
@@ -677,30 +747,60 @@
       this.wsn();
       if (this.c() === end) { this.i++; break; }
       if (this.c() === ",") { this.i++; continue; }
-      var type = null;
+      var type = null, attrs = "";
       while (this.c() === "[") {
-        var m = /^\[([^\]]*(?:\[\])?)\]/.exec(this.s.slice(this.i));
+        var m = /^\[([^\[\]]*(?:\[[^\]]*\])?)\]/.exec(this.s.slice(this.i));
+        var ma = /^\[\s*(Parameter|Validate\w*|Alias|AllowNull|AllowEmptyString)\s*\(/i.exec(this.s.slice(this.i));
+        if (ma) { // atributo com parênteses: [Parameter(...)] — pula até o ] que fecha
+          var a0 = this.i; this.i += ma[0].length - 1;
+          var depth = 0; do { var ch = this.c(); if (ch === "(") depth++; else if (ch === ")") depth--; else if (ch === '"' || ch === "'") { var q = ch; this.i++; while (!this.eof() && this.c() !== q) this.i++; } this.i++; } while (depth > 0 && !this.eof());
+          this.ws(); if (this.c() === "]") this.i++;
+          attrs += this.s.slice(a0, this.i) + " "; this.wsn(); continue;
+        }
         if (!m) this.fail("Missing ']'.");
         if (!/^Parameter|^Validate|^Alias|^CmdletBinding/i.test(m[1])) type = m[1];
         this.i += m[0].length;
-        if (this.c() === "(") { var depth = 0; do { if (this.c() === "(") depth++; else if (this.c() === ")") depth--; this.i++; } while (depth > 0 && !this.eof()); }
+        if (this.c() === "(") { var depth2 = 0; do { if (this.c() === "(") depth2++; else if (this.c() === ")") depth2--; this.i++; } while (depth2 > 0 && !this.eof()); }
         this.wsn();
       }
       if (this.c() !== "$") this.fail("Missing ')' in function parameter list.", this.i);
       var v = this.variable(), def = null; this.wsn();
       if (this.c() === "=") { this.i++; this.wsn(); def = this.expr(true); }
-      ps.push({ name: v.name, type: type, def: def });
+      ps.push({ name: v.name, type: type, def: def, vfp: /ValueFromPipeline(?!ByPropertyName)(\s*=\s*\$true)?/i.test(attrs), vfpbn: /ValueFromPipelineByPropertyName/i.test(attrs) });
     }
     return ps;
   };
   PP.scriptBlock = function () {
     var start = this.i; this.i++;
-    var params = null; this.wsn();
+    var params = null, cb = null; this.wsn();
+    for (;;) { // [CmdletBinding()], [OutputType()], [Alias()] antes do param
+      var am = /^\[\s*(CmdletBinding|OutputType|Alias)\s*(\(([^()]*(?:\([^()]*\)[^()]*)*)\))?\s*\]/i.exec(this.s.slice(this.i));
+      if (!am) break;
+      if (/^CmdletBinding$/i.test(am[1])) cb = { sp: /SupportsShouldProcess/i.test(am[3] || "") };
+      this.i += am[0].length; this.wsn();
+    }
     if (this.word() === "param") { var save = this.i; this.kw("param"); this.ws(); if (this.c() === "(") { this.i++; params = this.paramList(")"); } else this.i = save; }
+    if (cb && !params) params = [];
+    var blocos = null;
+    for (;;) {
+      var sv = this.i; this.wsn(); var bw = this.word();
+      if (bw === "begin" || bw === "process" || bw === "end") {
+        var sv2 = this.i; this.kw(bw); this.wsn();
+        if (this.c() !== "{") { this.i = sv; break; }
+        blocos = blocos || {}; blocos[bw] = this.block("Missing statement block.", sv2); continue;
+      }
+      this.i = sv; break;
+    }
+    if (blocos) {
+      this.wsn();
+      if (this.c() !== "}") this.fail("Unexpected token in script block: only begin, process and end blocks are allowed here.", this.i);
+      this.i++;
+      return { t: "sb", body: [], blocos: blocos, cb: cb, params: params, src: this.s.slice(start + 1, this.i - 1) };
+    }
     var body = this.statements("}");
     if (this.c() !== "}") this.fail("Missing closing '}' in statement block or type definition.", start);
     this.i++;
-    return { t: "sb", body: body, params: params, src: this.s.slice(start + 1, this.i - 1) };
+    return { t: "sb", body: body, cb: cb, params: params, src: this.s.slice(start + 1, this.i - 1) };
   };
 
   // RHS de atribuição e condições aceitam if/switch/foreach... como valor
@@ -947,7 +1047,7 @@
     return this.unary();
   };
   PP.typeLit = function () {
-    var m = /^\[\s*([A-Za-z_][\w.]*(?:\[\])?)\s*\]/.exec(this.s.slice(this.i));
+    var m = /^\[\s*([A-Za-z_][\w.]*(?:\[\]|\[[A-Za-z_][\w.]*\])?)\s*\]/.exec(this.s.slice(this.i));
     if (!m) return null;
     var p = this.i; this.i += m[0].length;
     return { t: "type", name: m[1], p: p };
@@ -1386,6 +1486,10 @@
   };
   S.getVar = function (raw, node) {
     var name = lc(raw), m = /^(global|script|local|private|using|variable):(.+)$/.exec(name);
+    if (m && m[1] === "using" && this.usingScope) {
+      var scU = this.scope, usU = this.usingScope; this.scope = usU; this.usingScope = null;
+      try { return this.getVar(m[2], node); } finally { this.scope = scU; this.usingScope = usU; }
+    }
     if (m) name = m[2];
     if (/^env:/.test(name)) { var e = this.env[name.slice(4)]; return e ? e.v : null; }
     if (hasOwn(CONST, name)) return CONST[name];
@@ -1410,7 +1514,10 @@
       case "shellid": return "Microsoft.PowerShell";
       case "psculture": return "pt-BR";
       case "psuiculture": return "pt-BR";
-      case "error": return this.errors.map(function (e) { return e.message; });
+      case "error": {
+        var errs = this.errors, lista = errs.map(function (e) { return new PSObj("System.Management.Automation.ErrorRecord", { Exception: new PSObj("System.Exception", { Message: e.message }) }, { err: e, toStr: function () { return e.message; } }); });
+        lista.__lista = "System.Collections.ArrayList"; lista.__erros = errs; return lista;
+      }
       case "verbosepreference": return new PSEnum("System.Management.Automation.ActionPreference", this.prefs.verbose, 0);
       case "warningpreference": return new PSEnum("System.Management.Automation.ActionPreference", this.prefs.warning, 0);
       case "informationpreference": return new PSEnum("System.Management.Automation.ActionPreference", this.prefs.information, 0);
@@ -1429,6 +1536,7 @@
   S.setVar = function (raw, v, local) {
     var name = lc(raw), m = /^(global|script|local|private|variable):(.+)$/.exec(name), sc = this.scope;
     if (m) { name = m[2]; if (m[1] === "global" || m[1] === "script") sc = this.global; }
+    if (name === "null") return; // $null = ... descarta o valor (como no PowerShell)
     if (/^env:/.test(name)) { var k = raw.slice(4); if (v === null || v === "") delete this.env[lc(k)]; else this.env[lc(k)] = { n: k, v: toStr(v) }; return; }
     if (hasOwn(CONST, name) || name === "?" || name === "home" || name === "pwd" || name === "host" || name === "pid" || name === "psversiontable" || name === "iswindows" || name === "islinux" || name === "ismacos" || name === "psedition")
       throw new PSErr("Cannot overwrite variable " + raw + " because it is read-only or constant.", "SessionStateUnauthorizedAccessException");
@@ -1444,6 +1552,7 @@
   // ---------- execução ----------
   S.runText = function (code, opts) {
     opts = opts || {};
+    TIPOS_USUARIO = this.tiposUsuario || (this.tiposUsuario = {}); SESSAO_ATUAL = this;
     this.src = String(code).replace(/\r\n?/g, "\n");
     this.t0 = Date.now(); this.steps = 0;
     var ast;
@@ -1550,6 +1659,7 @@
       case "switch": this.execSwitch(st, emit); return;
       case "break": case "continue": throw new Ctl(st.t, st.label);
       case "return":
+        if (this.scope.metodo) throw new Ctl("return", null, st.value ? this.valueOf(st.value) : undefined);
         if (st.value) { v = this.valueOf(st.value); this.emitVal(v, emit); }
         throw new Ctl("return");
       case "exit":
@@ -1562,6 +1672,14 @@
       case "function":
         this.funcs[lc(st.name)] = { name: st.name, sb: st.sb };
         return;
+      case "enumdef": TIPOS_USUARIO[lc(st.name)] = { kind: "enum", name: st.name, itens: st.itens, flags: !!st.flags }; return;
+      case "classdef": {
+        var cd = { kind: "class", name: st.name, def: st, baseDef: st.base ? tipoUsuario(st.base) : null, statics: {} }, selfC = this;
+        if (st.base && !cd.baseDef) throw new PSErr("Unable to find type [" + st.base + "].", "TypeNotFound");
+        TIPOS_USUARIO[lc(st.name)] = cd;
+        st.props.forEach(function (pr) { if (pr.stat) cd.statics[lc(pr.name)] = { n: pr.name, v: pr.def ? selfC.eval(pr.def) : padraoTipo(pr.type) }; });
+        return;
+      }
       case "param": return;
       case "try": this.execTry(st, emit); return;
     }
@@ -1574,6 +1692,7 @@
     catch (e) { if (e && e.ps) err = e; else { this.tryDepth--; this.tryDepth++; if (st.fin) { this.tryDepth--; this.execBlock(st.fin, emit); this.tryDepth++; } this.tryDepth--; throw e; } }
     this.tryDepth--;
     if (err) {
+      if (this.errors.indexOf(err) === -1) this.errors.unshift(err);
       var handled = false;
       for (var i = 0; i < st.catches.length && !handled; i++) {
         handled = true;
@@ -1761,10 +1880,90 @@
     }
     throw new PSErr("Method invocation failed because [" + typeOf(l) + "] does not contain a method named 'op_Addition'.", "InvalidOperation");
   }
+  function padraoTipo(t) {
+    var f = t ? typeFull(t) : null;
+    if (/^System\.(Int|Double|Decimal|Single|Byte|UInt)/.test(f || "")) return 0;
+    if (f === "System.Boolean") return false;
+    return null;
+  }
+  function enumConv(ut, v) {
+    if (v instanceof PSEnum && v.type === ut.name) return v;
+    var porNum = function (n) {
+      var achou = ut.itens.filter(function (it) { return it.num === n; })[0];
+      if (achou) return new PSEnum(ut.name, achou.name, n);
+      if (ut.flags) { var partes = ut.itens.filter(function (it) { return it.num && (n & it.num) === it.num; }); if (partes.length) return new PSEnum(ut.name, partes.map(function (x) { return x.name; }).join(", "), n); }
+      return new PSEnum(ut.name, String(n), n);
+    };
+    if (typeof v === "number") return porNum(v);
+    if (v instanceof PSEnum) return porNum(v.num);
+    var nomes = toStr(v).split(",").map(function (x) { return x.trim(); }), total = 0, achados = [];
+    nomes.forEach(function (nm) {
+      if (/^-?\d+$/.test(nm)) { total |= Number(nm); return; }
+      var it = ut.itens.filter(function (x) { return lc(x.name) === lc(nm); })[0];
+      if (!it) throw new PSErr('Cannot convert value "' + toStr(v) + '" to type "' + ut.name + '". Error: "Unable to match the identifier name ' + nm + ' to a valid enumerator name. Specify one of the following enumerator names and try again:\n' + ut.itens.map(function (x) { return x.name; }).join(", ") + '"', "InvalidArgument");
+      total |= it.num; achados.push(it.name);
+    });
+    if (nomes.length === 1 && achados.length === 1) return new PSEnum(ut.name, achados[0], total);
+    return porNum(total);
+  }
+  S.classConv = function (ut, v) {
+    if (v instanceof PSObj && v.__classe) { for (var c = v.__classe; c; c = c.baseDef) if (c === ut) return v; }
+    if (v instanceof PSHash) { var o = this.instanciar(ut, []); v.keys.forEach(function (k) { o.set(toStr(k), v.get(k)); }); return o; }
+    throw new PSErr('Cannot convert value "' + toStr(v) + '" to type "' + ut.name + '".', "InvalidArgument");
+  };
+  S.rodarMetodo = function (m, obj, args, ut) {
+    var saved = this.scope, ret;
+    this.scope = new Scope(this.global); this.scope.metodo = true;
+    try {
+      if (obj) this.scope.vars["this"] = { n: "this", v: obj };
+      this.bindParams(m.params || [], (args || []).map(function (a) { return { value: a }; }));
+      try { this.execBlock(m.body, function () { }); }
+      catch (e) { if (e instanceof Ctl && e.kind === "return") ret = e.value; else throw e; }
+    } finally { this.scope = saved; }
+    if (m.ret && lc(m.ret) !== "void" && ret !== undefined && ret !== null) { var tf = typeFull(m.ret); if (tf) ret = convertTo(tf, isArr(ret) && !/\[\]$/.test(m.ret) && ret.length === 1 ? ret[0] : ret); }
+    return lc(m.ret || "") === "void" ? undefined : ret;
+  };
+  S.instanciar = function (ut, args) {
+    var self = this, obj = new PSObj(ut.name), cadeia = [];
+    for (var c = ut; c; c = c.baseDef) cadeia.unshift(c);
+    obj.__classe = ut; obj.methods = {};
+    cadeia.forEach(function (cl) {
+      cl.def.props.forEach(function (pr) { if (!pr.stat) obj.set(pr.name, pr.def ? self.eval(pr.def) : padraoTipo(pr.type)); });
+      cl.def.methods.forEach(function (m) {
+        if (m.stat) return;
+        obj.methods[lc(m.name)] = function () { return self.rodarMetodo(m, obj, Array.prototype.slice.call(arguments), cl); };
+        if (lc(m.name) === "tostring" && !(m.params || []).length) obj.toStr = function () { return toStr(self.rodarMetodo(m, obj, [], cl)); };
+      });
+    });
+    var construir = function (cl, a) {
+      var ct = cl.def.ctors.filter(function (k) { return (k.params || []).length === a.length; })[0];
+      if (!ct) {
+        if (a.length || cl.def.ctors.length) throw new PSErr('Cannot find an overload for "new" and the argument count: "' + a.length + '".', "MethodException");
+        if (cl.baseDef) construir(cl.baseDef, []);
+        return;
+      }
+      var saved = self.scope; self.scope = new Scope(self.global); self.scope.metodo = true;
+      try {
+        self.scope.vars["this"] = { n: "this", v: obj };
+        self.bindParams(ct.params || [], a.map(function (x) { return { value: x }; }));
+        if (cl.baseDef) construir(cl.baseDef, ct.baseArgs ? ct.baseArgs.map(function (e) { return self.eval(e); }) : []);
+        try { self.execBlock(ct.body, function () { }); } catch (e) { if (!(e instanceof Ctl && e.kind === "return")) throw e; }
+      } finally { self.scope = saved; }
+    };
+    construir(ut, args || []);
+    return obj;
+  };
+  function timeSpan(ms) { // intervalo entre duas datas (System.TimeSpan)
+    var sinal = ms < 0 ? -1 : 1, a = Math.abs(ms), tr = function (x) { return sinal * Math.floor(x); };
+    var o = new PSObj("System.TimeSpan", { Days: tr(a / 864e5), Hours: tr(a / 36e5 % 24), Minutes: tr(a / 6e4 % 60), Seconds: tr(a / 1000 % 60), Milliseconds: tr(a % 1000),
+      Ticks: ms * 10000, TotalDays: ms / 864e5, TotalHours: ms / 36e5, TotalMinutes: ms / 6e4, TotalSeconds: ms / 1000, TotalMilliseconds: ms });
+    return o;
+  }
   function arith(op, l, r) {
     var nm = { "-": "op_Subtraction", "*": "op_Multiply", "/": "op_Division", "%": "op_Modulus" }[op];
     if (op === "*" && typeof l === "string") { var n = toInt(r); if (n > 1e6) throw new PSErr("O simulador não repete texto tantas vezes.", "InvalidOperation"); return rep(l, Math.max(0, n)); }
     if (op === "*" && isArr(l)) { var k = toInt(r), out = []; for (var i = 0; i < k; i++) out = out.concat(l); return out; }
+    if (op === "-" && l instanceof PSDate && r instanceof PSDate) return timeSpan(l.d.getTime() - r.d.getTime());
     if (isArr(l) || (l !== null && typeof l === "object" && !(l instanceof PSChar) && !(l instanceof Switch) && !(l instanceof PSEnum)) || (typeof l === "string" && op !== "-" && op !== "/" && op !== "%"))
       throw new PSErr("Method invocation failed because [" + typeOf(l) + "] does not contain a method named '" + nm + "'.", "InvalidOperation");
     if (typeof l === "string" && isNaN(parseNumStr(l))) throw convFail(l, "System.Int32");
@@ -1881,7 +2080,8 @@
     r = this.eval(n.r);
     switch (op) {
       case "+": return addVals(l, r);
-      case "-": case "*": case "/": case "%": return arith(op, l, r);
+      case "-": case "/": case "%": return arith(op, l, r);
+      case "*": if (l === null || l === undefined) return null; return arith(op, l, r);
       case "xor": return truthy(l) !== truthy(r);
       case "band": return toInt(l) & toInt(r);
       case "bor": return toInt(l) | toInt(r);
@@ -2073,6 +2273,9 @@
   }
   S.staticMember = function (t, nm) {
     if (!(t instanceof PSType)) throw new PSErr("Unable to find type.", "InvalidOperation");
+    var utM = tipoUsuario(t.name);
+    if (utM && utM.kind === "enum") return enumConv(utM, nm);
+    if (utM) { for (var cM = utM; cM; cM = cM.baseDef) if (cM.statics[lc(nm)]) return cM.statics[lc(nm)].v; return null; }
     var full = typeFull(t.name), k = lc(nm);
     if (!full) throw new PSErr("Unable to find type [" + t.name + "].", "InvalidOperation");
     switch (full + "::" + k) {
@@ -2106,8 +2309,21 @@
   S.staticCall = function (t, nm, a) {
     var self = this;
     if (!(t instanceof PSType)) throw new PSErr("Method invocation failed.", "InvalidOperation");
+    var utC = tipoUsuario(t.name);
+    if (utC && utC.kind === "class") {
+      if (lc(nm) === "new") return this.instanciar(utC, a);
+      for (var cC = utC; cC; cC = cC.baseDef) { var sm = cC.def.methods.filter(function (m) { return m.stat && lc(m.name) === lc(nm); })[0]; if (sm) return this.rodarMetodo(sm, null, a, cC); }
+      throw new PSErr("Method invocation failed because [" + utC.name + "] does not contain a method named '" + nm + "'.", "InvalidOperation");
+    }
+    if ((lc(nm) === "getnames" || lc(nm) === "getvalues") && a[0] instanceof PSType && tipoUsuario(a[0].name)) {
+      var utE = tipoUsuario(a[0].name);
+      return utE.itens.map(function (it) { return lc(nm) === "getnames" ? it.name : new PSEnum(utE.name, it.name, it.num); });
+    }
     var full = typeFull(t.name), k = lc(nm), n = function (i) { return toNumber(a[i], "System.Double"); };
     if (!full) throw new PSErr("Unable to find type [" + t.name + "].", "InvalidOperation");
+    if (k === "new" && (full === "System.Collections.ArrayList" || full.indexOf("System.Collections.Generic.List[") === 0)) {
+      var nova = []; nova.__lista = full; return nova;
+    }
     switch (full) {
       case "System.Math":
         switch (k) {
@@ -2259,6 +2475,27 @@
       }
       throw this.noMethod(o, nm);
     }
+    if (isArr(o) && o.__lista) {
+      var elT = /\[(.+)\]$/.exec(o.__lista), conv = function (v, nome) {
+        if (!elT || elT[1] === "System.Object") return v;
+        try { return convertTo(elT[1], v); } catch (e) {
+          throw new PSErr('Cannot convert argument "item", with value: "' + toStr(v) + '", for "' + nome + '" to type "' + elT[1] + '": "Cannot convert value "' + toStr(v) + '" to type "' + elT[1] + '". Error: "The input string \'' + toStr(v) + '\' was not in a correct format.""', "MethodException");
+        }
+      };
+      switch (k) {
+        case "clear": if (o.__erros) o.__erros.length = 0; o.length = 0; return undefined;
+        case "add": o.push(conv(a[0], "Add")); return o.__lista === "System.Collections.ArrayList" ? o.length - 1 : undefined;
+        case "insert": o.splice(toInt(a[0]), 0, conv(a[1], "Insert")); return undefined;
+        case "remove": for (var i4 = 0; i4 < o.length; i4++) if (eqVals(o[i4], a[0], true)) { o.splice(i4, 1); return true; } return o.__lista === "System.Collections.ArrayList" ? undefined : false;
+        case "removeat": var ix = toInt(a[0]); if (ix < 0 || ix >= o.length) throw new PSErr('Exception calling "RemoveAt" with "1" argument(s): "Index was out of range. Must be non-negative and less than the size of the collection. (Parameter \'index\')"', "MethodInvocationException"); o.splice(ix, 1); return undefined;
+        case "clear": o.length = 0; return undefined;
+        case "contains": return o.some(function (x) { return eqVals(x, a[0], true); });
+        case "indexof": for (var i5 = 0; i5 < o.length; i5++) if (eqVals(o[i5], a[0], true)) return i5; return -1;
+        case "toarray": return o.slice();
+        case "sort": o.sort(function (x, y) { return cmpVals(x, y); }); return undefined;
+        case "reverse": o.reverse(); return undefined;
+      }
+    }
     if (isArr(o)) {
       switch (k) {
         case "contains": return o.some(function (x) { return eqVals(x, a[0], true); });
@@ -2294,6 +2531,7 @@
       if (k === "tostring") return o.src;
       throw this.noMethod(o, nm);
     }
+    if (o instanceof PSEnum && k === "hasflag") { var fl = a[0] instanceof PSEnum ? a[0].num : toNumber(a[0]); return (o.num & fl) === fl; }
     if (o instanceof PSObj) {
       if (o.methods && o.methods[k]) return o.methods[k].apply(o, a);
       if (k === "tostring") return toStr(o);
@@ -2422,6 +2660,19 @@
       }
       name = toStr(nv);
     } else name = el.name.t === "str" ? el.name.v : toStr(this.eval(el.name));
+    if (/\.ps1$/i.test(name) && /[\\\/]/.test(name)) { // rodar um script .ps1 do disco de mentira
+      var txtScript = null;
+      try { txtScript = this.readFile(this.resolve(name, "x").full, name); } catch (eS) { txtScript = null; }
+      if (txtScript !== null) {
+        var ps = new Parser("{" + String(txtScript).replace(/\r\n?/g, "\n") + "\n}"), noSc;
+        ps.i = 0; noSc = ps.scriptBlock();
+        var argsS = this.evalArgs(el.args);
+        if (el.call === ".") { var selfS = this; try { this.execBlock(noSc.body, emit); } catch (eD) { if (!(eD instanceof Ctl && eD.kind === "return")) throw eD; } }
+        else { var fSalvas = {}, kf; for (kf in this.funcs) fSalvas[kf] = this.funcs[kf];
+          try { this.callFunction({ name: name.replace(/^.*[\\\/]/, ""), sb: noSc }, argsS, input, emit); } finally { this.funcs = fSalvas; } }
+        return;
+      }
+    }
     var found = this.lookup(name);
     if (!found) {
       if (/[\\\/]/.test(name) || /\.(ps1|exe|bat|cmd)$/i.test(name)) throw this.cmdNotFound(name);
@@ -2522,17 +2773,80 @@
     return rest.concat(pos);
   };
   S.callFunction = function (f, args, input, emit) {
-    var saved = this.scope, self = this;
+    var saved = this.scope, self = this, sb = f.sb, cb = sb.cb, prefVerb = this.prefs.verbose, prefErr = this.prefs.error, whatIf = false, errVar = null, errAntes = this.errors.length;
+    this.fnStack = this.fnStack || []; this.fnStack.push(f.name);
     this.depth = (this.depth || 0) + 1;
     if (this.depth > 100) { this.depth = 0; throw new PSErr("The script failed due to call depth overflow.", "ScriptCallDepthException", { terminating: true }); }
     this.scope = new Scope(this.scope);
     try {
-      var rest = this.bindParams(f.sb.params, args);
+      if (cb) { // parâmetros comuns das funções avançadas
+        var comuns = ["verbose", "debug", "whatif", "confirm", "erroraction", "warningaction", "informationaction", "errorvariable", "warningvariable", "outvariable", "outbuffer", "pipelinevariable", "progressaction", "informationvariable"];
+        var filtrados = [];
+        for (var i = 0; i < args.length; i++) {
+          var a = args[i], pn = a.param !== undefined ? lc(a.param) : null;
+          var hit = pn !== null && !(sb.params || []).some(function (p) { return lc(p.name).indexOf(pn) === 0; }) ? comuns.filter(function (c) { return c.indexOf(pn) === 0; })[0] : null;
+          if (!hit) { filtrados.push(a); continue; }
+          if (hit === "verbose") { if (!a.colon || truthy(a.value)) this.prefs.verbose = "Continue"; }
+          else if (hit === "whatif") { whatIf = !a.colon || truthy(a.value); }
+          else if ((hit === "erroraction" || hit === "errorvariable") && i + 1 < args.length) {
+            var valC = a.colon ? a.value : args[++i].value;
+            if (hit === "erroraction") this.prefs.error = toStr(valC); else errVar = toStr(valC);
+          }
+          else if (hit !== "debug" && hit !== "confirm" && !a.colon && i + 1 < args.length && args[i + 1].param === undefined) i++;
+        }
+        args = filtrados;
+        var pscmd = new PSObj("System.Management.Automation.PSScriptCmdlet", {});
+        pscmd.methods = { shouldprocess: function (alvo, acao) {
+          if (!whatIf) return true;
+          self.hostWrite('What if: Performing the operation "' + (acao === undefined ? f.name : toStr(acao)) + '" on target "' + toStr(alvo) + '".');
+          return false;
+        } };
+        this.scope.vars["pscmdlet"] = { n: "PSCmdlet", v: pscmd };
+      }
+      var temPipe = (sb.params || []).some(function (p) { return p.vfp || p.vfpbn; }) && input && input.length;
+      var rest = this.bindParams(sb.params, args);
+      if (cb) { var desconhecido = rest.filter(function (r) { return typeof r === "string" && /^-/.test(r); })[0];
+        if (desconhecido) throw new PSErr("Não foi possível encontrar um parâmetro correspondente ao nome de parâmetro '" + desconhecido.slice(1) + "'.", "ParameterBindingException", { cmd: f.name }); }
       this.scope.vars["args"] = { n: "args", v: rest };
       this.scope.vars["input"] = { n: "input", v: input || [] };
-      try { this.execBlock(f.sb.body, emit); }
-      catch (e) { if (!(e instanceof Ctl && e.kind === "return")) throw e; }
-    } finally { this.scope = saved; this.depth--; }
+      var ligar = function (item) { // liga o objeto do pipeline aos parâmetros
+        (sb.params || []).forEach(function (p) {
+          var v;
+          if (p.vfp) v = item;
+          else if (p.vfpbn && item instanceof PSObj && item.has(p.name)) v = item.get(p.name);
+          else return;
+          if (p.type && v !== null) { var tf = typeFull(p.type); if (tf) v = convertTo(tf, v); }
+          self.scope.vars[lc(p.name)] = { n: p.name, v: v };
+        });
+        self.setVar("_", item);
+      };
+      var rodar = function (corpo) {
+        try { self.execBlock(corpo, emit); }
+        catch (e) { if (!(e instanceof Ctl && e.kind === "return")) throw e; }
+      };
+      if (sb.blocos) {
+        if (sb.blocos.begin) rodar(sb.blocos.begin);
+        if (sb.blocos.process) {
+          if (temPipe) input.forEach(function (item) { self.tick(); ligar(item); rodar(sb.blocos.process); });
+          else rodar(sb.blocos.process);
+        }
+        if (sb.blocos.end) rodar(sb.blocos.end);
+      } else {
+        if (temPipe) ligar(input[input.length - 1]);
+        rodar(sb.body);
+      }
+    } finally {
+      this.scope = saved; this.depth--; this.prefs.verbose = prefVerb; this.prefs.error = prefErr; this.fnStack.pop();
+      if (errVar !== null) { // -ErrorVariable nome / +nome
+        var novos = this.errors.slice(0, Math.max(0, this.errors.length - errAntes)).reverse().map(function (e) {
+          return new PSObj("System.Management.Automation.ErrorRecord", { Exception: new PSObj("System.Exception", { Message: e.message }) }, { err: e, toStr: function () { return e.message; } });
+        });
+        var somar = errVar.charAt(0) === "+", nomeEV = somar ? errVar.slice(1) : errVar;
+        var antes = somar ? this.findVar(lc(nomeEV)) : null, base = antes && isArr(antes.v) ? antes.v : [];
+        var lista = base.concat(novos); lista.__lista = "System.Collections.ArrayList";
+        this.setVar(nomeEV, lista);
+      }
+    }
   };
 
   /* ------------------------------------------------------------------
@@ -2611,7 +2925,8 @@
     if (ia === "continue") this.hostWrite(toStr(b.get("MessageData")), "host");
   });
   def("Write-Error", { params: ["Message", "Category", "ErrorId", "TargetObject"], pos: ["Message"], module: "Microsoft.PowerShell.Utility" }, function (b) {
-    b.err(new PSErr(toStr(b.get("Message")), "WriteError", { cmd: "Write-Error" }));
+    var pilha = this.fnStack || [], quem = pilha.length ? pilha[pilha.length - 1] : "Write-Error";
+    b.err(new PSErr(toStr(b.get("Message")), "WriteError", { cmd: quem }));
   });
   def("Write-Progress", { params: ["Activity", "Status", "PercentComplete", "Id", "CurrentOperation", "SecondsRemaining"], sw: ["Completed"], pos: ["Activity", "Status"], module: "Microsoft.PowerShell.Utility" }, function () { });
   def("Out-Null", { params: ["InputObject"], module: "Microsoft.PowerShell.Core" }, function () { });
@@ -2958,8 +3273,20 @@
     if (o instanceof PSVersion) return ["Major", "Minor", "Build", "Revision"];
     return [];
   }
-  def("ForEach-Object", { params: ["Process", "Begin", "End", "MemberName", "ArgumentList", "InputObject", "RemainingScripts"], pos: ["Process"], rest: "Process", aliases: ["foreach", "%"], module: "Microsoft.PowerShell.Core" }, function (b) {
+  // roda um bloco "em outro runspace": sem enxergar as variáveis de quem chamou, só via $using:
+  S.rodarIsolado = function (sb, under, args) {
+    var saved = this.scope, usSaved = this.usingScope;
+    this.usingScope = saved; this.scope = new Scope(null);
+    try { return this.callSBList(sb, args || [], under, true); }
+    finally { this.scope = saved; this.usingScope = usSaved; }
+  };
+  def("ForEach-Object", { params: ["Process", "Begin", "End", "MemberName", "ArgumentList", "InputObject", "RemainingScripts", "Parallel", "ThrottleLimit", "TimeoutSeconds"], sw: ["AsJob", "UseNewRunspace"], pos: ["Process"], rest: "Process", aliases: ["foreach", "%"], module: "Microsoft.PowerShell.Core" }, function (b) {
     var self = this, items = inputOr(b, "InputObject"), pr = b.get("Process");
+    if (b.has("Parallel")) {
+      var psb = b.get("Parallel");
+      items.forEach(function (it) { self.tick(); self.rodarIsolado(psb, it).forEach(function (x) { self.emitVal(x, b.out); }); });
+      return;
+    }
     if (b.has("MemberName") || (pr !== undefined && !(pr instanceof ScriptBlock) && !isArr(pr))) {
       var mn = toStr(b.has("MemberName") ? b.get("MemberName") : pr), margs = arr(b.get("ArgumentList"));
       items.forEach(function (it) {
@@ -3309,6 +3636,173 @@
     }
     var v = items.length === 1 && !b.get("AsArray") ? items[0] : items;
     b.out(j(v, 0));
+  });
+
+  // ---- Jobs (rodam na hora, isolados; o resultado fica guardado até o Receive-Job)
+  S.novoJob = function (sb, nome, tipo, args) {
+    this.jobs = this.jobs || []; this.jobSeq = this.jobSeq || 0;
+    var id = ++this.jobSeq, saida = [], estado = "Completed", erroJ = null;
+    try { saida = this.rodarIsolado(sb, undefined, args); }
+    catch (e) { if (e instanceof PSErr) { estado = "Failed"; erroJ = e; } else throw e; }
+    var job = new PSObj("System.Management.Automation.PSRemotingJob", { Id: id, Name: nome || ("Job" + id), PSJobTypeName: tipo, State: estado, HasMoreData: saida.length > 0, Location: "localhost", Command: sb.text != null ? String(sb.text).trim() : "" });
+    job.__saida = saida; job.__erro = erroJ;
+    job.methods = {};
+    this.jobs.push(job); return job;
+  };
+  S.acharJobs = function (b, chave) {
+    var self = this, lista = this.jobs || [];
+    var v = b.get(chave || "Job");
+    if (v !== undefined && v !== null) return arr(v);
+    if (b.has("Id")) { var ids = arr(b.get("Id")).map(toInt); return lista.filter(function (j) { return ids.indexOf(j.get("Id")) >= 0; }); }
+    if (b.has("Name")) { var ns = arr(b.get("Name")).map(function (x) { return lc(toStr(x)); }); return lista.filter(function (j) { return ns.indexOf(lc(j.get("Name"))) >= 0; }); }
+    return lista.slice();
+  };
+  def("Start-Job", { params: ["ScriptBlock", "Name", "ArgumentList", "InputObject"], pos: ["ScriptBlock"], module: "Microsoft.PowerShell.Core" }, function (b) {
+    b.out(this.novoJob(b.get("ScriptBlock"), b.get("Name") ? toStr(b.get("Name")) : null, "BackgroundJob", arr(b.get("ArgumentList"))));
+  });
+  def("Start-ThreadJob", { params: ["ScriptBlock", "Name", "ArgumentList", "InputObject", "ThrottleLimit"], pos: ["ScriptBlock"], module: "ThreadJob" }, function (b) {
+    b.out(this.novoJob(b.get("ScriptBlock"), b.get("Name") ? toStr(b.get("Name")) : null, "ThreadJob", arr(b.get("ArgumentList"))));
+  });
+  def("Get-Job", { params: ["Id", "Name", "State"], pos: ["Id"], module: "Microsoft.PowerShell.Core" }, function (b) {
+    this.acharJobs(b, "__nada").forEach(b.out);
+  });
+  def("Wait-Job", { params: ["Job", "Id", "Name", "Timeout"], sw: ["Any", "Force"], pos: ["Job"], pipe: "Job", module: "Microsoft.PowerShell.Core" }, function (b) {
+    (b.input && b.input.length ? b.input : this.acharJobs(b)).forEach(b.out);
+  });
+  def("Receive-Job", { params: ["Job", "Id", "Name"], sw: ["Wait", "AutoRemoveJob", "Keep", "WriteJobInResults"], pos: ["Job"], pipe: "Job", module: "Microsoft.PowerShell.Core" }, function (b) {
+    var self = this, js = b.input && b.input.length ? b.input : this.acharJobs(b);
+    js.forEach(function (j) {
+      if (!(j instanceof PSObj) || !j.__saida) return;
+      j.__saida.forEach(function (x) { self.emitVal(x, b.out); });
+      if (j.__erro) self.writeError(j.__erro);
+      if (!b.get("Keep")) { j.__saida = []; j.set("HasMoreData", false); }
+      if (b.get("AutoRemoveJob") && b.get("Wait")) self.jobs = (self.jobs || []).filter(function (x) { return x !== j; });
+    });
+  });
+  def("Remove-Job", { params: ["Job", "Id", "Name", "State"], sw: ["Force"], pos: ["Job"], pipe: "Job", module: "Microsoft.PowerShell.Core" }, function (b) {
+    var js = b.input && b.input.length ? b.input : this.acharJobs(b);
+    this.jobs = (this.jobs || []).filter(function (x) { return js.indexOf(x) < 0; });
+  });
+  def("Stop-Job", { params: ["Job", "Id", "Name"], pos: ["Job"], pipe: "Job", module: "Microsoft.PowerShell.Core" }, function (b) { });
+
+  // ---- Módulos: Import-Module de um .psm1/.ps1 do disco de mentira
+  def("Import-Module", { params: ["Name", "Prefix", "Function", "MinimumVersion", "RequiredVersion"], sw: ["Force", "PassThru", "Global", "DisableNameChecking"], pos: ["Name"], module: "Microsoft.PowerShell.Core" }, function (b) {
+    var self = this;
+    arr(b.get("Name")).forEach(function (n0) {
+      var n = toStr(n0), txt = null;
+      if (/\.(psm1|ps1)$/i.test(n)) { try { txt = self.readFile(self.resolve(n, "x").full, n); } catch (e) { txt = null; } }
+      if (txt === null) {
+        if (/[\\\/]|\.psm?1$/i.test(n)) throw new PSErr("The specified module '" + n + "' was not loaded because no valid module file was found in any module directory.", "ResourceUnavailable", { cmd: "Import-Module" });
+        return; // módulos do próprio PowerShell: já "carregados"
+      }
+      var ps = new Parser("{" + String(txt).replace(/\r\n?/g, "\n") + "\n}"); ps.i = 0;
+      var sbM = ps.scriptBlock(), saved = self.scope; self.scope = self.global;
+      try { self.execBlock(sbM.body, function () { }); } finally { self.scope = saved; }
+      self.modulos = self.modulos || {}; self.modulos[lc(n.replace(/^.*[\\\/]/, "").replace(/\.psm?1$/i, ""))] = true;
+    });
+  });
+  def("Export-ModuleMember", { params: ["Function", "Variable", "Alias", "Cmdlet"], pos: ["Function"], module: "Microsoft.PowerShell.Core" }, function (b) { });
+  def("Remove-Module", { params: ["Name"], sw: ["Force"], pos: ["Name"], module: "Microsoft.PowerShell.Core" }, function (b) { });
+
+  // ---- Internet simulada: só a API de CEP usada nas aulas (respostas reais do ViaCEP gravadas)
+  var VIACEP = {
+    "01310100": { cep: "01310-100", logradouro: "Avenida Paulista", complemento: "de 612 a 1510 - lado par", unidade: "", bairro: "Bela Vista", localidade: "São Paulo", uf: "SP", estado: "São Paulo", regiao: "Sudeste", ibge: "3550308", gia: "1004", ddd: "11", siafi: "7107" },
+    "20040020": { cep: "20040-020", logradouro: "Praça Pio X", complemento: "lado ímpar", unidade: "", bairro: "Centro", localidade: "Rio de Janeiro", uf: "RJ", estado: "Rio de Janeiro", regiao: "Sudeste", ibge: "3304557", gia: "", ddd: "21", siafi: "6001" },
+    "70040010": { cep: "70040-010", logradouro: "SBN Quadra 1", complemento: "", unidade: "", bairro: "Asa Norte", localidade: "Brasília", uf: "DF", estado: "Distrito Federal", regiao: "Centro-Oeste", ibge: "5300108", gia: "", ddd: "61", siafi: "9701" }
+  };
+  S.webSimulada = function (b, nomeCmd) {
+    var url = toStr(b.get("Uri")), m = /^https?:\/\/viacep\.com\.br\/ws\/([^\/]*)\/json\/?$/i.exec(url);
+    if (!m) { this.hostWrite("(simulador) " + nomeCmd + " só simula a API de CEP (viacep.com.br) usada nas aulas; veja a saída real na aula.", "info"); return null; }
+    if (!/^\d{8}$/.test(m[1])) throw new PSErr("Response status code does not indicate success: 400 (Bad Request).", "InvalidOperation", { cmd: nomeCmd });
+    var d = VIACEP[m[1]] || { erro: "true" };
+    return { obj: d, json: JSON.stringify(d, null, 2) };
+  };
+  function jsonParaObj(v) {
+    if (Array.isArray(v)) return v.map(jsonParaObj);
+    if (v !== null && typeof v === "object") { var o = new PSObj(); Object.keys(v).forEach(function (k) { o.set(k, jsonParaObj(v[k])); }); return o; }
+    return v;
+  }
+  def("Invoke-RestMethod", { params: ["Uri", "Method", "Body", "ContentType", "Headers", "OutFile", "TimeoutSec"], sw: ["UseBasicParsing"], pos: ["Uri"], aliases: ["irm"], module: "Microsoft.PowerShell.Utility" }, function (b) {
+    var r0 = this.webSimulada(b, "Invoke-RestMethod"); if (r0) b.out(jsonParaObj(r0.obj));
+  });
+  def("Invoke-WebRequest", { params: ["Uri", "Method", "Body", "ContentType", "Headers", "OutFile", "TimeoutSec"], sw: ["UseBasicParsing"], pos: ["Uri"], aliases: ["iwr"], module: "Microsoft.PowerShell.Utility" }, function (b) {
+    var r1 = this.webSimulada(b, "Invoke-WebRequest"); if (!r1) return;
+    var hd = new PSHash(true); hd.set("Content-Type", ["application/json; charset=utf-8"]);
+    b.out(new PSObj("Microsoft.PowerShell.Commands.WebResponseObject", { StatusCode: 200, StatusDescription: "OK", Content: r1.json, Headers: hd, RawContentLength: r1.json.length }));
+  });
+  def("ConvertFrom-Json", { params: ["InputObject", "Depth"], sw: ["AsHashtable", "NoEnumerate"], pos: ["InputObject"], module: "Microsoft.PowerShell.Utility" }, function (b) {
+    var txt = inputOr(b, "InputObject").map(toStr).join("\n"), asH = !!b.get("AsHashtable"), dados;
+    function conv(v) {
+      if (Array.isArray(v)) return v.map(conv);
+      if (v !== null && typeof v === "object") {
+        var o = asH ? new PSHash(true) : new PSObj();
+        Object.keys(v).forEach(function (k) { o.set(k, conv(v[k])); }); return o;
+      }
+      if (typeof v === "number" && Math.floor(v) === v && Math.abs(v) < 2147483648) return v;
+      return v;
+    }
+    try { dados = JSON.parse(txt); }
+    catch (e) { throw new PSErr("Conversion from JSON failed with error: " + e.message, "ArgumentException", { cmd: "ConvertFrom-Json" }); }
+    var r = conv(dados);
+    if (Array.isArray(r) && !b.get("NoEnumerate")) r.forEach(b.out); else b.out(r);
+  });
+  function csvLinha(l, d) {
+    var out = [], cur = "", q = false;
+    for (var i = 0; i < l.length; i++) {
+      var ch = l[i];
+      if (q) { if (ch === '"') { if (l[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
+      else if (ch === '"') q = true;
+      else if (ch === d) { out.push(cur); cur = ""; }
+      else cur += ch;
+    }
+    out.push(cur); return out;
+  }
+  function csvParaObjs(linhas, d, header) {
+    linhas = linhas.filter(function (l) { return l.trim() !== ""; });
+    var cab = header ? header.map(toStr) : (linhas.length ? csvLinha(linhas.shift(), d) : []);
+    return linhas.map(function (l) {
+      var vs = csvLinha(l, d), o = new PSObj();
+      cab.forEach(function (c, i) { o.set(c, i < vs.length ? vs[i] : null); }); return o;
+    });
+  }
+  function objsParaCsv(items, d, semTipo) {
+    if (!items.length) return [];
+    var cab = items[0] instanceof PSObj ? items[0].keys.slice() : items[0] instanceof PSHash ? items[0].keys.map(toStr) : ["Length"];
+    var q = function (v) { return '"' + (v === null || v === undefined ? "" : toStr(v)).replace(/"/g, '""') + '"'; };
+    var ls = [cab.map(q).join(d)];
+    items.forEach(function (it) { ls.push(cab.map(function (c) { return it instanceof PSObj || it instanceof PSHash ? (it.get(c) === null || it.get(c) === undefined ? '""' : q(it.get(c))) : q(c === "Length" ? toStr(it).length : ""); }).join(d)); });
+    return ls;
+  }
+  function delim(b) { return b.has("Delimiter") ? toStr(b.get("Delimiter")) : ","; }
+  def("ConvertFrom-Csv", { params: ["InputObject", "Delimiter", "Header"], sw: ["UseCulture"], pos: ["InputObject", "Delimiter"], module: "Microsoft.PowerShell.Utility" }, function (b) {
+    var ls = []; inputOr(b, "InputObject").forEach(function (t) { ls = ls.concat(linesOf(toStr(t))); });
+    csvParaObjs(ls, delim(b), b.has("Header") ? arr(b.get("Header")) : null).forEach(b.out);
+  });
+  def("ConvertTo-Csv", { params: ["InputObject", "Delimiter"], sw: ["NoTypeInformation", "UseCulture", "IncludeTypeInformation", "NoHeader"], pos: ["InputObject"], module: "Microsoft.PowerShell.Utility" }, function (b) {
+    var ls = objsParaCsv(inputOr(b, "InputObject"), delim(b)); if (b.get("NoHeader")) ls.shift(); ls.forEach(b.out);
+  });
+  def("Import-Csv", { params: ["Path", "Delimiter", "Header", "Encoding", "LiteralPath"], sw: ["UseCulture"], pos: ["Path", "Delimiter"], aliases: ["ipcsv"], module: "Microsoft.PowerShell.Utility" }, function (b) {
+    var self = this;
+    arr(b.get("Path")).forEach(function (p) {
+      var t; try { t = self.readFile(self.resolve(self.pathArg(p), "Import-Csv").full, "Import-Csv"); } catch (e) { b.err(e); return; }
+      csvParaObjs(linesOf(t), delim(b), b.has("Header") ? arr(b.get("Header")) : null).forEach(b.out);
+    });
+  });
+  def("Export-Csv", { params: ["Path", "InputObject", "Delimiter", "Encoding", "LiteralPath"], sw: ["NoTypeInformation", "Append", "Force", "UseCulture", "NoClobber", "IncludeTypeInformation"], pos: ["Path"], aliases: ["epcsv"], module: "Microsoft.PowerShell.Utility" }, function (b) {
+    var self = this, p = self.pathArg(arr(b.get("Path"))[0]), ls = objsParaCsv(inputOr(b, "InputObject"), delim(b));
+    if (b.get("Append")) { var ja = ""; try { ja = self.readFile(self.resolve(p, "Export-Csv").full, "Export-Csv"); } catch (e) { ja = ""; } if (ja) ls.shift(); }
+    self.writeFile(p, joinLines(ls), !!b.get("Append"), "Export-Csv");
+  });
+  def("Join-String", { params: ["Property", "Separator", "OutputPrefix", "OutputSuffix", "FormatString", "InputObject"], sw: ["SingleQuote", "DoubleQuote"], pos: ["Property", "Separator"], module: "Microsoft.PowerShell.Utility" }, function (b) {
+    var self = this, sep = b.has("Separator") ? toStr(b.get("Separator")) : "", it = inputOr(b, "InputObject"), pr = b.get("Property");
+    var vs = it.map(function (x) {
+      var v = pr === undefined ? x : pr instanceof ScriptBlock ? self.callSB(pr, [], x) : (x instanceof PSObj || x instanceof PSHash ? x.get(toStr(pr)) : x);
+      v = toStr(v);
+      if (b.has("FormatString")) v = self.formatOp ? self.formatOp(toStr(b.get("FormatString")), [v]) : toStr(b.get("FormatString")).replace("{0}", v);
+      if (b.get("SingleQuote")) v = "'" + v + "'"; if (b.get("DoubleQuote")) v = '"' + v + '"';
+      return v;
+    });
+    b.out((b.has("OutputPrefix") ? toStr(b.get("OutputPrefix")) : "") + vs.join(sep) + (b.has("OutputSuffix") ? toStr(b.get("OutputSuffix")) : ""));
   });
 
   // ---------- Get-Member (definições com nomes curtos de tipo, como o PowerShell) ----------
@@ -3867,6 +4361,22 @@
     }
     var f = this.lookup(n);
     if (!f) { b.err(new PSErr("Get-Help could not find " + n + " in a help file in this session. To download updated help topics type: \"Update-Help\". To get help online, search for the help topic in the TechNet library at https:/go.microsoft.com/fwlink/?LinkID=107116.", "ResourceUnavailable", { cmd: "Get-Help" })); return; }
+    if (f.kind === "function") { // ajuda em comentário (<# .SYNOPSIS ... #>) das funções da pessoa
+      var fonte = (f.f && f.f.sb && f.f.sb.fonte) || "", ajuda = /<#([\s\S]*?)#>/.exec(fonte), secoes = {};
+      if (ajuda && /^\s*\.(SYNOPSIS|DESCRIPTION|PARAMETER|EXAMPLE|NOTES|LINK)\b/im.test(ajuda[1])) {
+        ajuda[1].split(/^\s*\.(?=[A-Z]+\b)/m).slice(1).forEach(function (bloco) {
+          var mm = /^([A-Z]+)[^\n]*\n?([\s\S]*)$/.exec(bloco); if (!mm) return;
+          var k = mm[1].toLowerCase(); if (!secoes[k]) secoes[k] = mm[2].split("\n").map(function (l) { return l.trim(); }).filter(Boolean).join(" ");
+        });
+      }
+      var ps = (f.f.sb.params || []).map(function (p) { return "[[-" + p.name + "] <" + (p.type ? typeFull(p.type) ? typeFull(p.type).replace(/^System\./, "") : p.type : "Object") + ">]"; });
+      var sintaxe = f.name + (ps.length ? " " + ps.join(" ") : "");
+      var syn = secoes.synopsis || sintaxe;
+      var linhas = ["", "NOME", "    " + f.name, "    ", "SINOPSE", "    " + syn, "    ", "", "SINTAXE", "    " + sintaxe, "    ", ""];
+      if (b.get("Examples") && secoes.example) linhas = ["", "NOME", "    " + f.name, "    ", "SINOPSE", "    " + syn, "    ", "    -------------------------- EXAMPLE 1 --------------------------", "    ", "    " + secoes.example, "    ", ""];
+      var ho = fmtText(linhas); ho.set("Name", f.name); ho.set("Synopsis", syn);
+      b.out(ho); return;
+    }
     var spec = f.kind === "cmdlet" ? f.spec : { name: f.name, params: [], sw: [], pos: [] };
     b.out(fmtText(this.helpFor(spec, b)));
   });

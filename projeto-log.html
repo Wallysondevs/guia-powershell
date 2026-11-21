@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projeto PowerShell: analisador de arquivo de log (passo a passo) | Guia PowerShell</title>
+<meta name="description" content="Projeto prático em PowerShell 7: ler um arquivo de log, transformar cada linha em objeto com regex, contar por nível, achar os erros mais comuns, agrupar por hora e gerar um relatório CSV, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Projeto: <span class="hl">Analisador de Log</span></h1>
+
+<p class="intro">Todo sistema escreve um diário: o arquivo de log. Quando algo dá errado, alguém precisa ler milhares de linhas para achar o problema. Neste projeto você ensina o PowerShell a fazer isso: transformar cada linha num objeto e responder perguntas como "quantos erros houve?" e "qual erro mais se repete?".</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A ler um log com <code>Get-Content</code>.</li>
+  <li>A transformar texto em objetos com <code>-match</code> e grupos nomeados.</li>
+  <li>A contar e agrupar com <code>Group-Object</code> e <code>Measure-Object</code>.</li>
+  <li>A agrupar por hora com datas.</li>
+  <li>A gerar um relatório em CSV.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>O plano</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Etapa</th><th>Ferramenta</th></tr>
+
+<tr><td>Ler as linhas</td><td><code>Get-Content</code></td></tr>
+
+<tr><td>Linha → objeto</td><td><code>-match</code> com grupos nomeados e <code>[pscustomobject]</code></td></tr>
+
+<tr><td>Perguntas</td><td><code>Where-Object</code>, <code>Group-Object</code>, <code>Sort-Object</code></td></tr>
+
+<tr><td>Relatório</td><td><code>Export-Csv</code></td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>1. O arquivo de log</h2>
+
+<p>Vamos criar um log de exemplo na pasta atual. No seu caso, seria o arquivo do sistema que você quer analisar:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Set-Content app.log @'
+&gt;&gt; 2026-11-20 08:01:12 INFO  Sistema iniciado
+&gt;&gt; 2026-11-20 08:05:40 WARN  Disco com 85% de uso
+&gt;&gt; 2026-11-20 08:17:03 ERROR Falha ao conectar no banco
+&gt;&gt; 2026-11-20 09:02:55 INFO  Usuário ana entrou
+&gt;&gt; 2026-11-20 09:10:21 ERROR Falha ao conectar no banco
+&gt;&gt; 2026-11-20 09:45:00 ERROR Tempo esgotado na API de pagamentos
+&gt;&gt; 2026-11-20 10:12:30 INFO  Usuário beto entrou
+&gt;&gt; 2026-11-20 10:30:08 WARN  Fila com 120 mensagens
+&gt;&gt; 2026-11-20 10:31:44 ERROR Falha ao conectar no banco
+&gt;&gt; linha estranha sem formato
+&gt;&gt; '@
+PS&gt; (Get-Content app.log).Count
+10
+</pre>
+
+<hr>
+
+<h2>2. Cada linha vira um objeto</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $padrao = '^(?&lt;data&gt;\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (?&lt;nivel&gt;\w+)\s+(?&lt;msg&gt;.+)$'
+PS&gt; $eventos = Get-Content app.log | ForEach-Object {
+&gt;&gt;     if ($_ -match $padrao) {
+&gt;&gt;         [pscustomobject]@{
+&gt;&gt;             Quando   = [datetime]$Matches.data
+&gt;&gt;             Nivel    = $Matches.nivel
+&gt;&gt;             Mensagem = $Matches.msg
+&gt;&gt;         }
+&gt;&gt;     } else {
+&gt;&gt;         Write-Verbose "Ignorada: $_"
+&gt;&gt;     }
+&gt;&gt; }
+PS&gt; $eventos.Count
+9
+PS&gt; $eventos | Select-Object -First 3 | Format-Table -AutoSize
+
+Quando              Nivel Mensagem
+------              ----- --------
+20/11/2026 08:01:12 INFO  Sistema iniciado
+20/11/2026 08:05:40 WARN  Disco com 85% de uso
+20/11/2026 08:17:03 ERROR Falha ao conectar no banco
+</pre>
+
+<dl class="anatomy">
+
+  <dt>(?&lt;data&gt;...)</dt><dd>Grupo nomeado: a data e a hora. Depois é só usar <code>$Matches.data</code>.</dd>
+
+  <dt>(?&lt;nivel&gt;\w+)</dt><dd>A palavra do nível (INFO, WARN, ERROR).</dd>
+
+  <dt>\s+</dt><dd>Um ou mais espaços (o <code>INFO</code> tem dois espaços depois, para alinhar).</dd>
+
+  <dt>else { Write-Verbose ... }</dt><dd>Linhas fora do formato são ignoradas, sem quebrar o resto.</dd>
+
+  <dt>[datetime]$Matches.data</dt><dd>O texto <code>2026-11-20 08:01:12</code> vira uma data de verdade, que dá para comparar e agrupar.</dd>
+
+</dl>
+
+<p>A linha estranha ficou de fora: 9 eventos de 10 linhas.</p>
+
+<hr>
+
+<h2>3. Respondendo perguntas</h2>
+
+<p>Quantos eventos de cada nível?</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $eventos | Group-Object Nivel | Sort-Object Count -Descending | Select-Object Name, Count
+
+Name  Count
+----  -----
+ERROR     4
+INFO      3
+WARN      2
+</pre>
+
+<p>Qual erro mais se repete?</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $eventos | Where-Object Nivel -eq "ERROR" | Group-Object Mensagem | Sort-Object Count -Descending | Select-Object Count, Name
+
+Count Name
+----- ----
+    3 Falha ao conectar no banco
+    1 Tempo esgotado na API de pagamentos
+</pre>
+
+<p>Quantos erros por hora?</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $eventos | Where-Object Nivel -eq "ERROR" | Group-Object { $_.Quando.ToString("HH'h'") } | Select-Object Name, Count
+
+Name Count
+---- -----
+08h      1
+09h      2
+10h      1
+</pre>
+
+<p>Primeiro e último erro:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $erros = $eventos | Where-Object Nivel -eq "ERROR" | Sort-Object Quando
+PS&gt; "Primeiro: {0:HH:mm} | Último: {1:HH:mm}" -f $erros[0].Quando, $erros[-1].Quando
+Primeiro: 08:17 | Último: 10:31
+</pre>
+
+<div class="tryps" data-goal="out:ERROR 2;;src:Group-Object;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> os eventos já estão prontos. Agrupe por <code>Nivel</code> e mostre cada grupo como <code>NIVEL quantidade</code> (ex.: <code>ERROR 2</code>).</p>
+
+<pre class="script" data-file="main.ps1">$eventos = @(
+  [pscustomobject]@{ Nivel = "INFO";  Mensagem = "Sistema iniciado" }
+  [pscustomobject]@{ Nivel = "ERROR"; Mensagem = "Falha no banco" }
+  [pscustomobject]@{ Nivel = "ERROR"; Mensagem = "Falha no banco" }
+)
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$eventos = @(
+  [pscustomobject]@{ Nivel = "INFO";  Mensagem = "Sistema iniciado" }
+  [pscustomobject]@{ Nivel = "ERROR"; Mensagem = "Falha no banco" }
+  [pscustomobject]@{ Nivel = "ERROR"; Mensagem = "Falha no banco" }
+)
+$eventos | Group-Object Nivel | ForEach-Object { "$($_.Name) $($_.Count)" }
+</pre>
+
+</div>
+
+<hr>
+
+<h2>4. O relatório em CSV</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $eventos | Where-Object Nivel -ne "INFO" |
+&gt;&gt;     Select-Object @{ n = "Data"; e = { $_.Quando.ToString("dd/MM/yyyy HH:mm") } }, Nivel, Mensagem |
+&gt;&gt;     Export-Csv relatorio-log.csv -Delimiter ';'
+PS&gt; Get-Content relatorio-log.csv
+"Data";"Nivel";"Mensagem"
+"20/11/2026 08:05";"WARN";"Disco com 85% de uso"
+"20/11/2026 08:17";"ERROR";"Falha ao conectar no banco"
+"20/11/2026 09:10";"ERROR";"Falha ao conectar no banco"
+"20/11/2026 09:45";"ERROR";"Tempo esgotado na API de pagamentos"
+"20/11/2026 10:30";"WARN";"Fila com 120 mensagens"
+"20/11/2026 10:31";"ERROR";"Falha ao conectar no banco"
+</pre>
+
+<p>Com <code>;</code>, o arquivo abre direto no Excel em português (veja <a href="csv.html">CSV</a>).</p>
+
+<hr>
+
+<h2>5. Transformando em função</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Get-EventoLog { param([Parameter(Mandatory)][string]$Path, [string]$Nivel)
+&gt;&gt;     $padrao = '^(?&lt;data&gt;\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (?&lt;nivel&gt;\w+)\s+(?&lt;msg&gt;.+)$'
+&gt;&gt;     Get-Content $Path | ForEach-Object {
+&gt;&gt;         if ($_ -match $padrao -and (-not $Nivel -or $Matches.nivel -eq $Nivel)) {
+&gt;&gt;             [pscustomobject]@{ Quando = [datetime]$Matches.data; Nivel = $Matches.nivel; Mensagem = $Matches.msg }
+&gt;&gt;         }
+&gt;&gt;     }
+&gt;&gt; }
+PS&gt; (Get-EventoLog -Path app.log -Nivel WARN).Mensagem
+Disco com 85% de uso
+Fila com 120 mensagens
+</pre>
+
+<hr>
+
+<h2>Desafios</h2>
+
+<ul>
+</ul>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">1. Por que converter a data com <code>[datetime]</code>?</p>
+
+<label><input type="radio" name="q1"> Para economizar memória</label>
+
+<label><input type="radio" name="q1"> Para poder comparar, ordenar e agrupar por hora de verdade</label>
+
+<label><input type="radio" name="q1"> Porque o <code>-match</code> exige</label>
+
+<label><input type="radio" name="q1"> Para mostrar em inglês</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. O que acontece com uma linha fora do formato?</p>
+
+<label><input type="radio" name="q2"> O script para com erro</label>
+
+<label><input type="radio" name="q2"> Vira um evento vazio</label>
+
+<label><input type="radio" name="q2"> É ignorada (vai só para o Write-Verbose)</label>
+
+<label><input type="radio" name="q2"> É apagada do arquivo</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Falha no banco;;src:-match;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> use <code>-match</code> com o grupo <code>(?&lt;msg&gt;.+)</code> para mostrar só a mensagem da linha de erro.</p>
+
+<pre class="script" data-file="main.ps1">$linha = "2026-11-20 08:17:03 ERROR Falha no banco"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$linha = "2026-11-20 08:17:03 ERROR Falha no banco"
+if ($linha -match '^\S+ \S+ (?&lt;nivel&gt;\w+)\s+(?&lt;msg&gt;.+)$') { $Matches.msg }
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Regex com grupos nomeados transforma cada linha em objeto.</li>
+  <li>Com objetos, <code>Group-Object</code>, <code>Sort-Object</code> e <code>Where-Object</code> respondem perguntas.</li>
+  <li>Datas como <code>[datetime]</code> permitem agrupar por hora e filtrar por período.</li>
+  <li><code>Export-Csv -Delimiter ';'</code> gera o relatório para o Excel.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

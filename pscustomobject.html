@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell [pscustomobject] — criando seus próprios objetos | Guia PowerShell</title>
+<meta name="description" content="Aprenda a criar objetos com [pscustomobject]: campos com nome, listas de objetos, acrescentar campos com Add-Member e a diferença para a hashtable, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Seus Objetos (<span class="hl">[pscustomobject]</span>)</h1>
+
+<p class="intro">Os comandos do PowerShell devolvem objetos com campos. Com <code>[pscustomobject]</code> você cria os seus, do mesmo jeito: uma ficha com os campos que quiser, pronta para o pipeline, o <code>Sort-Object</code>, o <code>Export-Csv</code> e tudo mais.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A criar um objeto com <code>[pscustomobject]@{ ... }</code>.</li>
+  <li>A montar uma lista de objetos, inclusive num laço.</li>
+  <li>A acrescentar campos depois com <code>Add-Member</code>.</li>
+  <li>A diferença entre hashtable e <code>[pscustomobject]</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: o formulário preenchido</h2>
+
+<p>A hashtable é uma folha de rascunho com anotações "chave: valor". O <code>[pscustomobject]</code> é o <strong>formulário oficial</strong>: os campos têm ordem fixa e qualquer comando do PowerShell sabe ler. Você escreve igual, mas o resultado se comporta como os objetos dos cmdlets.</p>
+
+<hr>
+
+<h2>1. Criando</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $livro = [pscustomobject]@{ Titulo = "Dom Casmurro"; Autor = "Machado de Assis"; Ano = 1899 }
+PS&gt; $livro
+
+Titulo       Autor             Ano
+------       -----             ---
+Dom Casmurro Machado de Assis 1899
+PS&gt; $livro.Autor
+Machado de Assis
+PS&gt; $livro.GetType().Name
+PSCustomObject
+</pre>
+
+<dl class="anatomy">
+
+  <dt>[pscustomobject]</dt><dd>Transforma a hashtable que vem logo depois num objeto. A ordem dos campos é a da escrita.</dd>
+
+  <dt>$livro.Autor</dt><dd>Lê um campo, como em qualquer objeto.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Uma lista de objetos</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $livros = @(
+&gt;&gt;   [pscustomobject]@{ Titulo = "Dom Casmurro"; Ano = 1899 }
+&gt;&gt;   [pscustomobject]@{ Titulo = "Iracema"; Ano = 1865 }
+&gt;&gt;   [pscustomobject]@{ Titulo = "Vidas Secas"; Ano = 1938 }
+&gt;&gt; )
+PS&gt; $livros | Sort-Object Ano
+
+Titulo        Ano
+------        ---
+Iracema      1865
+Dom Casmurro 1899
+Vidas Secas  1938
+</pre>
+
+<hr>
+
+<h2>3. Criando objetos num laço</h2>
+
+<p>O jeito mais comum: transformar dados em objetos dentro de um laço e guardar a saída:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $linhas = "Ana;9", "Beto;6", "Caio;8"
+PS&gt; $alunos = foreach ($l in $linhas) {
+&gt;&gt;   $partes = $l.Split(";")
+&gt;&gt;   [pscustomobject]@{ Nome = $partes[0]; Nota = [int]$partes[1] }
+&gt;&gt; }
+PS&gt; $alunos | Where-Object Nota -ge 7
+
+Nome Nota
+---- ----
+Ana     9
+Caio    8
+</pre>
+
+<dl class="anatomy">
+
+  <dt>$l.Split(";")</dt><dd>Corta a linha no <code>;</code>: nome e nota.</dd>
+
+  <dt>[int]$partes[1]</dt><dd>Converte a nota em número, para comparar e somar direito.</dd>
+
+  <dt>$alunos = foreach ...</dt><dd>Cada objeto que o laço "solta" vai para a lista.</dd>
+
+</dl>
+
+<div class="tryps" data-goal="out:Duda;;outre:Nome\s+Idade;;src:\[pscustomobject\];;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> crie um objeto com <code>Nome = "Duda"</code> e <code>Idade = 25</code> e mostre na tela.</p>
+
+<pre class="script" data-file="main.ps1">$pessoa = @{ Nome = "Duda" }
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$pessoa = [pscustomobject]@{ Nome = "Duda"; Idade = 25 }
+$pessoa
+</pre>
+
+</div>
+
+<hr>
+
+<h2>4. Acrescentando um campo: <code>Add-Member</code></h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $livro | Add-Member -NotePropertyName Paginas -NotePropertyValue 256
+PS&gt; $livro.Paginas
+256
+PS&gt; $livro.Ano = 1900
+PS&gt; $livro
+
+Titulo       Autor             Ano Paginas
+------       -----             --- -------
+Dom Casmurro Machado de Assis 1900     256
+</pre>
+
+<p>Mudar um campo que existe é só atribuir. Para criar um campo novo num objeto que já existe, use <code>Add-Member</code>.</p>
+
+<hr>
+
+<h2>Formas diferentes: hashtable × <code>[pscustomobject]</code></h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $h = @{ Nome = "Ana"; Nota = 9 }
+PS&gt; $o = [pscustomobject]@{ Nome = "Ana"; Nota = 9 }
+PS&gt; $h
+
+Name                           Value
+----                           -----
+Nome                           Ana
+Nota                           9
+PS&gt; $o
+
+Nome Nota
+---- ----
+Ana     9
+</pre>
+
+<p>Na hashtable, a ordem das linhas pode mudar de uma sessão para outra; no <code>[pscustomobject]</code>, nunca.</p>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th></th><th>Hashtable</th><th><code>[pscustomobject]</code></th></tr>
+
+<tr><td>Na tela</td><td>Duas colunas <code>Name</code> e <code>Value</code></td><td>Uma coluna por campo</td></tr>
+
+<tr><td>Ordem</td><td>Só com <code>[ordered]</code></td><td>Sempre a da escrita</td></tr>
+
+<tr><td>Campo novo</td><td><code>$h.x = 1</code></td><td><code>Add-Member</code></td></tr>
+
+<tr><td>Melhor para</td><td>Configurações, contagens, buscas por chave</td><td>Dados, tabelas, CSV, JSON</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Criar campo novo com <code>=</code></strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $livro.Editora = "Garnier"
+SetValueInvocationException: Exception setting "Editora": "The property 'Editora' cannot be found on this object. Verify that the property exists and can be set."
+</pre>
+
+<p>No <code>[pscustomobject]</code>, o <code>=</code> só muda campos que já existem. Para criar, use <code>Add-Member</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>[pscustomobject]@{ A = 1; B = 2 }</code></td><td>Cria um objeto.</td></tr>
+
+<tr><td><code>$o.A</code></td><td>Lê um campo.</td></tr>
+
+<tr><td><code>$o.A = 5</code></td><td>Muda um campo que existe.</td></tr>
+
+<tr><td><code>$o | Add-Member -NotePropertyName C -NotePropertyValue 3</code></td><td>Cria um campo novo.</td></tr>
+
+<tr><td><code>$lista = foreach (...) { [pscustomobject]@{ } }</code></td><td>Lista de objetos num laço.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. O tipo</h3>
+<p>Complete para criar um objeto em vez de uma hashtable:</p>
+<div class="ex-code">$p = <input data-answer="[pscustomobject" aria-label="resposta">]@{ Nome = "Ana" }</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Como um <code>[pscustomobject]</code> aparece na tela?</p>
+
+<label><input type="radio" name="q2"> Com colunas <code>Name</code> e <code>Value</code></label>
+
+<label><input type="radio" name="q2"> Com uma coluna para cada campo</label>
+
+<label><input type="radio" name="q2"> Como um texto só</label>
+
+<label><input type="radio" name="q2"> Não aparece</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. Para acrescentar um campo novo num <code>[pscustomobject]</code> que já existe, use:</p>
+
+<label><input type="radio" name="q3"> <code>$o.Novo = 1</code></label>
+
+<label><input type="radio" name="q3"> <code>$o.Add("Novo", 1)</code></label>
+
+<label><input type="radio" name="q3"> <code>Add-Member</code></label>
+
+<label><input type="radio" name="q3"> <code>New-Item</code></label>
+
+</div>
+
+<div class="tryps" data-goal="out:Iracema;;outre:Vidas Secas[\s\S]*Dom Casmurro[\s\S]*Iracema;;src:Sort-Object;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> mostre os livros do mais novo para o mais antigo (ordene por <code>Ano</code> com <code>-Descending</code>).</p>
+
+<pre class="script" data-file="main.ps1">$livros = @(
+    [pscustomobject]@{ Titulo = "Dom Casmurro"; Ano = 1899 }
+    [pscustomobject]@{ Titulo = "Iracema"; Ano = 1865 }
+    [pscustomobject]@{ Titulo = "Vidas Secas"; Ano = 1938 }
+)
+$livros
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$livros = @(
+    [pscustomobject]@{ Titulo = "Dom Casmurro"; Ano = 1899 }
+    [pscustomobject]@{ Titulo = "Iracema"; Ano = 1865 }
+    [pscustomobject]@{ Titulo = "Vidas Secas"; Ano = 1938 }
+)
+$livros | Sort-Object Ano -Descending
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>[pscustomobject]@{ ... }</code> cria um objeto com os campos na ordem da escrita.</li>
+  <li>Ele funciona com todos os cmdlets: ordenar, filtrar, exportar.</li>
+  <li>Monte listas de objetos guardando a saída de um laço.</li>
+  <li>Mude campos com <code>=</code>; crie campos novos com <code>Add-Member</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

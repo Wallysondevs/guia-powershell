@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell ForEach-Object -Parallel — rodando em paralelo (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda ForEach-Object -Parallel no PowerShell 7: processar vários itens ao mesmo tempo, -ThrottleLimit, $using: para levar variáveis, a ordem do resultado e quando o paralelo compensa, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">ForEach-Object -Parallel</span></h1>
+
+<p class="intro">O <code>ForEach-Object</code> comum trata um item de cada vez. Com <code>-Parallel</code>, o PowerShell 7 trata vários ao mesmo tempo, cada um numa thread. Para tarefas que passam o tempo <strong>esperando</strong> (rede, disco, APIs), isso pode deixar o script muitas vezes mais rápido.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A usar <code>ForEach-Object -Parallel</code>.</li>
+  <li>A medir o ganho com <code>Measure-Command</code>.</li>
+  <li>A limitar quantos rodam juntos com <code>-ThrottleLimit</code>.</li>
+  <li>A levar variáveis para dentro com <code>$using:</code>.</li>
+  <li>Que a ordem do resultado pode mudar, e como lidar com isso.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: os caixas do supermercado</h2>
+
+<p>Com um caixa só, a fila anda de um em um. Abrindo quatro caixas, quatro clientes são atendidos ao mesmo tempo. O <code>-ThrottleLimit</code> é quantos caixas estão abertos.</p>
+
+<hr>
+
+<h2>1. Comparando o tempo</h2>
+
+<p>Cada item "espera" 1 segundo (como uma consulta a um site):</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; (Measure-Command { 1..5 | ForEach-Object { Start-Sleep -Seconds 1 } }).Seconds
+5
+PS&gt; (Measure-Command { 1..5 | ForEach-Object -Parallel { Start-Sleep -Seconds 1 } }).Seconds
+1
+</pre>
+
+<p>Em sequência, 5 segundos. Em paralelo (até 5 de uma vez, o padrão), cerca de 1 segundo.</p>
+
+<dl class="anatomy">
+
+  <dt>-Parallel { }</dt><dd>Roda o bloco para cada item, vários ao mesmo tempo. Dentro, <code>$_</code> é o item, como sempre.</dd>
+
+  <dt>-ThrottleLimit</dt><dd>Quantos ao mesmo tempo. O padrão é 5.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. A ordem pode mudar</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; 1..6 | ForEach-Object -Parallel { Start-Sleep -Milliseconds (Get-Random -Minimum 10 -Maximum 300); "item $_" } | Sort-Object
+item 1
+item 2
+item 3
+item 4
+item 5
+item 6
+</pre>
+
+<p>Cada item termina quando termina, então a ordem de chegada varia a cada vez. Se a ordem importa, devolva objetos com um campo para ordenar e use <code>Sort-Object</code> no fim, como acima.</p>
+
+<hr>
+
+<h2>3. Variáveis de fora: $using:</h2>
+
+<p>Cada thread tem o seu próprio espaço de variáveis. Para usar uma variável da sua sessão, use <code>$using:</code>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $fator = 3
+PS&gt; 10, 20, 30 | ForEach-Object -Parallel { [pscustomobject]@{ Valor = $_; Triplo = $_ * $using:fator } } | Sort-Object Valor
+
+Valor Triplo
+----- ------
+   10     30
+   20     60
+   30     90
+</pre>
+
+<div class="tryps" data-goal="out:Olá, Ana;;src:-Parallel;;src:\$using:saudacao;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> use <code>-Parallel</code> com <code>$using:saudacao</code> para mostrar <code>Olá, </code> + cada nome.</p>
+
+<pre class="script" data-file="main.ps1">$saudacao = "Olá"
+"Ana", "Beto" | ForEach-Object { "$saudacao, $_" }
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$saudacao = "Olá"
+"Ana", "Beto" | ForEach-Object -Parallel { "$using:saudacao, $_" }
+</pre>
+
+</div>
+
+<hr>
+
+<h2>4. Limitando com -ThrottleLimit</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; (Measure-Command { 1..6 | ForEach-Object -Parallel { Start-Sleep -Seconds 1 } -ThrottleLimit 2 }).Seconds
+3
+</pre>
+
+<p>Com 2 de cada vez, 6 itens levam cerca de 3 segundos. Use um limite baixo quando cada tarefa pesa muito (disco, memória) ou quando um site limita quantas consultas você pode fazer.</p>
+
+<hr>
+
+<h2>5. Quando NÃO compensa</h2>
+
+<p>Criar threads tem um custo. Para tarefas rápidas, de pura conta, o paralelo fica <strong>mais lento</strong>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; (Measure-Command { 1..200 | ForEach-Object { $_ * 2 } }).TotalMilliseconds -lt (Measure-Command { 1..200 | ForEach-Object -Parallel { $_ * 2 } }).TotalMilliseconds
+True
+</pre>
+
+<p>Regra prática: paralelo para tarefas que <em>esperam</em> (rede, download, consulta remota). Para contas simples, o <code>ForEach-Object</code> comum ou o <code>foreach</code> são melhores.</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Somar numa variável de fora</strong>
+
+<p><code>$total = 0; 1..10 | ForEach-Object -Parallel { $total += $_ }</code> não funciona: cada thread tem a sua cópia. Devolva os valores e some depois: <code>(1..10 | ForEach-Object -Parallel { $_ } | Measure-Object -Sum).Sum</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Funções da sessão não existem lá dentro</strong>
+
+<p>Uma função que você criou não está disponível dentro do <code>-Parallel</code>. Defina a função dentro do bloco, ou carregue de um módulo.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>... | ForEach-Object -Parallel { }</code></td><td>Processa vários itens ao mesmo tempo.</td></tr>
+
+<tr><td><code>-ThrottleLimit 10</code></td><td>Até 10 de uma vez (padrão 5).</td></tr>
+
+<tr><td><code>$using:var</code></td><td>Usa uma variável da sessão.</td></tr>
+
+<tr><td><code>| Sort-Object</code></td><td>Recoloca em ordem.</td></tr>
+
+<tr><td><code>Measure-Command { }</code></td><td>Mede quanto tempo levou.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Quantos de uma vez</h3>
+<p>Complete para rodar no máximo 3 ao mesmo tempo:</p>
+<div class="ex-code">1..9 | ForEach-Object -Parallel { $_ } <input data-answer="-ThrottleLimit" aria-label="resposta"> 3</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Para que tipo de tarefa o paralelo compensa mais?</p>
+
+<label><input type="radio" name="q2"> Contas rápidas</label>
+
+<label><input type="radio" name="q2"> Tarefas que esperam rede ou disco</label>
+
+<label><input type="radio" name="q2"> Mostrar texto na tela</label>
+
+<label><input type="radio" name="q2"> Qualquer uma, sempre</label>
+
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">3. Qual é o <code>-ThrottleLimit</code> padrão?</p>
+
+<label><input type="radio" name="q3"> 5</label>
+
+<label><input type="radio" name="q3"> 1</label>
+
+<label><input type="radio" name="q3"> 10</label>
+
+<label><input type="radio" name="q3"> Ilimitado</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Total: 55;;src:-Parallel;;src:Measure-Object;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> devolva os números de 1 a 10 com <code>-Parallel</code> e some com <code>Measure-Object</code> no fim, mostrando <code>Total: 55</code>.</p>
+
+<pre class="script" data-file="main.ps1">$total = 0
+1..10 | ForEach-Object -Parallel { $total += $_ }
+"Total: $total"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$soma = (1..10 | ForEach-Object -Parallel { $_ } | Measure-Object -Sum).Sum
+"Total: $soma"
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>-Parallel</code> processa vários itens ao mesmo tempo (padrão: 5).</li>
+  <li>Compensa em tarefas que esperam; atrapalha em contas rápidas.</li>
+  <li>A ordem do resultado varia: ordene no fim se precisar.</li>
+  <li>Variáveis de fora entram com <code>$using:</code>; não some em variáveis compartilhadas.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

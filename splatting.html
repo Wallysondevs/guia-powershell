@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell splatting (@parametros) — parâmetros numa hashtable | Guia PowerShell</title>
+<meta name="description" content="Aprenda o splatting do PowerShell: guardar parâmetros numa hashtable e passar com @, reaproveitar e combinar parâmetros, e splatting com arrays, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Splatting</span> (@parametros)</h1>
+
+<p class="intro">Quando um comando tem muitos parâmetros, a linha fica enorme. O <strong>splatting</strong> resolve: você guarda os parâmetros numa hashtable e entrega todos de uma vez, trocando o <code>$</code> do nome da variável por <code>@</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A guardar parâmetros numa hashtable.</li>
+  <li>A passar a hashtable com <code>@nome</code> (e não <code>$nome</code>).</li>
+  <li>A reaproveitar os mesmos parâmetros em vários comandos.</li>
+  <li>A juntar splatting com parâmetros escritos na linha.</li>
+  <li>O splatting com array, para parâmetros por posição.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: o pedido salvo no aplicativo</h2>
+
+<p>No aplicativo de lanche, você salva o pedido de sempre: "X-salada, sem cebola, batata grande, refrigerante". Depois, é só tocar em "pedir de novo". O splatting é o pedido salvo: os parâmetros ficam guardados e você só diz "use estes".</p>
+
+<hr>
+
+<h2>1. A linha comprida</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; Get-Date -Year 2026 -Month 12 -Day 25 -Hour 20 -Minute 0 -Second 0 -Format "dd/MM/yyyy HH:mm"
+25/12/2026 20:00
+</pre>
+
+<hr>
+
+<h2>2. A mesma coisa com splatting</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $natal = @{
+&gt;&gt;   Year   = 2026
+&gt;&gt;   Month  = 12
+&gt;&gt;   Day    = 25
+&gt;&gt;   Hour   = 20
+&gt;&gt;   Minute = 0
+&gt;&gt;   Second = 0
+&gt;&gt;   Format = "dd/MM/yyyy HH:mm"
+&gt;&gt; }
+PS&gt; Get-Date @natal
+25/12/2026 20:00
+</pre>
+
+<dl class="anatomy">
+
+  <dt>$natal = @{ ... }</dt><dd>Uma hashtable comum. Cada chave é o nome de um parâmetro, sem o hífen.</dd>
+
+  <dt>Get-Date @natal</dt><dd>O <code>@</code> no lugar do <code>$</code> "espalha" a hashtable: cada chave vira <code>-Chave valor</code>.</dd>
+
+</dl>
+
+<div class="tryps" data-goal="out:Olá, Ana!;;src:@msg\b;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> a hashtable <code>$msg</code> já tem o parâmetro <code>Object</code> do <code>Write-Output</code>. Passe com splatting (<code>@msg</code>) para mostrar <code>Olá, Ana!</code>.</p>
+
+<pre class="script" data-file="main.ps1">$msg = @{ Object = "Olá, Ana!" }
+Write-Output $msg
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$msg = @{ Object = "Olá, Ana!" }
+Write-Output @msg
+</pre>
+
+</div>
+
+<hr>
+
+<h2>3. Reaproveitando e combinando</h2>
+
+<p>Guarde o que se repete e acrescente o resto na própria linha:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $formato = @{ Format = "dd/MM/yyyy" }
+PS&gt; Get-Date -Year 2026 -Month 1 -Day 1 @formato
+01/01/2026
+PS&gt; Get-Date -Year 2026 -Month 6 -Day 15 @formato
+15/06/2026
+</pre>
+
+<p>Também dá para mudar a hashtable antes de usar de novo, como qualquer hashtable: <code>$formato.Format = "yyyy-MM-dd"</code>.</p>
+
+<hr>
+
+<h2>4. Com suas funções</h2>
+
+<p>O splatting funciona em qualquer comando, inclusive nas suas <a href="funcoes.html">funções</a>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Saudar { param($Nome, $Saudacao = "Olá") "$Saudacao, $Nome!" }
+PS&gt; $p = @{ Nome = "Beto"; Saudacao = "Bom dia" }
+PS&gt; Saudar @p
+Bom dia, Beto!
+</pre>
+
+<hr>
+
+<h2>5. Splatting com array</h2>
+
+<p>Com um array, os valores entram <strong>por posição</strong>, na ordem:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $args2 = "Caio", "Boa noite"
+PS&gt; Saudar @args2
+Boa noite, Caio!
+</pre>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Usar <code>$</code> em vez de <code>@</code></strong>
+
+<pre><code>Get-Date $natal
+</code></pre>
+
+<p>Com <code>$</code>, a hashtable inteira vira <strong>um</strong> valor, entregue ao primeiro parâmetro de posição. O <code>Get-Date</code> tenta transformar a hashtable numa data e falha. Troque por <code>@natal</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Chave com nome de parâmetro que não existe</strong>
+
+<pre><code>$errado = @{ Ano = 2026 }
+Get-Date @errado
+</code></pre>
+
+<p>As chaves precisam ter o nome exato de um parâmetro do comando (<code>Year</code>, e não <code>Ano</code>). Com <code>Ano</code>, o erro diz que não existe parâmetro com esse nome.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>$p = @{ Nome = "x"; Ativo = $true }</code></td><td>Guarda os parâmetros.</td></tr>
+
+<tr><td><code>Comando @p</code></td><td>Passa todos de uma vez.</td></tr>
+
+<tr><td><code>Comando -Outro 1 @p</code></td><td>Mistura com parâmetros na linha.</td></tr>
+
+<tr><td><code>$a = "x", "y"; Comando @a</code></td><td>Por posição.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. O sinal certo</h3>
+<p>Complete com o sinal do splatting:</p>
+<div class="ex-code">Get-Date <input data-answer="@" aria-label="resposta">opcoes</div>
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">2. Numa hashtable de splatting, como se escreve a chave do parâmetro <code>-Format</code>?</p>
+
+<label><input type="radio" name="q2"> <code>-Format</code></label>
+
+<label><input type="radio" name="q2"> <code>$Format</code></label>
+
+<label><input type="radio" name="q2"> <code>Format</code></label>
+
+<label><input type="radio" name="q2"> <code>@Format</code></label>
+
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">3. O que acontece com <code>Get-Date $opcoes</code> (com <code>$</code>) se <code>$opcoes</code> é uma hashtable?</p>
+
+<label><input type="radio" name="q3"> Funciona igual ao <code>@opcoes</code></label>
+
+<label><input type="radio" name="q3"> A hashtable vira um valor só e o comando dá erro</label>
+
+<label><input type="radio" name="q3"> O PowerShell pergunta os parâmetros</label>
+
+<label><input type="radio" name="q3"> Mostra a hashtable</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Bom dia, Duda!;;src:@p\b;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> monte a hashtable <code>$p</code> com <code>Nome = "Duda"</code> e <code>Saudacao = "Bom dia"</code> e chame <code>Saudar @p</code>.</p>
+
+<pre class="script" data-file="main.ps1">function Saudar { param($Nome, $Saudacao = "Olá") "$Saudacao, $Nome!" }
+$p = @{}
+Saudar
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Saudar { param($Nome, $Saudacao = "Olá") "$Saudacao, $Nome!" }
+$p = @{ Nome = "Duda"; Saudacao = "Bom dia" }
+Saudar @p
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Splatting = parâmetros guardados numa hashtable e passados com <code>@</code>.</li>
+  <li>As chaves são os nomes dos parâmetros, sem hífen.</li>
+  <li>Dá para misturar com parâmetros escritos na linha e reaproveitar.</li>
+  <li>Com array, os valores entram por posição.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -95,7 +95,7 @@ Prompt, AsSecureString, MaskInput, Verbose, Debug, ErrorAction, WarningAction, I
 <dl class="anatomy">
   <dt>Prompt</dt><dd>A pergunta, que você já usou.</dd>
   <dt>MaskInput</dt><dd>"Mascarar a entrada": cada letra digitada aparece como <code>*</code>, mas a resposta continua sendo um texto comum. Bom para algo que não deve aparecer na tela, mas que o script vai usar como texto.</dd>
-  <dt>AsSecureString</dt><dd>"Como texto seguro": também mostra <code>*</code>, e a resposta vem trancada num <code>SecureString</code>, que não dá para imprimir direto. É o jeito certo para senhas (aula <a href="credenciais.html">Credenciais</a>).</dd>
+  <dt>AsSecureString</dt><dd>"Como texto seguro": também mostra <code>*</code>, e a resposta vem trancada num <code>SecureString</code>, que não dá para imprimir direto. É o jeito certo para senhas.</dd>
   <dt>Verbose, Debug, ErrorAction…</dt><dd>Os parâmetros comuns, que todo cmdlet tem (aula <a href="parametros-cmdlet.html">Parâmetros</a>).</dd>
 </dl>
 <div class="note"><strong>Windows PowerShell 5.1:</strong> o <code>-MaskInput</code> não existe lá: ele não aparece na documentação do <code>Read-Host</code> do 5.1, só na do PowerShell 7. No 5.1, use <code>-AsSecureString</code>.</div>

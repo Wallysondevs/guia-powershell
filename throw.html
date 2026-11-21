@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell throw — lançando seus próprios erros (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda o throw no PowerShell 7: lançar um erro com mensagem própria, parar uma função quando um dado está errado, relançar no catch e quando preferir Write-Error, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">throw</span>: Lançando Erros</h1>
+
+<p class="intro">Até aqui você tratou erros que o PowerShell gerou. Com <code>throw</code>, é <strong>você</strong> que gera o erro, com a sua mensagem, quando percebe que algo está errado e não faz sentido continuar.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A lançar um erro com <code>throw "mensagem"</code>.</li>
+  <li>Que o <code>throw</code> sempre encerra (para tudo).</li>
+  <li>A validar dados no começo de uma função.</li>
+  <li>A relançar um erro dentro do <code>catch</code>.</li>
+  <li>A diferença entre <code>throw</code> e <code>Write-Error</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: o juiz que apita</h2>
+
+<p>No futebol, quando a regra é quebrada, o juiz apita e o jogo para na hora. O <code>throw</code> é o apito: a execução para e o erro sobe até alguém tratar (um <code>catch</code>) ou até aparecer na tela.</p>
+
+<hr>
+
+<h2>1. O throw mais simples</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; throw "O arquivo de configuração está vazio."
+Exception: O arquivo de configuração está vazio.
+</pre>
+
+<dl class="anatomy">
+
+  <dt>throw</dt><dd>Lança um erro que encerra.</dd>
+
+  <dt>"O arquivo..."</dt><dd>A mensagem que vai aparecer. Escreva pensando em quem vai ler.</dd>
+
+  <dt>Exception:</dt><dd>A categoria de um erro lançado com texto simples.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Parando uma função com dado errado</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Definir-Idade { param([int]$Idade)
+&gt;&gt;   if ($Idade -lt 0) { throw "Idade não pode ser negativa: $Idade" }
+&gt;&gt;   "Idade definida: $Idade"
+&gt;&gt; }
+PS&gt; Definir-Idade 30
+Idade definida: 30
+</pre>
+
+<p>Com um valor ruim, o <code>throw</code> para a função antes da última linha:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; try { Definir-Idade -5 } catch { "Aviso: $($_.Exception.Message)" }
+Aviso: Idade não pode ser negativa: -5
+</pre>
+
+<div class="tryps" data-goal="out:Aviso: Preço inválido: -3;;src:throw;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> complete a função <code>Definir-Preco</code> para lançar <code>Preço inválido: </code> + o valor quando o preço for menor que zero. A chamada já está num <code>try</code>.</p>
+
+<pre class="script" data-file="main.ps1">function Definir-Preco { param([int]$Preco)
+  "Preço: $Preco"
+}
+try { Definir-Preco -3 } catch { "Aviso: $($_.Exception.Message)" }
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Definir-Preco { param([int]$Preco)
+  if ($Preco -lt 0) { throw "Preço inválido: $Preco" }
+  "Preço: $Preco"
+}
+try { Definir-Preco -3 } catch { "Aviso: $($_.Exception.Message)" }
+</pre>
+
+</div>
+
+<hr>
+
+<h2>3. throw para tudo, até o que vem depois</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Etapas {
+&gt;&gt;   "etapa 1"
+&gt;&gt;   throw "falhou na etapa 2"
+&gt;&gt;   "etapa 3"
+&gt;&gt; }
+PS&gt; try { Etapas } catch { "Parou: $($_.Exception.Message)" }
+etapa 1
+Parou: falhou na etapa 2
+</pre>
+
+<p>A <code>etapa 3</code> nunca roda. Isso é bom: não adianta continuar um processo com dado quebrado.</p>
+
+<hr>
+
+<h2>4. Relançando no catch</h2>
+
+<p>Às vezes você quer registrar o erro e deixar ele seguir para cima. Um <code>throw</code> sozinho, dentro do <code>catch</code>, relança o mesmo erro:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; function Importar {
+&gt;&gt;   try { [int]"x" }
+&gt;&gt;   catch { "(registrei o erro no log)"; throw }
+&gt;&gt; }
+PS&gt; try { Importar } catch { "Quem chamou também soube: $($_.Exception.GetType().Name)" }
+(registrei o erro no log)
+Quem chamou também soube: RuntimeException
+</pre>
+
+<hr>
+
+<h2>5. Lançando um tipo de exceção</h2>
+
+<p>Dá para lançar uma exceção de um tipo específico do .NET, e quem chamar pode usar um <code>catch [Tipo]</code>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; try { throw [System.ArgumentException]::new("Nome não pode ficar vazio.") }
+&gt;&gt; catch [System.ArgumentException] { "Argumento ruim: $($_.Exception.Message)" }
+Argumento ruim: Nome não pode ficar vazio.
+</pre>
+
+<hr>
+
+<h2>6. throw ou Write-Error?</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Use</th><th>Quando</th></tr>
+
+<tr><td><code>throw</code></td><td>O problema impede de continuar. Para a função (e o script) na hora.</td></tr>
+
+<tr><td><code>Write-Error</code></td><td>O problema é com <em>um</em> item; dá para seguir com os outros. É um erro que não encerra.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Mensagem sem informação</strong>
+
+<p><code>throw "Erro!"</code> não ajuda ninguém. Diga o que estava errado e, se puder, o valor: <code>throw "Idade não pode ser negativa: $Idade"</code>.</p>
+
+</div>
+
+<div class="cenario">
+<strong>throw dentro de um laço achando que só pula aquele item</strong>
+
+<p>O <code>throw</code> para o laço inteiro. Se a ideia é pular só um item, use <code>continue</code> (veja <a href="break-continue.html">break e continue</a>) ou <code>Write-Error</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>throw "mensagem"</code></td><td>Lança um erro que encerra.</td></tr>
+
+<tr><td><code>throw</code> (sozinho, no catch)</td><td>Relança o erro atual.</td></tr>
+
+<tr><td><code>throw [System.ArgumentException]::new("msg")</code></td><td>Lança um tipo específico.</td></tr>
+
+<tr><td><code>Write-Error "mensagem"</code></td><td>Erro que não encerra.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Lançar o erro</h3>
+<p>Complete para lançar o erro:</p>
+<div class="ex-code">if ($valor -eq 0) { <input data-answer="throw" aria-label="resposta"> "Valor não pode ser zero" }</div>
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">2. Depois de um <code>throw</code> dentro de uma função, as linhas seguintes da função...</p>
+
+<label><input type="radio" name="q2"> não rodam</label>
+
+<label><input type="radio" name="q2"> rodam normalmente</label>
+
+<label><input type="radio" name="q2"> rodam só se houver catch</label>
+
+<label><input type="radio" name="q2"> rodam no final</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. Para relançar o erro atual dentro de um <code>catch</code>, use:</p>
+
+<label><input type="radio" name="q3"> <code>continue</code></label>
+
+<label><input type="radio" name="q3"> <code>return $_</code></label>
+
+<label><input type="radio" name="q3"> <code>throw</code></label>
+
+<label><input type="radio" name="q3"> <code>break</code></label>
+
+</div>
+
+<div class="tryps" data-goal="out:Erro: Nome vazio;;src:throw;;src:catch;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> na função <code>Saudar</code>, lance <code>Nome vazio</code> quando <code>$Nome</code> estiver vazio. Depois chame <code>Saudar ""</code> dentro de um <code>try</code> e, no <code>catch</code>, mostre <code>Erro: </code> + a mensagem.</p>
+
+<pre class="script" data-file="main.ps1">function Saudar { param([string]$Nome)
+  "Olá, $Nome!"
+}
+Saudar ""
+</pre>
+
+<pre class="solucao" data-file="main.ps1">function Saudar { param([string]$Nome)
+  if (-not $Nome) { throw "Nome vazio" }
+  "Olá, $Nome!"
+}
+try { Saudar "" } catch { "Erro: $($_.Exception.Message)" }
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>throw "mensagem"</code> gera um erro que encerra, com o seu texto.</li>
+  <li>Use para parar quando um dado essencial está errado.</li>
+  <li><code>throw</code> sozinho no <code>catch</code> relança o erro.</li>
+  <li>Para erros por item, que deixam seguir, prefira <code>Write-Error</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

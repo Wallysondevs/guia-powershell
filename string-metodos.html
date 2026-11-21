@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell métodos de texto — Split, Replace, Trim, Substring, ToUpper | Guia PowerShell</title>
+<meta name="description" content="Aprenda os métodos de string do PowerShell 7: ToUpper, Trim, Replace, Split, Substring, IndexOf, StartsWith, Contains, PadLeft e Join, e a diferença para os operadores -replace e -split, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Métodos de Texto (<span class="hl">.Split</span>, .Replace…)</h1>
+
+<p class="intro">Todo texto no PowerShell é um objeto <code>System.String</code>, e ele vem com ferramentas próprias, os <strong>métodos</strong>: deixar em maiúsculas, tirar espaços, cortar um pedaço, dividir. Você chama com um ponto: <code>$texto.ToUpper()</code>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A mudar maiúsculas e minúsculas e tirar espaços.</li>
+  <li>A trocar, dividir e juntar textos.</li>
+  <li>A pegar pedaços com <code>Substring</code> e achar posições com <code>IndexOf</code>.</li>
+  <li>A testar começo, fim e conteúdo.</li>
+  <li>Quando usar método (<code>.Replace</code>) e quando usar operador (<code>-replace</code>).</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: o canivete suíço</h2>
+
+<p>Um canivete tem tesoura, lixa, abridor. Cada ferramenta faz uma coisa simples. Os métodos de texto são as ferramentas do canivete que todo texto carrega. Para ver todas, use <code>"texto" | Get-Member -MemberType Method</code>.</p>
+
+<hr>
+
+<h2>1. Maiúsculas, minúsculas e espaços</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $nome = "  ana souza  "
+PS&gt; $nome.ToUpper()
+  ANA SOUZA  
+PS&gt; $nome.Trim()
+ana souza
+PS&gt; "[" + $nome.TrimStart() + "]"
+[ana souza  ]
+PS&gt; $nome.Trim().Length
+9
+</pre>
+
+<p>Os métodos <strong>não mudam</strong> a variável: eles devolvem um texto novo. Para guardar, atribua: <code>$nome = $nome.Trim()</code>.</p>
+
+<hr>
+
+<h2>2. Trocar, dividir e juntar</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "10.5".Replace(".", ",")
+10,5
+PS&gt; "maçã,uva,pera".Split(",")
+maçã
+uva
+pera
+PS&gt; "maçã, uva, pera".Split(", ")
+maçã
+uva
+pera
+PS&gt; "a-b-c".Split("-")[1]
+b
+PS&gt; [string]::Join(" / ", ("Rio", "SP", "BH"))
+Rio / SP / BH
+PS&gt; "Rio", "SP", "BH" -join ", "
+Rio, SP, BH
+</pre>
+
+<dl class="anatomy">
+
+  <dt>.Replace(".", ",")</dt><dd>Troca o texto exato, sem regex. Diferencia maiúsculas.</dd>
+
+  <dt>.Split(",")</dt><dd>Divide e devolve um array.</dd>
+
+  <dt>.Split(", ")</dt><dd>No PowerShell 7, um texto com vários caracteres é usado inteiro como separador.</dd>
+
+  <dt>-join</dt><dd>Operador que junta um array com o separador.</dd>
+
+</dl>
+
+<hr>
+
+<h2>3. Pedaços e posições</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $cpf = "123.456.789-09"
+PS&gt; $cpf.Substring(0, 3)
+123
+PS&gt; $cpf.Substring(12)
+09
+PS&gt; $cpf.IndexOf("-")
+11
+PS&gt; $cpf.LastIndexOf(".")
+7
+</pre>
+
+<dl class="anatomy">
+
+  <dt>.Substring(0, 3)</dt><dd>A partir da posição 0, pegue 3 caracteres. A contagem começa em zero.</dd>
+
+  <dt>.Substring(12)</dt><dd>Da posição 12 até o fim.</dd>
+
+  <dt>.IndexOf("-")</dt><dd>Em que posição está o <code>-</code> (ou <code>-1</code> se não tiver).</dd>
+
+</dl>
+
+<div class="tryps" data-goal="out:ANA;;src:\.Substring\(;;src:\.ToUpper\(;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> pegue as 3 primeiras letras de <code>$nome</code> com <code>Substring</code> e mostre em maiúsculas com <code>ToUpper</code>.</p>
+
+<pre class="script" data-file="main.ps1">$nome = "anabela"
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$nome = "anabela"
+$nome.Substring(0, 3).ToUpper()
+</pre>
+
+</div>
+
+<hr>
+
+<h2>4. Perguntas sobre o texto</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $arq = "Relatorio-2026.xlsx"
+PS&gt; $arq.StartsWith("Relatorio")
+True
+PS&gt; $arq.EndsWith(".xlsx")
+True
+PS&gt; $arq.Contains("2026")
+True
+PS&gt; $arq.Contains("relatorio")
+False
+PS&gt; $arq.ToLower().Contains("relatorio")
+True
+</pre>
+
+<p>Diferente dos operadores (<code>-like</code>, <code>-match</code>), os métodos <strong>diferenciam</strong> maiúsculas de minúsculas.</p>
+
+<hr>
+
+<h2>5. Preenchendo</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "7".PadLeft(3, "0")
+007
+PS&gt; "Total".PadRight(10, ".") + "R$ 50"
+Total.....R$ 50
+PS&gt; "=" * 20
+====================
+</pre>
+
+<hr>
+
+<h2>6. Método ou operador?</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Método</th><th>Operador</th><th>Diferença</th></tr>
+
+<tr><td><code>.Replace("a", "b")</code></td><td><code>-replace 'a', 'b'</code></td><td>O método troca texto exato e diferencia maiúsculas; o operador usa regex e não diferencia.</td></tr>
+
+<tr><td><code>.Split(",")</code></td><td><code>-split ','</code></td><td>O método usa texto exato; o operador usa regex.</td></tr>
+
+<tr><td><code>.Contains("x")</code></td><td><code>-like '*x*'</code> / <code>-match 'x'</code></td><td>O método diferencia maiúsculas.</td></tr>
+
+</table>
+</div>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; "Preço 1.000.000".Replace(".", "")
+Preço 1000000
+PS&gt; "Preço 1.000.000" -replace '.', ''
+PS&gt; "Preço 1.000.000" -replace '\.', ''
+Preço 1000000
+</pre>
+
+<p>O segundo apagou tudo: no <code>-replace</code>, o <code>.</code> é regex e quer dizer "qualquer caractere".</p>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Esquecer os parênteses</strong>
+
+<p><code>$texto.ToUpper</code> sem <code>()</code> não chama o método: mostra a <em>descrição</em> dele. Métodos sempre levam parênteses, mesmo vazios.</p>
+
+</div>
+
+<div class="cenario">
+<strong>Substring além do fim</strong>
+
+<p><code>"abc".Substring(1, 10)</code> dá erro porque não há 10 caracteres a partir da posição 1. Confira o <code>.Length</code> antes, ou use <code>-replace</code>/<code>-match</code> quando o tamanho variar.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>.ToUpper()</code> / <code>.ToLower()</code></td><td>Maiúsculas / minúsculas.</td></tr>
+
+<tr><td><code>.Trim()</code></td><td>Tira espaços das pontas.</td></tr>
+
+<tr><td><code>.Replace("a","b")</code></td><td>Troca texto exato.</td></tr>
+
+<tr><td><code>.Split(",")</code></td><td>Divide em array.</td></tr>
+
+<tr><td><code>.Substring(i, n)</code></td><td>Pedaço de n caracteres a partir de i.</td></tr>
+
+<tr><td><code>.IndexOf("x")</code></td><td>Posição (ou -1).</td></tr>
+
+<tr><td><code>.StartsWith()</code> / <code>.EndsWith()</code> / <code>.Contains()</code></td><td>Testes (diferenciam maiúsculas).</td></tr>
+
+<tr><td><code>.PadLeft(n, "0")</code></td><td>Completa à esquerda.</td></tr>
+
+<tr><td><code>.Length</code></td><td>Tamanho (propriedade, sem parênteses).</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Tirar espaços</h3>
+<p>Complete para tirar os espaços das pontas:</p>
+<div class="ex-code">"  oi  ".<input data-answer="Trim" aria-label="resposta">()</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. O que <code>"abc".IndexOf("z")</code> devolve?</p>
+
+<label><input type="radio" name="q2"> 0</label>
+
+<label><input type="radio" name="q2"> 1</label>
+
+<label><input type="radio" name="q2"> $null</label>
+
+<label><input type="radio" name="q2"> Erro</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. Depois de <code>$t.ToUpper()</code>, o que acontece com <code>$t</code>?</p>
+
+<label><input type="radio" name="q3"> Fica em maiúsculas</label>
+
+<label><input type="radio" name="q3"> Fica vazia</label>
+
+<label><input type="radio" name="q3"> Continua igual; o método devolveu um texto novo</label>
+
+<label><input type="radio" name="q3"> Vira um array</label>
+
+</div>
+
+<div class="tryps" data-goal="out:007;;src:\.PadLeft\(;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> transforme o número do agente <code>"7"</code> em <code>007</code> usando <code>PadLeft</code>.</p>
+
+<pre class="script" data-file="main.ps1">$agente = "7"
+$agente
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$agente = "7"
+$agente.PadLeft(3, "0")
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Textos têm métodos: <code>.ToUpper()</code>, <code>.Trim()</code>, <code>.Replace()</code>, <code>.Split()</code>, <code>.Substring()</code>...</li>
+  <li>Métodos devolvem um texto novo; a variável não muda sozinha.</li>
+  <li>Métodos usam texto exato e diferenciam maiúsculas; operadores usam regex e não diferenciam.</li>
+  <li><code>.Length</code> é propriedade (sem parênteses); métodos sempre levam <code>()</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

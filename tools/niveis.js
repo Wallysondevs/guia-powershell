@@ -6,7 +6,7 @@ var NIVEIS = [
       ["versoes-powershell.html", "Windows PowerShell 5.1 × PowerShell 7"],
       ["instalar.html", "Instalar o PowerShell 7"],
       ["abrir-terminal.html", "Abrindo o PowerShell (e o Terminal do Windows)"],
-      ["simulador.html", "O Editor do Guia"],
+      ["simulador.html", "Simulador"],
       ["primeiro-comando.html", "Seu Primeiro Comando"],
       ["cmdlets.html", "Cmdlets: Verbo-Substantivo"],
       ["parametros-cmdlet.html", "Parâmetros dos Comandos"],
@@ -101,11 +101,8 @@ var NIVEIS = [
       ["ajuda-comentarios.html", "Ajuda nas Suas Funções"]
     ]},
     { grupo: "Scripts", itens: [
-      ["scripts.html", "Scripts (.ps1)"],
-      ["execution-policy.html", "Política de Execução"],
       ["parametros-script.html", "Parâmetros de Script e $args"],
-      ["dot-source.html", "Dot-Sourcing (. .\\arquivo.ps1)"],
-      ["perfil.html", "O Perfil ($PROFILE)"]
+      ["dot-source.html", "Dot-Sourcing (. .\\arquivo.ps1)"]
     ]},
     { grupo: "Erros", itens: [
       ["erros.html", "Lendo uma Mensagem de Erro"],
@@ -120,28 +117,17 @@ var NIVEIS = [
       ["xml.html", "XML"],
       ["get-date.html", "Datas e Horas (Get-Date)"],
       ["regex.html", "Expressões Regulares (-match, -replace)"],
-      ["string-metodos.html", "Métodos de Texto (.Split, .Replace…)"],
-      ["compress-archive.html", "Arquivos Zip (Compress-Archive)"]
+      ["string-metodos.html", "Métodos de Texto (.Split, .Replace…)"]
     ]}
   ]},
   { id: "n3", nome: "Nível 3 · Avançado", curto: "Avançado", desc: "Administração e automação", grupos: [
     { grupo: "Módulos", itens: [
-      ["modulos.html", "Módulos (Import-Module)"],
-      ["psgallery.html", "Instalando Módulos (PowerShell Gallery)"],
       ["modulos-proprios.html", "Criando seu Módulo (.psm1)"]
     ]},
     { grupo: "Administrando o Windows", itens: [
-      ["processos.html", "Processos (Get-Process e Stop-Process)"],
-      ["start-process.html", "Abrindo Programas (Start-Process)"],
       ["servicos.html", "Serviços (Get-Service)"],
-      ["variaveis-ambiente.html", "Variáveis de Ambiente ($env:)"],
       ["registro.html", "O Registro do Windows"],
-      ["cim.html", "Informações do Computador (Get-CimInstance)"],
-      ["eventos.html", "Logs de Eventos (Get-WinEvent)"],
-      ["tarefas-agendadas.html", "Tarefas Agendadas"],
-      ["permissoes.html", "Permissões (Get-Acl)"],
       ["usuarios-locais.html", "Usuários e Grupos Locais"],
-      ["rede.html", "Rede (Test-Connection e Test-NetConnection)"],
       ["web.html", "Internet (Invoke-WebRequest e Invoke-RestMethod)"]
     ]},
     { grupo: "Recursos Poderosos", itens: [
@@ -150,14 +136,10 @@ var NIVEIS = [
       ["enum.html", "Enum"],
       ["jobs.html", "Tarefas em Segundo Plano (Start-Job)"],
       ["foreach-parallel.html", "ForEach-Object -Parallel"],
-      ["remoting.html", "PowerShell Remoto (Enter-PSSession e SSH)"],
       ["add-type.html", "C# Dentro do PowerShell (Add-Type)"]
     ]},
     { grupo: "Boas Práticas", itens: [
       ["estilo.html", "Estilo e Verbos Aprovados"],
-      ["pester.html", "Testes com Pester"],
-      ["depuracao.html", "Depurando (Set-PSBreakpoint)"],
-      ["credenciais.html", "Senhas e Credenciais (SecureString)"],
       ["cmd-para-powershell.html", "Do cmd para o PowerShell"],
       ["bash-para-powershell.html", "Do Bash para o PowerShell"],
       ["novidades.html", "Novidades do PowerShell 7.7"]
@@ -165,14 +147,9 @@ var NIVEIS = [
   ]},
   { id: "pj", nome: "Projetos", curto: "Projetos", desc: "Mão na massa", grupos: [
     { grupo: "Projetos", itens: [
-      ["projeto-organizador.html", "Projeto: Organizador de Downloads"],
-      ["projeto-backup.html", "Projeto: Backup com Zip"],
-      ["projeto-relatorio.html", "Projeto: Relatório de Arquivos em CSV"],
-      ["projeto-renomear.html", "Projeto: Renomear Fotos em Lote"],
       ["projeto-tarefas.html", "Projeto: Lista de Tarefas (JSON)"],
       ["projeto-menu.html", "Projeto: Menu Interativo"],
       ["projeto-log.html", "Projeto: Analisador de Log"],
-      ["projeto-monitor.html", "Projeto: Monitor de Serviços"],
       ["projeto-api.html", "Projeto: Consultando uma API (CEP)"]
     ]}
   ]},

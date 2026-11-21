@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>cmd e Bash × PowerShell — tabela de equivalências (referência) | Guia PowerShell</title>
+<meta name="description" content="Tabela de equivalências entre cmd (Prompt de Comando), Bash e PowerShell 7: listar, navegar, copiar, apagar, ler arquivos, procurar texto, variáveis, ambiente, processos, rede, laços e condicionais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>cmd e Bash <span class="hl">×</span> PowerShell</h1>
+
+<p class="intro">Uma tabela só, com os três lado a lado. Para entender as diferenças com calma, veja <a href="cmd-para-powershell.html">Do cmd para o PowerShell</a> e <a href="bash-para-powershell.html">Do Bash para o PowerShell</a>.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O equivalente de cada comando nos três ambientes.</li>
+  <li>Variáveis, laços e condicionais lado a lado.</li>
+</ul>
+</div>
+
+
+
+<hr>
+
+<h2>Arquivos e pastas</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Tarefa</th><th>cmd</th><th>Bash</th><th>PowerShell</th></tr>
+
+<tr><td>listar</td><td><code>dir</code></td><td><code>ls -la</code></td><td><code>Get-ChildItem -Force</code></td></tr>
+
+<tr><td>listar tudo abaixo</td><td><code>dir /s</code></td><td><code>find .</code></td><td><code>Get-ChildItem -Recurse</code></td></tr>
+
+<tr><td>pasta atual</td><td><code>cd</code></td><td><code>pwd</code></td><td><code>Get-Location</code></td></tr>
+
+<tr><td>mudar de pasta</td><td><code>cd pasta</code></td><td><code>cd pasta</code></td><td><code>Set-Location pasta</code></td></tr>
+
+<tr><td>criar pasta</td><td><code>md x</code></td><td><code>mkdir x</code></td><td><code>New-Item -ItemType Directory x</code></td></tr>
+
+<tr><td>criar arquivo vazio</td><td><code>type nul &gt; a.txt</code></td><td><code>touch a.txt</code></td><td><code>New-Item a.txt</code></td></tr>
+
+<tr><td>copiar</td><td><code>copy a b</code></td><td><code>cp a b</code></td><td><code>Copy-Item a b</code></td></tr>
+
+<tr><td>copiar pasta</td><td><code>xcopy /e a b</code></td><td><code>cp -r a b</code></td><td><code>Copy-Item a b -Recurse</code></td></tr>
+
+<tr><td>mover</td><td><code>move a b</code></td><td><code>mv a b</code></td><td><code>Move-Item a b</code></td></tr>
+
+<tr><td>renomear</td><td><code>ren a b</code></td><td><code>mv a b</code></td><td><code>Rename-Item a b</code></td></tr>
+
+<tr><td>apagar</td><td><code>del a</code></td><td><code>rm a</code></td><td><code>Remove-Item a</code></td></tr>
+
+<tr><td>apagar pasta</td><td><code>rd /s /q x</code></td><td><code>rm -rf x</code></td><td><code>Remove-Item x -Recurse -Force</code></td></tr>
+
+<tr><td>existe?</td><td><code>if exist a</code></td><td><code>[ -e a ]</code></td><td><code>Test-Path a</code></td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Conteúdo e texto</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Tarefa</th><th>cmd</th><th>Bash</th><th>PowerShell</th></tr>
+
+<tr><td>mostrar arquivo</td><td><code>type a</code></td><td><code>cat a</code></td><td><code>Get-Content a</code></td></tr>
+
+<tr><td>primeiras linhas</td><td>—</td><td><code>head -5 a</code></td><td><code>Get-Content a -TotalCount 5</code></td></tr>
+
+<tr><td>últimas linhas</td><td>—</td><td><code>tail -5 a</code></td><td><code>Get-Content a -Tail 5</code></td></tr>
+
+<tr><td>acompanhar</td><td>—</td><td><code>tail -f a</code></td><td><code>Get-Content a -Wait</code></td></tr>
+
+<tr><td>procurar texto</td><td><code>findstr x a</code></td><td><code>grep x a</code></td><td><code>Select-String x a</code></td></tr>
+
+<tr><td>contar linhas</td><td><code>find /c /v "" a</code></td><td><code>wc -l a</code></td><td><code>(Get-Content a).Count</code></td></tr>
+
+<tr><td>ordenar</td><td><code>sort a</code></td><td><code>sort a</code></td><td><code>Get-Content a | Sort-Object</code></td></tr>
+
+<tr><td>sem repetidos</td><td>—</td><td><code>sort -u a</code></td><td><code>Get-Content a | Sort-Object -Unique</code></td></tr>
+
+<tr><td>trocar texto</td><td>—</td><td><code>sed 's/x/y/g'</code></td><td><code>-replace 'x', 'y'</code></td></tr>
+
+<tr><td>gravar saída</td><td><code>cmd &gt; a</code></td><td><code>cmd &gt; a</code></td><td><code>cmd &gt; a</code> ou <code>| Out-File a</code></td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Variáveis e ambiente</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Tarefa</th><th>cmd</th><th>Bash</th><th>PowerShell</th></tr>
+
+<tr><td>criar variável</td><td><code>set x=1</code></td><td><code>x=1</code></td><td><code>$x = 1</code></td></tr>
+
+<tr><td>usar variável</td><td><code>%x%</code></td><td><code>$x</code></td><td><code>$x</code></td></tr>
+
+<tr><td>variável de ambiente</td><td><code>%PATH%</code></td><td><code>$PATH</code></td><td><code>$env:PATH</code></td></tr>
+
+<tr><td>definir no ambiente</td><td><code>set X=1</code></td><td><code>export X=1</code></td><td><code>$env:X = "1"</code></td></tr>
+
+<tr><td>pasta do usuário</td><td><code>%USERPROFILE%</code></td><td><code>~</code> ou <code>$HOME</code></td><td><code>$HOME</code> ou <code>~</code></td></tr>
+
+<tr><td>código de saída</td><td><code>%ERRORLEVEL%</code></td><td><code>$?</code></td><td><code>$LASTEXITCODE</code> / <code>$?</code></td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Sistema e rede</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Tarefa</th><th>cmd</th><th>Bash</th><th>PowerShell</th></tr>
+
+<tr><td>processos</td><td><code>tasklist</code></td><td><code>ps aux</code></td><td><code>Get-Process</code></td></tr>
+
+<tr><td>encerrar</td><td><code>taskkill /im x.exe</code></td><td><code>pkill x</code></td><td><code>Stop-Process -Name x</code></td></tr>
+
+<tr><td>onde está o comando</td><td><code>where x</code></td><td><code>which x</code></td><td><code>Get-Command x</code></td></tr>
+
+<tr><td>ajuda</td><td><code>x /?</code></td><td><code>man x</code></td><td><code>Get-Help x</code></td></tr>
+
+<tr><td>ping</td><td><code>ping host</code></td><td><code>ping host</code></td><td><code>Test-Connection host</code></td></tr>
+
+<tr><td>baixar</td><td><code>curl -O url</code></td><td><code>curl -O url</code></td><td><code>Invoke-WebRequest url -OutFile a</code></td></tr>
+
+<tr><td>limpar tela</td><td><code>cls</code></td><td><code>clear</code></td><td><code>Clear-Host</code></td></tr>
+
+<tr><td>histórico</td><td><code>doskey /history</code></td><td><code>history</code></td><td><code>Get-History</code></td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Lógica</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Tarefa</th><th>cmd</th><th>Bash</th><th>PowerShell</th></tr>
+
+<tr><td>se</td><td><code>if %x%==1 (...)</code></td><td><code>if [ $x -eq 1 ]; then ...; fi</code></td><td><code>if ($x -eq 1) { ... }</code></td></tr>
+
+<tr><td>para cada</td><td><code>for %%f in (*.txt) do ...</code></td><td><code>for f in *.txt; do ...; done</code></td><td><code>foreach ($f in Get-ChildItem *.txt) { ... }</code></td></tr>
+
+<tr><td>repetir N vezes</td><td><code>for /l %%i in (1,1,5) do ...</code></td><td><code>for i in {1..5}; do ...; done</code></td><td><code>foreach ($i in 1..5) { ... }</code></td></tr>
+
+<tr><td>função</td><td><code>:rotulo</code> + <code>call :rotulo</code></td><td><code>f() { ...; }</code></td><td><code>function F { ... }</code></td></tr>
+
+<tr><td>e / ou</td><td><code>&amp;&amp;</code> / <code>||</code></td><td><code>&amp;&amp;</code> / <code>||</code></td><td><code>&amp;&amp;</code> / <code>||</code> (PowerShell 7)</td></tr>
+
+<tr><td>comentário</td><td><code>rem</code> ou <code>::</code></td><td><code>#</code></td><td><code>#</code> ou <code>&lt;# ... #&gt;</code></td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Os apelidos (<code>dir</code>, <code>cd</code>, <code>cat</code>, <code>cp</code>) ajudam na transição, mas os parâmetros são do PowerShell.</li>
+  <li>Variáveis de ambiente: <code>$env:NOME</code>.</li>
+  <li>Laços e condicionais usam parênteses e chaves: <code>if (...) { }</code>, <code>foreach (... in ...) { }</code>.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

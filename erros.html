@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell erros — como ler uma mensagem de erro (guia) | Guia PowerShell</title>
+<meta name="description" content="Aprenda a ler uma mensagem de erro do PowerShell 7: a categoria antes dos dois-pontos, a mensagem, os erros que param tudo e os que deixam o script seguir, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>Lendo uma <span class="hl">Mensagem de Erro</span></h1>
+
+<p class="intro">Erro em vermelho assusta, mas ele é um bilhete do PowerShell explicando o que deu errado. Nesta aula você aprende a ler esse bilhete em partes e a descobrir, com calma, o que ele quer dizer.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>As partes de uma mensagem de erro do PowerShell 7.</li>
+  <li>A diferença entre erro que <strong>para</strong> tudo e erro que deixa seguir.</li>
+  <li>Onde o PowerShell guarda o último erro (<code>$Error[0]</code>).</li>
+  <li>Como pegar só o texto do erro e o tipo dele.</li>
+  <li>Os erros mais comuns e como resolver cada um.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: o bilhete do mecânico</h2>
+
+<p>Quando você deixa o carro na oficina, o mecânico entrega um bilhete: "<em>Peça: freio. Problema: pastilha gasta.</em>" A mensagem de erro do PowerShell é igual: primeiro vem <strong>a categoria</strong> do problema, depois dos dois-pontos vem <strong>a explicação</strong>.</p>
+
+<hr>
+
+<h2>1. Um erro de verdade</h2>
+
+<p>Tente transformar a palavra <code>abc</code> num número inteiro:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; [int]"abc"
+InvalidArgument: Cannot convert value "abc" to type "System.Int32". Error: "The input string 'abc' was not in a correct format."
+</pre>
+
+<dl class="anatomy">
+
+  <dt>InvalidArgument</dt><dd>A <strong>categoria</strong> do erro: um argumento (valor) inválido.</dd>
+
+  <dt>Cannot convert value "abc" to type "System.Int32"</dt><dd>O que aconteceu: não deu para converter <code>abc</code> em <code>Int32</code> (o <code>[int]</code>).</dd>
+
+  <dt>Error: "The input string 'abc' was not in a correct format."</dt><dd>O detalhe: o texto não está num formato de número.</dd>
+
+</dl>
+
+<p>Algumas mensagens ficam em inglês mesmo com o Windows em português, porque vêm de partes do .NET que não são traduzidas. Outras, como "O termo ... não é reconhecido", aparecem em português. Nos dois casos a leitura é a mesma: categoria, dois-pontos, explicação.</p>
+
+<hr>
+
+<h2>2. Outros erros comuns</h2>
+
+<pre class="term" data-title="[divisão por zero]">PS&gt; 10 / 0
+RuntimeException: Attempted to divide by zero.
+</pre>
+
+<pre class="term" data-title="[método que não existe]">PS&gt; "Ana".Maiusculas()
+InvalidOperation: Method invocation failed because [System.String] does not contain a method named 'Maiusculas'.
+</pre>
+
+<pre class="term" data-title="[posição que não existe (com o modo estrito)]">PS&gt; Set-StrictMode -Version Latest
+PS&gt; $frutas = "maçã", "uva"
+PS&gt; $frutas[5]
+OperationStopped: Index was outside the bounds of the array.
+PS&gt; Set-StrictMode -Off
+</pre>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Categoria</th><th>O que costuma ser</th></tr>
+
+<tr><td><code>InvalidArgument</code></td><td>Um valor que não serve: texto onde precisava de número, data inválida.</td></tr>
+
+<tr><td><code>RuntimeException</code></td><td>Algo impossível na hora de rodar, como dividir por zero.</td></tr>
+
+<tr><td><code>InvalidOperation</code></td><td>Você pediu algo que aquele objeto não sabe fazer (um método que não existe).</td></tr>
+
+<tr><td><code>OperationStopped</code></td><td>A operação parou no meio, por exemplo uma posição fora do array.</td></tr>
+
+<tr><td><code>ParserError</code></td><td>O PowerShell nem conseguiu entender a linha: faltou fechar <code>}</code> ou <code>)</code>, ou um operador está escrito errado.</td></tr>
+
+</table>
+</div>
+
+<div class="tryps" data-goal="out:Attempted to divide by zero;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> o código abaixo divide por zero e o erro aparece. Troque o divisor por <code>2</code> para dar <code>5</code>, e depois volte para <code>0</code> e veja a mensagem. Para a missão, deixe a linha que mostra a mensagem guardada em <code>$Error[0]</code> funcionando: a saída precisa mostrar <code>Attempted to divide by zero</code>.</p>
+
+<pre class="script" data-file="main.ps1">$resultado = 10 / 2
+$resultado
+</pre>
+
+<pre class="solucao" data-file="main.ps1">try { 10 / 0 } catch { }
+$Error[0].Exception.Message
+</pre>
+
+</div>
+
+<hr>
+
+<h2>3. Erro que para e erro que segue</h2>
+
+<p>Existem dois tipos de erro:</p>
+
+<ul>
+</ul>
+
+<p>Os dois aparecem em vermelho. A diferença importa quando você for tratar erros com <a href="try-catch.html">try/catch</a> e <a href="erroraction.html">-ErrorAction</a>.</p>
+
+<hr>
+
+<h2>4. O último erro fica guardado</h2>
+
+<p>Todo erro vai para a variável automática <code>$Error</code>. O mais recente é sempre o <code>$Error[0]</code>:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $Error.Clear()
+PS&gt; [int]"doze"
+InvalidArgument: Cannot convert value "doze" to type "System.Int32". Error: "The input string 'doze' was not in a correct format."
+PS&gt; $Error.Count
+1
+PS&gt; $Error[0].Exception.Message
+Cannot convert value "doze" to type "System.Int32". Error: "The input string 'doze' was not in a correct format."
+</pre>
+
+<dl class="anatomy">
+
+  <dt>$Error.Clear()</dt><dd>Esvazia a lista (só para o exemplo ficar limpo).</dd>
+
+  <dt>$Error.Count</dt><dd>Quantos erros estão guardados.</dd>
+
+  <dt>$Error[0]</dt><dd>O erro mais recente. É um objeto <code>ErrorRecord</code>.</dd>
+
+  <dt>.Exception.Message</dt><dd>Só o texto da mensagem, sem a categoria.</dd>
+
+</dl>
+
+<p>Quer saber o tipo exato? Peça o tipo da exceção:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $Error[0].Exception.GetType().FullName
+System.Management.Automation.RuntimeException
+</pre>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Achar que o erro é "do computador"</strong>
+
+<p>Quase sempre o erro aponta exatamente o problema. Leia a categoria, depois a frase até o fim. <code>Cannot convert value "abc" to type "System.Int32"</code> está dizendo: "você me deu <code>abc</code> e eu precisava de um número".</p>
+
+</div>
+
+<div class="cenario">
+<strong>Ler só a primeira linha de um erro grande</strong>
+
+<p>Em erros de sintaxe (<code>ParserError</code>) o PowerShell mostra a linha do problema e marca a posição com <code>~~~~</code>. A dica de verdade fica embaixo das marcas. Leia o quadro inteiro antes de mudar o código.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>$Error[0]</code></td><td>O último erro.</td></tr>
+
+<tr><td><code>$Error[0].Exception.Message</code></td><td>Só o texto do último erro.</td></tr>
+
+<tr><td><code>$Error[0].Exception.GetType().FullName</code></td><td>O tipo da exceção.</td></tr>
+
+<tr><td><code>$Error.Count</code></td><td>Quantos erros guardados.</td></tr>
+
+<tr><td><code>$Error.Clear()</code></td><td>Limpa a lista.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. O mais recente</h3>
+<p>Complete para ver o erro mais recente:</p>
+<div class="ex-code">$Error<input data-answer="[0" aria-label="resposta">]</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Em <code>InvalidArgument: Cannot convert value "x" to type "System.Int32"</code>, o que é <code>InvalidArgument</code>?</p>
+
+<label><input type="radio" name="q2"> O nome do script</label>
+
+<label><input type="radio" name="q2"> A categoria do erro</label>
+
+<label><input type="radio" name="q2"> O nome da variável</label>
+
+<label><input type="radio" name="q2"> A linha onde parou</label>
+
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">3. Um comando que reclama de um item e continua com os outros mostrou um erro...</p>
+
+<label><input type="radio" name="q3"> que não encerra (non-terminating)</label>
+
+<label><input type="radio" name="q3"> que encerra (terminating)</label>
+
+<label><input type="radio" name="q3"> de sintaxe (ParserError)</label>
+
+<label><input type="radio" name="q3"> que não existe</label>
+
+</div>
+
+<div class="tryps" data-goal="out:Cannot convert value;;src:\$Error\[0\];;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> o <code>try</code> abaixo esconde o erro de <code>[int]"oito"</code>. Depois dele, mostre só a mensagem do último erro, usando <code>$Error[0].Exception.Message</code>.</p>
+
+<pre class="script" data-file="main.ps1">try { [int]"oito" } catch { }
+</pre>
+
+<pre class="solucao" data-file="main.ps1">try { [int]"oito" } catch { }
+$Error[0].Exception.Message
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>Mensagem de erro = categoria + dois-pontos + explicação.</li>
+  <li>Há erros que encerram e erros que deixam o comando seguir.</li>
+  <li><code>$Error[0]</code> é o último erro; <code>.Exception.Message</code> é só o texto dele.</li>
+  <li>Leia a mensagem até o fim: ela quase sempre diz o que corrigir.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

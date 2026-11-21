@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Group-Object — agrupando e contando por categoria | Guia PowerShell</title>
+<meta name="description" content="Aprenda o Group-Object: agrupar objetos por um campo, contar quantos há em cada grupo, ver os itens de cada grupo e montar um resumo, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1><span class="hl">Group-Object</span>: Agrupando</h1>
+
+<p class="intro">Quantos alunos há em cada cidade? Quantos pedidos em cada status? O <code>Group-Object</code> (apelido <code>group</code>) junta os objetos que têm o mesmo valor num campo e conta cada grupo.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>A agrupar por um campo: <code>Group-Object Cidade</code>.</li>
+  <li>A ler as colunas <code>Count</code>, <code>Name</code> e <code>Group</code>.</li>
+  <li>A ordenar os grupos pelo tamanho.</li>
+  <li>A pegar os itens de dentro de um grupo.</li>
+  <li>A contar palavras repetidas com <code>-NoElement</code>.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: separar as meias</h2>
+
+<p>Depois de lavar a roupa, você separa as meias por cor: um monte de pretas, um de brancas, um de coloridas. Depois conta cada monte. O <code>Group-Object</code> faz exatamente isso.</p>
+
+<hr>
+
+<h2>1. Agrupando por um campo</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $turma = @(
+&gt;&gt;   [pscustomobject]@{ Nome = "Ana"; Cidade = "Recife" }
+&gt;&gt;   [pscustomobject]@{ Nome = "Beto"; Cidade = "Natal" }
+&gt;&gt;   [pscustomobject]@{ Nome = "Caio"; Cidade = "Recife" }
+&gt;&gt;   [pscustomobject]@{ Nome = "Duda"; Cidade = "Maceió" }
+&gt;&gt;   [pscustomobject]@{ Nome = "Eva"; Cidade = "Recife" }
+&gt;&gt; )
+PS&gt; $turma | Group-Object Cidade
+
+Count Name                      Group
+----- ----                      -----
+    1 Maceió                    {@{Nome=Duda; Cidade=Maceió}}
+    1 Natal                     {@{Nome=Beto; Cidade=Natal}}
+    3 Recife                    {@{Nome=Ana; Cidade=Recife}, @{Nome=Caio; Cida…
+</pre>
+
+<dl class="anatomy">
+
+  <dt>Count</dt><dd>Quantos objetos caíram naquele grupo.</dd>
+
+  <dt>Name</dt><dd>O valor que eles têm em comum (a cidade).</dd>
+
+  <dt>Group</dt><dd>Os próprios objetos do grupo. Na tela aparecem resumidos entre chaves.</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Do maior grupo para o menor</h2>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $turma | Group-Object Cidade | Sort-Object Count -Descending | Select-Object Count, Name
+
+Count Name
+----- ----
+    3 Recife
+    1 Natal
+    1 Maceió
+</pre>
+
+<div class="tryps" data-goal="out:Recife;;src:Group-Object;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> agrupe a lista de cidades com <code>Group-Object</code> para ver quantas vezes cada uma aparece.</p>
+
+<pre class="script" data-file="main.ps1">$cidades = "Recife", "Natal", "Recife", "Recife", "Natal"
+$cidades
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$cidades = "Recife", "Natal", "Recife", "Recife", "Natal"
+$cidades | Group-Object
+</pre>
+
+</div>
+
+<hr>
+
+<h2>3. Os itens de um grupo</h2>
+
+<p>O campo <code>Group</code> guarda os objetos. Dá para abrir um grupo e ver quem está nele:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $grupos = $turma | Group-Object Cidade
+PS&gt; $grupos[0].Name
+Maceió
+PS&gt; $grupos[0].Group.Nome
+Duda
+</pre>
+
+<dl class="anatomy">
+
+  <dt>$grupos[0]</dt><dd>O primeiro grupo (a contagem começa no 0).</dd>
+
+  <dt>.Group.Nome</dt><dd>O campo <code>Nome</code> de cada objeto daquele grupo.</dd>
+
+</dl>
+
+<hr>
+
+<h2>4. Contando palavras: <code>-NoElement</code></h2>
+
+<p>Quando só a contagem interessa, <code>-NoElement</code> deixa a tabela mais limpa (sem a coluna <code>Group</code>):</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $texto = "o gato e o rato e o cão"
+PS&gt; $texto.Split(" ") | Group-Object -NoElement | Sort-Object Count -Descending
+
+Count Name
+----- ----
+    3 o
+    2 e
+    1 cão
+    1 gato
+    1 rato
+</pre>
+
+<hr>
+
+<h2>5. Grupos como hashtable: <code>-AsHashTable</code></h2>
+
+<p>Com <code>-AsHashTable</code>, cada valor vira uma chave, e você acessa o grupo pelo nome (aula <a href="hashtables.html">Hashtables</a>):</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $porCidade = $turma | Group-Object Cidade -AsHashTable
+PS&gt; $porCidade["Natal"].Nome
+Beto
+</pre>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong>Campo que não existe: um grupo só, sem nome</strong>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $turma | Group-Object Estado
+
+Count Name                      Group
+----- ----                      -----
+    5                           {@{Nome=Ana; Cidade=Recife}, @{Nome=Beto; Cida…
+</pre>
+
+<p>Sem o campo, todos os objetos têm o "mesmo valor" (nada) e caem num grupo só, com <code>Name</code> vazio. Confira o nome do campo.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>Group-Object Campo</code></td><td>Agrupa pelo campo.</td></tr>
+
+<tr><td><code>... | Sort-Object Count -Descending</code></td><td>Maiores grupos primeiro.</td></tr>
+
+<tr><td><code>-NoElement</code></td><td>Só a contagem, sem a coluna <code>Group</code>.</td></tr>
+
+<tr><td><code>-AsHashTable</code></td><td>Devolve uma hashtable: grupo pelo nome.</td></tr>
+
+<tr><td><code>$g.Group</code></td><td>Os objetos de um grupo.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. Agrupar por cidade</h3>
+<p>Complete com o nome do comando:</p>
+<div class="ex-code">$turma | <input data-answer="Group-Object|group" aria-label="resposta"> Cidade</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Na saída do <code>Group-Object</code>, o que é a coluna <code>Count</code>?</p>
+
+<label><input type="radio" name="q2"> O número da linha</label>
+
+<label><input type="radio" name="q2"> Quantos objetos há no grupo</label>
+
+<label><input type="radio" name="q2"> O total de grupos</label>
+
+<label><input type="radio" name="q2"> A soma dos valores</label>
+
+</div>
+
+<div class="mc" data-answer="3">
+
+<p class="mc-q">3. Para que serve o <code>-NoElement</code>?</p>
+
+<label><input type="radio" name="q3"> Para tirar os grupos vazios</label>
+
+<label><input type="radio" name="q3"> Para ordenar os grupos</label>
+
+<label><input type="radio" name="q3"> Para mostrar só a contagem, sem a coluna <code>Group</code></label>
+
+<label><input type="radio" name="q3"> Para agrupar sem diferenciar maiúsculas</label>
+
+</div>
+
+<div class="tryps" data-goal="outre:3\s+pago;;src:Group-Object;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> agrupe os pedidos pelo campo <code>Status</code>. A saída deve mostrar que há <code>3</code> pedidos com status <code>pago</code>.</p>
+
+<pre class="script" data-file="main.ps1">$pedidos = @(
+    [pscustomobject]@{ Id = 1; Status = "pago" }
+    [pscustomobject]@{ Id = 2; Status = "pendente" }
+    [pscustomobject]@{ Id = 3; Status = "pago" }
+    [pscustomobject]@{ Id = 4; Status = "pago" }
+)
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$pedidos = @(
+    [pscustomobject]@{ Id = 1; Status = "pago" }
+    [pscustomobject]@{ Id = 2; Status = "pendente" }
+    [pscustomobject]@{ Id = 3; Status = "pago" }
+    [pscustomobject]@{ Id = 4; Status = "pago" }
+)
+$pedidos | Group-Object Status
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li><code>Group-Object Campo</code> junta os objetos com o mesmo valor no campo.</li>
+  <li><code>Count</code> = quantos; <code>Name</code> = o valor; <code>Group</code> = os objetos.</li>
+  <li>Ordene com <code>Sort-Object Count -Descending</code> para ver os maiores.</li>
+  <li><code>-NoElement</code> deixa só a contagem; <code>-AsHashTable</code> dá acesso pelo nome.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PowerShell Pipeline (|) — ligando comandos com objetos | Guia PowerShell</title>
+<meta name="description" content="Aprenda o pipeline do PowerShell: o sinal | passa objetos de um comando para o outro. Filtrar, ordenar e contar em uma linha, com saídas reais.">
+<link rel="stylesheet" href="assets/style.css">
+<script>try{var t=localStorage.getItem("tema");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" id="sidebar" aria-label="Tópicos"></nav>
+<main class="main">
+<div class="content">
+
+<div class="pager"></div>
+
+<h1>O <span class="hl">Pipeline</span> (|)</h1>
+
+<p class="intro">O sinal <code>|</code> (a "barra em pé", chamada de <strong>pipe</strong>) liga comandos: o que sai de um entra no próximo. É como uma linha de montagem. No PowerShell, o que corre pela esteira são <strong>objetos</strong> inteiros, e não pedaços de texto.</p>
+
+<div class="note">
+<strong>Você vai aprender</strong>
+<ul>
+  <li>O que o <code>|</code> faz: entrega a saída de um comando ao próximo.</li>
+  <li>A montar uma "linha de montagem" com dois, três ou mais comandos.</li>
+  <li>Que cada objeto passa pela esteira <strong>um de cada vez</strong>.</li>
+  <li>O que é o <code>$_</code>: o objeto da vez dentro de um bloco <code>{ }</code>.</li>
+  <li>A quebrar um pipeline comprido em várias linhas.</li>
+</ul>
+</div>
+
+<p>As saídas desta aula foram colhidas no <strong>PowerShell 7.7 rodando no Linux</strong>, com o idioma em português (pt-BR), num console de 80 colunas. Os comandos funcionam do mesmo jeito no PowerShell 7 do Windows; a aula só mostra saídas que não dependem do sistema operacional.</p>
+
+<hr>
+
+<h2>A ideia: a linha de montagem</h2>
+
+<p>Numa fábrica de sucos, as laranjas passam por uma esteira: a primeira máquina lava, a segunda corta, a terceira espreme. Cada máquina recebe o que a anterior soltou. O pipeline é essa esteira: cada comando é uma máquina, e o <code>|</code> é o pedaço de esteira entre elas.</p>
+
+<hr>
+
+<h2>1. Dois comandos ligados</h2>
+
+<p>O <code>1..10</code> solta os números de 1 a 10. O <code>Where-Object</code> (aula <a href="where-object.html">Where-Object</a>) deixa passar só os que cumprem uma condição:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; 1..10 | Where-Object { $_ -gt 7 }
+8
+9
+10
+</pre>
+
+<dl class="anatomy">
+
+  <dt>1..10</dt><dd>A primeira máquina: solta os números de 1 a 10, um por um.</dd>
+
+  <dt>|</dt><dd>O pipe: entrega cada número para o próximo comando.</dd>
+
+  <dt>Where-Object { ... }</dt><dd>A segunda máquina: um filtro. Só deixa passar quem cumpre a condição entre chaves.</dd>
+
+  <dt>$_</dt><dd>"O objeto da vez". A cada número que chega, <code>$_</code> vale esse número.</dd>
+
+  <dt>$_ -gt 7</dt><dd>A condição: maior que 7 (aula <a href="operadores-comparacao.html">Comparações</a>).</dd>
+
+</dl>
+
+<hr>
+
+<h2>2. Três máquinas: filtrar, ordenar, pegar os primeiros</h2>
+
+<p>Você pode emendar quantos comandos quiser. Aqui: notas da turma, só as aprovadas (7 ou mais), da maior para a menor, e as duas primeiras:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $notas = 6.5, 9, 7, 4, 10, 8.5
+PS&gt; $notas | Where-Object { $_ -ge 7 } | Sort-Object -Descending | Select-Object -First 2
+10
+9
+</pre>
+
+<p>Leia da esquerda para a direita: <em>pegue as notas → deixe só as maiores ou iguais a 7 → ordene da maior para a menor → fique com as 2 primeiras</em>.</p>
+
+<hr>
+
+<h2>3. Objetos correndo pela esteira</h2>
+
+<p>O que passa pelo pipe são objetos com campos. Por isso a máquina seguinte pode olhar um campo pelo nome:</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; $produtos = @(
+&gt;&gt;   [pscustomobject]@{ Nome = "Arroz"; Preco = 25.9 }
+&gt;&gt;   [pscustomobject]@{ Nome = "Café"; Preco = 18.5 }
+&gt;&gt;   [pscustomobject]@{ Nome = "Azeite"; Preco = 42 }
+&gt;&gt; )
+PS&gt; $produtos | Where-Object { $_.Preco -lt 30 } | ForEach-Object { $_.Nome }
+Arroz
+Café
+</pre>
+
+<dl class="anatomy">
+
+  <dt>$_.Preco</dt><dd>O campo <code>Preco</code> do produto da vez. Não é preciso recortar texto: o campo tem nome.</dd>
+
+  <dt>ForEach-Object { $_.Nome }</dt><dd>Para cada produto que passou no filtro, solta só o nome (aula <a href="foreach-object.html">ForEach-Object</a>).</dd>
+
+</dl>
+
+<div class="tryps" data-goal="out:Arroz;;out:Café;;src:\|\s*Where-Object;;semerro">
+
+<p class="try-task"><strong>Experimente:</strong> complete o pipeline para mostrar só os nomes dos produtos que custam <strong>menos de 30</strong> (Arroz e Café).</p>
+
+<pre class="script" data-file="main.ps1">$produtos = @(
+    [pscustomobject]@{ Nome = "Arroz"; Preco = 25.9 }
+    [pscustomobject]@{ Nome = "Café"; Preco = 18.5 }
+    [pscustomobject]@{ Nome = "Azeite"; Preco = 42 }
+)
+$produtos | ForEach-Object { $_.Nome }
+</pre>
+
+<pre class="solucao" data-file="main.ps1">$produtos = @(
+    [pscustomobject]@{ Nome = "Arroz"; Preco = 25.9 }
+    [pscustomobject]@{ Nome = "Café"; Preco = 18.5 }
+    [pscustomobject]@{ Nome = "Azeite"; Preco = 42 }
+)
+$produtos | Where-Object { $_.Preco -lt 30 } | ForEach-Object { $_.Nome }
+</pre>
+
+</div>
+
+<hr>
+
+<h2>4. Um de cada vez</h2>
+
+<p>O pipeline não espera a primeira máquina terminar tudo para começar a segunda. Cada objeto atravessa a esteira inteira antes do próximo entrar. Dá para ver isso mostrando uma mensagem em cada etapa (o <code>Write-Host</code> escreve direto na tela, sem mandar nada pela esteira):</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; 1..3 | ForEach-Object { Write-Host "saiu $_"; $_ } | ForEach-Object { "chegou $_" }
+saiu 1
+chegou 1
+saiu 2
+chegou 2
+saiu 3
+chegou 3
+</pre>
+
+<p>Primeiro o 1 sai e chega, depois o 2, depois o 3. Isso economiza memória quando a lista é enorme.</p>
+
+<hr>
+
+<h2>5. Pipeline comprido: quebre a linha depois do <code>|</code></h2>
+
+<p>Se a linha ficar grande, termine a linha com o <code>|</code> e continue embaixo. O PowerShell entende que o comando não acabou (o <code>&gt;&gt;</code> é o prompt de continuação):</p>
+
+<pre class="term" data-title="PowerShell 7">PS&gt; 1..20 |
+&gt;&gt;   Where-Object { $_ % 5 -eq 0 } |
+&gt;&gt;   ForEach-Object { $_ * 10 }
+50
+100
+150
+200
+</pre>
+
+<hr>
+
+<h2 id="errado">Quando dá errado</h2>
+
+<div class="cenario">
+<strong><code>$_</code> fora do bloco</strong>
+
+<pre><code>1..3 | Where-Object $_ -gt 1
+</code></pre>
+
+<p>O <code>$_</code> só existe dentro das chaves <code>{ }</code> do bloco. Fora delas ele está vazio, e o <code>Where-Object</code> recebe um nome de propriedade vazio: o PowerShell recusa o comando com um erro dizendo que o argumento do parâmetro <code>Property</code> está vazio. Escreva sempre <code>Where-Object { $_ -gt 1 }</code>.</p>
+
+</div>
+
+<hr>
+
+<h2>Referência rápida</h2>
+
+<div class="table-wrap">
+<table class="ref">
+
+<tr><th>Você digita</th><th>O que faz</th></tr>
+
+<tr><td><code>A | B</code></td><td>A saída de A entra em B.</td></tr>
+
+<tr><td><code>$_</code></td><td>O objeto da vez, dentro de <code>{ }</code>.</td></tr>
+
+<tr><td><code>... | Where-Object { cond }</code></td><td>Filtra.</td></tr>
+
+<tr><td><code>... | Sort-Object</code></td><td>Ordena.</td></tr>
+
+<tr><td><code>... | Select-Object -First 3</code></td><td>Pega os 3 primeiros.</td></tr>
+
+<tr><td><code>... | ForEach-Object { }</code></td><td>Faz algo com cada um.</td></tr>
+
+</table>
+</div>
+
+<hr>
+
+<h2>Exercícios</h2>
+
+<div class="exercise">
+<h3>1. O sinal que liga</h3>
+<p>Complete com o sinal que liga os dois comandos:</p>
+<div class="ex-code">1..10 <input data-answer="|" aria-label="resposta"> Where-Object { $_ -gt 5 }</div>
+</div>
+
+<div class="mc" data-answer="2">
+
+<p class="mc-q">2. Dentro de <code>Where-Object { ... }</code>, o que é o <code>$_</code>?</p>
+
+<label><input type="radio" name="q2"> A lista inteira</label>
+
+<label><input type="radio" name="q2"> O objeto da vez, que está passando pela esteira</label>
+
+<label><input type="radio" name="q2"> O último resultado do console</label>
+
+<label><input type="radio" name="q2"> Um erro de digitação</label>
+
+</div>
+
+<div class="mc" data-answer="1">
+
+<p class="mc-q">3. Em <code>$notas | Sort-Object | Select-Object -First 1</code>, o que sai?</p>
+
+<label><input type="radio" name="q3"> A menor nota</label>
+
+<label><input type="radio" name="q3"> A maior nota</label>
+
+<label><input type="radio" name="q3"> A primeira nota que foi digitada</label>
+
+<label><input type="radio" name="q3"> Todas as notas</label>
+
+</div>
+
+<div class="tryps" data-goal="out:15;;out:30;;src:Where-Object;;src:ForEach-Object;;semerro">
+
+<p class="try-task"><strong>Missão final:</strong> dos números de 1 a 30, deixe passar só os múltiplos de 15 (<code>$_ % 15 -eq 0</code>) e mostre cada um. A saída deve ser <code>15</code> e <code>30</code>.</p>
+
+<pre class="script" data-file="main.ps1">1..30
+</pre>
+
+<pre class="solucao" data-file="main.ps1">1..30 | Where-Object { $_ % 15 -eq 0 } | ForEach-Object { $_ }
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Resumo</h2>
+<ul>
+  <li>O <code>|</code> entrega a saída de um comando ao próximo, como uma esteira.</li>
+  <li>Pelo pipe correm <strong>objetos</strong>, e cada comando pode olhar os campos deles.</li>
+  <li>Dentro de <code>{ }</code>, <code>$_</code> é o objeto da vez.</li>
+  <li>Os objetos passam um de cada vez pela esteira inteira.</li>
+  <li>Para quebrar a linha, termine com <code>|</code> e continue embaixo.</li>
+</ul>
+
+<div class="pager"></div>
+
+</div>
+</main>
+</div>
+<script src="assets/site.js"></script>
+</body>
+</html>
